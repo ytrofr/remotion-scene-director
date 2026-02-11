@@ -17,7 +17,7 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 ];
 
 export const Toolbar: React.FC = () => {
-  const { state, dispatch } = useDirector();
+  const { state, dispatch, canUndo } = useDirector();
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const handleSave = useCallback(async () => {
@@ -104,6 +104,17 @@ export const Toolbar: React.FC = () => {
       >
         Select
         <kbd className="toolbar__kbd">S</kbd>
+      </button>
+
+      {/* Undo */}
+      <button
+        onClick={() => dispatch({ type: 'UNDO' })}
+        disabled={!canUndo}
+        className="toolbar__btn toolbar__btn--undo"
+        title="Undo (Ctrl+Z)"
+      >
+        Undo
+        <kbd className="toolbar__kbd">Z</kbd>
       </button>
 
       <div className="toolbar__spacer" />

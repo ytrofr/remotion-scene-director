@@ -59,7 +59,8 @@ export type DirectorAction =
   | { type: 'IMPORT_PATHS'; scene: string; waypoints: HandPathPoint[]; gesture: GestureTool }
   | { type: 'CLEAR_SCENE'; scene: string }
   | { type: 'START_DRAG'; index: number }
-  | { type: 'END_DRAG' };
+  | { type: 'END_DRAG' }
+  | { type: 'UNDO' };
 
 export const initialState: DirectorState = {
   compositionId: 'MobileChatDemoCombined',

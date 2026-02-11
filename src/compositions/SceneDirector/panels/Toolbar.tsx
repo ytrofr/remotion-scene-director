@@ -1,12 +1,13 @@
 /**
- * Toolbar v3 - Gesture tool buttons replace mode buttons
- * Layout: [SD] [Composition] | [Click 1] [Scroll 2] [Drag 3] [Swipe 4] [Point 5] | [Select S] --- [Preview] [Clear] [Export]
+ * Toolbar v3.1 - Gesture tool buttons with variant dropdown
+ * Click gesture button → activates tool
+ * Click active gesture button again → opens variant picker (animation + dark/light)
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDirector } from '../context';
 import { COMPOSITIONS } from '../state';
-import { GESTURE_PRESETS, type GestureTool } from '../gestures';
+import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
   { id: 'click', key: '1' },
@@ -19,6 +20,20 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 export const Toolbar: React.FC = () => {
   const { state, dispatch, canUndo } = useDirector();
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [openDropdown, setOpenDropdown] = useState<GestureTool | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!openDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openDropdown]);
 
   const handleSave = useCallback(async () => {
     if (!state.selectedScene) return;
@@ -38,7 +53,7 @@ export const Toolbar: React.FC = () => {
           sceneName: state.selectedScene,
           path: waypoints,
           gesture,
-          animation: preset.animation,
+          animation: state.sceneAnimation[state.selectedScene] ?? preset.animation,
         }),
       });
       if (!res.ok) throw new Error('Save failed');
@@ -48,7 +63,7 @@ export const Toolbar: React.FC = () => {
       setSaveState('error');
       setTimeout(() => setSaveState('idle'), 3000);
     }
-  }, [state.selectedScene, state.waypoints, state.sceneGesture, state.compositionId]);
+  }, [state.selectedScene, state.waypoints, state.sceneGesture, state.sceneAnimation, state.compositionId]);
 
   // Listen for Ctrl+S custom event from App.tsx
   useEffect(() => {
@@ -56,6 +71,11 @@ export const Toolbar: React.FC = () => {
     window.addEventListener('scene-director-save', handler);
     return () => window.removeEventListener('scene-director-save', handler);
   }, [handleSave]);
+
+  // Current effective animation and dark for the selected scene
+  const scene = state.selectedScene;
+  const currentAnimation = scene ? (state.sceneAnimation[scene] ?? GESTURE_PRESETS[state.sceneGesture[scene] ?? 'click']?.animation) : null;
+  const currentDark = scene ? (state.sceneDark[scene] ?? false) : false;
 
   return (
     <div className="toolbar">
@@ -75,21 +95,77 @@ export const Toolbar: React.FC = () => {
 
       <div className="toolbar__divider" />
 
-      {/* Gesture tool buttons */}
-      <div className="toolbar__gesture-group">
+      {/* Gesture tool buttons with variant dropdown */}
+      <div className="toolbar__gesture-group" ref={dropdownRef}>
         {GESTURE_TOOLS.map(t => {
           const preset = GESTURE_PRESETS[t.id];
           const active = state.activeTool === t.id;
+          const dropdownOpen = openDropdown === t.id;
+          const animations = GESTURE_ANIMATIONS[t.id];
+
           return (
-            <button
-              key={t.id}
-              onClick={() => dispatch({ type: 'SET_TOOL', tool: t.id })}
-              className={`toolbar__btn ${active ? 'toolbar__btn--active' : ''}`}
-              title={`${preset.label} gesture (${t.key})`}
-            >
-              {preset.label}
-              <kbd className="toolbar__kbd">{t.key}</kbd>
-            </button>
+            <div key={t.id} className="toolbar__gesture-wrapper">
+              <button
+                onClick={() => {
+                  if (active) {
+                    // Already active → toggle variant dropdown
+                    setOpenDropdown(dropdownOpen ? null : t.id);
+                  } else {
+                    // Activate tool
+                    dispatch({ type: 'SET_TOOL', tool: t.id });
+                    setOpenDropdown(null);
+                  }
+                }}
+                className={`toolbar__btn ${active ? 'toolbar__btn--active' : ''} ${dropdownOpen ? 'toolbar__btn--dropdown-open' : ''}`}
+                title={`${preset.label} gesture (${t.key}) — click again for variants`}
+              >
+                {preset.label}
+                <kbd className="toolbar__kbd">{t.key}</kbd>
+                {active && <span className="toolbar__btn-arrow">{dropdownOpen ? '\u25B2' : '\u25BC'}</span>}
+              </button>
+
+              {/* Variant dropdown */}
+              {dropdownOpen && (
+                <div className="toolbar__dropdown">
+                  <div className="toolbar__dropdown-title">Hand Style</div>
+                  <div className="toolbar__dropdown-anims">
+                    {animations.map(anim => {
+                      const isActive = currentAnimation === anim.id;
+                      return (
+                        <button
+                          key={anim.id}
+                          onClick={() => {
+                            if (scene) {
+                              dispatch({ type: 'SET_SCENE_ANIMATION', scene, animation: anim.id });
+                              if (!state.sceneGesture[scene]) {
+                                dispatch({ type: 'SET_SCENE_GESTURE', scene, gesture: t.id });
+                              }
+                            }
+                          }}
+                          className={`toolbar__dropdown-btn ${isActive ? 'toolbar__dropdown-btn--active' : ''}`}
+                        >
+                          {anim.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="toolbar__dropdown-dark">
+                    <button
+                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: true }); }}
+                      className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                    >
+                      Light
+                    </button>
+                    <button
+                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: false }); }}
+                      className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                    >
+                      Dark
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
@@ -98,7 +174,7 @@ export const Toolbar: React.FC = () => {
 
       {/* Select tool */}
       <button
-        onClick={() => dispatch({ type: 'SET_TOOL', tool: 'select' })}
+        onClick={() => { dispatch({ type: 'SET_TOOL', tool: 'select' }); setOpenDropdown(null); }}
         className={`toolbar__btn ${state.activeTool === 'select' ? 'toolbar__btn--active' : ''}`}
         title="Select mode (S)"
       >

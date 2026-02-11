@@ -19,3 +19,15 @@
    for a module that actually exists on disk (e.g. lottie-web), clear the webpack
    cache: `rm -rf node_modules/.cache` then restart dev server. Do NOT reinstall
    packages - the file is there, the cache is stale.
+
+7. **codedPaths key must match scene name**: `getSavedPath()` / `getCodedPath()` keys
+   must exactly match the scene name used in the COMPOSITIONS registry in `state.ts`.
+   Mismatch causes "phantom" waypoints that reappear after deletion or edits that revert.
+
+8. **Never reset waypoints in SELECT_SCENE**: The SELECT_SCENE reducer must only change
+   `selectedScene`, `selectedWaypoint`, `draggingIndex`. Never include `waypoints: {}`
+   — it destroys all waypoints across all scenes.
+
+9. **dark prop is inverted**: FloatingHand `dark={true}` applies `filter: invert(1)`,
+   making the hand LIGHT-colored on screen. UI labels must be swapped: "Light" button
+   dispatches `dark: true`, "Dark" button dispatches `dark: false`.

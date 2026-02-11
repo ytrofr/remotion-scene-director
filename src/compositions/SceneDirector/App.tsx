@@ -29,13 +29,71 @@ import { ExportModal } from './panels/ExportModal';
 import { DrawingCanvas } from './overlays/DrawingCanvas';
 import { WaypointMarkers } from './overlays/WaypointMarkers';
 
+// localStorage persistence key
+const STORAGE_KEY = 'scene-director-session';
+
+interface SavedSession {
+  compositionId?: string;
+  selectedScene?: string | null;
+  frame?: number;
+  sceneGesture?: Record<string, string>;
+  sceneAnimation?: Record<string, string>;
+  sceneDark?: Record<string, boolean>;
+}
+
+function loadSession(): SavedSession {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch { return {}; }
+}
+
+function saveSession(s: SavedSession) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch { /* ignore quota errors */ }
+}
+
 export const App: React.FC = () => {
-  const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: initialState } as UndoableState);
+  // Restore session from localStorage
+  const savedSession = useMemo(() => loadSession(), []);
+  const restoredInitial = useMemo(() => ({
+    ...initialState,
+    ...(savedSession.compositionId ? { compositionId: savedSession.compositionId } : {}),
+    ...(savedSession.selectedScene ? { selectedScene: savedSession.selectedScene } : {}),
+    ...(savedSession.sceneGesture ? { sceneGesture: savedSession.sceneGesture } : {}),
+    ...(savedSession.sceneAnimation ? { sceneAnimation: savedSession.sceneAnimation } : {}),
+    ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
+  }), []);
+
+  const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: restoredInitial } as UndoableState);
   const state = undoState.present;
   const canUndo = undoState.past.length > 0;
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
-  const [frame, setFrame] = useState(0);
+  const [frame, setFrame] = useState(savedSession.frame ?? 0);
+
+  // Seek to saved frame on mount
+  const didRestore = useRef(false);
+  useEffect(() => {
+    if (!didRestore.current && savedSession.frame && playerRef.current) {
+      playerRef.current.seekTo(savedSession.frame);
+      didRestore.current = true;
+    }
+  });
+
+  // Persist session to localStorage on changes
+  useEffect(() => {
+    saveSession({
+      compositionId: state.compositionId,
+      selectedScene: state.selectedScene,
+      frame,
+      sceneGesture: state.sceneGesture,
+      sceneAnimation: state.sceneAnimation,
+      sceneDark: state.sceneDark,
+    });
+  }, [state.compositionId, state.selectedScene, frame, state.sceneGesture, state.sceneAnimation, state.sceneDark]);
 
   // Track player frame dimensions for coordinate mapping (composition → screen space)
   const [playerScale, setPlayerScale] = useState(1);
@@ -99,7 +157,7 @@ export const App: React.FC = () => {
   );
 
   // Preset for current scene's gesture (for preview rendering)
-  // Falls back to coded path gesture when no manual gesture set
+  // Falls back to coded path gesture, then active tool preset
   const scenePreset = useMemo(() => {
     const sceneName = state.selectedScene || '';
     const gesture = state.sceneGesture[sceneName];
@@ -107,8 +165,10 @@ export const App: React.FC = () => {
     // Fall back to coded path gesture
     const coded = sceneName ? getCodedPath(state.compositionId, sceneName) : null;
     if (coded) return GESTURE_PRESETS[coded.gesture];
-    return null;
-  }, [state.selectedScene, state.sceneGesture, state.compositionId]);
+    // Fall back to active tool preset so hand always shows when waypoints exist
+    if (state.activeTool !== 'select') return GESTURE_PRESETS[state.activeTool];
+    return GESTURE_PRESETS.click;
+  }, [state.selectedScene, state.sceneGesture, state.compositionId, state.activeTool]);
 
   // Context value
   const ctxValue = useMemo(() => ({
@@ -121,8 +181,9 @@ export const App: React.FC = () => {
     sceneWaypoints,
     effectiveWaypoints,
     activePreset,
+    scenePreset,
     canUndo,
-  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, canUndo]);
+  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo]);
 
   // Track frame from Player
   useEffect(() => {
@@ -260,9 +321,9 @@ export const App: React.FC = () => {
               <DrawingCanvas />
             )}
 
-            {/* FloatingHand: visible in preview mode AND when Trail is ON (live editing) */}
-            {/* When dragging a waypoint, hand snaps to the dragged position for live WYSIWYG */}
-            {(state.preview || state.showTrail) && state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
+            {/* FloatingHand: always visible when scene has waypoints (live WYSIWYG) */}
+            {/* When dragging a waypoint, hand snaps to the dragged position */}
+            {state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
               const isDragging = state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
               const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
               // When dragging: single-point path at dragged position, frame=0
@@ -292,10 +353,10 @@ export const App: React.FC = () => {
                       frame={handFrame}
                       path={handPath}
                       startFrame={handStartFrame}
-                      animation={scenePreset.animation}
+                      animation={state.sceneAnimation[state.selectedScene!] ?? scenePreset.animation}
                       size={scenePreset.size}
                       showRipple={scenePreset.showRipple}
-                      dark={scenePreset.dark}
+                      dark={state.sceneDark[state.selectedScene!] ?? scenePreset.dark}
                       physics={{ ...DEFAULT_PHYSICS, ...scenePreset.physics }}
                     />
                   </div>

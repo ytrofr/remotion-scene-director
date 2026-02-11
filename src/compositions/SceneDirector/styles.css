@@ -519,6 +519,69 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   background: var(--accent-hover);
 }
 
+/* Waypoint list */
+.inspector__waypoint-list {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__wp-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.inspector__wp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 100%;
+}
+.inspector__wp-row:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__wp-row--active {
+  background: rgba(88,166,255,0.12);
+  border-color: var(--accent);
+  color: #fff;
+}
+.inspector__wp-num {
+  width: 18px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--accent);
+}
+.inspector__wp-row--active .inspector__wp-num {
+  color: #f0883e;
+}
+.inspector__wp-coords {
+  flex: 1;
+  min-width: 0;
+}
+.inspector__wp-frame {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.inspector__wp-gesture {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--green);
+}
+
 /* Delete button */
 .inspector__delete-btn {
   width: 100%;

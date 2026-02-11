@@ -1,12 +1,21 @@
 /**
- * Inspector v3 - Simplified: X, Y, Frame fields + scene gesture display + Delete
- * Duration, Scale, and gesture picker removed (handled by presets).
+ * Inspector v3.1 - X, Y, Frame fields + scene gesture display + Delete + Waypoint List
+ * Waypoint list shows all scene waypoints with click-to-select-and-seek.
  */
 
 import React, { useCallback } from 'react';
-import type { HandPathPoint } from '../../../components/FloatingHand/types';
+import type { HandPathPoint, HandGesture } from '../../../components/FloatingHand/types';
 import { useDirector } from '../context';
 import { GESTURE_PRESETS, type GestureTool } from '../gestures';
+
+// Gesture abbreviations for compact display
+const GESTURE_ABBR: Record<string, string> = {
+  pointer: 'PTR',
+  click: 'CLK',
+  drag: 'DRG',
+  scroll: 'SCR',
+  open: 'OPN',
+};
 
 const NumField: React.FC<{
   label: string;
@@ -35,7 +44,7 @@ const NumField: React.FC<{
 const GESTURE_OPTIONS: GestureTool[] = ['click', 'scroll', 'drag', 'swipe', 'point'];
 
 export const Inspector: React.FC = () => {
-  const { state, dispatch, sceneWaypoints } = useDirector();
+  const { state, dispatch, sceneWaypoints, effectiveWaypoints, playerRef, currentScene } = useDirector();
   const scene = state.selectedScene;
   const idx = state.selectedWaypoint;
   const waypoint: HandPathPoint | null =
@@ -44,6 +53,13 @@ export const Inspector: React.FC = () => {
   if (!scene) return null;
 
   const currentGesture = state.sceneGesture[scene];
+
+  const handleWaypointClick = useCallback((i: number, wp: HandPathPoint) => {
+    dispatch({ type: 'SELECT_WAYPOINT', index: i });
+    if (playerRef.current && currentScene) {
+      playerRef.current.seekTo(currentScene.start + (wp.frame ?? 0));
+    }
+  }, [dispatch, playerRef, currentScene]);
 
   // Scene gesture header (always visible)
   const gestureHeader = (
@@ -73,15 +89,41 @@ export const Inspector: React.FC = () => {
     </div>
   );
 
+  // Waypoint list (always visible when there are waypoints)
+  const waypointList = effectiveWaypoints.length > 0 ? (
+    <div className="inspector__waypoint-list">
+      <div className="inspector__section-title">Waypoints ({effectiveWaypoints.length})</div>
+      <div className="inspector__wp-table">
+        {effectiveWaypoints.map((wp, i) => {
+          const isSelected = i === idx;
+          const gesture = (wp.gesture || 'pointer') as string;
+          return (
+            <button
+              key={i}
+              onClick={() => handleWaypointClick(i, wp)}
+              className={`inspector__wp-row ${isSelected ? 'inspector__wp-row--active' : ''}`}
+            >
+              <span className="inspector__wp-num">{i + 1}</span>
+              <span className="inspector__wp-coords">{wp.x},{wp.y}</span>
+              <span className="inspector__wp-frame">f{wp.frame ?? 0}</span>
+              <span className="inspector__wp-gesture">{GESTURE_ABBR[gesture] || gesture}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  ) : null;
+
   if (idx === null || !waypoint) {
     return (
       <div className="inspector">
         {gestureHeader}
-        <div className="inspector__empty-text">
-          {sceneWaypoints.length === 0
-            ? 'Pick a gesture tool and click on the video'
-            : `${sceneWaypoints.length} waypoints. Click one to edit (S mode)`}
-        </div>
+        {waypointList}
+        {!waypointList && (
+          <div className="inspector__empty-text">
+            Pick a gesture tool and click on the video
+          </div>
+        )}
       </div>
     );
   }
@@ -93,6 +135,7 @@ export const Inspector: React.FC = () => {
   return (
     <div className="inspector">
       {gestureHeader}
+      {waypointList}
 
       <div className="inspector__header">
         <span className="inspector__header-title">Waypoint #{idx + 1}</span>

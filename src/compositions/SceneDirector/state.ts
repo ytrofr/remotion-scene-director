@@ -22,6 +22,8 @@ export interface CompositionEntry {
   label: string;
   video: { width: number; height: number; fps: number; frames: number };
   scenes: SceneInfo[];
+  /** Global Y offset applied by the composition (e.g. translateY(120px) in Combined) */
+  globalOffsetY?: number;
 }
 
 // Main state
@@ -164,6 +166,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
     label: 'Combined (V2+V4)',
     video: { width: 1080, height: 1920, fps: 30, frames: COMBINED_VIDEO.durationInFrames },
     scenes: COMBINED_SCENE_INFO.map(s => ({ name: s.name, start: s.start, end: s.end, part: s.part, hand: s.hand })),
+    globalOffsetY: 120,
   },
   {
     id: 'DorianDemo',

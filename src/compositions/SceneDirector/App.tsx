@@ -275,7 +275,7 @@ export const App: React.FC = () => {
                     width: composition.video.width,
                     height: composition.video.height,
                     transformOrigin: 'top left',
-                    transform: `scale(${playerScale})`,
+                    transform: `scale(${playerScale}) translateY(${composition.globalOffsetY ?? 0}px)`,
                     pointerEvents: 'none',
                   }}>
                     <FloatingHand

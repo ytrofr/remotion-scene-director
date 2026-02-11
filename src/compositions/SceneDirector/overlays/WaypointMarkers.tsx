@@ -91,6 +91,7 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
   const displayWaypoints = waypointsProp ?? sceneWaypoints;
   const compWidth = composition.video.width;
   const compHeight = composition.video.height;
+  const offsetY = composition.globalOffsetY ?? 0;
   const selectedIndex = state.selectedWaypoint;
   const scene = state.selectedScene;
 
@@ -121,8 +122,9 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (dragging === null || !scene || !editable) return;
     const pos = toComp(e.clientX, e.clientY);
-    dispatch({ type: 'UPDATE_WAYPOINT', scene, index: dragging, point: { x: pos.x, y: pos.y } });
-  }, [dragging, scene, editable, dispatch, toComp]);
+    // Subtract globalOffsetY: screen coords → scene-space coords
+    dispatch({ type: 'UPDATE_WAYPOINT', scene, index: dragging, point: { x: pos.x, y: pos.y - offsetY } });
+  }, [dragging, scene, editable, dispatch, toComp, offsetY]);
 
   const handleMouseUp = useCallback(() => {
     dispatch({ type: 'END_DRAG' });
@@ -179,6 +181,8 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
         viewBox={`0 0 ${compWidth} ${compHeight}`}
         preserveAspectRatio="none"
       >
+        {/* Shift markers to match composition's global offset (e.g. translateY(120px) in Combined) */}
+        <g transform={offsetY ? `translate(0, ${offsetY})` : undefined}>
         {/* Connection lines */}
         {displayWaypoints.length > 1 && (
           <polyline
@@ -310,6 +314,7 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
             />
           </>
         )}
+        </g>
       </svg>
     </div>
   );

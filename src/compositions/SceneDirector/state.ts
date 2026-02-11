@@ -80,7 +80,7 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
     case 'SET_COMPOSITION':
       return { ...state, compositionId: action.id, selectedScene: null, selectedWaypoint: null };
     case 'SELECT_SCENE':
-      return { ...state, selectedScene: action.name, selectedWaypoint: null };
+      return { ...state, selectedScene: action.name, selectedWaypoint: null, waypoints: {}, draggingIndex: null };
     case 'SET_TOOL':
       return { ...state, activeTool: action.tool, selectedWaypoint: null };
     case 'SET_SCENE_GESTURE':

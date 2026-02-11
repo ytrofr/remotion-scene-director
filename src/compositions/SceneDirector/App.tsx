@@ -251,37 +251,47 @@ export const App: React.FC = () => {
             )}
 
             {/* FloatingHand: visible in preview mode AND when Trail is ON (live editing) */}
-            {/* Outer div clips to player bounds; inner div maps composition coords to screen */}
-            {(state.preview || state.showTrail) && state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (
-              <div style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0,
-                overflow: 'hidden',
-                pointerEvents: 'none',
-                zIndex: 11,
-              }}>
+            {/* When dragging a waypoint, hand snaps to the dragged position for live WYSIWYG */}
+            {(state.preview || state.showTrail) && state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
+              const isDragging = state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
+              const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
+              // When dragging: single-point path at dragged position, frame=0
+              const handPath = dragWp
+                ? [{ ...dragWp, frame: 0 }]
+                : effectiveWaypoints;
+              const handFrame = dragWp ? 0 : frame;
+              const handStartFrame = dragWp ? 0 : currentScene.start;
+              return (
                 <div style={{
                   position: 'absolute',
-                  top: 0, left: 0,
-                  width: composition.video.width,
-                  height: composition.video.height,
-                  transformOrigin: 'top left',
-                  transform: `scale(${playerScale})`,
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  overflow: 'hidden',
                   pointerEvents: 'none',
+                  zIndex: 11,
                 }}>
-                  <FloatingHand
-                    frame={frame}
-                    path={effectiveWaypoints}
-                    startFrame={currentScene.start}
-                    animation={scenePreset.animation}
-                    size={scenePreset.size}
-                    showRipple={scenePreset.showRipple}
-                    dark={scenePreset.dark}
-                    physics={{ ...DEFAULT_PHYSICS, ...scenePreset.physics }}
-                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0,
+                    width: composition.video.width,
+                    height: composition.video.height,
+                    transformOrigin: 'top left',
+                    transform: `scale(${playerScale})`,
+                    pointerEvents: 'none',
+                  }}>
+                    <FloatingHand
+                      frame={handFrame}
+                      path={handPath}
+                      startFrame={handStartFrame}
+                      animation={scenePreset.animation}
+                      size={scenePreset.size}
+                      showRipple={scenePreset.showRipple}
+                      dark={scenePreset.dark}
+                      physics={{ ...DEFAULT_PHYSICS, ...scenePreset.physics }}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Trail overlay: manual waypoints in edit mode, or any waypoints when Trail toggled on */}
             {state.selectedScene && (

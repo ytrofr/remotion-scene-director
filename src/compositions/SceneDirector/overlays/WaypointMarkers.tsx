@@ -4,7 +4,7 @@
  * `editable` prop controls whether waypoints can be dragged (disabled in preview mode).
  */
 
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDirector } from '../context';
 import type { HandGesture, HandPathPoint } from '../../../components/FloatingHand/types';
 
@@ -94,8 +94,8 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
   const selectedIndex = state.selectedWaypoint;
   const scene = state.selectedScene;
 
-  // Drag state (only when editable)
-  const [dragging, setDragging] = useState<number | null>(null);
+  // Drag state from global store (enables hand snap-to-waypoint)
+  const dragging = state.draggingIndex;
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const toComp = useCallback((clientX: number, clientY: number): { x: number; y: number } => {
@@ -114,9 +114,8 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
     if (!editable) return;
     e.stopPropagation();
     e.preventDefault();
-    setDragging(index);
+    dispatch({ type: 'START_DRAG', index });
     dragStartRef.current = toComp(e.clientX, e.clientY);
-    dispatch({ type: 'SELECT_WAYPOINT', index });
   }, [editable, dispatch, toComp]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -126,9 +125,9 @@ export const WaypointMarkers: React.FC<Props> = ({ containerRef, editable = true
   }, [dragging, scene, editable, dispatch, toComp]);
 
   const handleMouseUp = useCallback(() => {
-    setDragging(null);
+    dispatch({ type: 'END_DRAG' });
     dragStartRef.current = null;
-  }, []);
+  }, [dispatch]);
 
   // Frame position indicator: interpolate along path at current frame
   let frameIndicator: { x: number; y: number } | null = null;

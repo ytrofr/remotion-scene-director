@@ -32,6 +32,7 @@ export interface DirectorState {
   sceneGesture: Record<string, GestureTool>;          // per-scene gesture type
   waypoints: Record<string, HandPathPoint[]>;          // scene name -> waypoints
   selectedWaypoint: number | null;                     // index in current scene
+  draggingIndex: number | null;                         // waypoint index being dragged (for hand snap)
   preview: boolean;
   showTrail: boolean;
   exportOpen: boolean;
@@ -54,7 +55,9 @@ export type DirectorAction =
   | { type: 'TOGGLE_EXPORT' }
   | { type: 'TOGGLE_IMPORT' }
   | { type: 'IMPORT_PATHS'; scene: string; waypoints: HandPathPoint[]; gesture: GestureTool }
-  | { type: 'CLEAR_SCENE'; scene: string };
+  | { type: 'CLEAR_SCENE'; scene: string }
+  | { type: 'START_DRAG'; index: number }
+  | { type: 'END_DRAG' };
 
 export const initialState: DirectorState = {
   compositionId: 'MobileChatDemoCombined',
@@ -63,6 +66,7 @@ export const initialState: DirectorState = {
   sceneGesture: {},
   waypoints: {},
   selectedWaypoint: null,
+  draggingIndex: null,
   preview: false,
   showTrail: false,
   exportOpen: false,
@@ -122,6 +126,10 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
         sceneGesture: { ...state.sceneGesture, [action.scene]: action.gesture },
         importOpen: false,
       };
+    case 'START_DRAG':
+      return { ...state, draggingIndex: action.index, selectedWaypoint: action.index };
+    case 'END_DRAG':
+      return { ...state, draggingIndex: null };
     case 'CLEAR_SCENE': {
       const newGestures = { ...state.sceneGesture };
       delete newGestures[action.scene];

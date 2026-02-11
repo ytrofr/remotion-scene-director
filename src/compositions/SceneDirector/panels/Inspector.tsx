@@ -1,12 +1,13 @@
 /**
- * Inspector v3.1 - X, Y, Frame fields + scene gesture display + Delete + Waypoint List
+ * Inspector v3.2 - X, Y, Frame fields + scene gesture display + Hand Style picker + Delete + Waypoint List
  * Waypoint list shows all scene waypoints with click-to-select-and-seek.
+ * Hand Style section: animation variant picker + dark/light toggle per scene.
  */
 
 import React, { useCallback } from 'react';
-import type { HandPathPoint, HandGesture } from '../../../components/FloatingHand/types';
+import type { HandPathPoint, HandGesture, LottieAnimation } from '../../../components/FloatingHand/types';
 import { useDirector } from '../context';
-import { GESTURE_PRESETS, type GestureTool } from '../gestures';
+import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
 
 // Gesture abbreviations for compact display
 const GESTURE_ABBR: Record<string, string> = {
@@ -44,7 +45,7 @@ const NumField: React.FC<{
 const GESTURE_OPTIONS: GestureTool[] = ['click', 'scroll', 'drag', 'swipe', 'point'];
 
 export const Inspector: React.FC = () => {
-  const { state, dispatch, sceneWaypoints, effectiveWaypoints, playerRef, currentScene } = useDirector();
+  const { state, dispatch, sceneWaypoints, effectiveWaypoints, playerRef, currentScene, scenePreset } = useDirector();
   const scene = state.selectedScene;
   const idx = state.selectedWaypoint;
   const waypoint: HandPathPoint | null =
@@ -53,6 +54,13 @@ export const Inspector: React.FC = () => {
   if (!scene) return null;
 
   const currentGesture = state.sceneGesture[scene];
+  // Resolve effective gesture for animation picker
+  // Priority: manual sceneGesture > reverse-lookup from scenePreset > active tool > 'click' fallback
+  const effectiveGesture: GestureTool = currentGesture
+    ?? (scenePreset
+      ? (Object.keys(GESTURE_PRESETS) as GestureTool[]).find(k => GESTURE_PRESETS[k] === scenePreset)
+      : undefined)
+    ?? (state.activeTool !== 'select' ? state.activeTool : 'click');
 
   const handleWaypointClick = useCallback((i: number, wp: HandPathPoint) => {
     dispatch({ type: 'SELECT_WAYPOINT', index: i });
@@ -60,6 +68,10 @@ export const Inspector: React.FC = () => {
       playerRef.current.seekTo(currentScene.start + (wp.frame ?? 0));
     }
   }, [dispatch, playerRef, currentScene]);
+
+  // Current effective animation and dark mode
+  const currentAnimation: LottieAnimation | null = state.sceneAnimation[scene] ?? scenePreset?.animation ?? null;
+  const currentDark: boolean = state.sceneDark[scene] ?? scenePreset?.dark ?? false;
 
   // Scene gesture header (always visible)
   const gestureHeader = (
@@ -83,9 +95,46 @@ export const Inspector: React.FC = () => {
       </div>
       {currentGesture && (
         <div className="inspector__gesture-info">
-          {GESTURE_PRESETS[currentGesture].animation} | {GESTURE_PRESETS[currentGesture].size}px
+          {currentAnimation ?? GESTURE_PRESETS[currentGesture].animation} | {GESTURE_PRESETS[currentGesture].size}px
         </div>
       )}
+    </div>
+  );
+
+  // Hand Style section (animation picker + dark/light toggle) - always visible
+  const animations = GESTURE_ANIMATIONS[effectiveGesture];
+  const handStyleSection = (
+    <div className="inspector__hand-style">
+      <div className="inspector__section-title">Hand Style</div>
+      <div className="inspector__anim-row">
+        {animations.map(anim => {
+          const active = currentAnimation === anim.id;
+          return (
+            <button
+              key={anim.id}
+              onClick={() => dispatch({ type: 'SET_SCENE_ANIMATION', scene, animation: anim.id })}
+              className={`inspector__anim-btn ${active ? 'inspector__anim-btn--active' : ''}`}
+              title={anim.id}
+            >
+              {anim.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="inspector__dark-row">
+        <button
+          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: true })}
+          className={`inspector__dark-btn ${currentDark ? 'inspector__dark-btn--active' : ''}`}
+        >
+          Light
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: false })}
+          className={`inspector__dark-btn ${!currentDark ? 'inspector__dark-btn--active' : ''}`}
+        >
+          Dark
+        </button>
+      </div>
     </div>
   );
 
@@ -118,6 +167,7 @@ export const Inspector: React.FC = () => {
     return (
       <div className="inspector">
         {gestureHeader}
+        {handStyleSection}
         {waypointList}
         {!waypointList && (
           <div className="inspector__empty-text">
@@ -135,6 +185,7 @@ export const Inspector: React.FC = () => {
   return (
     <div className="inspector">
       {gestureHeader}
+      {handStyleSection}
       {waypointList}
 
       <div className="inspector__header">

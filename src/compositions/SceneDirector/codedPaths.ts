@@ -95,7 +95,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
       { x: 518, y: 992, frame: 73, gesture: 'click', scale: 1, duration: 2 },
     ],
   },
-  '5-UserTyping': {
+  '4-ChatOpen': {
     gesture: 'click',
     animation: 'hand-click',
     path: [
@@ -104,6 +104,16 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
       { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 },
       { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 },
       { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  '5-UserTyping': {
+    gesture: 'click',
+    animation: 'hand-click',
+    path: [
+      { x: 750, y: 1520, frame: 70, gesture: 'pointer', scale: 1 },
+      { x: 730, y: 1500, frame: 85, gesture: 'pointer', scale: 1 },
+      { x: 720, y: 1490, frame: 100, gesture: 'pointer', scale: 1 },
+      { x: 720, y: 1490, frame: 105, gesture: 'click', scale: 1, duration: 10 },
     ],
   },
 };

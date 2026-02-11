@@ -12,19 +12,61 @@
           "scale": 1
         },
         {
-          "x": 671,
-          "y": 1703,
+          "x": 540,
+          "y": 1568,
           "frame": 5,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ]
+    },
+    "4-V2-Send": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 681,
+          "y": 1488,
+          "frame": 0,
           "gesture": "pointer",
           "scale": 1
         },
         {
-          "x": 671,
-          "y": 1703,
-          "frame": 6,
+          "x": 146,
+          "y": 1496,
+          "frame": 10,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ]
+    }
+  },
+  "DorianDemo": {
+    "3-TapBubble": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 780,
+          "y": 1200,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 818,
+          "y": 1546,
+          "frame": 53,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 518,
+          "y": 992,
+          "frame": 73,
           "gesture": "click",
           "scale": 1,
-          "duration": 4
+          "duration": 2
         }
       ]
     }

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import type { HandPathPoint } from '../../components/FloatingHand/types';
+import type { HandPathPoint, LottieAnimation } from '../../components/FloatingHand/types';
 import type { GestureTool } from './gestures';
 
 // Scene info (unified format across compositions)
@@ -35,6 +35,8 @@ export interface DirectorState {
   waypoints: Record<string, HandPathPoint[]>;          // scene name -> waypoints
   selectedWaypoint: number | null;                     // index in current scene
   draggingIndex: number | null;                         // waypoint index being dragged (for hand snap)
+  sceneAnimation: Record<string, LottieAnimation>;      // per-scene animation override
+  sceneDark: Record<string, boolean>;                    // per-scene dark mode override
   preview: boolean;
   showTrail: boolean;
   exportOpen: boolean;
@@ -57,6 +59,8 @@ export type DirectorAction =
   | { type: 'TOGGLE_EXPORT' }
   | { type: 'TOGGLE_IMPORT' }
   | { type: 'IMPORT_PATHS'; scene: string; waypoints: HandPathPoint[]; gesture: GestureTool }
+  | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
+  | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
   | { type: 'CLEAR_SCENE'; scene: string }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
@@ -70,6 +74,8 @@ export const initialState: DirectorState = {
   waypoints: {},
   selectedWaypoint: null,
   draggingIndex: null,
+  sceneAnimation: {},
+  sceneDark: {},
   preview: false,
   showTrail: false,
   exportOpen: false,
@@ -81,7 +87,7 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
     case 'SET_COMPOSITION':
       return { ...state, compositionId: action.id, selectedScene: null, selectedWaypoint: null };
     case 'SELECT_SCENE':
-      return { ...state, selectedScene: action.name, selectedWaypoint: null, waypoints: {}, draggingIndex: null };
+      return { ...state, selectedScene: action.name, selectedWaypoint: null, draggingIndex: null };
     case 'SET_TOOL':
       return { ...state, activeTool: action.tool, selectedWaypoint: null };
     case 'SET_SCENE_GESTURE':
@@ -133,13 +139,23 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       return { ...state, draggingIndex: action.index, selectedWaypoint: action.index };
     case 'END_DRAG':
       return { ...state, draggingIndex: null };
+    case 'SET_SCENE_ANIMATION':
+      return { ...state, sceneAnimation: { ...state.sceneAnimation, [action.scene]: action.animation } };
+    case 'SET_SCENE_DARK':
+      return { ...state, sceneDark: { ...state.sceneDark, [action.scene]: action.dark } };
     case 'CLEAR_SCENE': {
       const newGestures = { ...state.sceneGesture };
       delete newGestures[action.scene];
+      const newAnims = { ...state.sceneAnimation };
+      delete newAnims[action.scene];
+      const newDark = { ...state.sceneDark };
+      delete newDark[action.scene];
       return {
         ...state,
         waypoints: { ...state.waypoints, [action.scene]: [] },
         sceneGesture: newGestures,
+        sceneAnimation: newAnims,
+        sceneDark: newDark,
         selectedWaypoint: null,
       };
     }

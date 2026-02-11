@@ -1043,8 +1043,8 @@ const ChatOpenScene: React.FC = () => {
   const inputFocused = frame >= 48;
 
   // Hand path: move to input box after zoom settles, tap it, stay during typing
-  const savedTyping = getSavedPath('DorianDemo', '5-UserTyping');
-  const handPath: HandPathPoint[] = savedTyping?.path ?? [
+  const savedChatOpen = getSavedPath('DorianDemo', '4-ChatOpen');
+  const handPath: HandPathPoint[] = savedChatOpen?.path ?? [
     { x: 518, y: 992, frame: 0, gesture: 'pointer' },       // Start where scene 3 ended (zoomed click pos)
     { x: 500, y: 1200, frame: 20, gesture: 'pointer' },     // Moving down as zoom settles
     { x: 480, y: 1520, frame: 45, gesture: 'pointer' },     // Approaching input box
@@ -1949,8 +1949,8 @@ export const DORIAN_SCENE_INFO = [
   { name: '1-Intro', start: SCENES.intro.start, end: SCENES.intro.start + SCENES.intro.duration, hand: 'none', gesture: '-' },
   { name: '2-HomeScroll', start: SCENES.homeScroll.start, end: SCENES.homeScroll.start + SCENES.homeScroll.duration, hand: 'hand-scroll-clean', gesture: 'drag (scroll)' },
   { name: '3-TapBubble', start: SCENES.tapBubble.start, end: SCENES.tapBubble.start + SCENES.tapBubble.duration, hand: 'hand-click', gesture: 'pointer → click' },
-  { name: '4-ChatOpen', start: SCENES.chatOpen.start, end: SCENES.chatOpen.start + SCENES.chatOpen.duration, hand: 'none', gesture: '-' },
-  { name: '5-UserTyping', start: SCENES.userTyping.start, end: SCENES.userTyping.start + SCENES.userTyping.duration, hand: 'none', gesture: '-' },
+  { name: '4-ChatOpen', start: SCENES.chatOpen.start, end: SCENES.chatOpen.start + SCENES.chatOpen.duration, hand: 'hand-click', gesture: 'pointer → click (input box) → hide' },
+  { name: '5-UserTyping', start: SCENES.userTyping.start, end: SCENES.userTyping.start + SCENES.userTyping.duration, hand: 'hand-click', gesture: 'pointer → click (send btn)' },
   { name: '6-Outro', start: SCENES.outro.start, end: SCENES.outro.start + SCENES.outro.duration, hand: 'none', gesture: '-' },
 ];
 const SCENE_INFO = DORIAN_SCENE_INFO;
@@ -2220,7 +2220,26 @@ export const DorianDebugInteractive: React.FC = () => {
     { x: 780, y: 960, frame: SCENES.homeScroll.start + 150, label: 'S2-End', color: '#00f', desc: 'Scene 2 scroll hand end' },
   ];
 
-  const allPredefined = [...scene2Points, ...predefinedPoints];
+  // Scene 4 hand path: zoom-out → move to input → tap → hide
+  const scene4Start = SCENES.chatOpen.start; // 300
+  const scene4Points = [
+    { x: 518, y: 992, frame: scene4Start + 0, label: 'S4-Start', color: '#0ff', desc: 'Start (from S3 zoom click pos) @ 300' },
+    { x: 500, y: 1200, frame: scene4Start + 20, label: 'S4-Move', color: '#0ff', desc: 'Moving down @ 320' },
+    { x: 480, y: 1520, frame: scene4Start + 45, label: 'S4-Near', color: '#0ff', desc: 'Near input box @ 345' },
+    { x: 480, y: 1550, frame: scene4Start + 48, label: 'S4-TAP', color: '#f80', desc: '★ TAP input box @ 348' },
+    { x: 480, y: 1550, frame: scene4Start + 53, label: 'S4-Hide', color: '#f00', desc: 'Hand hides @ 353' },
+  ];
+
+  // Scene 5 hand path: reappear → move to send → tap
+  const scene5Start = SCENES.userTyping.start; // 390
+  const scene5Points = [
+    { x: 750, y: 1520, frame: scene5Start + 70, label: 'S5-Show', color: '#a0f', desc: 'Hand reappears @ 460' },
+    { x: 730, y: 1500, frame: scene5Start + 85, label: 'S5-Move', color: '#a0f', desc: 'Moving to send @ 475' },
+    { x: 720, y: 1490, frame: scene5Start + 100, label: 'S5-Near', color: '#a0f', desc: 'Near send btn @ 490' },
+    { x: 720, y: 1490, frame: scene5Start + 105, label: 'S5-SEND', color: '#f00', desc: '★ TAP send @ 495' },
+  ];
+
+  const allPredefined = [...scene2Points, ...predefinedPoints, ...scene4Points, ...scene5Points];
 
   return (
     <AbsoluteFill
@@ -2299,18 +2318,55 @@ export const DorianDebugInteractive: React.FC = () => {
 
       {/* Path lines connecting predefined points */}
       <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9989 }}>
+        {/* Scene 3 path (green) */}
         {predefinedPoints.slice(0, -1).map((p, i) => {
           const next = predefinedPoints[i + 1];
           return (
             <line
-              key={i}
-              x1={p.x}
-              y1={p.y}
-              x2={next.x}
-              y2={next.y}
+              key={`s3-${i}`}
+              x1={p.x} y1={p.y} x2={next.x} y2={next.y}
               stroke={next.label === 'CLICK' ? '#f00' : '#0f0'}
               strokeWidth={2}
               strokeDasharray={next.label === 'CLICK' ? 'none' : '5,5'}
+              opacity={0.5}
+            />
+          );
+        })}
+        {/* Scene 4 path (cyan) */}
+        {scene4Points.slice(0, -1).map((p, i) => {
+          const next = scene4Points[i + 1];
+          return (
+            <line
+              key={`s4-${i}`}
+              x1={p.x} y1={p.y} x2={next.x} y2={next.y}
+              stroke={next.label.includes('TAP') || next.label.includes('Hide') ? '#f80' : '#0ff'}
+              strokeWidth={2}
+              strokeDasharray={next.label.includes('TAP') ? 'none' : '5,5'}
+              opacity={0.5}
+            />
+          );
+        })}
+        {/* Scene 3 → Scene 4 transition (dashed white) */}
+        <line
+          x1={predefinedPoints[predefinedPoints.length - 1].x}
+          y1={predefinedPoints[predefinedPoints.length - 1].y}
+          x2={scene4Points[0].x}
+          y2={scene4Points[0].y}
+          stroke="#fff"
+          strokeWidth={1}
+          strokeDasharray="8,4"
+          opacity={0.3}
+        />
+        {/* Scene 5 path (purple) */}
+        {scene5Points.slice(0, -1).map((p, i) => {
+          const next = scene5Points[i + 1];
+          return (
+            <line
+              key={`s5-${i}`}
+              x1={p.x} y1={p.y} x2={next.x} y2={next.y}
+              stroke={next.label.includes('SEND') ? '#f00' : '#a0f'}
+              strokeWidth={2}
+              strokeDasharray={next.label.includes('SEND') ? 'none' : '5,5'}
               opacity={0.5}
             />
           );

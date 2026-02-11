@@ -260,6 +260,28 @@ export const GESTURE_PRESETS: Record<GestureTool, GesturePreset> = {
   point: pointPreset,
 };
 
+// Compatible animations for each gesture type (for the hand style picker)
+export const GESTURE_ANIMATIONS: Record<GestureTool, { id: LottieAnimation; label: string }[]> = {
+  click: [
+    { id: 'hand-click', label: 'Click' },
+    { id: 'hand-tap', label: 'Tap' },
+    { id: 'hand-tap-alt', label: 'Tap Alt' },
+  ],
+  scroll: [
+    { id: 'hand-scroll-clean', label: 'Scroll' },
+  ],
+  drag: [
+    { id: 'hand-drag', label: 'Drag' },
+    { id: 'hand-pinch', label: 'Pinch' },
+  ],
+  swipe: [
+    { id: 'hand-swipe-up', label: 'Swipe Up' },
+  ],
+  point: [
+    { id: 'hand-point', label: 'Point' },
+  ],
+};
+
 // Keyboard shortcut mapping
 export const GESTURE_KEYS: Record<string, GestureTool> = {
   '1': 'click',

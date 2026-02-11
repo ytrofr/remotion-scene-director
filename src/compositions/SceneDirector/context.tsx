@@ -19,6 +19,7 @@ export interface DirectorContextValue {
   sceneWaypoints: HandPathPoint[];
   effectiveWaypoints: HandPathPoint[];
   activePreset: GesturePreset | null;
+  scenePreset: GesturePreset | null;
   canUndo: boolean;
 }
 

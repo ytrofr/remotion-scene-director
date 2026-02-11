@@ -10,6 +10,7 @@ import {
 } from 'remotion';
 import { PhoneMockup } from '../../../components/PhoneMockup';
 import { FloatingHand } from '../../../components/FloatingHand';
+import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { COLORS, PHONE, COORDINATES, TYPING, SCREENSHOTS } from '../constants';
 
 /**
@@ -62,7 +63,8 @@ export const TypingScene: React.FC = () => {
   const baseHandY = 960 + (COORDINATES.chatInput.y - PHONE.height / 2) * PHONE.baseScale + 120 - 140; // +120 global offset, -140 to raise click position
 
   // Hand path: enter from right, tap input, then exit BEFORE typing starts
-  const handPath = [
+  const savedV4Typing = getSavedPath('MobileChatDemoCombined', '8-V4-Typing');
+  const handPath = savedV4Typing?.path ?? [
     // Enter from bottom-right
     { x: baseHandX + 250, y: baseHandY + 300, frame: 0, gesture: 'pointer' as const, scale: 1 },
     // Move to input position

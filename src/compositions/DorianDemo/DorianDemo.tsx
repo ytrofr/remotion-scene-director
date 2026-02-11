@@ -14,6 +14,7 @@ import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, SCENES, TEXT_CONTENT, SPRING_CONFIG } from './constants';
 import { FloatingHand } from '../../components/FloatingHand';
 import { HandPathPoint } from '../../components/FloatingHand/types';
+import { getSavedPath } from '../SceneDirector/codedPaths';
 // Import the fixed phone mockup components (creates phone frame in CODE with scrollable content)
 import {
   DorianPhoneMockup as DorianPhoneMockupNew,
@@ -788,7 +789,8 @@ const HomeScrollScene: React.FC = () => {
 
   // Hand path - COMPLETELY STATIC position, tilted 30deg left while scrolling
   // NO EXIT - hand stays in place for smooth transition to Scene 3
-  const scrollHandPath: HandPathPoint[] = [
+  const savedScroll = getSavedPath('DorianDemo', '2-HomeScroll');
+  const scrollHandPath: HandPathPoint[] = savedScroll?.path ?? [
     { x: 1050, y: handY, frame: 0, gesture: 'pointer', rotation: 0 },              // Enter from right
     { x: handX, y: handY, frame: 20, gesture: 'pointer', rotation: 0 },            // Arrive at position
     { x: handX, y: handY, frame: 28, gesture: 'drag', rotation: -30 },             // Start scroll - tilt left 30deg
@@ -933,7 +935,8 @@ const TapAIBubbleScene: React.FC = () => {
   const zoomOffsetY = interpolate(zoomProgress, [0, 1], [0, -1730]);
 
   // Hand path - approach bubble, then track it as zoom moves it
-  const handPath: HandPathPoint[] = [
+  const savedTap = getSavedPath('DorianDemo', '3-TapBubble');
+  const handPath: HandPathPoint[] = savedTap?.path ?? [
     { x: 780, y: 1200, frame: 0, gesture: 'pointer' },        // H1: Start above
     { x: 800, y: 1400, frame: 30, gesture: 'pointer' },       // H2: Moving down
     { x: 818, y: 1546, frame: zoomStartFrame, gesture: 'pointer' }, // H3: At bubble, zoom starts
@@ -1040,7 +1043,8 @@ const ChatOpenScene: React.FC = () => {
   const inputFocused = frame >= 48;
 
   // Hand path: move to input box after zoom settles, tap it, stay during typing
-  const handPath: HandPathPoint[] = [
+  const savedTyping = getSavedPath('DorianDemo', '5-UserTyping');
+  const handPath: HandPathPoint[] = savedTyping?.path ?? [
     { x: 518, y: 992, frame: 0, gesture: 'pointer' },       // Start where scene 3 ended (zoomed click pos)
     { x: 500, y: 1200, frame: 20, gesture: 'pointer' },     // Moving down as zoom settles
     { x: 480, y: 1520, frame: 45, gesture: 'pointer' },     // Approaching input box

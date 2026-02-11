@@ -10,6 +10,7 @@ import {
 } from 'remotion';
 import { PhoneMockup } from '../../../components/PhoneMockup';
 import { FloatingHand } from '../../../components/FloatingHand';
+import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { COLORS, PHONE, COORDINATES, SCREENSHOTS } from '../constants';
 
 /**
@@ -52,7 +53,8 @@ export const SendScene: React.FC = () => {
   const baseHandY = 960 + (COORDINATES.sendButton.y - PHONE.height / 2) * PHONE.baseScale + 120 - 190; // +120 global offset, -190 to raise click position
 
   // Hand path: enter from right, move to send button, tap, then exit
-  const handPath = [
+  const savedV4Send = getSavedPath('MobileChatDemoCombined', '9-V4-Send');
+  const handPath = savedV4Send?.path ?? [
     // Enter from right side
     { x: baseHandX + 300, y: baseHandY - 100, frame: 0, gesture: 'pointer' as const, scale: 1 },
     // Move to send button area (following the pan)

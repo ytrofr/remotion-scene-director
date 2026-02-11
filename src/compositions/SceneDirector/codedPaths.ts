@@ -132,3 +132,12 @@ export function getCodedPath(compositionId: string, sceneName: string): CodedPat
 export function getCodedPathPoints(compositionId: string, sceneName: string): HandPathPoint[] {
   return getCodedPath(compositionId, sceneName)?.path ?? [];
 }
+
+/**
+ * Get ONLY the user-saved path override (from codedPaths.data.json).
+ * Returns null if the user hasn't saved this scene from SceneDirector.
+ * Compositions use this to check for overrides before falling back to inline defaults.
+ */
+export function getSavedPath(compositionId: string, sceneName: string): CodedPath | null {
+  return (saved[compositionId]?.[sceneName] as CodedPath) ?? null;
+}

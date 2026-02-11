@@ -1,1 +1,32 @@
-{}
+{
+  "MobileChatDemoCombined": {
+    "3-V2-Typing": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 921,
+          "y": 2003,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 671,
+          "y": 1703,
+          "frame": 5,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 671,
+          "y": 1703,
+          "frame": 6,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 4
+        }
+      ]
+    }
+  }
+}

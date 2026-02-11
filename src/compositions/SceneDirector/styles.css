@@ -294,6 +294,19 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   border-color: var(--orange);
   font-weight: 600;
 }
+.toolbar__btn--undo {
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.toolbar__btn--undo:hover:not(:disabled) {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.toolbar__btn--undo:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
 .toolbar__btn--export:hover {
   background: #f0b33a;
   border-color: #f0b33a;

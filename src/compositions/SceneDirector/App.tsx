@@ -8,11 +8,11 @@ import { Player, type PlayerRef } from '@remotion/player';
 import { FloatingHand } from '../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
 import {
-  directorReducer,
   initialState,
   COMPOSITIONS,
   COMPOSITION_COMPONENTS,
 } from './state';
+import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
 import { GESTURE_PRESETS, GESTURE_KEYS, type GestureTool } from './gestures';
 import { getCodedPath } from './codedPaths';
@@ -30,7 +30,9 @@ import { DrawingCanvas } from './overlays/DrawingCanvas';
 import { WaypointMarkers } from './overlays/WaypointMarkers';
 
 export const App: React.FC = () => {
-  const [state, dispatch] = useReducer(directorReducer, initialState);
+  const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: initialState } as UndoableState);
+  const state = undoState.present;
+  const canUndo = undoState.past.length > 0;
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState(0);
@@ -119,7 +121,8 @@ export const App: React.FC = () => {
     sceneWaypoints,
     effectiveWaypoints,
     activePreset,
-  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset]);
+    canUndo,
+  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, canUndo]);
 
   // Track frame from Player
   useEffect(() => {
@@ -141,6 +144,13 @@ export const App: React.FC = () => {
     if (gestureTool) {
       e.preventDefault();
       dispatch({ type: 'SET_TOOL', tool: gestureTool });
+      return;
+    }
+
+    // Ctrl+Z → Undo
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      dispatch({ type: 'UNDO' });
       return;
     }
 

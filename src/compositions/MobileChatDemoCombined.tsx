@@ -23,6 +23,7 @@ import { PHONE as V2_PHONE, COORDINATES as V2_COORDINATES, TYPING as V2_TYPING }
 // PhoneMockup and FloatingHand for custom V2 scenes with pointer gesture
 import { PhoneMockup } from '../components/PhoneMockup';
 import { FloatingHand } from '../components/FloatingHand';
+import { getSavedPath } from './SceneDirector/codedPaths';
 
 // V4 Scene components (second question with Lottie hand)
 import {
@@ -85,7 +86,8 @@ const V2TypingSceneWithPointer: React.FC = () => {
   const baseHandY = 960 + (V2_COORDINATES.chatInput.y - V2_PHONE.height / 2) * V2_PHONE.baseScale + 120 - 120; // -120 = raised 20px from -100
 
   // Hand path: enter, click input, exit
-  const handPath = [
+  const savedV2Typing = getSavedPath('MobileChatDemoCombined', '3-V2-Typing');
+  const handPath = savedV2Typing?.path ?? [
     { x: baseHandX + 250, y: baseHandY + 300, frame: 0, gesture: 'pointer' as const, scale: 1 },
     { x: baseHandX, y: baseHandY, frame: 5, gesture: 'pointer' as const, scale: 1 },
     { x: baseHandX, y: baseHandY, frame: 6, gesture: 'click' as const, scale: 1, duration: 4 },
@@ -177,7 +179,8 @@ const V2SendSceneWithPointer: React.FC = () => {
   const baseHandY = 960 + (V2_COORDINATES.sendButton.y - V2_PHONE.height / 2) * V2_PHONE.baseScale + 120 - 150;
 
   // Hand path: pointer gesture (no click)
-  const handPath = [
+  const savedV2Send = getSavedPath('MobileChatDemoCombined', '4-V2-Send');
+  const handPath = savedV2Send?.path ?? [
     { x: baseHandX + 300, y: baseHandY - 100, frame: 0, gesture: 'pointer' as const, scale: 1 },
     { x: baseHandX + 50, y: baseHandY, frame: 10, gesture: 'pointer' as const, scale: 1 },
     { x: baseHandX, y: baseHandY, frame: 12, gesture: 'pointer' as const, scale: 1 },

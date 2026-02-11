@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baker's Corner Dashboard - LocalAI Marketplace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #202223;
+            background-color: #f6f6f7;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #374151;
+        }
+
+        .store-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .store-avatar {
+            width: 40px;
+            height: 40px;
+            background: #d4654a;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .store-details h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .store-type {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .marketplace-link {
+            color: #10b981;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .marketplace-link:hover {
+            color: #065f46;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0 1.5rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: #d1d5db;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-right: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #065f46;
+            color: white;
+            border-right-color: #10b981;
+        }
+
+        .nav-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #374151;
+        }
+
+        .ai-assistant-btn {
+            background: linear-gradient(135deg, #10b981, #065f46);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .ai-assistant-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 2rem;
+            max-width: calc(100vw - 240px);
+            overflow-x: auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem 1.5rem 1rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.revenue {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .stat-icon.orders {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .stat-icon.products {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .stat-icon.rating {
+            background: #fde2e8;
+            color: #ef4444;
+        }
+
+        .stat-details h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: #10b981;
+        }
+
+        .stat-change.negative {
+            color: #ef4444;
+        }
+
+        /* Recent Orders */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            background: #f9fafb;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .orders-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .orders-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .order-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .order-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .order-status.confirmed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .order-status.delivered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .customer-avatar {
+            width: 32px;
+            height: 32px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        /* Product Management */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 160px;
+            background: #f3f4f6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #10b981;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-danger:hover {
+            background: #fca5a5;
+        }
+
+        /* AI Insights */
+        .ai-insight {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1px solid #93c5fd;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-insight-title {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .ai-insight-content {
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+
+        .ai-recommendations {
+            margin-top: 1rem;
+        }
+
+        .ai-recommendations h4 {
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .ai-recommendations ul {
+            list-style: none;
+        }
+
+        .ai-recommendations li {
+            padding: 0.25rem 0;
+            color: #1e3a8a;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #374151;
+        }
+
+        .quick-action-btn:hover {
+            background: #f9fafb;
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        /* AI Chat Button */
+        .ai-chat-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10b981, #065f46);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+        }
+
+        .ai-chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 350px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            max-height: 500px;
+            z-index: 1001;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, #10b981, #065f46);
+            color: white;
+            border-radius: 1rem 1rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-weight: 600;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .chat-content {
+            padding: 1rem;
+            flex: 1;
+            min-height: 200px;
+        }
+
+        .chat-suggestions {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .suggestion-btn {
+            padding: 0.75rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .suggestion-btn:hover {
+            background: #f3f4f6;
+            border-color: #10b981;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                max-width: 100vw;
+            }
+
+            .dashboard-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-interface {
+                right: 1rem;
+                left: 1rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .orders-table {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f3f4f6 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f3f4f6 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f3f4f6 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f3f4f6 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="store-info">
+                    <div class="store-avatar">BC</div>
+                    <div class="store-details">
+                        <h3>Baker's Corner</h3>
+                        <div class="store-type">Local Bakery</div>
+                    </div>
+                </div>
+                <a href="#marketplace" class="marketplace-link">
+                    🏪 View in Marketplace
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="#dashboard" class="nav-item active">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="#analytics" class="nav-item">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Store Management</div>
+                    <a href="#products" class="nav-item">
+                        <span class="nav-icon">📦</span>
+                        Products
+                    </a>
+                    <a href="#orders" class="nav-item">
+                        <span class="nav-icon">🛒</span>
+                        Orders
+                    </a>
+                    <a href="#customers" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        Customers
+                    </a>
+                    <a href="#inventory" class="nav-item">
+                        <span class="nav-icon">📋</span>
+                        Inventory
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Marketing</div>
+                    <a href="#promotions" class="nav-item">
+                        <span class="nav-icon">🎯</span>
+                        Promotions
+                    </a>
+                    <a href="#ai-insights" class="nav-item">
+                        <span class="nav-icon">🤖</span>
+                        AI Insights
+                    </a>
+                    <a href="#reviews" class="nav-item">
+                        <span class="nav-icon">⭐</span>
+                        Reviews
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Settings</div>
+                    <a href="#store-settings" class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        Store Settings
+                    </a>
+                    <a href="#profile" class="nav-item">
+                        <span class="nav-icon">👤</span>
+                        Profile
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="ai-assistant-btn" onclick="toggleAIAssistant()">
+                    🤖 AI Assistant
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Welcome back! Here's what's happening with Baker's Corner today.</p>
+            </div>
+
+            <!-- AI Insights Banner -->
+            <div class="ai-insight">
+                <div class="ai-insight-header">
+                    <span style="font-size: 1.2rem;">🤖</span>
+                    <h3 class="ai-insight-title">AI Insights for Today</h3>
+                </div>
+                <div class="ai-insight-content">
+                    Based on current trends and your inventory, sourdough bread demand is 23% higher than usual today. Consider promoting your Artisan Sourdough to maximize sales.
+                </div>
+                <div class="ai-recommendations">
+                    <h4>💡 Recommended Actions:</h4>
+                    <ul>
+                        <li>✨ Feature Artisan Sourdough on your store homepage</li>
+                        <li>📱 Send push notifications to 847 customers who bought bread this month</li>
+                        <li>🎯 Create a bundle offer: Sourdough + Honey for $19.99</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="#add-product" class="quick-action-btn">
+                    <span>➕</span>
+                    Add Product
+                </a>
+                <a href="#process-orders" class="quick-action-btn">
+                    <span>📋</span>
+                    Process Orders
+                </a>
+                <a href="#update-inventory" class="quick-action-btn">
+                    <span>📦</span>
+                    Update Inventory
+                </a>
+                <a href="#view-analytics" class="quick-action-btn">
+                    <span>📊</span>
+                    View Analytics
+                </a>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon revenue">💰</div>
+                    <div class="stat-details">
+                        <h3>$2,847</h3>
+                        <div class="stat-label">Revenue This Month</div>
+                        <div class="stat-change positive">
+                            <span>↗</span>
+                            +12% from last month
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orders">📋</div>
+                    <div class="stat-details">
+                        <h3>89</h3>
+                        <div class="stat-label">Orders This Month</div>
+                        <div class="stat-change positive">
+                            <span>↗</span>
+                            +8% from last month
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon products">📦</div>
+                    <div class="stat-details">
+                        <h3>45</h3>
+                        <div class="stat-label">Active Products</div>
+                        <div class="stat-change positive">
+                            <span>↗</span>
+                            +3 new this week
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon rating">⭐</div>
+                    <div class="stat-details">
+                        <h3>4.9</h3>
+                        <div class="stat-label">Average Rating</div>
+                        <div class="stat-change positive">
+                            <span>↗</span>
+                            +0.2 this month
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Recent Orders -->
+                <div class="dashboard-card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>📋</span>
+                            Recent Orders
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#BC-2047</td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">SM</div>
+                                            Sarah M.
+                                        </div>
+                                    </td>
+                                    <td>Artisan Sourdough × 2</td>
+                                    <td>$17.00</td>
+                                    <td><span class="order-status delivered">Delivered</span></td>
+                                    <td>2 hours ago</td>
+                                </tr>
+                                <tr>
+                                    <td>#BC-2048</td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">MJ</div>
+                                            Mike J.
+                                        </div>
+                                    </td>
+                                    <td>Pain au Chocolat × 6</td>
+                                    <td>$19.50</td>
+                                    <td><span class="order-status confirmed">Confirmed</span></td>
+                                    <td>4 hours ago</td>
+                                </tr>
+                                <tr>
+                                    <td>#BC-2049</td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">LR</div>
+                                            Lisa R.
+                                        </div>
+                                    </td>
+                                    <td>French Baguette × 1, Cookies × 1</td>
+                                    <td>$15.75</td>
+                                    <td><span class="order-status pending">Pending</span></td>
+                                    <td>6 hours ago</td>
+                                </tr>
+                                <tr>
+                                    <td>#BC-2050</td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">DJ</div>
+                                            David K.
+                                        </div>
+                                    </td>
+                                    <td>Apple Pie × 1</td>
+                                    <td>$18.00</td>
+                                    <td><span class="order-status delivered">Delivered</span></td>
+                                    <td>1 day ago</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sales Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <span>📈</span>
+                            Sales This Week
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                📊 Sales Chart<br>
+                                <small style="margin-top: 0.5rem; display: block;">Interactive chart would display here</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span>🏆</span>
+                        Top Performing Products
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="product-grid">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=200&fit=crop&auto=format" alt="Artisan Sourdough">
+                                <div class="product-badge">Best Seller</div>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">Artisan Sourdough Bread</h4>
+                                <div class="product-price">$8.50</div>
+                                <div class="product-meta">
+                                    <span>47 sold this month</span>
+                                    <span>⭐ 4.9 (47)</span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn btn-primary">Edit</button>
+                                    <button class="btn btn-secondary">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1555507036-ab794f576813?w=300&h=200&fit=crop&auto=format" alt="Pain au Chocolat">
+                                <div class="product-badge">Popular</div>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">Pain au Chocolat</h4>
+                                <div class="product-price">$3.25</div>
+                                <div class="product-meta">
+                                    <span>34 sold this month</span>
+                                    <span>⭐ 4.8 (22)</span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn btn-primary">Edit</button>
+                                    <button class="btn btn-secondary">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1565299585323-38174c879e77?w=300&h=200&fit=crop&auto=format" alt="Apple Pie">
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">Classic Apple Pie</h4>
+                                <div class="product-price">$18.00</div>
+                                <div class="product-meta">
+                                    <span>28 sold this month</span>
+                                    <span>⭐ 4.7 (31)</span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn btn-primary">Edit</button>
+                                    <button class="btn btn-secondary">View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop&auto=format" alt="Chocolate Chip Cookies">
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">Chocolate Chip Cookies</h4>
+                                <div class="product-price">$12.00</div>
+                                <div class="product-meta">
+                                    <span>23 sold this month</span>
+                                    <span>⭐ 4.6 (18)</span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn btn-primary">Edit</button>
+                                    <button class="btn btn-secondary">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- AI Chat Button -->
+        <button class="ai-chat-fab" onclick="toggleChat()">🤖</button>
+
+        <!-- Chat Interface -->
+        <div class="chat-interface" id="chatInterface">
+            <div class="chat-header">
+                <span class="chat-title">Store Management AI</span>
+                <button class="chat-close" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-content">
+                <p style="margin-bottom: 1rem; color: #6b7280;">Hi! I'm your store management assistant. I can help you optimize your business and increase sales!</p>
+                <div class="chat-suggestions">
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">📊 Analyze my sales performance</button>
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">🎯 Create a promotion campaign</button>
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">📦 Optimize my inventory levels</button>
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">💰 Suggest pricing adjustments</button>
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">📝 Improve product descriptions for SEO</button>
+                    <button class="suggestion-btn" onclick="handleSuggestion(this)">👥 Analyze customer buying patterns</button>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <textarea class="chat-input" placeholder="Ask me about sales optimization, inventory management, customer insights..." rows="2"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatInterface = document.getElementById('chatInterface');
+            if (chatInterface.style.display === 'none' || chatInterface.style.display === '') {
+                chatInterface.style.display = 'flex';
+                document.querySelector('.chat-input').focus();
+            } else {
+                chatInterface.style.display = 'none';
+            }
+        }
+
+        function handleSuggestion(btn) {
+            const query = btn.textContent.substring(2); // Remove emoji
+            alert('Store Management AI: "' + query + '"\n\nThis would provide detailed business insights and actionable recommendations for:\n• Sales optimization strategies\n• Inventory management tips\n• Customer behavior analysis\n• Pricing recommendations\n• Marketing campaign ideas');
+        }
+
+        function toggleAIAssistant() {
+            toggleChat(); // Use the same chat interface
+        }
+
+        // Chat functionality
+        document.querySelector('.chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (this.value.trim()) {
+                    alert('Store Management AI: Thank you for your question: "' + this.value + '"\n\nThis would provide intelligent business insights and personalized recommendations for your bakery!');
+                    this.value = '';
+                }
+            }
+        });
+
+        // Close chat when clicking outside
+        document.addEventListener('click', function(e) {
+            const chatInterface = document.getElementById('chatInterface');
+            const chatFab = document.querySelector('.ai-chat-fab');
+            
+            if (chatInterface.style.display === 'flex' && 
+                !chatInterface.contains(e.target) && 
+                !chatFab.contains(e.target)) {
+                chatInterface.style.display = 'none';
+            }
+        });
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Simulate page navigation
+                const section = this.textContent.trim();
+                alert(`Navigating to: ${section}\n\nThis would load the ${section} management interface with relevant tools and data.`);
+            });
+        });
+
+        // Quick action buttons
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const action = this.textContent.trim();
+                alert(`Quick Action: ${action}\n\nThis would open the ${action} interface for immediate action.`);
+            });
+        });
+
+        // Product action buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                const productCard = this.closest('.product-card');
+                const productName = productCard.querySelector('.product-title').textContent;
+                
+                alert(`${action} Product: "${productName}"\n\nThis would open the ${action.toLowerCase()} interface for this product.`);
+            });
+        });
+
+        // Order status interactions
+        document.querySelectorAll('.orders-table tr').forEach(row => {
+            row.addEventListener('click', function() {
+                const orderNumber = this.cells[0]?.textContent;
+                if (orderNumber && orderNumber.startsWith('#')) {
+                    alert(`Order Details: ${orderNumber}\n\nThis would open detailed order management including:\n• Customer information\n• Product details\n• Delivery tracking\n• Payment status\n• Order history`);
+                }
+            });
+        });
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Add mobile menu button for smaller screens
+        if (window.innerWidth <= 1024) {
+            const header = document.querySelector('.page-header');
+            const menuBtn = document.createElement('button');
+            menuBtn.innerHTML = '☰';
+            menuBtn.style.cssText = 'position: fixed; top: 1rem; left: 1rem; z-index: 1001; background: #1f2937; color: white; border: none; padding: 0.5rem; border-radius: 0.25rem; cursor: pointer;';
+            menuBtn.onclick = toggleSidebar;
+            document.body.appendChild(menuBtn);
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // This would typically update stats, orders, etc. in real-time
+            console.log('Dashboard data refresh...');
+        }, 30000);
+    </script>
+</body>
+</html>

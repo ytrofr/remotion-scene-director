@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalAI Marketplace - Discover Local Stores with AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #202223;
+            background-color: #f7f7f7;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e1e3e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #008060;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 3rem 0.75rem 1rem;
+            border: 2px solid #e1e3e5;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #008060;
+        }
+
+        .ai-search-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #008060;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .ai-search-btn:hover {
+            background: #006a4e;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #637381;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #008060;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cart-btn {
+            background: #f7f7f7;
+            border: 1px solid #e1e3e5;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            color: #637381;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .cart-btn:hover {
+            background: #f0f0f0;
+            color: #008060;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #008060 0%, #006a4e 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-ai-search {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .hero-search-input {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            resize: vertical;
+            min-height: 60px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .hero-search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .hero-search-btn {
+            position: absolute;
+            right: 0.75rem;
+            bottom: 0.75rem;
+            background: #008060;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .hero-search-btn:hover {
+            background: #006a4e;
+        }
+
+        .ai-suggestions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .ai-suggestion-chip {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .ai-suggestion-chip:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #202223;
+        }
+
+        .view-all {
+            color: #008060;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .view-all:hover {
+            color: #006a4e;
+        }
+
+        /* Categories Grid */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-count {
+            color: #637381;
+            font-size: 0.9rem;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .product-store {
+            color: #637381;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #008060;
+        }
+
+        /* Stores Section */
+        .stores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .store-card {
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .store-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .store-banner {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #008060, #006a4e);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .store-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .store-card-content {
+            padding: 1.5rem;
+        }
+
+        .store-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .store-logo {
+            width: 60px;
+            height: 60px;
+            background: #008060;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .store-info h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .store-type {
+            color: #637381;
+            font-size: 0.9rem;
+        }
+
+        .store-description {
+            margin-bottom: 1rem;
+            color: #637381;
+            line-height: 1.5;
+        }
+
+        .store-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #637381;
+        }
+
+        /* AI Chat Button */
+        .ai-chat-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #008060, #006a4e);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 16px rgba(0,128,96,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+        }
+
+        .ai-chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,128,96,0.4);
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 350px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            max-height: 500px;
+            z-index: 1001;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: #008060;
+            color: white;
+            border-radius: 1rem 1rem 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-weight: 600;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .chat-content {
+            padding: 1rem;
+            flex: 1;
+            min-height: 200px;
+        }
+
+        .chat-suggestions {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .suggestion-btn {
+            padding: 0.75rem;
+            background: #f7f7f7;
+            border: 1px solid #e1e3e5;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e1e3e5;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e1e3e5;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            resize: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: #202223;
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .chat-interface {
+                right: 1rem;
+                left: 1rem;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">LocalAI Marketplace</div>
+
+            <nav class="nav-links">
+                <a href="#categories">Categories</a>
+                <a href="#stores">Stores</a>
+                <a href="#deals">Deals</a>
+            </nav>
+            <div class="user-actions">
+                <a href="#account" class="nav-links">Account</a>
+                <a href="#cart" class="cart-btn">🛒 Cart (0)</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Discover Local Stores with AI</h1>
+            <p>Find exactly what you need from local businesses and themed stores, powered by intelligent search</p>
+            
+            <div class="hero-ai-search">
+                <textarea class="hero-search-input" placeholder="Ask AI anything: 'Find organic coffee beans under $20' or 'Show me local bakeries with gluten-free options'"></textarea>
+                <button class="hero-search-btn">✨ Search</button>
+            </div>
+            
+            <div class="ai-suggestions">
+                <span class="ai-suggestion-chip" onclick="fillSearch(this)">🍞 Fresh bread near me</span>
+                <span class="ai-suggestion-chip" onclick="fillSearch(this)">🎨 Handmade crafts</span>
+                <span class="ai-suggestion-chip" onclick="fillSearch(this)">☕ Best local coffee</span>
+                <span class="ai-suggestion-chip" onclick="fillSearch(this)">🌱 Organic gardening supplies</span>
+                <span class="ai-suggestion-chip" onclick="fillSearch(this)">👕 Sustainable fashion</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Categories Section -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Shop by Category</h2>
+                <a href="#" class="view-all">View all categories</a>
+            </div>
+            <div class="categories-grid">
+                <a href="#" class="category-card">
+                    <div class="category-icon">🛒</div>
+                    <div class="category-name">Groceries</div>
+                    <div class="category-count">24 local stores</div>
+                </a>
+                <a href="#" class="category-card">
+                    <div class="category-icon">👕</div>
+                    <div class="category-name">Fashion</div>
+                    <div class="category-count">18 boutiques</div>
+                </a>
+                <a href="#" class="category-card">
+                    <div class="category-icon">🏠</div>
+                    <div class="category-name">Home & Garden</div>
+                    <div class="category-count">31 stores</div>
+                </a>
+                <a href="#" class="category-card">
+                    <div class="category-icon">🎨</div>
+                    <div class="category-name">Artisan Crafts</div>
+                    <div class="category-count">15 creators</div>
+                </a>
+                <a href="#" class="category-card">
+                    <div class="category-icon">📚</div>
+                    <div class="category-name">Books & Media</div>
+                    <div class="category-count">8 bookstores</div>
+                </a>
+                <a href="#" class="category-card">
+                    <div class="category-icon">🏃</div>
+                    <div class="category-name">Sports & Outdoor</div>
+                    <div class="category-count">12 retailers</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Featured Products</h2>
+                <a href="#" class="view-all">View all products</a>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format" alt="Artisan Sourdough Bread">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Artisan Sourdough Bread</h3>
+                        <p class="product-store">From: Baker's Corner</p>
+                        <div class="product-price">$8.50</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=300&fit=crop&auto=format" alt="Ethiopian Coffee">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Ethiopian Single Origin Coffee</h3>
+                        <p class="product-store">From: Local Roasters</p>
+                        <div class="product-price">$16.99</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop&auto=format" alt="Hand-knitted Wool Scarf">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Hand-knitted Wool Scarf</h3>
+                        <p class="product-store">From: Cozy Crafts</p>
+                        <div class="product-price">$34.00</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&auto=format" alt="Organic Herb Garden Kit">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Organic Herb Garden Kit</h3>
+                        <p class="product-store">From: Green Thumb Gardens</p>
+                        <div class="product-price">$24.99</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop&auto=format" alt="Ceramic Coffee Mug">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Handmade Ceramic Coffee Mug</h3>
+                        <p class="product-store">From: Potter's Wheel Studio</p>
+                        <div class="product-price">$18.00</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&auto=format" alt="Organic Honey">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Raw Wildflower Honey</h3>
+                        <p class="product-store">From: Sunshine Apiaries</p>
+                        <div class="product-price">$12.50</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop&auto=format" alt="Vintage Book Collection">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Classic Literature Set</h3>
+                        <p class="product-store">From: Corner Bookshop</p>
+                        <div class="product-price">$45.00</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&auto=format" alt="Succulent Plants">
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Mini Succulent Collection</h3>
+                        <p class="product-store">From: Desert Bloom Nursery</p>
+                        <div class="product-price">$28.99</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Stores -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Featured Local Stores</h2>
+                <a href="#stores" class="view-all">View all stores</a>
+            </div>
+            <div class="stores-grid">
+                <div class="store-card">
+                    <div class="store-banner">
+                        <img src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=600&h=200&fit=crop&auto=format" alt="Baker's Corner Banner">
+                    </div>
+                    <div class="store-card-content">
+                        <div class="store-header">
+                            <div class="store-logo">BC</div>
+                            <div class="store-info">
+                                <h3>Baker's Corner</h3>
+                                <p class="store-type">Local Bakery • 0.8 miles away</p>
+                            </div>
+                        </div>
+                        <p class="store-description">Fresh artisan breads, pastries, and coffee. Family-owned bakery serving the community for over 20 years.</p>
+                        <div class="store-stats">
+                            <span>⭐ 4.9</span>
+                            <span>📦 45 products</span>
+                            <span>🚚 Same-day delivery</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="store-card">
+                    <div class="store-banner">
+                        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=200&fit=crop&auto=format" alt="Green Thumb Gardens Banner">
+                    </div>
+                    <div class="store-card-content">
+                        <div class="store-header">
+                            <div class="store-logo">GG</div>
+                            <div class="store-info">
+                                <h3>Green Thumb Gardens</h3>
+                                <p class="store-type">Garden Center • 2.1 miles away</p>
+                            </div>
+                        </div>
+                        <p class="store-description">Everything for your garden - from seeds to tools, plants to planters. Expert advice included with every purchase.</p>
+                        <div class="store-stats">
+                            <span>⭐ 4.7</span>
+                            <span>📦 120 products</span>
+                            <span>🚚 Next-day delivery</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="store-card">
+                    <div class="store-banner">
+                        <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&h=200&fit=crop&auto=format" alt="Cozy Crafts Banner">
+                    </div>
+                    <div class="store-card-content">
+                        <div class="store-header">
+                            <div class="store-logo">CC</div>
+                            <div class="store-info">
+                                <h3>Cozy Crafts</h3>
+                                <p class="store-type">Artisan Shop • Online + Local Markets</p>
+                            </div>
+                        </div>
+                        <p class="store-description">Handmade knitwear, pottery, and home decor. Each piece is unique and crafted with love by local artisans.</p>
+                        <div class="store-stats">
+                            <span>⭐ 4.8</span>
+                            <span>📦 28 products</span>
+                            <span>🚚 2-3 days shipping</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 LocalAI Marketplace. Connecting communities through intelligent commerce.</p>
+        </div>
+    </footer>
+
+    <!-- AI Chat Button -->
+    <button class="ai-chat-fab" onclick="toggleChat()">🤖</button>
+
+    <!-- Chat Interface -->
+    <div class="chat-interface" id="chatInterface">
+        <div class="chat-header">
+            <span class="chat-title">AI Shopping Assistant</span>
+            <button class="chat-close" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-content">
+            <p style="margin-bottom: 1rem; color: #637381;">Hi! I'm here to help you find exactly what you need. Try one of these suggestions or ask me anything:</p>
+            <div class="chat-suggestions">
+                <button class="suggestion-btn" onclick="handleSuggestion(this)">🍞 Find fresh bread near me</button>
+                <button class="suggestion-btn" onclick="handleSuggestion(this)">🎨 Show me handmade crafts</button>
+                <button class="suggestion-btn" onclick="handleSuggestion(this)">🌱 I need organic gardening supplies</button>
+                <button class="suggestion-btn" onclick="handleSuggestion(this)">☕ Best local coffee shops</button>
+                <button class="suggestion-btn" onclick="handleSuggestion(this)">👕 Find sustainable fashion stores</button>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea class="chat-input" placeholder="Ask me anything... 'Find organic coffee beans under $20'" rows="2"></textarea>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatInterface = document.getElementById('chatInterface');
+            if (chatInterface.style.display === 'none' || chatInterface.style.display === '') {
+                chatInterface.style.display = 'flex';
+                document.querySelector('.chat-input').focus();
+            } else {
+                chatInterface.style.display = 'none';
+            }
+        }
+
+        function fillSearch(chip) {
+            const heroInput = document.querySelector('.hero-search-input');
+            const text = chip.textContent.substring(2); // Remove emoji
+            
+            heroInput.value = text;
+            heroInput.focus();
+        }
+
+        function performSearch() {
+            const heroInput = document.querySelector('.hero-search-input');
+            const query = heroInput.value;
+            
+            if (query.trim()) {
+                alert('AI Search Results for: "' + query + '"\n\nThis would show personalized results based on your location, preferences, and AI-powered recommendations!');
+            }
+        }
+
+        // Add search functionality
+        document.querySelector('.hero-search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+
+        document.querySelector('.hero-search-btn').addEventListener('click', performSearch);
+
+        // Handle Enter key in chat
+        document.querySelector('.chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (this.value.trim()) {
+                    alert('AI Response: Thank you for your question: "' + this.value + '". This would trigger the AI search and personalization engine!');
+                    this.value = '';
+                }
+            }
+        });
+
+        // Close chat when clicking outside
+        document.addEventListener('click', function(e) {
+            const chatInterface = document.getElementById('chatInterface');
+            const chatFab = document.querySelector('.ai-chat-fab');
+            
+            if (chatInterface.style.display === 'flex' && 
+                !chatInterface.contains(e.target) && 
+                !chatFab.contains(e.target)) {
+                chatInterface.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

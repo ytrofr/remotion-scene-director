@@ -1,0 +1,35 @@
+[
+  {
+    "name": "cf_clearance",
+    "value": "V8WpDTaOte4JdscYzQ520_4A4LtpBHoJKV0_jDoo3Pc-1770631703-1.2.1.1-impNdxXO6rDSZmq6FKuQrBgPvnRFgOhdrgyV2ula_qcikTXDgI2UGZ6PT7tB6IO2xUkhcdai8ad7RGeWDYGbIgXZefRC5MjZHhTRcavqjk5csl9uOJZaV3GVaeLzMsSSFSVk5lRMsBRv4TCoNAb9YVhLIwOlda4LVA3QNalBWF.INz4Vfygq6YfvwpALZV6FtfSmQ5CBkMrFMGsMY3jJvc27Ha8XZG5vDx1b8QjiwJI",
+    "domain": ".xtemos.com",
+    "path": "/",
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_ga",
+    "value": "GA1.1.281889483.1770631699",
+    "domain": ".xtemos.com",
+    "path": "/"
+  },
+  {
+    "name": "_ga_PXKDRD0KG3",
+    "value": "GS2.1.s1770631699$o1$g0$t1770631699$j60$l0$h0",
+    "domain": ".xtemos.com",
+    "path": "/"
+  },
+  {
+    "name": "sbjs_current",
+    "value": "typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29",
+    "domain": ".woodmart.xtemos.com",
+    "path": "/"
+  },
+  {
+    "name": "sbjs_current_add",
+    "value": "fd%3D2026-02-09%2010%3A08%3A19%7C%7C%7Cep%3Dhttps%3A%2F%2Fwoodmart.xtemos.com%2F%7C%7C%7Crf%3D%28none%29",
+    "domain": ".woodmart.xtemos.com",
+    "path": "/"
+  }
+]

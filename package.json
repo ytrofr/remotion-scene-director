@@ -1,0 +1,60 @@
+{
+  "name": "limor-video-poc",
+  "version": "1.0.0",
+  "description": "LIMOR AI Demo Video POC using Remotion",
+  "scripts": {
+    "dev": "remotion studio --port 3000",
+    "dev:dorian": "remotion studio --port 3000",
+    "render": "remotion render LimorAIDemo out/limor-ai-demo.mp4",
+    "render:720p": "remotion render LimorAIDemo out/limor-ai-demo-720p.mp4 --scale=0.667",
+    "render:old": "remotion render LimorAppDemo out/limor-demo.mp4",
+    "render:mobile": "remotion render MobileChatDemo out/mobile-demo-vertical.mp4",
+    "render:v2": "remotion render MobileChatDemoV2 out/mobile-demo-v2.mp4",
+    "render:v3": "remotion render MobileChatDemoV3 out/mobile-demo-v3.mp4",
+    "render:dorian": "remotion render DorianDemo out/dorian-demo.mp4",
+    "render:dashmor": "remotion render DashmorDemo out/dashmor-labor-v3.mp4",
+    "capture": "npx ts-node scripts/capture-real-screens.ts",
+    "capture:chat": "npx ts-node scripts/capture-chat-sequence.ts",
+    "capture:mobile": "npx ts-node scripts/capture-mobile-chat.ts",
+    "scene-director": "vite --config vite.config.ts --port 3001"
+  },
+  "keywords": [
+    "remotion",
+    "video",
+    "limor"
+  ],
+  "author": "LIMOR AI",
+  "license": "MIT",
+  "dependencies": {
+    "@remotion/animated-emoji": "4.0.419",
+    "@remotion/animation-utils": "4.0.419",
+    "@remotion/bundler": "^4.0.419",
+    "@remotion/captions": "4.0.419",
+    "@remotion/cli": "^4.0.419",
+    "@remotion/fonts": "4.0.419",
+    "@remotion/google-fonts": "4.0.419",
+    "@remotion/layout-utils": "4.0.419",
+    "@remotion/light-leaks": "4.0.419",
+    "@remotion/lottie": "4.0.419",
+    "@remotion/mcp": "4.0.419",
+    "@remotion/motion-blur": "4.0.419",
+    "@remotion/player": "4.0.419",
+    "@remotion/shapes": "4.0.419",
+    "@remotion/transitions": "4.0.419",
+    "lottie-web": "^5.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.419"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "playwright": "^1.58.2",
+    "prettier": "^3.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1"
+  }
+}

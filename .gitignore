@@ -5,3 +5,25 @@ dist-scene-director/
 *.local
 .DS_Store
 .playwright-mcp/
+
+# Private project assets (keep locally, never commit)
+Dorian/
+Limor/
+video-assets/
+out/
+
+# Screenshots and debug images (private app content)
+public/mobile/
+public/dorian/
+public/dashmor/
+public/screenshots/
+*.png
+
+# Internal docs
+SESSION-HANDOFF.md
+FEEDBACK.md
+SCENES.md
+
+# OS artifacts
+Thumbs.db
+*:Zone.Identifier

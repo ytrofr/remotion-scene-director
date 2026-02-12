@@ -1,0 +1,36 @@
+title: Remotion Scene Director
+description: Interactive hand-path editor for Remotion video compositions with Lottie animations
+url: 'https://ytrofr.github.io'
+baseurl: '/remotion-scene-director'
+theme: jekyll-theme-cayman
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - node_modules/
+  - src/
+  - scripts/
+  - public/
+  - .agents/
+  - .claude/
+  - package.json
+  - package-lock.json
+  - tsconfig.json
+  - vite.config.ts
+  - remotion.config.ts
+  - .prettierrc
+  - .gitignore
+  - scene-director.html
+
+social:
+  name: ytrofr
+  links:
+    - https://github.com/ytrofr
+
+defaults:
+  - scope:
+      path: ''
+    values:
+      layout: default

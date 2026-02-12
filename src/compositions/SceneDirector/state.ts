@@ -64,7 +64,8 @@ export type DirectorAction =
   | { type: 'CLEAR_SCENE'; scene: string }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
-  | { type: 'UNDO' };
+  | { type: 'UNDO' }
+  | { type: 'ADOPT_CODED_PATH'; scene: string; waypoints: HandPathPoint[]; gesture?: GestureTool };
 
 export const initialState: DirectorState = {
   compositionId: 'MobileChatDemoCombined',
@@ -158,6 +159,16 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
         sceneDark: newDark,
         selectedWaypoint: null,
       };
+    }
+    case 'ADOPT_CODED_PATH': {
+      const updated: DirectorState = {
+        ...state,
+        waypoints: { ...state.waypoints, [action.scene]: action.waypoints },
+      };
+      if (action.gesture) {
+        updated.sceneGesture = { ...state.sceneGesture, [action.scene]: action.gesture };
+      }
+      return updated;
     }
     default:
       return state;

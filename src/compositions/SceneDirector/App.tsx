@@ -143,10 +143,7 @@ export const App: React.FC = () => {
   // This copies coded path points into state.waypoints so they become draggable/editable
   useEffect(() => {
     if (state.showTrail && state.selectedScene && codedPath && sceneWaypoints.length === 0) {
-      dispatch({ type: 'SET_WAYPOINTS', scene: state.selectedScene, waypoints: [...codedPath.path] });
-      if (codedPath.gesture) {
-        dispatch({ type: 'SET_SCENE_GESTURE', scene: state.selectedScene, gesture: codedPath.gesture });
-      }
+      dispatch({ type: 'ADOPT_CODED_PATH', scene: state.selectedScene, waypoints: [...codedPath.path], gesture: codedPath.gesture });
     }
   }, [state.showTrail, state.selectedScene, codedPath, sceneWaypoints.length, dispatch]);
 

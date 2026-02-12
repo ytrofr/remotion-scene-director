@@ -1,18 +1,9 @@
-# Remotion Video Project - LIMOR AI
+# Remotion Scene Director
 
-**Project**: Programmatic video creation with Remotion
-**Framework**: React + Remotion 4.0.419
+**Project**: Programmatic video creation with Remotion + interactive hand-path editor
+**Framework**: React + Remotion 4.0.419 + Vite
 **Purpose**: Demo videos, mobile app mockups, marketing content
-**Dev Server**: ALWAYS use port 3000 → http://localhost:3000
-
----
-
-## Auto-Load Context
-
-> **IMPORTANT**: For comprehensive project context, see `Limor/CONTEXT.md`
-> Contains: Video specs, scene breakdowns, capture workflow, dark mode CSS patterns, troubleshooting guide
-
-**Sub-Project**: `Limor/` - All assets, scripts, compositions, and documentation for Limor AI demo videos.
+**Ports**: 3000 (Remotion Studio), 3001 (Scene Director UI)
 
 ---
 
@@ -27,7 +18,7 @@ npm run render:v2        # Mobile 9:16 demo (MobileChatDemoV2)
 npm run render:mobile    # Legacy mobile demo
 npm run render           # Desktop demo
 
-# Capture screenshots (requires LimorAI-Limor running on port 8080)
+# Capture screenshots (requires target app running on port 8080)
 npm run capture:mobile   # Dark mode mobile capture
 ```
 
@@ -39,16 +30,16 @@ npm run capture:mobile   # Dark mode mobile capture
 
 **Dimensions**: 1080x1920 | **Duration**: ~11 seconds @ 30fps (320 frames)
 
-| # | Scene Name | Duration | Description | File |
-|---|------------|----------|-------------|------|
-| 1 | Intro | 35 frames | Phone slides in | IntroScene.tsx |
-| 2 | ChatEmpty | 45 frames | Empty chat UI | ChatEmptyScene.tsx |
-| 3 | Typing | 70 frames | Tap input + letter-by-letter + zoom | TypingScene.tsx |
-| 4 | Send | 30 frames | Pan to send, tap send | SendScene.tsx |
-| 5 | UserMessage | 30 frames | User prompt appears in chat | UserMessageScene.tsx |
-| 6 | Thinking | 45 frames | AI thinking with animated dots | ThinkingScene.tsx |
-| 7 | Response | 60 frames | AI response appears | ResponseScene.tsx |
-| 8 | Outro | 35 frames | CTA overlay | OutroScene.tsx |
+| #   | Scene Name  | Duration  | Description                         | File                 |
+| --- | ----------- | --------- | ----------------------------------- | -------------------- |
+| 1   | Intro       | 35 frames | Phone slides in                     | IntroScene.tsx       |
+| 2   | ChatEmpty   | 45 frames | Empty chat UI                       | ChatEmptyScene.tsx   |
+| 3   | Typing      | 70 frames | Tap input + letter-by-letter + zoom | TypingScene.tsx      |
+| 4   | Send        | 30 frames | Pan to send, tap send               | SendScene.tsx        |
+| 5   | UserMessage | 30 frames | User prompt appears in chat         | UserMessageScene.tsx |
+| 6   | Thinking    | 45 frames | AI thinking with animated dots      | ThinkingScene.tsx    |
+| 7   | Response    | 60 frames | AI response appears                 | ResponseScene.tsx    |
+| 8   | Outro       | 35 frames | CTA overlay                         | OutroScene.tsx       |
 
 ### MobileChatDemoV4 (Lottie Hand Version - 9:16 Vertical)
 
@@ -56,21 +47,23 @@ npm run capture:mobile   # Dark mode mobile capture
 
 Same as V3 but uses professional Lottie hand-click animation instead of simple finger indicator.
 
-| # | Scene Name | Duration | Description | Hand |
-|---|------------|----------|-------------|------|
-| 1 | Intro | 35 frames | Phone slides in | none |
-| 2 | ChatWithResponse | 45 frames | Shows first Q&A | none |
-| 3 | Typing | 85 frames | Click input, wait 1s, type | hand-click @ frame 5 |
-| 4 | Send | 30 frames | Pan to send, click send | hand-click @ frame 13 |
-| 5 | UserMessage | 30 frames | Second question appears | none |
-| 6 | Thinking | 45 frames | AI thinking dots | none |
-| 7 | Response | 60 frames | AI response slides up | none |
-| 8 | Outro | 35 frames | CTA overlay | none |
+| #   | Scene Name       | Duration  | Description                | Hand                  |
+| --- | ---------------- | --------- | -------------------------- | --------------------- |
+| 1   | Intro            | 35 frames | Phone slides in            | none                  |
+| 2   | ChatWithResponse | 45 frames | Shows first Q&A            | none                  |
+| 3   | Typing           | 85 frames | Click input, wait 1s, type | hand-click @ frame 5  |
+| 4   | Send             | 30 frames | Pan to send, click send    | hand-click @ frame 13 |
+| 5   | UserMessage      | 30 frames | Second question appears    | none                  |
+| 6   | Thinking         | 45 frames | AI thinking dots           | none                  |
+| 7   | Response         | 60 frames | AI response slides up      | none                  |
+| 8   | Outro            | 35 frames | CTA overlay                | none                  |
 
 **Debug Compositions**:
+
 - `MobileChatDemoV4-INTERACTIVE` ★ - **ALWAYS USE THIS** for debugging hand movements, clicks, positions
 
 **Interactive Debug Workflow** (MobileChatDemoV4-INTERACTIVE):
+
 1. Navigate to the frame with the issue
 2. Click on video to drop markers (M1, M2, M3...)
 3. Markers show: position + frame number
@@ -78,6 +71,7 @@ Same as V3 but uses professional Lottie hand-click animation instead of simple f
 5. Use COPY ALL to export marker coordinates as code
 
 **Hand Position Adjustments** (in scene files):
+
 - `baseHandX` - Horizontal position (negative = left)
 - `baseHandY` - Vertical position (negative = up)
 - Current: TypingScene -140 up, SendScene -190 up and -40 left
@@ -90,24 +84,26 @@ Same as V3 but uses professional Lottie hand-click animation instead of simple f
 
 Dashboard scrolling demo with section-by-section navigation and scroll-synced hand gesture.
 
-| # | Scene Name | Duration | Description | File |
-|---|------------|----------|-------------|------|
-| 1 | Intro | 45 frames | Phone enters from bottom | IntroScene.tsx |
-| 2 | Header | 60 frames | Dashboard header + summary | SectionScene.tsx |
-| 3 | Summary Cards | 45 frames | Key metrics cards | SectionScene.tsx |
-| 4 | Main Data | 60 frames | Employee-level breakdown | SectionScene.tsx |
-| 5 | Shift Status | 45 frames | Current shift overview | SectionScene.tsx |
-| 6 | Forecast | 60 frames | Cost projections | SectionScene.tsx |
-| 7 | Analytics | 60 frames | Historical trends | SectionScene.tsx |
-| 8 | Details | 60 frames | Detailed reports | SectionScene.tsx |
-| 9 | Outro | 45 frames | Phone exits | OutroScene.tsx |
+| #   | Scene Name    | Duration  | Description                | File             |
+| --- | ------------- | --------- | -------------------------- | ---------------- |
+| 1   | Intro         | 45 frames | Phone enters from bottom   | IntroScene.tsx   |
+| 2   | Header        | 60 frames | Dashboard header + summary | SectionScene.tsx |
+| 3   | Summary Cards | 45 frames | Key metrics cards          | SectionScene.tsx |
+| 4   | Main Data     | 60 frames | Employee-level breakdown   | SectionScene.tsx |
+| 5   | Shift Status  | 45 frames | Current shift overview     | SectionScene.tsx |
+| 6   | Forecast      | 60 frames | Cost projections           | SectionScene.tsx |
+| 7   | Analytics     | 60 frames | Historical trends          | SectionScene.tsx |
+| 8   | Details       | 60 frames | Detailed reports           | SectionScene.tsx |
+| 9   | Outro         | 45 frames | Phone exits                | OutroScene.tsx   |
 
 **Key Features**:
+
 - **Scroll-synced hand** - Hand gesture ONLY animates during scroll transitions
 - **Scene-based architecture** - Each section is a separate Sequence
 - **Named timeline** - Visible in Remotion Studio for easy navigation
 
 **Files**:
+
 ```
 src/compositions/DashmorDemo/
 ├── DashmorDemo.tsx           # Main composition with Sequences
@@ -127,22 +123,24 @@ src/compositions/DashmorDemo/
 
 AI-powered marketplace demo showing product discovery and chat assistant.
 
-| # | Scene Name | Duration | Description |
-|---|------------|----------|-------------|
-| 1 | Intro | 75 frames | Logo animation |
-| 2 | HomeScroll | 150 frames | Scroll through products |
-| 3 | TapBubble | 75 frames | Tap AI assistant bubble |
-| 4 | ChatOpen | 90 frames | Chat panel slides up |
-| 5 | UserTyping | 150 frames | User types message |
-| 6 | Outro | 210 frames | CTA + logo |
+| #   | Scene Name | Duration   | Description             |
+| --- | ---------- | ---------- | ----------------------- |
+| 1   | Intro      | 75 frames  | Logo animation          |
+| 2   | HomeScroll | 150 frames | Scroll through products |
+| 3   | TapBubble  | 75 frames  | Tap AI assistant bubble |
+| 4   | ChatOpen   | 90 frames  | Chat panel slides up    |
+| 5   | UserTyping | 150 frames | User types message      |
+| 6   | Outro      | 210 frames | CTA + logo              |
 
 **Key Standards**:
+
 - **ALWAYS use `dark={true}`** for FloatingHand - dark pointers on light backgrounds
 - **Hand animations**: Use `hand-tap` for click scenes, `hand-scroll-clean` for scrolling
 - **Physics for trail effect**: `velocityScale: 0.8`, `maxRotation: 35` - hand rotates toward movement direction
 - **Sticky header**: Logo + hamburger + search bar overlay on all scroll frames
 
 **Files**:
+
 ```
 src/compositions/DorianDemo/
 ├── DorianDemo.tsx           # Main composition + scenes
@@ -152,12 +150,14 @@ src/compositions/DorianDemo/
 ```
 
 **Debug Compositions**:
+
 - `DorianDemo-INTERACTIVE` ★ - **ALWAYS USE THIS** for debugging hand movements, clicks, positions
 - `DorianDemo-DEBUG` - Overlay showing current scene, frame, hand info
 - `DorianDebug` - Scroll position picker
 - `DorianDebug-TapBubble` - AI bubble click position finder
 
 **Interactive Debug Workflow** (DorianDemo-INTERACTIVE):
+
 1. Navigate to the frame with the issue
 2. Click on video to drop markers (M1, M2, M3...)
 3. Markers show: position + frame number
@@ -169,6 +169,7 @@ src/compositions/DorianDemo/
 ### Debug-CoordinatePicker (Utility)
 
 Interactive tool to find exact touch coordinates on screenshots.
+
 - Click on screen to record coordinates
 - Shows crosshair following mouse
 - COPY button to export coordinates
@@ -183,6 +184,7 @@ Interactive tool to find exact touch coordinates on screenshots.
 Use this to find the exact `scrollY` value for each section of a scrolling demo.
 
 **How to Use:**
+
 1. Open Remotion Studio → Select **Debug-DashmorSections**
 2. Click section buttons (0, 1, 2...) on the LEFT to select a section
 3. Click +/- buttons on the RIGHT to adjust scrollY
@@ -191,6 +193,7 @@ Use this to find the exact `scrollY` value for each section of a scrolling demo.
 6. Update `constants.ts` with the new value
 
 **Controls:**
+
 - `-100` / `+100` - Big jumps
 - `-50` / `+50` - Medium jumps
 - `-10` / `+10` - Small steps
@@ -204,6 +207,7 @@ Use this to find the exact `scrollY` value for each section of a scrolling demo.
 **Standard workflow for debugging scroll positions in multi-section demos:**
 
 ### Step 1: Create Debug Composition
+
 ```tsx
 // Interactive picker with on-screen buttons
 <Composition
@@ -214,11 +218,13 @@ Use this to find the exact `scrollY` value for each section of a scrolling demo.
 ```
 
 ### Step 2: Find Scroll Positions
+
 1. Open debug composition in Remotion Studio
 2. For each section, adjust scrollY until content is positioned correctly
 3. Record the values
 
 ### Step 3: Update Constants
+
 ```typescript
 // constants.ts
 export const SECTIONS = [
@@ -229,6 +235,7 @@ export const SECTIONS = [
 ```
 
 ### Step 4: Preview Full Video
+
 Select the main composition to verify all sections scroll correctly.
 
 **Key Principle**: Each section's `scrollY` should position the **key content** at the top of the phone viewport when that scene starts.
@@ -243,22 +250,28 @@ For scrolling demos where the app header should stay fixed:
 // In ScrollableContent component (shared.tsx)
 const STICKY_HEADER_HEIGHT = 56; // pixels before scaling
 
-{/* Scrolling content */}
+{
+  /* Scrolling content */
+}
 <div style={{ transform: `translateY(${-scrollY * scale}px)` }}>
   <Img src={fullPageImage} />
-</div>
+</div>;
 
-{/* Sticky header overlay - stays at top */}
-<div style={{
-  position: 'absolute',
-  top: 0,
-  height: STICKY_HEADER_HEIGHT * scale,
-  overflow: 'hidden',
-  zIndex: 10,
-  boxShadow: scrollY > 10 ? '0 2px 10px rgba(0,0,0,0.3)' : 'none',
-}}>
+{
+  /* Sticky header overlay - stays at top */
+}
+<div
+  style={{
+    position: 'absolute',
+    top: 0,
+    height: STICKY_HEADER_HEIGHT * scale,
+    overflow: 'hidden',
+    zIndex: 10,
+    boxShadow: scrollY > 10 ? '0 2px 10px rgba(0,0,0,0.3)' : 'none',
+  }}
+>
   <Img src={fullPageImage} /> {/* Shows only header (clipped) */}
-</div>
+</div>;
 ```
 
 **Key**: The header overlay shows the same image but clips to header height, staying fixed while content scrolls behind it.
@@ -277,16 +290,17 @@ const playbackRate = isScrolling ? 2 : 0.001;
 ```
 
 **Use `ScrollSyncedHand` component:**
+
 ```tsx
 <ScrollSyncedHand
-  x={700}                    // Static position
+  x={700} // Static position
   y={960}
-  isScrolling={isScrolling}  // From useScrollState hook
+  isScrolling={isScrolling} // From useScrollState hook
   scrollProgress={progress}
   enterFrame={0}
   exitFrame={outroStart}
   totalFrames={totalFrames}
-  tilt={-20}                 // Tilted left
+  tilt={-20} // Tilted left
 />
 ```
 
@@ -382,7 +396,7 @@ public/
 // From: src/compositions/MobileChatDemo/constants.ts
 export const COORDINATES = {
   chatInput: { x: 250, y: 687 },
-  sendButton: { x: 43, y: 687 },   // Verified via Debug-CoordinatePicker
+  sendButton: { x: 43, y: 687 }, // Verified via Debug-CoordinatePicker
   responseArea: { x: 195, y: 350 },
   thumbsUp: { x: 100, y: 420 },
 };
@@ -393,25 +407,20 @@ export const COORDINATES = {
 ## Screenshot Capture Workflow
 
 ### Prerequisites
-- LimorAI-Limor running on port 8080
-- Temporarily disable auth for capture
+
+- Target web app running on port 8080
+- Auth disabled or pre-configured for capture
 
 ### Capture Process
 
-1. **Disable auth temporarily** in LimorAI-Limor:
-   ```javascript
-   // public/js/auth-check.js - add 'localhost' to authDisabledDomains
-   // public/dashboard/limor-chat.html - comment out auth script
-   ```
+1. **Run capture**:
 
-2. **Run capture**:
    ```bash
    npx tsx scripts/capture-mobile-chat-dark.ts
    ```
 
-3. **Re-enable auth** after capture
-
 ### Capture Script Features
+
 - Dark mode CSS injection (CRITICAL - must match existing screenshots)
 - Letter-by-letter typing (21 stages)
 - Rapid capture after send (5 screenshots: 0ms, 50ms, 150ms, 300ms, 500ms)
@@ -433,6 +442,7 @@ npx tsx scripts/capture-user-message.ts
 ```
 
 **Output**:
+
 - `mobile-chat-user-message.png` - User message only (no AI)
 - `mobile-chat-thinking.png` - User message + native thinking bubble
 
@@ -441,19 +451,31 @@ npx tsx scripts/capture-user-message.ts
 **DO NOT** just set `data-theme="dark"` - you MUST inject the full CSS to match existing screenshots.
 
 Key CSS rules:
+
 ```css
 /* Background */
-html, body { background-color: #0a0a15 !important; }
+html,
+body {
+  background-color: #0a0a15 !important;
+}
 
 /* Header gradient */
-header, nav { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important; }
+header,
+nav {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+}
 
 /* Chat area */
-.chat-container, .chat-messages { background-color: #0f0f1a !important; }
+.chat-container,
+.chat-messages {
+  background-color: #0f0f1a !important;
+}
 
 /* IMPORTANT: Do NOT override user message bubble background! */
 /* Only force white text, keep native teal/green bubble color */
-.message.user * { color: #ffffff !important; }
+.message.user * {
+  color: #ffffff !important;
+}
 /* DO NOT: background: linear-gradient(...) - this changes bubble color! */
 ```
 
@@ -462,11 +484,11 @@ header, nav { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !imp
 ```javascript
 // Delay AI response to capture intermediate states
 await page.route('**/api/true-ai/**', async (route) => {
-  await new Promise(resolve => setTimeout(resolve, 15000)); // 15 sec delay
+  await new Promise((resolve) => setTimeout(resolve, 15000)); // 15 sec delay
   await route.fulfill({
     status: 200,
     contentType: 'text/event-stream',
-    body: 'data: {"type":"done"}\n\n'
+    body: 'data: {"type":"done"}\n\n',
   });
 });
 ```
@@ -476,9 +498,9 @@ await page.route('**/api/true-ai/**', async (route) => {
 ```javascript
 // After capturing with thinking, hide it for clean user message
 await page.evaluate(() => {
-  document.querySelectorAll(
-    '.thinking-message, .thinking-dots, .message:not(.user)'
-  ).forEach(el => el.style.display = 'none');
+  document
+    .querySelectorAll('.thinking-message, .thinking-dots, .message:not(.user)')
+    .forEach((el) => (el.style.display = 'none'));
 });
 ```
 
@@ -487,15 +509,17 @@ await page.evaluate(() => {
 ## Audio Setup
 
 ### Audio Files (public/audio/)
+
 - `typing-soft.wav` - Keyboard typing (loops during Scene 3)
 - `send-click.wav` - Button tap sound (Scene 4)
 
 ### AudioLayer Timings
+
 ```typescript
 const AUDIO_TIMINGS = {
   typingStart: 65,
   typingDuration: 60,
-  sendFrame: 135 + 10,  // 10 frames into Scene 4
+  sendFrame: 135 + 10, // 10 frames into Scene 4
   responseFrame: 215,
 };
 ```
@@ -506,34 +530,37 @@ const AUDIO_TIMINGS = {
 
 ### Scene Screenshot Mapping
 
-| Scene | Screenshot | Overlay/Effect |
-|-------|------------|----------------|
-| 3 - Typing | `mobile-chat-type-XX.png` | Finger tap at start (frames 0-8) |
-| 4 - Send | `mobile-chat-3-ready.png` | Finger tap on send button |
-| 5 - UserMessage | `mobile-chat-user-message.png` | Crossfade from input state |
-| 6 - Thinking | `mobile-chat-user-message.png` | Animated thinking dots (bottom: 210) |
-| 7 - Response | Crossfade to `mobile-chat-5-response.png` | Glow effect fades in |
+| Scene           | Screenshot                                | Overlay/Effect                       |
+| --------------- | ----------------------------------------- | ------------------------------------ |
+| 3 - Typing      | `mobile-chat-type-XX.png`                 | Finger tap at start (frames 0-8)     |
+| 4 - Send        | `mobile-chat-3-ready.png`                 | Finger tap on send button            |
+| 5 - UserMessage | `mobile-chat-user-message.png`            | Crossfade from input state           |
+| 6 - Thinking    | `mobile-chat-user-message.png`            | Animated thinking dots (bottom: 210) |
+| 7 - Response    | Crossfade to `mobile-chat-5-response.png` | Glow effect fades in                 |
 
 ### Finger Visibility Pattern
 
-| Scene | Finger Behavior |
-|-------|-----------------|
-| 3 - Typing | Tap input (frames 0-8) → disappears during typing |
-| 4 - Send | No finger during pan → appears at send button (frames 12-25) |
-| 5-7 | No finger |
+| Scene      | Finger Behavior                                              |
+| ---------- | ------------------------------------------------------------ |
+| 3 - Typing | Tap input (frames 0-8) → disappears during typing            |
+| 4 - Send   | No finger during pan → appears at send button (frames 12-25) |
+| 5-7        | No finger                                                    |
 
 ### Animation Best Practices
+
 - **No pulsing**: Remove `Math.sin()` animations - they look like bugs
 - **Static glow**: Use fixed opacity (e.g., 0.15) not animated
 - **Spring entrances only**: Use spring for one-time entrances, not continuous effects
 - **Thinking dots position**: `bottom: 210` in ThinkingScene
 
 ### Zoom & Pan
+
 - **TypingScene**: Zooms in + shifts to center input (zoomOffsetX: -120)
 - **SendScene**: Pans from input (right) to send button (left)
 - **Global offset**: 120px down (`translateY(120px)`) in main composition
 
 ### Remotion Specifics
+
 - Use `useCurrentScale()` for interactive components in Studio
 - Use `TransitionSeries` with `name` prop for labeled timeline
 - Use `staticFile()` for all assets in `/public`
@@ -569,18 +596,18 @@ npm install @remotion/lottie@4.0.419 lottie-web --save-exact
 
 ### Available Lottie Files
 
-| File | Size | Description | Source |
-|------|------|-------------|--------|
-| `hand-click.json` | 10KB | Click gesture with finger press | [LottieFiles](https://lottiefiles.com/free-animation/hand-click-gesture-9MTQM8gTjD) |
-| `hand-tap.json` | 14KB | Quick tap gesture | LottieFiles |
-| `hand-tap-alt.json` | 12KB | Alternative tap (James Lashmar) | LottieFiles CDN |
-| `hand-point.json` | 4KB | Pointing finger icon | [Eray Asena](https://lottiefiles.com/free-animation/hand-pointing-icon-q2Q1A7r3KH) |
-| `hand-swipe-up.json` | 5KB | Swipe up gesture | LottieFiles |
-| `hand-swipe-right.json` | 5KB | Swipe right gesture | LottieFiles |
-| `hand-scroll.json` | 36KB | Scroll gesture with cards | LottieFiles |
-| `hand-scroll-clean.json` | 5KB | ★ Clean dark finger scroll (no arrow) | [Lai](https://lottiefiles.com/free-animation/finger-scroll-up-1icmMbTAJ3) |
-| `hand-drag.json` | 64KB | Drag and drop gesture | LottieFiles |
-| `hand-pinch.json` | 106KB | Pinch zoom in/out | [David Tanner](https://lottiefiles.com/free-animation/pinch-zoom-in-out-mobile-gesture-5ocGtC4BZf) |
+| File                     | Size  | Description                           | Source                                                                                             |
+| ------------------------ | ----- | ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `hand-click.json`        | 10KB  | Click gesture with finger press       | [LottieFiles](https://lottiefiles.com/free-animation/hand-click-gesture-9MTQM8gTjD)                |
+| `hand-tap.json`          | 14KB  | Quick tap gesture                     | LottieFiles                                                                                        |
+| `hand-tap-alt.json`      | 12KB  | Alternative tap (James Lashmar)       | LottieFiles CDN                                                                                    |
+| `hand-point.json`        | 4KB   | Pointing finger icon                  | [Eray Asena](https://lottiefiles.com/free-animation/hand-pointing-icon-q2Q1A7r3KH)                 |
+| `hand-swipe-up.json`     | 5KB   | Swipe up gesture                      | LottieFiles                                                                                        |
+| `hand-swipe-right.json`  | 5KB   | Swipe right gesture                   | LottieFiles                                                                                        |
+| `hand-scroll.json`       | 36KB  | Scroll gesture with cards             | LottieFiles                                                                                        |
+| `hand-scroll-clean.json` | 5KB   | ★ Clean dark finger scroll (no arrow) | [Lai](https://lottiefiles.com/free-animation/finger-scroll-up-1icmMbTAJ3)                          |
+| `hand-drag.json`         | 64KB  | Drag and drop gesture                 | LottieFiles                                                                                        |
+| `hand-pinch.json`        | 106KB | Pinch zoom in/out                     | [David Tanner](https://lottiefiles.com/free-animation/pinch-zoom-in-out-mobile-gesture-5ocGtC4BZf) |
 
 ### Usage Example
 
@@ -589,13 +616,15 @@ import { Lottie, LottieAnimationData } from '@remotion/lottie';
 import { staticFile, delayRender, continueRender } from 'remotion';
 
 // Load animation
-const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
+const [animationData, setAnimationData] = useState<LottieAnimationData | null>(
+  null,
+);
 const [handle] = useState(() => delayRender('Loading Lottie'));
 
 useEffect(() => {
   fetch(staticFile('lottie/hand-click.json'))
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       setAnimationData(data);
       continueRender(handle);
     });
@@ -607,7 +636,7 @@ useEffect(() => {
   playbackRate={1}
   loop={true}
   direction="forward"
-/>
+/>;
 ```
 
 ### Finding More Lottie Animations
@@ -654,38 +683,38 @@ import { FloatingHand } from './components/FloatingHand';
     { x: 400, y: 600, frame: 30, gesture: 'drag' },
     { x: 400, y: 800, frame: 60, gesture: 'click', duration: 20 },
   ]}
-  animation="hand-click"  // See Lottie files above
+  animation="hand-click" // See Lottie files above
   size={120}
   showRipple={true}
-/>
+/>;
 ```
 
 ### Available Animations
 
-| Animation | Best For | File Size |
-|-----------|----------|-----------|
-| `hand-click` | Button clicks, taps | 10KB |
-| `hand-tap` | Quick taps | 14KB |
-| `hand-tap-alt` | Alternative tap style | 12KB |
-| `hand-point` | Highlighting elements | 4KB |
-| `hand-scroll-clean` | ★ **Scrolling demos** (dark finger, no arrow) | 3KB |
-| `hand-swipe-up` | Vertical swipes (has arrow) | 5KB |
-| `hand-swipe-right` | Horizontal swipes | 5KB |
-| `hand-scroll` | Scroll with UI cards (legacy) | 36KB |
-| `hand-drag` | Drag and drop | 64KB |
-| `hand-pinch` | Pinch zoom | 106KB |
+| Animation           | Best For                                      | File Size |
+| ------------------- | --------------------------------------------- | --------- |
+| `hand-click`        | Button clicks, taps                           | 10KB      |
+| `hand-tap`          | Quick taps                                    | 14KB      |
+| `hand-tap-alt`      | Alternative tap style                         | 12KB      |
+| `hand-point`        | Highlighting elements                         | 4KB       |
+| `hand-scroll-clean` | ★ **Scrolling demos** (dark finger, no arrow) | 3KB       |
+| `hand-swipe-up`     | Vertical swipes (has arrow)                   | 5KB       |
+| `hand-swipe-right`  | Horizontal swipes                             | 5KB       |
+| `hand-scroll`       | Scroll with UI cards (legacy)                 | 36KB      |
+| `hand-drag`         | Drag and drop                                 | 64KB      |
+| `hand-pinch`        | Pinch zoom                                    | 106KB     |
 
 ### Hand Path Points
 
 ```typescript
 interface HandPathPoint {
-  x: number;           // X position
-  y: number;           // Y position
-  frame?: number;      // Frame to reach this point
+  x: number; // X position
+  y: number; // Y position
+  frame?: number; // Frame to reach this point
   gesture?: HandGesture; // 'pointer' | 'drag' | 'click' | 'scroll'
-  scale?: number;      // Size multiplier (default: 1)
-  rotation?: number;   // Manual rotation override
-  duration?: number;   // Frames to pause at this point
+  scale?: number; // Size multiplier (default: 1)
+  rotation?: number; // Manual rotation override
+  duration?: number; // Frames to pause at this point
 }
 ```
 
@@ -708,14 +737,15 @@ interface HandPathPoint {
 
 ### Effects
 
-| Prop | Description |
-|------|-------------|
-| `showRipple={true}` | Ripple effect on click gesture |
-| `dark={true}` | Invert colors for light backgrounds |
+| Prop                | Description                         |
+| ------------------- | ----------------------------------- |
+| `showRipple={true}` | Ripple effect on click gesture      |
+| `dark={true}`       | Invert colors for light backgrounds |
 
 ### Debug Composition
 
 Select **Debug-FloatingHand** in Remotion Studio to:
+
 - Test animated movement with physics
 - Preview different animations
 - Compare gestures (pointer, drag, click)
@@ -723,6 +753,7 @@ Select **Debug-FloatingHand** in Remotion Studio to:
 ### Speed Control
 
 Adjust movement speed by changing frame intervals in your path:
+
 ```tsx
 // Slower movement (50 frames between points)
 { x: 100, y: 200, frame: 0 },
@@ -754,30 +785,30 @@ Adjust movement speed by changing frame intervals in your path:
 import { ScrollingHand } from './components/FloatingHand';
 
 <ScrollingHand
-  x={600}                    // Static X position
-  y={960}                    // Static Y position
-  scrollStartFrame={35}      // When scroll gesture starts
-  scrollEndFrame={200}       // When scroll gesture ends
-  totalFrames={300}          // Total video frames
-  tilt={-20}                 // Tilted 20° left (default)
-  size={140}                 // Hand size
-/>
+  x={600} // Static X position
+  y={960} // Static Y position
+  scrollStartFrame={35} // When scroll gesture starts
+  scrollEndFrame={200} // When scroll gesture ends
+  totalFrames={300} // Total video frames
+  tilt={-20} // Tilted 20° left (default)
+  size={140} // Hand size
+/>;
 ```
 
 ### Full Props
 
 ```typescript
 interface ScrollingHandProps {
-  x: number;              // X position where hand stays
-  y: number;              // Y position where hand stays
-  enterFrame?: number;    // When hand enters (default: 0)
-  scrollStartFrame: number;  // When scroll gesture starts
-  scrollEndFrame: number;    // When scroll gesture ends
-  exitFrame?: number;     // When hand exits (default: scrollEndFrame + 10)
-  totalFrames: number;    // Total video frames
-  size?: number;          // Hand size (default: 140)
-  tilt?: number;          // Tilt angle, negative = left (default: -20)
-  dark?: boolean;         // Dark variant for light backgrounds
+  x: number; // X position where hand stays
+  y: number; // Y position where hand stays
+  enterFrame?: number; // When hand enters (default: 0)
+  scrollStartFrame: number; // When scroll gesture starts
+  scrollEndFrame: number; // When scroll gesture ends
+  exitFrame?: number; // When hand exits (default: scrollEndFrame + 10)
+  totalFrames: number; // Total video frames
+  size?: number; // Hand size (default: 140)
+  tilt?: number; // Tilt angle, negative = left (default: -20)
+  dark?: boolean; // Dark variant for light backgrounds
 }
 ```
 
@@ -829,39 +860,39 @@ const { isScrolling, scrollProgress } = useScrollState(frame);
 <ScrollSyncedHand
   x={700}
   y={960}
-  isScrolling={isScrolling}      // TRUE only during scroll
+  isScrolling={isScrolling} // TRUE only during scroll
   scrollProgress={scrollProgress} // 0-1 scroll progress
   enterFrame={0}
   exitFrame={outroStart}
   totalFrames={VIDEO.durationInFrames}
   size={140}
   tilt={-20}
-/>
+/>;
 ```
 
 ### Full Props
 
 ```typescript
 interface ScrollSyncedHandProps {
-  x: number;              // Static X position
-  y: number;              // Static Y position
-  isScrolling: boolean;   // Whether screen is currently scrolling
+  x: number; // Static X position
+  y: number; // Static Y position
+  isScrolling: boolean; // Whether screen is currently scrolling
   scrollProgress: number; // Progress of current scroll (0-1)
-  enterFrame?: number;    // When hand enters (default: 0)
-  exitFrame: number;      // When hand exits
-  totalFrames: number;    // Total video frames
-  size?: number;          // Hand size (default: 140)
-  tilt?: number;          // Tilt angle (default: -20)
+  enterFrame?: number; // When hand enters (default: 0)
+  exitFrame: number; // When hand exits
+  totalFrames: number; // Total video frames
+  size?: number; // Hand size (default: 140)
+  tilt?: number; // Tilt angle (default: -20)
 }
 ```
 
 ### When to Use Which
 
-| Component | Use When |
-|-----------|----------|
-| `ScrollingHand` | Simple single-scroll demos |
+| Component          | Use When                                     |
+| ------------------ | -------------------------------------------- |
+| `ScrollingHand`    | Simple single-scroll demos                   |
 | `ScrollSyncedHand` | Multi-section demos with pause/scroll cycles |
-| `FloatingHand` | Moving hand that follows a path |
+| `FloatingHand`     | Moving hand that follows a path              |
 
 ---
 
@@ -870,11 +901,12 @@ interface ScrollSyncedHandProps {
 ### Creating Different Movement Styles
 
 #### 1. Quick Tap Pattern
+
 ```tsx
 <FloatingHand
   path={[
     { x: 300, y: 400, frame: 0, gesture: 'pointer' },
-    { x: 300, y: 420, frame: 8, gesture: 'click' },  // Quick down
+    { x: 300, y: 420, frame: 8, gesture: 'click' }, // Quick down
     { x: 300, y: 400, frame: 16, gesture: 'pointer' }, // Quick up
   ]}
   animation="hand-tap"
@@ -882,6 +914,7 @@ interface ScrollSyncedHandProps {
 ```
 
 #### 2. Scroll Demo Pattern ★
+
 ```tsx
 // USE ScrollingHand for scroll demos (hand stays in place)
 import { ScrollingHand } from './components/FloatingHand';
@@ -893,15 +926,16 @@ import { ScrollingHand } from './components/FloatingHand';
   scrollEndFrame={200}
   totalFrames={300}
   tilt={-20}
-/>
+/>;
 ```
 
 #### 3. Swipe Gesture
+
 ```tsx
 <FloatingHand
   path={[
     { x: 200, y: 500, frame: 0, gesture: 'pointer' },
-    { x: 800, y: 500, frame: 20, gesture: 'drag' },  // Fast horizontal swipe
+    { x: 800, y: 500, frame: 20, gesture: 'drag' }, // Fast horizontal swipe
     { x: 850, y: 500, frame: 30, gesture: 'pointer' },
   ]}
   animation="hand-swipe-right"
@@ -909,6 +943,7 @@ import { ScrollingHand } from './components/FloatingHand';
 ```
 
 #### 4. Navigate & Click Pattern
+
 ```tsx
 <FloatingHand
   path={[
@@ -924,6 +959,7 @@ import { ScrollingHand } from './components/FloatingHand';
 ### Physics Presets
 
 #### Snappy (Fast, responsive)
+
 ```tsx
 physics={{
   floatAmplitude: 2,
@@ -935,6 +971,7 @@ physics={{
 ```
 
 #### Floaty (Slow, dreamy)
+
 ```tsx
 physics={{
   floatAmplitude: 8,
@@ -946,6 +983,7 @@ physics={{
 ```
 
 #### Professional (Balanced)
+
 ```tsx
 physics={{
   floatAmplitude: 4,
@@ -962,12 +1000,14 @@ physics={{
 2. **Download** as Lottie JSON
 3. **Save** to `public/lottie/`
 4. **Use**:
+
 ```tsx
 // In LottieHand.tsx or directly
 <LottieHand animationFile="your-new-animation" size={120} />
 ```
 
 **Recommended searches on LottieFiles:**
+
 - "hand tap" - Tap/click gestures
 - "hand swipe" - Swipe animations
 - "hand scroll" - Scroll gestures
@@ -977,27 +1017,27 @@ physics={{
 
 ### Animation Timing Guide
 
-| Use Case | Frames Between Points | Feel |
-|----------|----------------------|------|
-| Quick tap | 8-15 | Snappy, responsive |
-| Normal click | 20-30 | Natural pace |
-| Smooth drag | 40-60 | Flowing, elegant |
-| Slow scroll | 60-90 | Deliberate, readable |
-| Swipe | 15-25 | Quick but visible |
+| Use Case     | Frames Between Points | Feel                 |
+| ------------ | --------------------- | -------------------- |
+| Quick tap    | 8-15                  | Snappy, responsive   |
+| Normal click | 20-30                 | Natural pace         |
+| Smooth drag  | 40-60                 | Flowing, elegant     |
+| Slow scroll  | 60-90                 | Deliberate, readable |
+| Swipe        | 15-25                 | Quick but visible    |
 
 ---
 
 ## Choosing the Right Animation
 
-| Demo Type | Recommended Animation |
-|-----------|----------------------|
-| Button clicks | `hand-click` or `hand-tap` |
-| Mobile taps | `hand-tap` or `hand-tap-alt` |
-| Scrolling content | `hand-scroll-clean` ★ |
-| Swipe gestures | `hand-swipe-up` or `hand-swipe-right` |
-| Drag and drop | `hand-drag` |
-| Pinch zoom | `hand-pinch` |
-| Highlighting | `hand-point` |
+| Demo Type         | Recommended Animation                 |
+| ----------------- | ------------------------------------- |
+| Button clicks     | `hand-click` or `hand-tap`            |
+| Mobile taps       | `hand-tap` or `hand-tap-alt`          |
+| Scrolling content | `hand-scroll-clean` ★                 |
+| Swipe gestures    | `hand-swipe-up` or `hand-swipe-right` |
+| Drag and drop     | `hand-drag`                           |
+| Pinch zoom        | `hand-pinch`                          |
+| Highlighting      | `hand-point`                          |
 
 ### Files Location
 
@@ -1032,161 +1072,40 @@ public/lottie/             # All Lottie animation files
 
 ---
 
-## Limor App Control (Playwright MCP)
+## External App Integration (Playwright MCP)
 
-Full control over Limor app for demos without modifying Limor code.
-Use Playwright MCP tools: `browser_navigate`, `browser_click`, `browser_evaluate`, etc.
+For capturing screenshots from external web apps, use Playwright MCP tools (`browser_navigate`, `browser_click`, `browser_evaluate`, etc.) to automate interactions without modifying the target app.
 
-### Page URLs
-
-| Page | URL |
-|------|-----|
-| AI Chat | `/dashboard/limor-chat.html` |
-| Labor Cost | `/dashboard/labor-cost.html` |
-| Enhanced Comparison | `/dashboard/enhanced-comparison.html` |
-| Feedback Review | `/dashboard/feedback-review.html` |
-| Health Monitoring | `/dashboard/health-monitoring-dashboard.html` |
-
-### API Endpoints
-
-- **Streaming (recommended)**: `GET /api/true-ai/stream?q={query}&sessionId={id}`
-- **Non-streaming**: `POST /api/true-ai/chat`
-- **Demo endpoint**: `/api/demo-semantic-chat` (may return canned responses)
-
-### UI Element Selectors
-
-```javascript
-// Core Elements
-#messageInput           // Textarea - chat input field
-#actionButton           // Button - send/stop toggle ("שלח"/"עצור")
-#chatMessages           // Container - all messages
-
-// Message Selectors
-.message.user           // User message bubble
-.message.ai             // AI response bubble
-.message.ai:last-of-type .message-content  // Last AI response text
-
-// Loading/Thinking
-.thinking-message       // Appears during response
-.thinking-dots          // Animated dots
-
-// Feedback Buttons (on AI messages)
-.feedback-btn.feedback-positive   // Thumbs up
-.feedback-btn.feedback-negative   // Thumbs down
-[data-message-id="msg-xxx"]       // Each message has unique ID
-
-// Other UI
-#limorOrb               // Welcome animation (hides after first message)
-#history-toggle-btn     // Chat history sidebar toggle
-```
-
-### Cache & State Management
-
-```javascript
-// Clear chat - Option 1: Reload (fresh session)
-window.location.reload();
-
-// Clear chat - Option 2: Reset session
-LimorChatSession.resetSession();
-
-// Clear chat - Option 3: Clear container
-document.getElementById('chatMessages').innerHTML = '';
-
-// Clear localStorage/sessionStorage
-sessionStorage.removeItem('limorChatSessionId');
-localStorage.removeItem('limorAuth');
-localStorage.removeItem('authToken');
-localStorage.removeItem('limor-theme');
-window.LIMOR_CACHE?.clear();
-```
-
-### Authentication
-
-- **Token storage**: `localStorage.limorAuth` (JWT)
-- **Token expiry**: 24 hours with 5-minute auto-refresh
-- **401 handling**: Auto-redirects to `/login.html`
-
-```javascript
-// Pre-authenticate for demos
-const auth = { token: 'your-jwt', user: {...}, timestamp: Date.now() };
-localStorage.setItem('limorAuth', JSON.stringify(auth));
-```
-
-**CORS allowed origins**: `localhost:8080`, `127.0.0.1:8080`, `localhost:3000`
-
-### Dark Mode
-
-Built-in theme system with 4 themes: `light`, `dark`, `restaurant`, `premium`
-
-```javascript
-// Set dark mode
-localStorage.setItem('limor-theme', 'dark');
-document.documentElement.setAttribute('data-theme', 'dark');
-document.documentElement.classList.add('dark');
-
-// Set light mode
-localStorage.setItem('limor-theme', 'light');
-document.documentElement.setAttribute('data-theme', 'light');
-```
-
-**Default**: Dark mode (set in `theme-init.js`)
-
-### Mock Responses (Playwright Route Interception)
+### Route Interception Pattern
 
 ```javascript
 // Intercept API for controlled demo responses
-await page.route('/api/true-ai/stream*', async route => {
+await page.route('/api/endpoint*', async (route) => {
   await route.fulfill({
     status: 200,
     headers: { 'Content-Type': 'text/event-stream' },
-    body: 'data: {"type":"chunk","data":{"text":"Mock response"}}\n\n'
+    body: 'data: {"type":"chunk","data":{"text":"Response text"}}\n\n',
   });
 });
 ```
 
-### Complete Demo Automation Example
+### Demo Automation Example
 
 ```javascript
 // Using Playwright MCP tools
-// 1. Navigate
-await browser_navigate({ url: 'http://localhost:8080/dashboard/limor-chat.html' });
-
-// 2. Ensure dark mode
+await browser_navigate({ url: 'http://localhost:8080/your-page' });
 await browser_evaluate({
   function: `() => {
-    localStorage.setItem('limor-theme', 'dark');
     document.documentElement.setAttribute('data-theme', 'dark');
-  }`
+  }`,
 });
-
-// 3. Get page snapshot
 await browser_snapshot({});
-
-// 4. Type query
-await browser_type({ ref: '#messageInput', text: 'כמה עובדים בחברה?', delay: 100 });
-
-// 5. Click send
-await browser_click({ ref: '#actionButton', element: 'Send button' });
-
-// 6. Wait for response
-await browser_wait_for({ selector: '.message.ai', timeout: 30000 });
-
-// 7. Screenshot
+await browser_type({ ref: '#inputField', text: 'Query text', delay: 100 });
+await browser_click({ ref: '#sendButton', element: 'Send button' });
+await browser_wait_for({ selector: '.response', timeout: 30000 });
 await browser_take_screenshot({ path: 'demo-response.png' });
 ```
 
-### Quick Reference
-
-| Need | Method |
-|------|--------|
-| Reset chat | `window.location.reload()` or `LimorChatSession.resetSession()` |
-| Clear all state | Remove `limorAuth`, `limorChatSessionId`, call `LIMOR_CACHE.clear()` |
-| Set dark mode | `localStorage.setItem('limor-theme', 'dark')` |
-| Wait for AI | `page.waitForSelector('.message.ai')` |
-| Check loading | `document.querySelector('.thinking-message') !== null` |
-| Get response text | `.message.ai:last-of-type .message-content` |
-
 ---
 
-**Skills**: `remotion-video-creation`, `remotion-best-practices`
 **Docs**: https://www.remotion.dev/docs

@@ -1,7 +1,7 @@
 {
-  "name": "limor-video-poc",
+  "name": "remotion-scene-director",
   "version": "1.0.0",
-  "description": "LIMOR AI Demo Video POC using Remotion",
+  "description": "Interactive hand-path editor for Remotion video compositions with Lottie animations",
   "scripts": {
     "dev": "remotion studio --port 3000",
     "dev:dorian": "remotion studio --port 3000",
@@ -21,9 +21,13 @@
   "keywords": [
     "remotion",
     "video",
-    "limor"
+    "animation",
+    "lottie",
+    "hand-path",
+    "scene-editor",
+    "react"
   ],
-  "author": "LIMOR AI",
+  "author": "ytrofr",
   "license": "MIT",
   "dependencies": {
     "@remotion/animated-emoji": "4.0.419",

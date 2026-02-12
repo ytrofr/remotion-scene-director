@@ -171,6 +171,8 @@ npm run scene-director   # http://localhost:3001
 
 ### Sticky Header
 
+{% raw %}
+
 ```tsx
 // Content scrolls while header stays fixed
 <div style={{ transform: `translateY(${-scrollY * scale}px)` }}>
@@ -180,6 +182,8 @@ npm run scene-director   # http://localhost:3001
   <Img src={fullPageImage} /> {/* Clipped to header height */}
 </div>
 ```
+
+{% endraw %}
 
 ### Scroll-Synced Hand
 

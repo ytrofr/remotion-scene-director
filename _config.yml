@@ -1,7 +1,7 @@
-title: Remotion Scene Director
+title: Claude Remotion Editor
 description: Interactive hand-path editor for Remotion video compositions with Lottie animations
 url: 'https://ytrofr.github.io'
-baseurl: '/remotion-scene-director'
+baseurl: '/claude-remotion-editor'
 theme: jekyll-theme-cayman
 
 plugins:

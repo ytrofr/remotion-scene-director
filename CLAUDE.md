@@ -1,4 +1,4 @@
-# Remotion Scene Director
+# Claude Remotion Editor
 
 **Project**: Programmatic video creation with Remotion + interactive hand-path editor
 **Framework**: React + Remotion 4.0.419 + Vite

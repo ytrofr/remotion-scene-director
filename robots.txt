@@ -1,4 +1,4 @@
-# Remotion Scene Director - robots.txt
+# Claude Remotion Editor - robots.txt
 # Allow all crawlers including AI bots
 
 User-agent: *

@@ -1,5 +1,5 @@
 {
-  "name": "remotion-scene-director",
+  "name": "claude-remotion-editor",
   "version": "1.0.0",
   "description": "Interactive hand-path editor for Remotion video compositions with Lottie animations",
   "scripts": {

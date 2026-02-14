@@ -1,4 +1,4 @@
-# Remotion Scene Director
+# Claude Remotion Editor
 
 > **Interactive hand-path editor for Remotion video compositions with Lottie animations.**
 
@@ -197,9 +197,9 @@ const playbackRate = isScrolling ? 2 : 0.001;
 
 ## Frequently Asked Questions
 
-### What is Remotion Scene Director?
+### What is Claude Remotion Editor?
 
-Remotion Scene Director is an interactive hand-path editor and video composition toolkit built on top of Remotion. It provides physics-based animated hand cursors, phone mockup components, and debug tools for creating professional demo videos programmatically with React and TypeScript.
+Claude Remotion Editor is an interactive hand-path editor and video composition toolkit built on top of Remotion. It provides physics-based animated hand cursors, phone mockup components, and debug tools for creating professional demo videos programmatically with React and TypeScript.
 
 ### How do I add a new hand animation?
 

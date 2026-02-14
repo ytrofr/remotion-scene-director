@@ -1,4 +1,4 @@
-# Contributing to Remotion Scene Director
+# Contributing to Claude Remotion Editor
 
 Thank you for your interest in contributing!
 
@@ -22,8 +22,8 @@ Thank you for your interest in contributing!
 ### Development Setup
 
 ```bash
-git clone https://github.com/ytrofr/remotion-scene-director.git
-cd remotion-scene-director
+git clone https://github.com/ytrofr/claude-remotion-editor.git
+cd claude-remotion-editor
 npm install
 npm run dev    # Opens Remotion Studio on port 3000
 ```

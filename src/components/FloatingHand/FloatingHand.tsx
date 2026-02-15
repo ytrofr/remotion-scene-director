@@ -10,6 +10,7 @@ import {
 import { useHandAnimation, useFloatEffect, computeHandState, computeFloatEffect } from './useHandAnimation';
 import { LottieHand } from './hands/LottieHand';
 import { LottieHandStandalone } from './hands/LottieHandStandalone';
+import { useSceneDirectorMode } from './SceneDirectorMode';
 
 /**
  * SimpleCursorHand - SVG cursor for standalone rendering (outside Remotion).
@@ -165,7 +166,11 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   showRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
 }) => {
+  const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
+
+  // Hide composition's built-in hand when SceneDirector provides its own overlay
+  if (isSceneDirector) return null;
   const physics: HandPhysicsConfig = { ...DEFAULT_PHYSICS, ...physicsOverrides };
   const handState = useHandAnimation(path, startFrame, physics);
   const { offsetY, shadowScale } = useFloatEffect(physics);

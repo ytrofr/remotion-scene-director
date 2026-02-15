@@ -6,8 +6,10 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDirector } from '../context';
 
+const SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2];
+
 export const Timeline: React.FC = () => {
-  const { state, dispatch, frame, playerRef, composition } = useDirector();
+  const { state, dispatch, frame, playerRef, composition, playbackRate, setPlaybackRate } = useDirector();
   const { scenes } = composition;
   const totalFrames = composition.video.frames;
   const barRef = useRef<HTMLDivElement>(null);
@@ -141,6 +143,20 @@ export const Timeline: React.FC = () => {
         >
           &#x23E9;
         </button>
+
+        {/* Playback speed */}
+        <div className="timeline__speed">
+          {SPEED_OPTIONS.map(speed => (
+            <button
+              key={speed}
+              onClick={() => setPlaybackRate(speed)}
+              className={`timeline__speed-btn ${playbackRate === speed ? 'timeline__speed-btn--active' : ''}`}
+              title={`${speed}x speed`}
+            >
+              {speed}x
+            </button>
+          ))}
+        </div>
 
         <div style={{ flex: 1 }} />
 

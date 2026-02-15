@@ -1034,9 +1034,9 @@ const ChatOpenScene: React.FC = () => {
   const chatHeight = 260;
 
   // Typing in input box - starts after hand taps input at frame 50
-  const message = "I need dog food for large dog";
+  const message = TEXT_CONTENT.userTyping.userMessage;
   const typingStartFrame = 55;
-  const typedChars = Math.floor(interpolate(frame, [typingStartFrame, 85], [0, 10], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
+  const typedChars = Math.floor(interpolate(frame, [typingStartFrame, 85], [0, 12], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
   const typedText = message.slice(0, typedChars);
 
   // Input focus state - active after hand taps
@@ -1212,8 +1212,8 @@ const UserTypingScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const message = "I need dog food for large dog";
-  const startChars = 10; // Scene 4 typed first 10 chars
+  const message = TEXT_CONTENT.userTyping.userMessage;
+  const startChars = 12; // Scene 4 typed first 12 chars
   const typedChars = Math.floor(interpolate(frame, [0, 60], [startChars, message.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
   const typedText = message.slice(0, typedChars);
 
@@ -1414,7 +1414,865 @@ const UserTypingScene: React.FC = () => {
   );
 };
 
-// Scene 6: Outro
+// ============ V2 NEW SCENES ============
+
+// Scene 6: AI Thinking - animated dots in chat (same zoom as scene 5)
+const AIThinkingScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const message = TEXT_CONTENT.userTyping.userMessage;
+
+  // Stay zoomed in at same level as scene 5 end
+  const zoomScale = 2.76;
+  const zoomOffsetY = -560;
+
+  // Chat height
+  const chatHeight = 260;
+
+  // Animated thinking dots
+  const dotCount = 3;
+  const dots = Array.from({ length: dotCount }, (_, i) => {
+    const bounce = Math.sin((frame * 0.2) - (i * 1.2));
+    return Math.max(0, bounce) * 6;
+  });
+
+  return (
+    <AbsoluteFill style={{ background: COLORS.white }}>
+      <AnimatedText
+        delay={0}
+        style={{
+          position: 'absolute',
+          top: 80,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 44,
+            fontWeight: 700,
+            color: COLORS.text,
+            fontFamily,
+          }}
+        >
+          {TEXT_CONTENT.aiThinking.title}
+        </div>
+      </AnimatedText>
+
+      <div style={{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        transform: `translate(0px, ${zoomOffsetY}px)`,
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: `translate(-50%, -50%) scale(${zoomScale})`,
+        }}>
+        <DorianPhoneStaticNew showAIBubble={false} scrollOffset={702}>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 60,
+              left: 0,
+              right: 0,
+              height: chatHeight,
+              background: 'white',
+              borderRadius: '24px 24px 0 0',
+              boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
+              padding: '15px 16px',
+              fontFamily,
+            }}
+          >
+            {/* Chat header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <AIBubble scale={0.6} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: COLORS.text }}>Dorian</div>
+                <div style={{ fontSize: 10, color: COLORS.primary }}>Your AI Assistant</div>
+              </div>
+            </div>
+
+            {/* AI greeting */}
+            <div
+              style={{
+                background: '#f0f0f0',
+                padding: '8px 12px',
+                borderRadius: '14px 14px 14px 4px',
+                maxWidth: '85%',
+                fontSize: 12,
+                color: COLORS.text,
+                marginBottom: 8,
+                lineHeight: 1.3,
+              }}
+            >
+              Hi! How can I help you today?
+            </div>
+
+            {/* User message bubble */}
+            <div
+              style={{
+                background: COLORS.primary,
+                padding: '8px 12px',
+                borderRadius: '14px 14px 4px 14px',
+                maxWidth: '80%',
+                marginLeft: 'auto',
+                fontSize: 12,
+                color: 'white',
+                lineHeight: 1.3,
+                marginBottom: 8,
+              }}
+            >
+              {message}
+            </div>
+
+            {/* Thinking dots */}
+            <div
+              style={{
+                background: '#f0f0f0',
+                padding: '10px 16px',
+                borderRadius: '14px 14px 14px 4px',
+                maxWidth: 60,
+                display: 'flex',
+                gap: 5,
+                alignItems: 'center',
+              }}
+            >
+              {dots.map((offset, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: '#999',
+                    transform: `translateY(${-offset}px)`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Input field - inactive after send */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                left: 12,
+                right: 12,
+                background: '#f5f5f5',
+                borderRadius: 18,
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                border: '2px solid transparent',
+              }}
+            >
+              <span style={{ color: '#999', fontSize: 11 }}>Type a message...</span>
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: '50%',
+                  background: '#ccc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ color: 'white', fontSize: 14 }}>→</span>
+              </div>
+            </div>
+          </div>
+        </DorianPhoneStaticNew>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// Scene 7: AI Response - response message slides in + "View Products" button + hand tap
+const AIResponseScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const message = TEXT_CONTENT.userTyping.userMessage;
+  const aiMessage = TEXT_CONTENT.aiResponse.aiMessage;
+
+  // Stay zoomed in
+  const zoomScale = 2.76;
+  const zoomOffsetY = -560;
+  const chatHeight = 260;
+
+  // AI response slides in
+  const responseSlide = spring({
+    frame: frame - 5,
+    fps,
+    config: { damping: 18, mass: 1, stiffness: 100 },
+  });
+
+  // "View Products" button appears after response
+  const buttonAppear = spring({
+    frame: frame - 40,
+    fps,
+    config: SPRING_CONFIG.bouncy,
+  });
+
+  // Chars revealed for typewriter effect
+  const revealedChars = Math.floor(interpolate(frame, [5, 50], [0, aiMessage.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
+
+  // Hand appears and taps "View Products" button
+  const savedPath = getSavedPath('DorianDemo', '7-AIResponse');
+  const handPath: HandPathPoint[] = savedPath?.path ?? [
+    { x: 540, y: 1600, frame: 70, gesture: 'pointer' as const },
+    { x: 540, y: 1480, frame: 85, gesture: 'pointer' as const },
+    { x: 540, y: 1450, frame: 95, gesture: 'click' as const, duration: 10 },
+  ];
+
+  return (
+    <AbsoluteFill style={{ background: COLORS.white }}>
+      <AnimatedText
+        delay={0}
+        style={{
+          position: 'absolute',
+          top: 80,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 44,
+            fontWeight: 700,
+            color: COLORS.text,
+            fontFamily,
+          }}
+        >
+          {TEXT_CONTENT.aiResponse.title}
+        </div>
+      </AnimatedText>
+
+      <div style={{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        transform: `translate(0px, ${zoomOffsetY}px)`,
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: `translate(-50%, -50%) scale(${zoomScale})`,
+        }}>
+        <DorianPhoneStaticNew showAIBubble={false} scrollOffset={702}>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 60,
+              left: 0,
+              right: 0,
+              height: chatHeight,
+              background: 'white',
+              borderRadius: '24px 24px 0 0',
+              boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
+              padding: '15px 16px',
+              fontFamily,
+              overflow: 'hidden',
+            }}
+          >
+            {/* Chat header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <AIBubble scale={0.5} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 12, color: COLORS.text }}>Dorian</div>
+                <div style={{ fontSize: 9, color: COLORS.primary }}>Your AI Assistant</div>
+              </div>
+            </div>
+
+            {/* AI greeting - smaller to make room */}
+            <div
+              style={{
+                background: '#f0f0f0',
+                padding: '6px 10px',
+                borderRadius: '12px 12px 12px 4px',
+                maxWidth: '85%',
+                fontSize: 10,
+                color: COLORS.text,
+                marginBottom: 6,
+                lineHeight: 1.3,
+              }}
+            >
+              Hi! How can I help you today?
+            </div>
+
+            {/* User message */}
+            <div
+              style={{
+                background: COLORS.primary,
+                padding: '6px 10px',
+                borderRadius: '12px 12px 4px 12px',
+                maxWidth: '80%',
+                marginLeft: 'auto',
+                fontSize: 10,
+                color: 'white',
+                lineHeight: 1.3,
+                marginBottom: 6,
+              }}
+            >
+              {message}
+            </div>
+
+            {/* AI Response - slides in */}
+            <div
+              style={{
+                transform: `translateY(${(1 - responseSlide) * 30}px)`,
+                opacity: responseSlide,
+              }}
+            >
+              <div
+                style={{
+                  background: '#f0f0f0',
+                  padding: '6px 10px',
+                  borderRadius: '12px 12px 12px 4px',
+                  maxWidth: '90%',
+                  fontSize: 10,
+                  color: COLORS.text,
+                  lineHeight: 1.3,
+                  marginBottom: 6,
+                }}
+              >
+                {aiMessage.slice(0, revealedChars)}
+                {revealedChars < aiMessage.length && <span style={{ opacity: frame % 10 < 5 ? 1 : 0 }}>|</span>}
+              </div>
+
+              {/* View Products button */}
+              {frame >= 40 && (
+                <div
+                  style={{
+                    background: COLORS.primary,
+                    padding: '8px 16px',
+                    borderRadius: 16,
+                    textAlign: 'center',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'white',
+                    maxWidth: '60%',
+                    opacity: buttonAppear,
+                    transform: `scale(${buttonAppear})`,
+                  }}
+                >
+                  View Products →
+                </div>
+              )}
+            </div>
+
+            {/* Input field */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 10,
+                left: 12,
+                right: 12,
+                background: '#f5f5f5',
+                borderRadius: 18,
+                padding: '7px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                border: '2px solid transparent',
+              }}
+            >
+              <span style={{ color: '#999', fontSize: 10 }}>Type a message...</span>
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  background: '#ccc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ color: 'white', fontSize: 12 }}>→</span>
+              </div>
+            </div>
+          </div>
+        </DorianPhoneStaticNew>
+        </div>
+      </div>
+
+      {/* Hand taps "View Products" button */}
+      {frame >= 70 && (
+        <FloatingHand
+          path={handPath}
+          startFrame={70}
+          animation="hand-click"
+          size={120}
+          dark={true}
+          showRipple={true}
+          rippleColor="rgba(45, 212, 191, 0.5)"
+          physics={{
+            floatAmplitude: 2,
+            floatSpeed: 0.04,
+            velocityScale: 0.5,
+            maxRotation: 20,
+            shadowEnabled: true,
+            shadowDistance: 10,
+            shadowBlur: 12,
+            smoothing: 0.15,
+          }}
+        />
+      )}
+    </AbsoluteFill>
+  );
+};
+
+// Scene 8: Product Page - zoom out, chat collapses, crossfade to LG TV listing
+const ProductPageScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  // Zoom out from chat (2.76) to normal phone view (1.8)
+  const zoomOutProgress = spring({
+    frame,
+    fps,
+    config: { damping: 18, mass: 1, stiffness: 80 },
+  });
+  const zoomScale = interpolate(zoomOutProgress, [0, 1], [2.76, 1.8]);
+  const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-560, 0]);
+
+  // Crossfade from products screen to LG TV listing
+  const crossfadeProgress = interpolate(frame, [15, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // Scroll the listing page
+  const scrollProgress = interpolate(frame, [50, 130], [0, 300], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // Hand for scrolling
+  const handX = 780;
+  const handY = 960;
+  const savedScroll = getSavedPath('DorianDemo', '8-ProductPage');
+  const scrollHandPath: HandPathPoint[] = savedScroll?.path ?? [
+    { x: 1050, y: handY, frame: 30, gesture: 'pointer' as const, rotation: 0 },
+    { x: handX, y: handY, frame: 45, gesture: 'pointer' as const, rotation: 0 },
+    { x: handX, y: handY, frame: 48, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 80, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 110, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 128, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 135, gesture: 'pointer' as const, rotation: 0 },
+    { x: handX, y: handY, frame: 150, gesture: 'pointer' as const, rotation: 0 },
+  ];
+
+  return (
+    <AbsoluteFill style={{ background: COLORS.white }}>
+      <AnimatedText
+        delay={0}
+        style={{
+          position: 'absolute',
+          top: 80,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 44,
+            fontWeight: 700,
+            color: COLORS.text,
+            fontFamily,
+          }}
+        >
+          {TEXT_CONTENT.productPage.title}
+        </div>
+      </AnimatedText>
+
+      <div style={{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        transform: `translate(0px, ${zoomOffsetY}px)`,
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: `translate(-50%, -50%) scale(${zoomScale})`,
+        }}>
+          {/* Phone frame with LG TV listing screenshot */}
+          <div
+            style={{
+              width: 390 + 24,
+              height: 844 + 24,
+              background: '#1a1a1a',
+              borderRadius: 55,
+              padding: 12,
+              boxShadow: '0 50px 100px rgba(0,0,0,0.4), 0 20px 40px rgba(0,0,0,0.3)',
+            }}
+          >
+            <div
+              style={{
+                width: 390,
+                height: 844,
+                borderRadius: 45,
+                overflow: 'hidden',
+                position: 'relative',
+                background: '#fff',
+              }}
+            >
+              {/* Crossfade: old products screen fading out */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: 390, opacity: 1 - crossfadeProgress }}>
+                <Img
+                  src={staticFile('dorian/screens/products.png')}
+                  style={{ width: 390, height: 'auto', display: 'block' }}
+                />
+              </div>
+
+              {/* New LG TV listing fading in + scrolling */}
+              <div style={{
+                position: 'absolute',
+                top: -scrollProgress,
+                left: 0,
+                width: 390,
+                opacity: crossfadeProgress,
+              }}>
+                <Img
+                  src={staticFile('dorian/woodmart/lg-tvs-listing-full.png')}
+                  style={{ width: 390, height: 'auto', display: 'block' }}
+                />
+              </div>
+
+              {/* Status Bar */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 50,
+                  background: 'white',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  padding: '0 25px 5px 25px',
+                  zIndex: 5,
+                }}
+              >
+                <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>10:45</span>
+                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                  <svg width="18" height="12" viewBox="0 0 18 12">
+                    <rect x="0" y="8" width="3" height="4" fill="#000" />
+                    <rect x="5" y="5" width="3" height="7" fill="#000" />
+                    <rect x="10" y="2" width="3" height="10" fill="#000" />
+                    <rect x="15" y="0" width="3" height="12" fill="#000" />
+                  </svg>
+                  <div style={{ width: 25, height: 12, border: '1px solid #000', borderRadius: 3, position: 'relative' }}>
+                    <div style={{ position: 'absolute', right: -4, top: 3, width: 2, height: 6, background: '#000', borderRadius: '0 2px 2px 0' }} />
+                    <div style={{ position: 'absolute', left: 2, top: 2, right: 4, bottom: 2, background: '#000', borderRadius: 1 }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Island */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 125,
+                  height: 35,
+                  background: '#1a1a1a',
+                  borderRadius: 20,
+                  zIndex: 6,
+                }}
+              />
+
+              {/* Dorian Nav Header - Hamburger + Logo + Account + Search */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 50,
+                  left: 0,
+                  right: 0,
+                  background: 'white',
+                  zIndex: 5,
+                }}
+              >
+                {/* Header Row: Hamburger + Logo + Account */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px 20px',
+                    position: 'relative',
+                  }}
+                >
+                  {/* Hamburger Menu - Left */}
+                  <div style={{ position: 'absolute', left: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                    <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                    <div style={{ width: 16, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                  </div>
+                  {/* Logo - Center */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2.5px solid white', borderRightColor: 'transparent', transform: 'rotate(-45deg)' }} />
+                    </div>
+                    <span style={{ fontSize: 18, fontWeight: 800, color: '#2DD4BF', fontFamily, letterSpacing: 0.5 }}>DORIAN</span>
+                  </div>
+                  {/* Account Icon - Right */}
+                  <div style={{ position: 'absolute', right: 20 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="8" r="4" stroke="#1E293B" strokeWidth="2" />
+                      <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                </div>
+                {/* Search Bar */}
+                <div style={{ padding: '4px 16px 12px 16px', background: '#fff' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', background: '#F1F5F9', borderRadius: 25, padding: '10px 16px', gap: 10 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <circle cx="11" cy="11" r="7" stroke="#64748B" strokeWidth="2" />
+                      <path d="M16 16l4 4" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <span style={{ color: '#94A3B8', fontSize: 14, fontFamily }}>Search for products</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Assistant Bubble */}
+              <div style={{ position: 'absolute', bottom: 70, right: 15, zIndex: 20 }}>
+                <AIBubbleNew scale={1} pulse={true} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scrolling hand */}
+      {frame >= 30 && (
+        <FloatingHand
+          path={scrollHandPath}
+          startFrame={30}
+          animation="hand-scroll-clean"
+          size={140}
+          dark={true}
+          showRipple={false}
+          physics={{
+            floatAmplitude: 0,
+            floatSpeed: 0,
+            velocityScale: 0.1,
+            maxRotation: 5,
+            shadowEnabled: true,
+            shadowDistance: 8,
+            shadowBlur: 10,
+            smoothing: 0.2,
+          }}
+        />
+      )}
+    </AbsoluteFill>
+  );
+};
+
+// Scene 9: Product Detail - hand taps first product, crossfade to detail page
+const ProductDetailScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  // Crossfade from listing to detail
+  const crossfadeProgress = interpolate(frame, [5, 25], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  return (
+    <AbsoluteFill style={{ background: COLORS.white }}>
+      <AnimatedText
+        delay={0}
+        style={{
+          position: 'absolute',
+          top: 80,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 44,
+            fontWeight: 700,
+            color: COLORS.text,
+            fontFamily,
+          }}
+        >
+          {TEXT_CONTENT.productDetail.title}
+        </div>
+      </AnimatedText>
+
+      <div style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%) scale(1.8)',
+      }}>
+        <div
+          style={{
+            width: 390 + 24,
+            height: 844 + 24,
+            background: '#1a1a1a',
+            borderRadius: 55,
+            padding: 12,
+            boxShadow: '0 50px 100px rgba(0,0,0,0.4), 0 20px 40px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div
+            style={{
+              width: 390,
+              height: 844,
+              borderRadius: 45,
+              overflow: 'hidden',
+              position: 'relative',
+              background: '#fff',
+            }}
+          >
+            {/* LG TV listing fading out */}
+            <div style={{ position: 'absolute', top: -300, left: 0, width: 390, opacity: 1 - crossfadeProgress }}>
+              <Img
+                src={staticFile('dorian/woodmart/lg-tvs-listing-full.png')}
+                style={{ width: 390, height: 'auto', display: 'block' }}
+              />
+            </div>
+
+            {/* Product detail page fading in */}
+            <div style={{ position: 'absolute', top: 0, left: 0, width: 390, opacity: crossfadeProgress }}>
+              <Img
+                src={staticFile('dorian/woodmart/lg-tv-detail.png')}
+                style={{ width: 390, height: 'auto', display: 'block' }}
+              />
+            </div>
+
+            {/* Status Bar */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 50,
+                background: 'white',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                padding: '0 25px 5px 25px',
+                zIndex: 5,
+              }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>10:45</span>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                <svg width="18" height="12" viewBox="0 0 18 12">
+                  <rect x="0" y="8" width="3" height="4" fill="#000" />
+                  <rect x="5" y="5" width="3" height="7" fill="#000" />
+                  <rect x="10" y="2" width="3" height="10" fill="#000" />
+                  <rect x="15" y="0" width="3" height="12" fill="#000" />
+                </svg>
+                <div style={{ width: 25, height: 12, border: '1px solid #000', borderRadius: 3, position: 'relative' }}>
+                  <div style={{ position: 'absolute', right: -4, top: 3, width: 2, height: 6, background: '#000', borderRadius: '0 2px 2px 0' }} />
+                  <div style={{ position: 'absolute', left: 2, top: 2, right: 4, bottom: 2, background: '#000', borderRadius: 1 }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Dynamic Island */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 125,
+                height: 35,
+                background: '#1a1a1a',
+                borderRadius: 20,
+                zIndex: 6,
+              }}
+            />
+
+            {/* Dorian Nav Header - Hamburger + Logo + Account + Search */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 50,
+                left: 0,
+                right: 0,
+                background: 'white',
+                zIndex: 5,
+              }}
+            >
+              {/* Header Row: Hamburger + Logo + Account */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '8px 20px',
+                  position: 'relative',
+                }}
+              >
+                {/* Hamburger Menu - Left */}
+                <div style={{ position: 'absolute', left: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                  <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                  <div style={{ width: 16, height: 2, background: '#1E293B', borderRadius: 1 }} />
+                </div>
+                {/* Logo - Center */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2.5px solid white', borderRightColor: 'transparent', transform: 'rotate(-45deg)' }} />
+                  </div>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: '#2DD4BF', fontFamily, letterSpacing: 0.5 }}>DORIAN</span>
+                </div>
+                {/* Account Icon - Right */}
+                <div style={{ position: 'absolute', right: 20 }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="8" r="4" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+              </div>
+              {/* Search Bar */}
+              <div style={{ padding: '4px 16px 12px 16px', background: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', background: '#F1F5F9', borderRadius: 25, padding: '10px 16px', gap: 10 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="#64748B" strokeWidth="2" />
+                    <path d="M16 16l4 4" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  <span style={{ color: '#94A3B8', fontSize: 14, fontFamily }}>Search for products</span>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Assistant Bubble */}
+            <div style={{ position: 'absolute', bottom: 70, right: 15, zIndex: 20 }}>
+              <AIBubbleNew scale={1} pulse={true} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// Scene 10: Outro
 const OutroScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -1935,7 +2793,23 @@ export const DorianDemo: React.FC = () => {
         <UserTypingScene />
       </Sequence>
 
-      <Sequence from={SCENES.outro.start} durationInFrames={SCENES.outro.duration} name="6-Outro">
+      <Sequence from={SCENES.aiThinking.start} durationInFrames={SCENES.aiThinking.duration} name="6-AIThinking">
+        <AIThinkingScene />
+      </Sequence>
+
+      <Sequence from={SCENES.aiResponse.start} durationInFrames={SCENES.aiResponse.duration} name="7-AIResponse">
+        <AIResponseScene />
+      </Sequence>
+
+      <Sequence from={SCENES.productPage.start} durationInFrames={SCENES.productPage.duration} name="8-ProductPage">
+        <ProductPageScene />
+      </Sequence>
+
+      <Sequence from={SCENES.productDetail.start} durationInFrames={SCENES.productDetail.duration} name="9-ProductDetail">
+        <ProductDetailScene />
+      </Sequence>
+
+      <Sequence from={SCENES.outro.start} durationInFrames={SCENES.outro.duration} name="10-Outro">
         <OutroScene />
       </Sequence>
     </AbsoluteFill>
@@ -1951,7 +2825,11 @@ export const DORIAN_SCENE_INFO = [
   { name: '3-TapBubble', start: SCENES.tapBubble.start, end: SCENES.tapBubble.start + SCENES.tapBubble.duration, hand: 'hand-click', gesture: 'pointer → click' },
   { name: '4-ChatOpen', start: SCENES.chatOpen.start, end: SCENES.chatOpen.start + SCENES.chatOpen.duration, hand: 'hand-click', gesture: 'pointer → click (input box) → hide' },
   { name: '5-UserTyping', start: SCENES.userTyping.start, end: SCENES.userTyping.start + SCENES.userTyping.duration, hand: 'hand-click', gesture: 'pointer → click (send btn)' },
-  { name: '6-Outro', start: SCENES.outro.start, end: SCENES.outro.start + SCENES.outro.duration, hand: 'none', gesture: '-' },
+  { name: '6-AIThinking', start: SCENES.aiThinking.start, end: SCENES.aiThinking.start + SCENES.aiThinking.duration, hand: 'none', gesture: 'thinking dots' },
+  { name: '7-AIResponse', start: SCENES.aiResponse.start, end: SCENES.aiResponse.start + SCENES.aiResponse.duration, hand: 'hand-click', gesture: 'pointer → click (View Products)' },
+  { name: '8-ProductPage', start: SCENES.productPage.start, end: SCENES.productPage.start + SCENES.productPage.duration, hand: 'hand-scroll-clean', gesture: 'drag (scroll listing)' },
+  { name: '9-ProductDetail', start: SCENES.productDetail.start, end: SCENES.productDetail.start + SCENES.productDetail.duration, hand: 'none', gesture: 'crossfade' },
+  { name: '10-Outro', start: SCENES.outro.start, end: SCENES.outro.start + SCENES.outro.duration, hand: 'none', gesture: '-' },
 ];
 const SCENE_INFO = DORIAN_SCENE_INFO;
 
@@ -2239,7 +3117,22 @@ export const DorianDebugInteractive: React.FC = () => {
     { x: 720, y: 1490, frame: scene5Start + 105, label: 'S5-SEND', color: '#f00', desc: '★ TAP send @ 495' },
   ];
 
-  const allPredefined = [...scene2Points, ...predefinedPoints, ...scene4Points, ...scene5Points];
+  // Scene 7 hand path: tap "View Products" button
+  const scene7Start = SCENES.aiResponse.start; // 600
+  const scene7Points = [
+    { x: 540, y: 1600, frame: scene7Start + 70, label: 'S7-Show', color: '#0f8', desc: 'Hand appears @ 670' },
+    { x: 540, y: 1480, frame: scene7Start + 85, label: 'S7-Move', color: '#0f8', desc: 'Moving to button @ 685' },
+    { x: 540, y: 1450, frame: scene7Start + 95, label: 'S7-TAP', color: '#f00', desc: '★ TAP View Products @ 695' },
+  ];
+
+  // Scene 8 hand path: scroll listing
+  const scene8Start = SCENES.productPage.start; // 720
+  const scene8Points = [
+    { x: 780, y: 960, frame: scene8Start + 45, label: 'S8-Scroll', color: '#ff0', desc: 'Scroll hand @ 765' },
+    { x: 780, y: 960, frame: scene8Start + 128, label: 'S8-End', color: '#ff0', desc: 'Scroll end @ 848' },
+  ];
+
+  const allPredefined = [...scene2Points, ...predefinedPoints, ...scene4Points, ...scene5Points, ...scene7Points, ...scene8Points];
 
   return (
     <AbsoluteFill
@@ -2367,6 +3260,20 @@ export const DorianDebugInteractive: React.FC = () => {
               stroke={next.label.includes('SEND') ? '#f00' : '#a0f'}
               strokeWidth={2}
               strokeDasharray={next.label.includes('SEND') ? 'none' : '5,5'}
+              opacity={0.5}
+            />
+          );
+        })}
+        {/* Scene 7 path (green) */}
+        {scene7Points.slice(0, -1).map((p, i) => {
+          const next = scene7Points[i + 1];
+          return (
+            <line
+              key={`s7-${i}`}
+              x1={p.x} y1={p.y} x2={next.x} y2={next.y}
+              stroke={next.label.includes('TAP') ? '#f00' : '#0f8'}
+              strokeWidth={2}
+              strokeDasharray={next.label.includes('TAP') ? 'none' : '5,5'}
               opacity={0.5}
             />
           );

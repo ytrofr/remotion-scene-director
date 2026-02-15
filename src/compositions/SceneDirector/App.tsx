@@ -7,6 +7,7 @@ import React, { useReducer, useMemo, useRef, useState, useCallback, useEffect } 
 import { Player, type PlayerRef } from '@remotion/player';
 import { FloatingHand } from '../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
+import { SceneDirectorModeProvider } from '../../components/FloatingHand/SceneDirectorMode';
 import {
   initialState,
   COMPOSITIONS,
@@ -73,6 +74,7 @@ export const App: React.FC = () => {
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState(savedSession.frame ?? 0);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   // Seek to saved frame on mount
   const didRestore = useRef(false);
@@ -180,7 +182,9 @@ export const App: React.FC = () => {
     activePreset,
     scenePreset,
     canUndo,
-  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo]);
+    playbackRate,
+    setPlaybackRate,
+  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo, playbackRate]);
 
   // Track frame from Player
   useEffect(() => {
@@ -299,19 +303,22 @@ export const App: React.FC = () => {
             className="player-frame"
             style={{ aspectRatio: `${composition.video.width} / ${composition.video.height}` }}
           >
-            <Player
-              ref={playerRef}
-              component={VideoComponent}
-              compositionWidth={composition.video.width}
-              compositionHeight={composition.video.height}
-              fps={composition.video.fps}
-              durationInFrames={composition.video.frames}
-              controls={false}
-              style={{
-                width: '100%',
-                height: '100%',
-              }}
-            />
+            <SceneDirectorModeProvider value={!!(state.selectedScene && effectiveWaypoints.length > 0)}>
+              <Player
+                ref={playerRef}
+                component={VideoComponent}
+                compositionWidth={composition.video.width}
+                compositionHeight={composition.video.height}
+                fps={composition.video.fps}
+                durationInFrames={composition.video.frames}
+                playbackRate={playbackRate}
+                controls={false}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </SceneDirectorModeProvider>
 
             {/* Drawing canvas overlays the player */}
             {state.selectedScene && !state.preview && !state.exportOpen && (

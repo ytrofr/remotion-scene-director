@@ -21,6 +21,8 @@ export interface DirectorContextValue {
   activePreset: GesturePreset | null;
   scenePreset: GesturePreset | null;
   canUndo: boolean;
+  playbackRate: number;
+  setPlaybackRate: (rate: number) => void;
 }
 
 const Ctx = createContext<DirectorContextValue>(null!);

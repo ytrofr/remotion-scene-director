@@ -123,14 +123,14 @@ export const Inspector: React.FC = () => {
       </div>
       <div className="inspector__dark-row">
         <button
-          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: true })}
-          className={`inspector__dark-btn ${currentDark ? 'inspector__dark-btn--active' : ''}`}
+          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: false })}
+          className={`inspector__dark-btn ${!currentDark ? 'inspector__dark-btn--active' : ''}`}
         >
           Light
         </button>
         <button
-          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: false })}
-          className={`inspector__dark-btn ${!currentDark ? 'inspector__dark-btn--active' : ''}`}
+          onClick={() => dispatch({ type: 'SET_SCENE_DARK', scene, dark: true })}
+          className={`inspector__dark-btn ${currentDark ? 'inspector__dark-btn--active' : ''}`}
         >
           Dark
         </button>

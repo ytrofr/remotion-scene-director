@@ -5,7 +5,7 @@ export const VIDEO = {
   width: 1080,
   height: 1920,
   fps: 30,
-  durationInFrames: 750, // ~25 seconds
+  durationInFrames: 1140, // ~38 seconds (V2 extended)
 };
 
 // Colors (from Dorian branding)
@@ -21,14 +21,20 @@ export const COLORS = {
 };
 
 // Scene timings (in frames at 30fps)
-// NEW FLOW: Intro → Home Scroll → Tap AI Bubble → Chat Opens → User Types → Outro
+// V2 FLOW: Intro → Home Scroll → Tap AI Bubble → Chat Opens → User Types →
+//          AI Thinking → AI Response → Product Page → Product Detail → Outro
 export const SCENES = {
-  intro: { start: 0, duration: 75 },          // 2.5s - Logo intro
-  homeScroll: { start: 75, duration: 150 },   // 5s - Home page with scroll
-  tapBubble: { start: 225, duration: 75 },    // 2.5s - Tap on AI bubble
-  chatOpen: { start: 300, duration: 90 },     // 3s - Chat opens
-  userTyping: { start: 390, duration: 150 },  // 5s - User types message
-  outro: { start: 540, duration: 210 },       // 7s - CTA/Outro
+  intro: { start: 0, duration: 75 },              // 2.5s - Logo intro
+  homeScroll: { start: 75, duration: 150 },       // 5s - Home page with scroll
+  tapBubble: { start: 225, duration: 75 },        // 2.5s - Tap on AI bubble
+  chatOpen: { start: 300, duration: 90 },         // 3s - Chat opens
+  userTyping: { start: 390, duration: 150 },      // 5s - User types message + sends
+  // V2 new scenes:
+  aiThinking: { start: 540, duration: 60 },       // 2s - AI thinking dots
+  aiResponse: { start: 600, duration: 120 },      // 4s - AI response + View Products button + hand tap
+  productPage: { start: 720, duration: 150 },     // 5s - Zoom out, crossfade to LG TV listing, hand scroll
+  productDetail: { start: 870, duration: 90 },    // 3s - Hand taps product, crossfade to detail page
+  outro: { start: 960, duration: 180 },           // 6s - CTA/Outro
 };
 
 // Phone mockup dimensions (from existing mockups)
@@ -57,7 +63,20 @@ export const TEXT_CONTENT = {
   },
   userTyping: {
     title: 'Find Exactly What You Need',
-    userMessage: 'I need dog food for large dog, around me',
+    userMessage: 'Show me LG TVs with best reviews',
+  },
+  aiThinking: {
+    title: 'AI-Powered Search',
+  },
+  aiResponse: {
+    title: 'Personalized Results',
+    aiMessage: "I found 6 LG TVs with excellent reviews! The LG C3 65\" OLED is the top-rated with 4.8 stars. Here are your options:",
+  },
+  productPage: {
+    title: 'Browse & Compare',
+  },
+  productDetail: {
+    title: 'Product Details',
   },
   outro: {
     title: 'DORIAN',

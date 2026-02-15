@@ -69,6 +69,76 @@
           "duration": 2
         }
       ]
+    },
+    "2-HomeScroll": {
+      "gesture": "scroll",
+      "animation": "hand-scroll-clean",
+      "path": [
+        {
+          "x": 1050,
+          "y": 960,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 20,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 28,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 60,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 90,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 118,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 125,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 150,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        }
+      ]
     }
   }
 }

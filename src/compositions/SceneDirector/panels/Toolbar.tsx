@@ -151,14 +151,14 @@ export const Toolbar: React.FC = () => {
                   </div>
                   <div className="toolbar__dropdown-dark">
                     <button
-                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: true }); }}
-                      className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: false }); }}
+                      className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Light
                     </button>
                     <button
-                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: false }); }}
-                      className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: true }); }}
+                      className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Dark
                     </button>

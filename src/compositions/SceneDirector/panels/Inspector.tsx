@@ -1,13 +1,17 @@
 /**
- * Inspector v3.2 - X, Y, Frame fields + scene gesture display + Hand Style picker + Delete + Waypoint List
+ * Inspector v3.3 - X, Y, Frame fields + scene gesture display + Hand Style picker + Delete + Waypoint List
  * Waypoint list shows all scene waypoints with click-to-select-and-seek.
  * Hand Style section: animation variant picker + dark/light toggle per scene.
  */
 
 import React, { useCallback } from 'react';
-import type { HandPathPoint, HandGesture, LottieAnimation } from '../../../components/FloatingHand/types';
+import type { HandPathPoint, LottieAnimation } from '../../../components/FloatingHand/types';
 import { useDirector } from '../context';
 import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
+import type { ZoomLayer } from '../layers';
+import { LayerPanel } from './LayerPanel';
+import { NumField } from './NumField';
+import { ZoomInspector } from './ZoomInspector';
 
 // Gesture abbreviations for compact display
 const GESTURE_ABBR: Record<string, string> = {
@@ -18,34 +22,10 @@ const GESTURE_ABBR: Record<string, string> = {
   open: 'OPN',
 };
 
-const NumField: React.FC<{
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  step?: number;
-  min?: number;
-}> = ({ label, value, onChange, step = 1, min }) => {
-  const adjust = useCallback((delta: number) => {
-    const next = value + delta;
-    onChange(min !== undefined ? Math.max(min, next) : next);
-  }, [value, onChange, min]);
-
-  return (
-    <div className="inspector__field">
-      <span className="inspector__field-label">{label}</span>
-      <button className="inspector__field-btn" onClick={() => adjust(-step * 10)}>-{step * 10}</button>
-      <button className="inspector__field-btn" onClick={() => adjust(-step)}>-{step}</button>
-      <span className="inspector__field-value">{value}</span>
-      <button className="inspector__field-btn" onClick={() => adjust(step)}>+{step}</button>
-      <button className="inspector__field-btn" onClick={() => adjust(step * 10)}>+{step * 10}</button>
-    </div>
-  );
-};
-
 const GESTURE_OPTIONS: GestureTool[] = ['click', 'scroll', 'drag', 'swipe', 'point'];
 
 export const Inspector: React.FC = () => {
-  const { state, dispatch, sceneWaypoints, effectiveWaypoints, playerRef, currentScene, scenePreset } = useDirector();
+  const { state, dispatch, sceneWaypoints, effectiveWaypoints, playerRef, currentScene, scenePreset, selectedLayer, sceneLayers } = useDirector();
   const scene = state.selectedScene;
   const idx = state.selectedWaypoint;
   const waypoint: HandPathPoint | null =
@@ -163,13 +143,20 @@ export const Inspector: React.FC = () => {
     </div>
   ) : null;
 
+  // Zoom layer inspector (when a zoom layer is selected)
+  const zoomInspectorSection = selectedLayer?.type === 'zoom' ? (
+    <ZoomInspector layer={selectedLayer as ZoomLayer} scene={scene} />
+  ) : null;
+
   if (idx === null || !waypoint) {
     return (
       <div className="inspector">
+        <LayerPanel />
         {gestureHeader}
         {handStyleSection}
+        {zoomInspectorSection}
         {waypointList}
-        {!waypointList && (
+        {!waypointList && !zoomInspectorSection && (
           <div className="inspector__empty-text">
             Pick a gesture tool and click on the video
           </div>
@@ -184,8 +171,10 @@ export const Inspector: React.FC = () => {
 
   return (
     <div className="inspector">
+      <LayerPanel />
       {gestureHeader}
       {handStyleSection}
+      {zoomInspectorSection}
       {waypointList}
 
       <div className="inspector__header">

@@ -168,14 +168,12 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
 }) => {
   const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
-
-  // Hide composition's built-in hand when SceneDirector provides its own overlay
-  if (isSceneDirector) return null;
   const physics: HandPhysicsConfig = { ...DEFAULT_PHYSICS, ...physicsOverrides };
   const handState = useHandAnimation(path, startFrame, physics);
   const { offsetY, shadowScale } = useFloatEffect(physics);
 
-  if (frame < startFrame) return null;
+  // Hide composition's built-in hand when SceneDirector provides its own overlay
+  if (isSceneDirector || frame < startFrame) return null;
 
   const finalX = handState.x;
   const finalY = handState.y + offsetY;

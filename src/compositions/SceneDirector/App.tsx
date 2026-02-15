@@ -1,6 +1,6 @@
 /**
- * SceneDirector v3 - Gesture-First App
- * CSS Grid layout + Remotion Player + Context Provider + Keyboard shortcuts
+ * SceneDirector v3.1 - Gesture-First App
+ * CSS Grid layout + Remotion Player + Context Provider
  */
 
 import React, { useReducer, useMemo, useRef, useState, useCallback, useEffect } from 'react';
@@ -8,15 +8,16 @@ import { Player, type PlayerRef } from '@remotion/player';
 import { FloatingHand } from '../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
 import { SceneDirectorModeProvider } from '../../components/FloatingHand/SceneDirectorMode';
-import {
-  initialState,
-  COMPOSITIONS,
-  COMPOSITION_COMPONENTS,
-} from './state';
+import { initialState } from './state';
+import { COMPOSITIONS, COMPOSITION_COMPONENTS } from './compositions';
 import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
-import { GESTURE_PRESETS, GESTURE_KEYS, type GestureTool } from './gestures';
+import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
+import { computeZoomAtFrame, type ZoomLayer } from './layers';
+import { loadSession, useSessionPersistence } from './hooks/useSessionPersistence';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { usePlayerControls } from './hooks/usePlayerControls';
 import './styles.css';
 
 // Panels
@@ -30,31 +31,7 @@ import { ExportModal } from './panels/ExportModal';
 import { DrawingCanvas } from './overlays/DrawingCanvas';
 import { WaypointMarkers } from './overlays/WaypointMarkers';
 
-// localStorage persistence key
-const STORAGE_KEY = 'scene-director-session';
-
-interface SavedSession {
-  compositionId?: string;
-  selectedScene?: string | null;
-  frame?: number;
-  sceneGesture?: Record<string, string>;
-  sceneAnimation?: Record<string, string>;
-  sceneDark?: Record<string, boolean>;
-}
-
-function loadSession(): SavedSession {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch { return {}; }
-}
-
-function saveSession(s: SavedSession) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  } catch { /* ignore quota errors */ }
-}
+const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
 
 export const App: React.FC = () => {
   // Restore session from localStorage
@@ -76,6 +53,20 @@ export const App: React.FC = () => {
   const [frame, setFrame] = useState(savedSession.frame ?? 0);
   const [playbackRate, setPlaybackRate] = useState(1);
 
+  // Cursor preview scale multiplier (persisted to localStorage)
+  const [cursorScale, setCursorScaleRaw] = useState(() => {
+    try { return parseFloat(localStorage.getItem(CURSOR_SCALE_KEY) || '1') || 1; }
+    catch { return 1; }
+  });
+  const setCursorScale = useCallback((scale: number) => {
+    setCursorScaleRaw(scale);
+    try { localStorage.setItem(CURSOR_SCALE_KEY, String(scale)); } catch {}
+  }, []);
+
+  // Player zoom & pan
+  const { zoom, setZoom, pan, setPan, playerAreaRef, handlePanStart, handlePanMove, handlePanEnd } =
+    usePlayerControls(state.compositionId);
+
   // Seek to saved frame on mount
   const didRestore = useRef(false);
   useEffect(() => {
@@ -85,19 +76,10 @@ export const App: React.FC = () => {
     }
   });
 
-  // Persist session to localStorage on changes
-  useEffect(() => {
-    saveSession({
-      compositionId: state.compositionId,
-      selectedScene: state.selectedScene,
-      frame,
-      sceneGesture: state.sceneGesture,
-      sceneAnimation: state.sceneAnimation,
-      sceneDark: state.sceneDark,
-    });
-  }, [state.compositionId, state.selectedScene, frame, state.sceneGesture, state.sceneAnimation, state.sceneDark]);
+  // Session persistence
+  useSessionPersistence(state, frame);
 
-  // Track player frame dimensions for coordinate mapping (composition → screen space)
+  // Track player frame dimensions for coordinate mapping (composition -> screen space)
   const [playerScale, setPlayerScale] = useState(1);
   useEffect(() => {
     const el = playerFrameRef.current;
@@ -116,7 +98,6 @@ export const App: React.FC = () => {
     [state.compositionId],
   );
 
-  // Underlying video component
   const VideoComponent = COMPOSITION_COMPONENTS[composition.id];
 
   // Current scene
@@ -142,12 +123,18 @@ export const App: React.FC = () => {
     : (codedPath?.path ?? []);
 
   // Auto-adopt coded paths into editable state when Trail is ON
-  // This copies coded path points into state.waypoints so they become draggable/editable
   useEffect(() => {
     if (state.showTrail && state.selectedScene && codedPath && sceneWaypoints.length === 0) {
       dispatch({ type: 'ADOPT_CODED_PATH', scene: state.selectedScene, waypoints: [...codedPath.path], gesture: codedPath.gesture });
     }
   }, [state.showTrail, state.selectedScene, codedPath, sceneWaypoints.length, dispatch]);
+
+  // Auto-migrate layers on scene select
+  useEffect(() => {
+    if (!state.selectedScene) return;
+    const coded = getCodedPath(state.compositionId, state.selectedScene);
+    dispatch({ type: 'ENSURE_SCENE_LAYERS', scene: state.selectedScene, codedPath: coded });
+  }, [state.selectedScene, state.compositionId, dispatch]);
 
   // Active gesture preset (null when tool is 'select')
   const activePreset = useMemo(
@@ -156,18 +143,36 @@ export const App: React.FC = () => {
   );
 
   // Preset for current scene's gesture (for preview rendering)
-  // Falls back to coded path gesture, then active tool preset
   const scenePreset = useMemo(() => {
     const sceneName = state.selectedScene || '';
     const gesture = state.sceneGesture[sceneName];
     if (gesture) return GESTURE_PRESETS[gesture];
-    // Fall back to coded path gesture
     const coded = sceneName ? getCodedPath(state.compositionId, sceneName) : null;
     if (coded) return GESTURE_PRESETS[coded.gesture];
-    // Fall back to active tool preset so hand always shows when waypoints exist
     if (state.activeTool !== 'select') return GESTURE_PRESETS[state.activeTool];
     return GESTURE_PRESETS.click;
   }, [state.selectedScene, state.sceneGesture, state.compositionId, state.activeTool]);
+
+  // Layers for the selected scene
+  const sceneLayers = useMemo(
+    () => state.selectedScene ? (state.layers[state.selectedScene] || []) : [],
+    [state.selectedScene, state.layers],
+  );
+  const selectedLayer = useMemo(
+    () => state.selectedLayerId ? sceneLayers.find(l => l.id === state.selectedLayerId) ?? null : null,
+    [state.selectedLayerId, sceneLayers],
+  );
+
+  // Compute zoom transform from visible zoom layers
+  const zoomTransform = useMemo(() => {
+    if (!currentScene) return null;
+    const zoomLayers = sceneLayers.filter(
+      (l): l is ZoomLayer => l.type === 'zoom' && l.visible,
+    );
+    if (zoomLayers.length === 0) return null;
+    const localFrame = Math.max(0, frame - currentScene.start);
+    return computeZoomAtFrame(zoomLayers, localFrame);
+  }, [sceneLayers, currentScene, frame]);
 
   // Context value
   const ctxValue = useMemo(() => ({
@@ -184,7 +189,12 @@ export const App: React.FC = () => {
     canUndo,
     playbackRate,
     setPlaybackRate,
-  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo, playbackRate]);
+    playerScale,
+    cursorScale,
+    setCursorScale,
+    sceneLayers,
+    selectedLayer,
+  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo, playbackRate, playerScale, cursorScale, setCursorScale, sceneLayers, selectedLayer]);
 
   // Track frame from Player
   useEffect(() => {
@@ -193,94 +203,10 @@ export const App: React.FC = () => {
     const handler = (e: { detail: { frame: number } }) => setFrame(e.detail.frame);
     player.addEventListener('frameupdate', handler as any);
     return () => player.removeEventListener('frameupdate', handler as any);
-  }, [state.compositionId]); // Re-attach when composition changes
+  }, [state.compositionId]);
 
   // Keyboard shortcuts
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Don't capture when typing in inputs
-    const tag = (e.target as HTMLElement).tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-
-    // Gesture tool shortcuts: 1-5
-    const gestureTool = GESTURE_KEYS[e.key];
-    if (gestureTool) {
-      e.preventDefault();
-      dispatch({ type: 'SET_TOOL', tool: gestureTool });
-      return;
-    }
-
-    // Ctrl+Z → Undo
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-      e.preventDefault();
-      dispatch({ type: 'UNDO' });
-      return;
-    }
-
-    switch (e.key) {
-      case 's': case 'S':
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          window.dispatchEvent(new CustomEvent('scene-director-save'));
-        } else {
-          e.preventDefault();
-          dispatch({ type: 'SET_TOOL', tool: 'select' });
-        }
-        break;
-      case ' ':
-        e.preventDefault();
-        if (playerRef.current) {
-          if (playerRef.current.isPlaying()) {
-            playerRef.current.pause();
-          } else {
-            playerRef.current.play();
-          }
-        }
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        if (playerRef.current) {
-          const step = e.shiftKey ? 10 : 1;
-          const next = Math.max(0, frame - step);
-          playerRef.current.seekTo(next);
-        }
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        if (playerRef.current) {
-          const step = e.shiftKey ? 10 : 1;
-          const next = Math.min(composition.video.frames - 1, frame + step);
-          playerRef.current.seekTo(next);
-        }
-        break;
-      case 'Delete': case 'Backspace':
-        if (state.selectedWaypoint !== null && state.selectedScene) {
-          e.preventDefault();
-          dispatch({ type: 'DELETE_WAYPOINT', scene: state.selectedScene, index: state.selectedWaypoint });
-        }
-        break;
-      case 't': case 'T':
-        e.preventDefault();
-        dispatch({ type: 'TOGGLE_TRAIL' });
-        break;
-      case 'e': case 'E':
-        e.preventDefault();
-        dispatch({ type: 'TOGGLE_EXPORT' });
-        break;
-      case 'Escape':
-        e.preventDefault();
-        if (state.exportOpen) {
-          dispatch({ type: 'TOGGLE_EXPORT' });
-        } else if (state.selectedWaypoint !== null) {
-          dispatch({ type: 'SELECT_WAYPOINT', index: null });
-        }
-        break;
-    }
-  }, [frame, composition.video.frames, state.selectedWaypoint, state.selectedScene, state.exportOpen]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+  useKeyboardShortcuts({ frame, composition, state, dispatch, playerRef, setZoom, setPan });
 
   return (
     <DirectorProvider value={ctxValue}>
@@ -296,29 +222,48 @@ export const App: React.FC = () => {
         </div>
 
         {/* Player Area */}
-        <div className="player-area">
+        <div
+          ref={playerAreaRef}
+          className="player-area"
+          onMouseDown={handlePanStart}
+          onMouseMove={handlePanMove}
+          onMouseUp={handlePanEnd}
+          onMouseLeave={handlePanEnd}
+        >
           {/* Aspect-ratio container - keeps 9:16 centered */}
           <div
             ref={playerFrameRef}
             className="player-frame"
-            style={{ aspectRatio: `${composition.video.width} / ${composition.video.height}` }}
+            style={{
+              aspectRatio: `${composition.video.width} / ${composition.video.height}`,
+              transform: zoom > 1 ? `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)` : undefined,
+            }}
           >
-            <SceneDirectorModeProvider value={!!(state.selectedScene && effectiveWaypoints.length > 0)}>
-              <Player
-                ref={playerRef}
-                component={VideoComponent}
-                compositionWidth={composition.video.width}
-                compositionHeight={composition.video.height}
-                fps={composition.video.fps}
-                durationInFrames={composition.video.frames}
-                playbackRate={playbackRate}
-                controls={false}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-              />
-            </SceneDirectorModeProvider>
+            <div
+              style={zoomTransform ? {
+                transform: `scale(${zoomTransform.zoom}) translate(${-(zoomTransform.centerX - 0.5) * 100 / zoomTransform.zoom}%, ${-(zoomTransform.centerY - 0.5) * 100 / zoomTransform.zoom}%)`,
+                transformOrigin: 'center center',
+                width: '100%',
+                height: '100%',
+              } : { width: '100%', height: '100%' }}
+            >
+              <SceneDirectorModeProvider value={!!(state.selectedScene && effectiveWaypoints.length > 0)}>
+                <Player
+                  ref={playerRef}
+                  component={VideoComponent}
+                  compositionWidth={composition.video.width}
+                  compositionHeight={composition.video.height}
+                  fps={composition.video.fps}
+                  durationInFrames={composition.video.frames}
+                  playbackRate={playbackRate}
+                  controls={false}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
+                />
+              </SceneDirectorModeProvider>
+            </div>
 
             {/* Drawing canvas overlays the player */}
             {state.selectedScene && !state.preview && !state.exportOpen && (
@@ -330,7 +275,6 @@ export const App: React.FC = () => {
             {state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
               const isDragging = state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
               const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
-              // When dragging: single-point path at dragged position, frame=0
               const handPath = dragWp
                 ? [{ ...dragWp, frame: 0 }]
                 : effectiveWaypoints;
@@ -391,6 +335,13 @@ export const App: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Zoom indicator */}
+          {zoom > 1 && (
+            <div className="zoom-indicator" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>
+              {Math.round(zoom * 100)}% — Alt+drag to pan, 0 to reset
+            </div>
+          )}
         </div>
 
         {/* Inspector (right panel) */}

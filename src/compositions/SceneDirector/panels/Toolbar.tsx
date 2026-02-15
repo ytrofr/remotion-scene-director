@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDirector } from '../context';
-import { COMPOSITIONS } from '../state';
+import { COMPOSITIONS } from '../compositions';
 import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
@@ -18,7 +18,7 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 ];
 
 export const Toolbar: React.FC = () => {
-  const { state, dispatch, canUndo } = useDirector();
+  const { state, dispatch, canUndo, cursorScale, setCursorScale } = useDirector();
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [openDropdown, setOpenDropdown] = useState<GestureTool | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -192,6 +192,25 @@ export const Toolbar: React.FC = () => {
         Undo
         <kbd className="toolbar__kbd">Z</kbd>
       </button>
+
+      {/* Cursor size slider */}
+      {state.activeTool !== 'select' && (
+        <>
+          <div className="toolbar__divider" />
+          <div className="toolbar__cursor-size" title="Cursor preview size">
+            <input
+              type="range"
+              min="0.3"
+              max="2"
+              step="0.1"
+              value={cursorScale}
+              onChange={(e) => setCursorScale(parseFloat(e.target.value))}
+              className="toolbar__slider"
+            />
+            <span className="toolbar__slider-label">{cursorScale.toFixed(1)}x</span>
+          </div>
+        </>
+      )}
 
       <div className="toolbar__spacer" />
 

@@ -20,6 +20,7 @@ import { simplifyPath } from '../utils';
 import { GESTURE_PRESETS, type GestureTool } from '../gestures';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import { Crosshairs } from './Crosshairs';
+import { HandCursorPreview } from './HandCursorPreview';
 
 export const DrawingCanvas: React.FC = () => {
   const { state, dispatch, frame, currentScene, sceneWaypoints, composition, activePreset } = useDirector();
@@ -68,6 +69,11 @@ export const DrawingCanvas: React.FC = () => {
 
     // === EDIT MODE: dots are visible ===
     if (hasExistingWaypoints) {
+      // Select tool in edit mode: just deselect, no drawing/adding
+      if (state.activeTool === 'select') {
+        dispatch({ type: 'SELECT_WAYPOINT', index: null });
+        return;
+      }
       if (state.selectedWaypoint !== null && state.selectedScene) {
         // A dot is selected → move it to this position, then deselect
         dispatch({
@@ -158,6 +164,10 @@ export const DrawingCanvas: React.FC = () => {
         }));
         dispatch({ type: 'SET_WAYPOINTS', scene: currentScene.name, waypoints: newWaypoints });
       }
+      // Sync scene gesture to active tool so hand animation matches
+      if (state.activeTool !== 'select') {
+        dispatch({ type: 'SET_SCENE_GESTURE', scene: currentScene.name, gesture: state.activeTool as GestureTool });
+      }
       return;
     }
 
@@ -180,17 +190,22 @@ export const DrawingCanvas: React.FC = () => {
     }
   }, [isDrawing, currentScene, activePreset, frame, compWidth, compHeight, dispatch, state.activeTool, sceneWaypoints.length, toScene]);
 
-  // Cursor: crosshair when a dot is selected (ready to place), otherwise default
+  // Cursor logic: Lottie hand when gesture tool active, crosshair for precision placement
   const hasExistingWaypoints = sceneWaypoints.length > 0;
   const isSelectTool = state.activeTool === 'select';
-  const cursorStyle = hasExistingWaypoints
-    ? (state.selectedWaypoint !== null ? 'crosshair' : 'default')
-    : (isSelectTool ? 'default' : 'crosshair');
 
-  // Show crosshairs: in edit mode when dot selected, in create mode when gesture tool active
-  const showCrosshairs = hasExistingWaypoints
-    ? state.selectedWaypoint !== null
-    : !isSelectTool;
+  // Hand cursor: when gesture tool active and not in precision waypoint placement
+  const showHandCursor = activePreset !== null && state.selectedWaypoint === null;
+
+  const cursorStyle = showHandCursor
+    ? 'none'
+    : (isSelectTool
+      ? 'default'
+      : (hasExistingWaypoints
+        ? (state.selectedWaypoint !== null ? 'crosshair' : 'default')
+        : 'crosshair'));
+
+  const showPrecisionCrosshairs = hasExistingWaypoints && state.selectedWaypoint !== null && !isSelectTool;
 
   return (
     <div
@@ -209,8 +224,17 @@ export const DrawingCanvas: React.FC = () => {
         zIndex: 10,
       }}
     >
-      {/* Crosshairs */}
-      {mousePos && showCrosshairs && (
+      {/* Hand cursor preview — always mounted when gesture tool active (avoids Lottie reload) */}
+      {showHandCursor && activePreset && (
+        <HandCursorPreview
+          x={mousePos?.x ?? null}
+          y={mousePos?.y ?? null}
+          preset={activePreset}
+        />
+      )}
+
+      {/* Precision crosshairs when placing a waypoint */}
+      {mousePos && showPrecisionCrosshairs && (
         <Crosshairs x={mousePos.x} y={mousePos.y} />
       )}
 

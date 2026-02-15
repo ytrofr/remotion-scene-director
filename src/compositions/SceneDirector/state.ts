@@ -3,9 +3,10 @@
  * Gesture-first state: activeTool + per-scene gesture type replace all manual config.
  */
 
-import React from 'react';
 import type { HandPathPoint, LottieAnimation } from '../../components/FloatingHand/types';
-import type { GestureTool } from './gestures';
+import { GESTURE_PRESETS, type GestureTool } from './gestures';
+import { createHandLayer, type Layer, type ZoomKeyframe } from './layers';
+import type { CodedPath } from './codedPaths';
 
 // Scene info (unified format across compositions)
 export interface SceneInfo {
@@ -41,6 +42,9 @@ export interface DirectorState {
   showTrail: boolean;
   exportOpen: boolean;
   importOpen: boolean;
+  // Layer system
+  layers: Record<string, Layer[]>;       // scene name -> ordered layers
+  selectedLayerId: string | null;
 }
 
 // Actions
@@ -65,12 +69,23 @@ export type DirectorAction =
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
   | { type: 'UNDO' }
-  | { type: 'ADOPT_CODED_PATH'; scene: string; waypoints: HandPathPoint[]; gesture?: GestureTool };
+  | { type: 'ADOPT_CODED_PATH'; scene: string; waypoints: HandPathPoint[]; gesture?: GestureTool }
+  // Layer actions
+  | { type: 'ADD_LAYER'; scene: string; layer: Layer }
+  | { type: 'REMOVE_LAYER'; scene: string; layerId: string }
+  | { type: 'UPDATE_LAYER'; scene: string; layerId: string; changes: Partial<Layer> }
+  | { type: 'UPDATE_LAYER_DATA'; scene: string; layerId: string; data: any }
+  | { type: 'SELECT_LAYER'; layerId: string | null }
+  | { type: 'REORDER_LAYERS'; scene: string; layerIds: string[] }
+  | { type: 'TOGGLE_LAYER_VISIBILITY'; scene: string; layerId: string }
+  | { type: 'TOGGLE_LAYER_LOCK'; scene: string; layerId: string }
+  // Layer auto-migration
+  | { type: 'ENSURE_SCENE_LAYERS'; scene: string; codedPath: CodedPath | null };
 
 export const initialState: DirectorState = {
   compositionId: 'MobileChatDemoCombined',
   selectedScene: null,
-  activeTool: 'click',
+  activeTool: 'select',
   sceneGesture: {},
   waypoints: {},
   selectedWaypoint: null,
@@ -81,6 +96,8 @@ export const initialState: DirectorState = {
   showTrail: false,
   exportOpen: false,
   importOpen: false,
+  layers: {},
+  selectedLayerId: null,
 };
 
 export function directorReducer(state: DirectorState, action: DirectorAction): DirectorState {
@@ -170,49 +187,83 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       }
       return updated;
     }
+    // Layer actions
+    case 'ADD_LAYER': {
+      const sceneLayers = [...(state.layers[action.scene] || []), action.layer];
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers }, selectedLayerId: action.layer.id };
+    }
+    case 'REMOVE_LAYER': {
+      const sceneLayers = (state.layers[action.scene] || []).filter(l => l.id !== action.layerId);
+      return {
+        ...state,
+        layers: { ...state.layers, [action.scene]: sceneLayers },
+        selectedLayerId: state.selectedLayerId === action.layerId ? null : state.selectedLayerId,
+      };
+    }
+    case 'UPDATE_LAYER': {
+      const sceneLayers = (state.layers[action.scene] || []).map(l =>
+        l.id === action.layerId ? { ...l, ...action.changes, id: l.id, type: l.type } as Layer : l
+      );
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers } };
+    }
+    case 'UPDATE_LAYER_DATA': {
+      const sceneLayers = (state.layers[action.scene] || []).map(l =>
+        l.id === action.layerId ? { ...l, data: { ...l.data, ...action.data } } as Layer : l
+      );
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers } };
+    }
+    case 'SELECT_LAYER':
+      return { ...state, selectedLayerId: action.layerId };
+    case 'REORDER_LAYERS': {
+      const existing = state.layers[action.scene] || [];
+      const ordered = action.layerIds
+        .map(id => existing.find(l => l.id === id))
+        .filter((l): l is Layer => !!l);
+      return { ...state, layers: { ...state.layers, [action.scene]: ordered } };
+    }
+    case 'TOGGLE_LAYER_VISIBILITY': {
+      const sceneLayers = (state.layers[action.scene] || []).map(l =>
+        l.id === action.layerId ? { ...l, visible: !l.visible } as Layer : l
+      );
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers } };
+    }
+    case 'TOGGLE_LAYER_LOCK': {
+      const sceneLayers = (state.layers[action.scene] || []).map(l =>
+        l.id === action.layerId ? { ...l, locked: !l.locked } as Layer : l
+      );
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers } };
+    }
+    // Layer auto-migration: idempotently create hand layer from existing data
+    case 'ENSURE_SCENE_LAYERS': {
+      if ((state.layers[action.scene] || []).length > 0) return state;
+
+      const waypoints = state.waypoints[action.scene] || [];
+      const coded = action.codedPath;
+      const effectiveWaypoints = waypoints.length > 0 ? waypoints : (coded?.path ?? []);
+      if (effectiveWaypoints.length === 0) return state;
+
+      const gesture: GestureTool = state.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
+      const animation = state.sceneAnimation[action.scene] ?? GESTURE_PRESETS[gesture].animation;
+      const dark = state.sceneDark[action.scene] ?? GESTURE_PRESETS[gesture].dark;
+
+      const handLayer = createHandLayer(action.scene, effectiveWaypoints, gesture, animation, dark, 0);
+
+      const newState: DirectorState = {
+        ...state,
+        layers: { ...state.layers, [action.scene]: [handLayer] },
+        selectedLayerId: handLayer.id,
+      };
+      // Also adopt waypoints into flat state if they came from coded path
+      if (waypoints.length === 0) {
+        newState.waypoints = { ...state.waypoints, [action.scene]: effectiveWaypoints };
+      }
+      if (!state.sceneGesture[action.scene] && coded?.gesture) {
+        newState.sceneGesture = { ...state.sceneGesture, [action.scene]: coded.gesture as GestureTool };
+      }
+      return newState;
+    }
     default:
       return state;
   }
 }
 
-// Build composition registry
-import { MobileChatDemoCombined, COMBINED_SCENE_INFO, COMBINED_VIDEO } from '../MobileChatDemoCombined';
-import { DorianDemo, DORIAN_SCENE_INFO, VIDEO as DORIAN_VIDEO } from '../DorianDemo';
-import { DashmorDemo, DASHMOR_SCENE_TIMINGS, VIDEO as DASHMOR_VIDEO } from '../DashmorDemo';
-
-function dashmorSceneInfo(): SceneInfo[] {
-  return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
-    name: `${i + 1}-${t.name.replace(/\s+/g, '')}`,
-    start: t.from,
-    end: t.from + t.durationInFrames,
-  }));
-}
-
-export const COMPOSITIONS: CompositionEntry[] = [
-  {
-    id: 'MobileChatDemoCombined',
-    label: 'Combined (V2+V4)',
-    video: { width: 1080, height: 1920, fps: 30, frames: COMBINED_VIDEO.durationInFrames },
-    scenes: COMBINED_SCENE_INFO.map(s => ({ name: s.name, start: s.start, end: s.end, part: s.part, hand: s.hand })),
-    globalOffsetY: 120,
-  },
-  {
-    id: 'DorianDemo',
-    label: 'Dorian (Marketplace)',
-    video: { width: 1080, height: 1920, fps: 30, frames: DORIAN_VIDEO.durationInFrames },
-    scenes: DORIAN_SCENE_INFO.map(s => ({ name: s.name, start: s.start, end: s.end, hand: s.hand })),
-  },
-  {
-    id: 'DashmorDemo',
-    label: 'Dashmor (Dashboard)',
-    video: { width: 1080, height: 1920, fps: 30, frames: DASHMOR_VIDEO.durationInFrames },
-    scenes: dashmorSceneInfo(),
-  },
-];
-
-// Component map for rendering
-export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
-  MobileChatDemoCombined,
-  DorianDemo,
-  DashmorDemo,
-};

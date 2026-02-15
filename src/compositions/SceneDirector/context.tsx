@@ -8,6 +8,7 @@ import type { PlayerRef } from '@remotion/player';
 import type { HandPathPoint } from '../../components/FloatingHand/types';
 import type { DirectorState, DirectorAction, CompositionEntry, SceneInfo } from './state';
 import type { GesturePreset } from './gestures';
+import type { Layer } from './layers';
 
 export interface DirectorContextValue {
   state: DirectorState;
@@ -23,6 +24,11 @@ export interface DirectorContextValue {
   canUndo: boolean;
   playbackRate: number;
   setPlaybackRate: (rate: number) => void;
+  playerScale: number;
+  cursorScale: number;
+  setCursorScale: (scale: number) => void;
+  sceneLayers: Layer[];
+  selectedLayer: Layer | null;
 }
 
 const Ctx = createContext<DirectorContextValue>(null!);

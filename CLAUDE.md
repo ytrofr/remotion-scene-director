@@ -14,9 +14,17 @@
 npm run dev   # http://localhost:3000
 
 # Render videos
-npm run render:v2        # Mobile 9:16 demo (MobileChatDemoV2)
-npm run render:mobile    # Legacy mobile demo
-npm run render           # Desktop demo
+npm run render:dorian          # DorianDemo 30fps (standard)
+npm run render:dorian:preview  # DorianDemo fast preview (CRF 28)
+npm run render:dorian:hq       # DorianDemo high quality (CRF 16)
+npm run render:v4              # MobileChatDemoV4
+npm run render:combined        # MobileChatDemoCombined
+npm run render:v2              # Mobile 9:16 demo (MobileChatDemoV2)
+npm run render:mobile          # Legacy mobile demo
+npm run render                 # Desktop demo
+
+# 2x speed post-processing
+npm run postrender:2x          # ffmpeg blend interpolation + 2x speed
 
 # Capture screenshots (requires target app running on port 8080)
 npm run capture:mobile   # Dark mode mobile capture
@@ -119,34 +127,65 @@ src/compositions/DashmorDemo/
 
 ### DorianDemo (Marketplace Demo - 9:16 Vertical)
 
-**Dimensions**: 1080x1920 | **Duration**: ~25 seconds @ 30fps (750 frames)
+**Dimensions**: 1080x1920 | **Duration**: ~38 seconds @ 30fps (1140 frames)
 
-AI-powered marketplace demo showing product discovery and chat assistant.
+AI-powered marketplace demo showing product discovery and chat assistant (V2 - 10 scenes).
 
-| #   | Scene Name | Duration   | Description             |
-| --- | ---------- | ---------- | ----------------------- |
-| 1   | Intro      | 75 frames  | Logo animation          |
-| 2   | HomeScroll | 150 frames | Scroll through products |
-| 3   | TapBubble  | 75 frames  | Tap AI assistant bubble |
-| 4   | ChatOpen   | 90 frames  | Chat panel slides up    |
-| 5   | UserTyping | 150 frames | User types message      |
-| 6   | Outro      | 210 frames | CTA + logo              |
+| #   | Scene Name    | Duration   | Description                          | File                   |
+| --- | ------------- | ---------- | ------------------------------------ | ---------------------- |
+| 1   | Intro         | 75 frames  | Logo animation                       | IntroScene.tsx         |
+| 2   | HomeScroll    | 150 frames | Scroll through products              | HomeScrollScene.tsx    |
+| 3   | TapBubble     | 75 frames  | Tap AI assistant bubble              | TapBubbleScene.tsx     |
+| 4   | ChatOpen      | 90 frames  | Chat panel slides up                 | ChatOpenScene.tsx      |
+| 5   | UserTyping    | 150 frames | User types message + sends           | UserTypingScene.tsx    |
+| 6   | AIThinking    | 60 frames  | AI thinking dots                     | AIThinkingScene.tsx    |
+| 7   | AIResponse    | 120 frames | AI response + View Products button   | AIResponseScene.tsx    |
+| 8   | ProductPage   | 150 frames | LG TV listing with scroll            | ProductPageScene.tsx   |
+| 9   | ProductDetail | 90 frames  | Product detail crossfade             | ProductDetailScene.tsx |
+| 10  | Outro         | 180 frames | CTA/Outro                            | OutroScene.tsx         |
 
 **Key Standards**:
 
 - **ALWAYS use `dark={true}`** for FloatingHand - dark pointers on light backgrounds
 - **Hand animations**: Use `hand-tap` for click scenes, `hand-scroll-clean` for scrolling
-- **Physics for trail effect**: `velocityScale: 0.8`, `maxRotation: 35` - hand rotates toward movement direction
-- **Sticky header**: Logo + hamburger + search bar overlay on all scroll frames
+- **Physics presets**: Use `HAND_PHYSICS` from constants.ts (scroll, tap, trail)
+- **Spring presets**: Use `SPRING_CONFIG` from constants.ts (gentle, bouncy, snappy, zoom, slide, response)
+- **FPS-relative timing**: Use `f(frame30, fps)` from timing.ts for all interpolate() calls
+- **Shared components**: Use components from `src/components/DorianPhone/` (StatusBar, DynamicIsland, DorianNavHeader, AIBubble, ChatHeader, AnimatedText, FingerTap, DorianLogo)
 
 **Files**:
 
 ```
 src/compositions/DorianDemo/
-├── DorianDemo.tsx           # Main composition + scenes
+├── DorianDemo.tsx           # Main composition (orchestrator) + debug compositions
 ├── DorianPhoneMockup.tsx    # Phone frame with scrollable content
-├── constants.ts             # Colors, timing, text content
-└── index.ts                 # Exports
+├── constants.ts             # Colors, timing, text, spring configs, hand physics
+├── timing.ts                # FPS-relative frame helpers (f, sec)
+├── transitions.ts           # Reusable transition hooks (useZoom, useCrossfade, useSlide)
+├── index.ts                 # Exports
+└── scenes/
+    ├── index.ts             # Barrel exports
+    ├── IntroScene.tsx
+    ├── HomeScrollScene.tsx
+    ├── TapBubbleScene.tsx
+    ├── ChatOpenScene.tsx
+    ├── UserTypingScene.tsx
+    ├── AIThinkingScene.tsx
+    ├── AIResponseScene.tsx
+    ├── ProductPageScene.tsx
+    ├── ProductDetailScene.tsx
+    └── OutroScene.tsx
+
+src/components/DorianPhone/  # Shared UI components
+├── index.ts                 # Barrel exports
+├── StatusBar.tsx            # iOS status bar (10:45, signal, battery)
+├── DynamicIsland.tsx        # Black pill notch
+├── DorianNavHeader.tsx      # Hamburger + logo + account + search
+├── AIBubble.tsx             # Teal AI assistant circle (single source)
+├── ChatHeader.tsx           # Chat panel header
+├── AnimatedText.tsx         # Fade/slide-in text wrapper
+├── FingerTap.tsx            # Tap ripple effect
+└── DorianLogo.tsx           # Large logo for intro/outro
 ```
 
 **Debug Compositions**:

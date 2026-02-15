@@ -835,6 +835,15 @@ export const RemotionRoot: React.FC = () => {
         width={DORIAN_VIDEO.width}
         height={DORIAN_VIDEO.height}
       />
+      {/* DorianDemo 60fps variant - smooth rendering after fps-relative conversion */}
+      <Composition
+        id="DorianDemo-60fps"
+        component={DorianDemo}
+        durationInFrames={DORIAN_VIDEO.durationInFrames * 2}
+        fps={60}
+        width={DORIAN_VIDEO.width}
+        height={DORIAN_VIDEO.height}
+      />
       {/* Dorian Debug - Click to get coordinates */}
       <Still
         id="DorianDebug"

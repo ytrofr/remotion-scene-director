@@ -1837,12 +1837,22 @@ const AIResponseScene: React.FC = () => {
   );
 };
 
-// Scene 8: Product Page - zoom out, chat collapses, crossfade to LG TV listing
+// Scene 8: Product Page - zoom out from chat, loader inside phone, then LG TV listing
 const ProductPageScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Zoom out from chat (2.76) to normal phone view (1.8)
+  const message = TEXT_CONTENT.userTyping.userMessage;
+  const aiMessage = TEXT_CONTENT.aiResponse.aiMessage;
+  const chatHeight = 260;
+
+  // Phase 1 (frames 0-25): Zoom out from 2.76 to 1.8 to reveal full phone
+  // Phase 2 (frames 25-40): Chat panel slides down, loader appears inside phone content area
+  // Phase 3 (frames 40-100): Dorian branded loader visible (~2s)
+  // Phase 4 (frames 95-105): Loader fades, LG TV listing fades in
+  // Phase 5 (frames 105-150): Hand scrolls listing
+
+  // Zoom out from chat to full phone view
   const zoomOutProgress = spring({
     frame,
     fps,
@@ -1851,26 +1861,39 @@ const ProductPageScene: React.FC = () => {
   const zoomScale = interpolate(zoomOutProgress, [0, 1], [2.76, 1.8]);
   const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-560, 0]);
 
-  // Crossfade from products screen to LG TV listing
-  const crossfadeProgress = interpolate(frame, [15, 35], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  // Chat panel slides down and fades
+  const chatSlide = interpolate(frame, [25, 40], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+
+  // Loader phases
+  const loaderIn = interpolate(frame, [30, 38], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const loaderOut = interpolate(frame, [95, 105], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const loaderVisible = Math.min(loaderIn, loaderOut);
+
+  // Spinning animation for loader
+  const spinDegrees = frame * 8;
+
+  // LG TV listing fade in
+  const listingIn = interpolate(frame, [95, 108], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   // Scroll the listing page
-  const scrollProgress = interpolate(frame, [50, 130], [0, 300], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const scrollProgress = interpolate(frame, [110, 140], [0, 300], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
   // Hand for scrolling
   const handX = 780;
   const handY = 960;
   const savedScroll = getSavedPath('DorianDemo', '8-ProductPage');
   const scrollHandPath: HandPathPoint[] = savedScroll?.path ?? [
-    { x: 1050, y: handY, frame: 30, gesture: 'pointer' as const, rotation: 0 },
-    { x: handX, y: handY, frame: 45, gesture: 'pointer' as const, rotation: 0 },
-    { x: handX, y: handY, frame: 48, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 80, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 110, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 128, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 135, gesture: 'pointer' as const, rotation: 0 },
+    { x: 1050, y: handY, frame: 105, gesture: 'pointer' as const, rotation: 0 },
+    { x: handX, y: handY, frame: 115, gesture: 'pointer' as const, rotation: 0 },
+    { x: handX, y: handY, frame: 118, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 130, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 140, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 145, gesture: 'pointer' as const, rotation: 0 },
     { x: handX, y: handY, frame: 150, gesture: 'pointer' as const, rotation: 0 },
   ];
+
+  // Content area top (below nav header + search = ~130px)
+  const contentTop = 130;
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
@@ -1909,7 +1932,7 @@ const ProductPageScene: React.FC = () => {
           top: '50%',
           transform: `translate(-50%, -50%) scale(${zoomScale})`,
         }}>
-          {/* Phone frame with LG TV listing screenshot */}
+          {/* Single phone frame throughout the scene */}
           <div
             style={{
               width: 390 + 24,
@@ -1930,29 +1953,142 @@ const ProductPageScene: React.FC = () => {
                 background: '#fff',
               }}
             >
-              {/* Crossfade: old products screen fading out */}
-              <div style={{ position: 'absolute', top: 0, left: 0, width: 390, opacity: 1 - crossfadeProgress }}>
-                <Img
-                  src={staticFile('dorian/screens/products.png')}
-                  style={{ width: 390, height: 'auto', display: 'block' }}
-                />
-              </div>
+              {/* Layer 1: Background - same stacked screenshots as scene 7 (scrollOffset 702) */}
+              {frame < 108 && (
+                <div style={{ position: 'absolute', top: -702, left: 0, width: 390, opacity: 1 - listingIn }}>
+                  {/* Home screen */}
+                  <div style={{ position: 'relative', marginLeft: -5 }}>
+                    <Img
+                      src={staticFile('dorian/woodmart/home-mobile.png')}
+                      style={{ width: 390 + 52, height: 'auto', display: 'block' }}
+                    />
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 55, background: '#fff' }} />
+                  </div>
+                  {/* Categories with products */}
+                  <div style={{ position: 'relative', marginLeft: -5, marginTop: -70 }}>
+                    <Img
+                      src={staticFile('dorian/woodmart/categories-mobile-2.png')}
+                      style={{ width: 390 + 12, height: 'auto', display: 'block' }}
+                    />
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50, background: '#fff' }} />
+                  </div>
+                </div>
+              )}
 
-              {/* New LG TV listing fading in + scrolling */}
-              <div style={{
-                position: 'absolute',
-                top: -scrollProgress,
-                left: 0,
-                width: 390,
-                opacity: crossfadeProgress,
-              }}>
-                <Img
-                  src={staticFile('dorian/woodmart/lg-tvs-listing-full.png')}
-                  style={{ width: 390, height: 'auto', display: 'block' }}
-                />
-              </div>
+              {/* Layer 2: Dorian branded loader (inside phone content area, below nav header) */}
+              {frame >= 30 && frame < 110 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: contentTop,
+                    left: 0,
+                    right: 0,
+                    bottom: 60,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'white',
+                    opacity: loaderVisible,
+                    zIndex: 3,
+                  }}
+                >
+                  {/* Teal spinner */}
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      border: '4px solid #E2E8F0',
+                      borderTopColor: COLORS.primary,
+                      transform: `rotate(${spinDegrees}deg)`,
+                      marginBottom: 16,
+                    }}
+                  />
+                  <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.text, fontFamily, marginBottom: 4 }}>
+                    Finding your products...
+                  </div>
+                  <div style={{ fontSize: 11, color: COLORS.textLight, fontFamily }}>
+                    Powered by Dorian AI
+                  </div>
+                </div>
+              )}
 
-              {/* Status Bar */}
+              {/* Layer 3: LG TV listing (fades in after loader, then scrolls) */}
+              {frame >= 90 && (
+                <div style={{
+                  position: 'absolute',
+                  top: -scrollProgress,
+                  left: 0,
+                  width: 390,
+                  opacity: listingIn,
+                }}>
+                  <Img
+                    src={staticFile('dorian/woodmart/lg-tvs-listing-full.png')}
+                    style={{ width: 390, height: 'auto', display: 'block' }}
+                  />
+                </div>
+              )}
+
+              {/* Chat overlay panel - slides down after zoom out completes */}
+              {frame < 45 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 60 - chatSlide * 350,
+                    left: 0,
+                    right: 0,
+                    height: chatHeight,
+                    background: 'white',
+                    borderRadius: '24px 24px 0 0',
+                    boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
+                    padding: '15px 16px',
+                    fontFamily,
+                    overflow: 'hidden',
+                    opacity: 1 - chatSlide,
+                    zIndex: 4,
+                  }}
+                >
+                  {/* Chat header */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                    <AIBubble scale={0.5} />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 12, color: COLORS.text }}>Dorian</div>
+                      <div style={{ fontSize: 9, color: COLORS.primary }}>Your AI Assistant</div>
+                    </div>
+                  </div>
+
+                  {/* AI greeting */}
+                  <div style={{ background: '#f0f0f0', padding: '6px 10px', borderRadius: '12px 12px 12px 4px', maxWidth: '85%', fontSize: 10, color: COLORS.text, marginBottom: 6, lineHeight: 1.3 }}>
+                    Hi! How can I help you today?
+                  </div>
+
+                  {/* User message */}
+                  <div style={{ background: COLORS.primary, padding: '6px 10px', borderRadius: '12px 12px 4px 12px', maxWidth: '80%', marginLeft: 'auto', fontSize: 10, color: 'white', lineHeight: 1.3, marginBottom: 6 }}>
+                    {message}
+                  </div>
+
+                  {/* AI Response (fully revealed) */}
+                  <div style={{ background: '#f0f0f0', padding: '6px 10px', borderRadius: '12px 12px 12px 4px', maxWidth: '90%', fontSize: 10, color: COLORS.text, lineHeight: 1.3, marginBottom: 6 }}>
+                    {aiMessage}
+                  </div>
+
+                  {/* View Products button (tapped state) */}
+                  <div style={{ background: COLORS.primaryDark, padding: '8px 16px', borderRadius: 16, textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'white', maxWidth: '60%' }}>
+                    View Products →
+                  </div>
+
+                  {/* Input field */}
+                  <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12, background: '#f5f5f5', borderRadius: 18, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '2px solid transparent' }}>
+                    <span style={{ color: '#999', fontSize: 10 }}>Type a message...</span>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ color: 'white', fontSize: 12 }}>→</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Status Bar (always visible) */}
               <div
                 style={{
                   position: 'absolute',
@@ -1998,7 +2134,7 @@ const ProductPageScene: React.FC = () => {
                 }}
               />
 
-              {/* Dorian Nav Header - Hamburger + Logo + Account + Search */}
+              {/* Dorian Nav Header - stays throughout */}
               <div
                 style={{
                   position: 'absolute',
@@ -2009,30 +2145,18 @@ const ProductPageScene: React.FC = () => {
                   zIndex: 5,
                 }}
               >
-                {/* Header Row: Hamburger + Logo + Account */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '8px 20px',
-                    position: 'relative',
-                  }}
-                >
-                  {/* Hamburger Menu - Left */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 20px', position: 'relative' }}>
                   <div style={{ position: 'absolute', left: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
                     <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
                     <div style={{ width: 22, height: 2, background: '#1E293B', borderRadius: 1 }} />
                     <div style={{ width: 16, height: 2, background: '#1E293B', borderRadius: 1 }} />
                   </div>
-                  {/* Logo - Center */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div style={{ width: 28, height: 28, borderRadius: 7, background: 'linear-gradient(135deg, #2DD4BF 0%, #14B8A6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2.5px solid white', borderRightColor: 'transparent', transform: 'rotate(-45deg)' }} />
                     </div>
                     <span style={{ fontSize: 18, fontWeight: 800, color: '#2DD4BF', fontFamily, letterSpacing: 0.5 }}>DORIAN</span>
                   </div>
-                  {/* Account Icon - Right */}
                   <div style={{ position: 'absolute', right: 20 }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="8" r="4" stroke="#1E293B" strokeWidth="2" />
@@ -2040,7 +2164,6 @@ const ProductPageScene: React.FC = () => {
                     </svg>
                   </div>
                 </div>
-                {/* Search Bar */}
                 <div style={{ padding: '4px 16px 12px 16px', background: '#fff' }}>
                   <div style={{ display: 'flex', alignItems: 'center', background: '#F1F5F9', borderRadius: 25, padding: '10px 16px', gap: 10 }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -2062,10 +2185,10 @@ const ProductPageScene: React.FC = () => {
       </div>
 
       {/* Scrolling hand */}
-      {frame >= 30 && (
+      {frame >= 105 && (
         <FloatingHand
           path={scrollHandPath}
-          startFrame={30}
+          startFrame={105}
           animation="hand-scroll-clean"
           size={140}
           dark={true}

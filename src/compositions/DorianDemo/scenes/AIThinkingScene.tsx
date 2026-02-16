@@ -4,13 +4,11 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT } from '../constants';
 import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { DorianPhoneStatic as DorianPhoneStaticNew } from '../DorianPhoneMockup';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 6: AI Thinking - thinking dots animation
 export const AIThinkingScene: React.FC = () => {

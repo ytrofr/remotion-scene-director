@@ -3,9 +3,7 @@
 
 import React from 'react';
 import { Img, staticFile, useCurrentFrame } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../lib/fonts';
 
 // AI Chat Bubble - matches Dorian design
 export const AIBubble: React.FC<{ scale?: number; pulse?: boolean }> = ({ scale = 1, pulse = false }) => {

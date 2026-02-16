@@ -1,7 +1,5 @@
 import React from 'react';
-import { loadFont } from '@remotion/google-fonts/Rubik';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../lib/fonts';
 
 export const DorianNavHeader: React.FC<{ showSearch?: boolean; zIndex?: number }> = React.memo(({
   showSearch = true,

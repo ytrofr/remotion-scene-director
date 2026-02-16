@@ -1,6 +1,5 @@
 import React from 'react';
 import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Audio } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT, SPRING_CONFIG } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -8,8 +7,7 @@ import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { DorianPhoneStatic as DorianPhoneStaticNew } from '../DorianPhoneMockup';
 import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 4: Chat Opens with zoom effect + hand taps input + starts typing
 export const ChatOpenScene: React.FC = () => {

@@ -6,7 +6,6 @@ import {
   spring,
   useVideoConfig,
 } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT, SPRING_CONFIG } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -14,8 +13,7 @@ import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { DorianPhoneStatic as DorianPhoneStaticNew } from '../DorianPhoneMockup';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 7: AI Response - response message slides in + "View Products" button + hand tap
 export const AIResponseScene: React.FC = () => {

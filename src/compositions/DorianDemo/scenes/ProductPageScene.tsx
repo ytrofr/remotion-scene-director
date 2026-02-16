@@ -8,7 +8,6 @@ import {
   spring,
   useVideoConfig,
 } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -16,8 +15,7 @@ import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { AIBubble as AIBubbleNew } from '../DorianPhoneMockup';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 8: Product Page - zoom out from chat, loader inside phone, then LG TV listing
 export const ProductPageScene: React.FC = () => {

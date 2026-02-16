@@ -1,14 +1,12 @@
 import React from 'react';
 import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Audio } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
 import { DorianPhoneMockup as DorianPhoneMockupNew } from '../DorianPhoneMockup';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 3: Tap on AI Bubble with ZOOM and FloatingHand
 export const TapAIBubbleScene: React.FC = () => {

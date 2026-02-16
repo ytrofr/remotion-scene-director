@@ -7,12 +7,10 @@ import {
   interpolate,
   useVideoConfig,
 } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT } from '../constants';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { AIBubble as AIBubbleNew } from '../DorianPhoneMockup';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 9: Product Detail - hand taps first product, crossfade to detail page
 export const ProductDetailScene: React.FC = () => {

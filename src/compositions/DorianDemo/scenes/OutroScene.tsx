@@ -5,11 +5,9 @@ import {
   spring,
   useVideoConfig,
 } from 'remotion';
-import { loadFont } from '@remotion/google-fonts/Rubik';
 import { COLORS, TEXT_CONTENT, SPRING_CONFIG } from '../constants';
 import { DorianLogo } from '../../../components/DorianPhone/DorianLogo';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../../lib/fonts';
 
 // Scene 10: Outro
 export const OutroScene: React.FC = () => {

@@ -1,7 +1,5 @@
 import React from 'react';
-import { loadFont } from '@remotion/google-fonts/Rubik';
-
-const { fontFamily } = loadFont();
+import { fontFamily } from '../../lib/fonts';
 
 export const DorianLogo: React.FC<{ size?: number; showText?: boolean }> = React.memo(({
   size = 120,

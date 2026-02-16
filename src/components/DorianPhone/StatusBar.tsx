@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const StatusBar: React.FC<{ zIndex?: number }> = ({ zIndex = 5 }) => (
+export const StatusBar: React.FC<{ zIndex?: number }> = React.memo(({ zIndex = 5 }) => (
   <div
     style={{
       position: 'absolute',
@@ -32,4 +32,4 @@ export const StatusBar: React.FC<{ zIndex?: number }> = ({ zIndex = 5 }) => (
       </div>
     </div>
   </div>
-);
+));

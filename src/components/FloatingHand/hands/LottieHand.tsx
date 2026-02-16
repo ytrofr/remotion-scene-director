@@ -60,38 +60,19 @@ export const LottieHand: React.FC<LottieHandProps> = ({
   dark = false,
 }) => {
   const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
-  const [pointerAnimationData, setPointerAnimationData] = useState<LottieAnimationData | null>(null);
   const [handle] = useState(() => delayRender('Loading Lottie animation'));
 
-  // Determine which animation to show based on gesture
-  // - pointer/drag: use hand-point (static pointer)
-  // - click: use the specified animationFile (tap animation)
-  // - scroll: use the specified animationFile (scroll animation)
-  const isClickGesture = gesture === 'click';
-  const isScrollGesture = gesture === 'scroll';
-  const usePointerAnimation = !isClickGesture && !isScrollGesture;
-
   useEffect(() => {
-    const loadAnimations = async () => {
-      try {
-        // Load the main animation (for click/scroll)
-        const response = await fetch(staticFile(`lottie/${animationFile}.json`));
-        const data = await response.json();
+    fetch(staticFile(`lottie/${animationFile}.json`))
+      .then(r => r.json())
+      .then(data => {
         setAnimationData(data as LottieAnimationData);
-
-        // Load the pointer animation (for movement)
-        const pointerResponse = await fetch(staticFile('lottie/hand-point.json'));
-        const pointerData = await pointerResponse.json();
-        setPointerAnimationData(pointerData as LottieAnimationData);
-
         continueRender(handle);
-      } catch (error) {
+      })
+      .catch(error => {
         console.error('Failed to load Lottie animation:', error);
         continueRender(handle);
-      }
-    };
-
-    loadAnimations();
+      });
   }, [animationFile, handle]);
 
   // Adjust playback based on gesture

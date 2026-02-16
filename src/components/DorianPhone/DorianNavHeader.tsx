@@ -3,7 +3,7 @@ import { loadFont } from '@remotion/google-fonts/Rubik';
 
 const { fontFamily } = loadFont();
 
-export const DorianNavHeader: React.FC<{ showSearch?: boolean; zIndex?: number }> = ({
+export const DorianNavHeader: React.FC<{ showSearch?: boolean; zIndex?: number }> = React.memo(({
   showSearch = true,
   zIndex = 5,
 }) => (
@@ -112,4 +112,4 @@ export const DorianNavHeader: React.FC<{ showSearch?: boolean; zIndex?: number }
       </div>
     )}
   </div>
-);
+));

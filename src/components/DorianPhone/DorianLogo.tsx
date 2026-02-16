@@ -3,7 +3,7 @@ import { loadFont } from '@remotion/google-fonts/Rubik';
 
 const { fontFamily } = loadFont();
 
-export const DorianLogo: React.FC<{ size?: number; showText?: boolean }> = ({
+export const DorianLogo: React.FC<{ size?: number; showText?: boolean }> = React.memo(({
   size = 120,
   showText = true,
 }) => {
@@ -47,4 +47,4 @@ export const DorianLogo: React.FC<{ size?: number; showText?: boolean }> = ({
       )}
     </div>
   );
-};
+});

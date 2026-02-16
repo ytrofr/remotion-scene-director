@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const DynamicIsland: React.FC<{ zIndex?: number }> = ({ zIndex = 6 }) => (
+export const DynamicIsland: React.FC<{ zIndex?: number }> = React.memo(({ zIndex = 6 }) => (
   <div
     style={{
       position: 'absolute',
@@ -14,4 +14,4 @@ export const DynamicIsland: React.FC<{ zIndex?: number }> = ({ zIndex = 6 }) => 
       zIndex,
     }}
   />
-);
+));

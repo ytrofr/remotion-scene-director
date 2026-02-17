@@ -173,7 +173,7 @@ export const Timeline: React.FC = () => {
         className={`timeline__bar ${isScrubbing ? 'timeline__bar--scrubbing' : ''}`}
       >
         {/* Scene bars */}
-        {scenes.map((scene) => {
+        {scenes.map((scene, sceneIndex) => {
           const left = (scene.start / totalFrames) * 100;
           const width = ((scene.end - scene.start) / totalFrames) * 100;
           const isSelected = scene.name === state.selectedScene;
@@ -199,12 +199,11 @@ export const Timeline: React.FC = () => {
               }}
               title={`${scene.name} (${scene.start}-${scene.end})`}
             >
-              {width > 5 && (
-                <span className="timeline__scene-label">
-                  {scene.name.split('-').slice(1).join('-') || scene.name}
-                  {wpCount > 0 && <span className="timeline__scene-wp-count" style={{ color: partColor }}>{wpCount}</span>}
-                </span>
-              )}
+              <span className="timeline__scene-label">
+                <span style={{ color: '#fff', marginRight: 2, fontWeight: 700 }}>{sceneIndex + 1}</span>
+                {width > 6 && (scene.name.split('-').slice(1).join('-') || scene.name)}
+                {wpCount > 0 && <span className="timeline__scene-wp-count" style={{ color: partColor }}>{wpCount}</span>}
+              </span>
             </div>
           );
         })}

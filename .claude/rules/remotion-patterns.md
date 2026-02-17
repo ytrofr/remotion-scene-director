@@ -66,3 +66,13 @@
 18. **2x speed via ffmpeg blend**: Use `npm run postrender:2x` (ffmpeg
     minterpolate blend + setpts). Never change composition fps as a
     speed hack — it breaks spring timing.
+
+19. **Centralized font loading**: Import `fontFamily` from `src/lib/fonts.ts`.
+    Never call `loadFont()` directly in scene or component files. The shared
+    module loads Rubik with only needed weights (400-800) and latin subset,
+    avoiding 84+ redundant network requests per render tab.
+
+20. **Static components use React.memo**: DorianPhone components (StatusBar,
+    DynamicIsland, DorianNavHeader, DorianLogo) are wrapped in React.memo.
+    Any new purely-props-driven component that renders every frame should
+    also be wrapped.

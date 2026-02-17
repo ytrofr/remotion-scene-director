@@ -372,6 +372,8 @@ src/
 │   │       ├── SectionScene.tsx          # Generic (used 7x)
 │   │       ├── OutroScene.tsx
 │   │       └── shared.tsx                # PhoneFrame, Callout, etc.
+├── lib/
+│   └── fonts.ts                          # ★ Centralized Rubik font loading (single source)
 ├── components/
 │   ├── PhoneMockup.tsx                   # iPhone-style frame
 │   ├── TouchAnimation.tsx                # Tap ripple effects

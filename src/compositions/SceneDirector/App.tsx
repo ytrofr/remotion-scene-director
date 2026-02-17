@@ -14,7 +14,7 @@ import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
 import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
-import { computeZoomAtFrame, type ZoomLayer } from './layers';
+import { computeZoomAtFrame, type ZoomLayer, type HandLayer } from './layers';
 import { loadSession, useSessionPersistence } from './hooks/useSessionPersistence';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePlayerControls } from './hooks/usePlayerControls';
@@ -270,9 +270,12 @@ export const App: React.FC = () => {
               <DrawingCanvas />
             )}
 
-            {/* FloatingHand: always visible when scene has waypoints (live WYSIWYG) */}
+            {/* FloatingHand: only renders when a visible hand layer exists */}
             {/* When dragging a waypoint, hand snaps to the dragged position */}
             {state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
+              // Hand only renders if a visible hand layer exists (layers are source of truth)
+              const handLayer = sceneLayers.find((l): l is HandLayer => l.type === 'hand');
+              if (!handLayer || !handLayer.visible) return null;
               const isDragging = state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
               const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
               const handPath = dragWp

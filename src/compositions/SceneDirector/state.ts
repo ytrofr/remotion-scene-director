@@ -193,12 +193,18 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers }, selectedLayerId: action.layer.id };
     }
     case 'REMOVE_LAYER': {
+      const removedLayer = (state.layers[action.scene] || []).find(l => l.id === action.layerId);
       const sceneLayers = (state.layers[action.scene] || []).filter(l => l.id !== action.layerId);
-      return {
+      const newState: DirectorState = {
         ...state,
         layers: { ...state.layers, [action.scene]: sceneLayers },
         selectedLayerId: state.selectedLayerId === action.layerId ? null : state.selectedLayerId,
       };
+      // When removing a hand layer, also clear flat waypoints so the hand disappears
+      if (removedLayer?.type === 'hand') {
+        newState.waypoints = { ...state.waypoints, [action.scene]: [] };
+      }
+      return newState;
     }
     case 'UPDATE_LAYER': {
       const sceneLayers = (state.layers[action.scene] || []).map(l =>

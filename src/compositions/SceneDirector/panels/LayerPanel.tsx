@@ -6,7 +6,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDirector } from '../context';
 import { createHandLayer, createZoomLayer, createAudioLayer, type Layer, type LayerType, type ZoomLayer } from '../layers';
-import { GESTURE_PRESETS, type GestureTool } from '../gestures';
+import type { GestureTool } from '../gestures';
 
 export const LayerPanel: React.FC = () => {
   const { state, dispatch } = useDirector();
@@ -20,8 +20,7 @@ export const LayerPanel: React.FC = () => {
     const order = sceneLayers.length;
     if (type === 'hand') {
       const gesture: GestureTool = state.sceneGesture[scene] ?? (state.activeTool !== 'select' ? state.activeTool : 'click');
-      const preset = GESTURE_PRESETS[gesture];
-      const layer = createHandLayer(scene, [], gesture, preset.animation, preset.dark, order);
+      const layer = createHandLayer(scene, [], gesture, order);
       dispatch({ type: 'ADD_LAYER', scene, layer });
     } else if (type === 'zoom') {
       const layer = createZoomLayer(scene, order);

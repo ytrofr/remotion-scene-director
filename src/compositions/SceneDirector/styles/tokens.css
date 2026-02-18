@@ -1,0 +1,24 @@
+/* ── Design Tokens ── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg:           #0c0e14;
+  --panel:        #14171f;
+  --panel-hover:  #1a1e28;
+  --surface:      #1e2230;
+  --border:       #2a2f3a;
+  --border-hover: #3d4455;
+  --text:         #e2e6ef;
+  --text-muted:   #6b7280;
+  --text-dim:     #4a5060;
+  --accent:       #5b9cf6;
+  --accent-hover: #7ab4ff;
+  --green:        #34d058;
+  --orange:       #e3a52a;
+  --red:          #f05050;
+  --radius:       6px;
+  --radius-sm:    4px;
+  --font:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono:         'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}

@@ -31,7 +31,6 @@ const UNDOABLE_ACTIONS = new Set([
   'REORDER_LAYERS',
   'TOGGLE_LAYER_VISIBILITY',
   'TOGGLE_LAYER_LOCK',
-  'ENSURE_SCENE_LAYERS',
 ]);
 
 export interface UndoableState {

@@ -37,7 +37,7 @@ export const ExportModal: React.FC = () => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => { /* clipboard not available */ });
   }, [code]);
 
   const handleImport = useCallback(() => {

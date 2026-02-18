@@ -1,0 +1,204 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TIMELINE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 6px 0;
+}
+.timeline__transport {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.timeline__transport-btn {
+  padding: 5px 10px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.timeline__transport-btn:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.timeline__play-btn {
+  padding: 5px 14px;
+  font-size: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  min-width: 40px;
+  text-align: center;
+}
+.timeline__play-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.timeline__frame-counter {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+}
+
+/* Timeline bar */
+.timeline__bar {
+  position: relative;
+  flex: 1;
+  margin: 0 16px;
+  cursor: pointer;
+  min-height: 60px;
+  user-select: none;
+}
+.timeline__bar--scrubbing {
+  cursor: ew-resize;
+}
+
+/* Scene bars */
+.timeline__scene {
+  position: absolute;
+  top: 0;
+  height: 28px;
+  background: rgba(42,47,58,0.6);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.12s, background 0.12s;
+}
+.timeline__scene:hover {
+  border-color: var(--border-hover);
+  background: rgba(42,47,58,0.8);
+}
+.timeline__scene--selected {
+  background: rgba(91,156,246,0.12);
+}
+.timeline__scene-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  font-family: var(--mono);
+}
+.timeline__scene-wp-count {
+  margin-left: 3px;
+}
+
+/* Waypoint dots */
+.timeline__dot {
+  position: absolute;
+  top: 32px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateX(-3.5px);
+  pointer-events: none;
+}
+
+/* Audio bars (below scene bars) */
+.timeline__audio-bar {
+  position: absolute;
+  top: 42px;
+  height: 14px;
+  background: rgba(245, 158, 11, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  min-width: 4px;
+}
+.timeline__audio-bar--selected {
+  background: rgba(245, 158, 11, 0.55);
+  border-color: #f59e0b;
+}
+.timeline__audio-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+  z-index: 2;
+}
+.timeline__audio-handle--left {
+  left: -2px;
+  border-radius: 3px 0 0 3px;
+}
+.timeline__audio-handle--right {
+  right: -2px;
+  border-radius: 0 3px 3px 0;
+}
+.timeline__audio-handle:hover {
+  background: rgba(245, 158, 11, 0.5);
+}
+.timeline__audio-label {
+  font-size: 9px;
+  color: #f59e0b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  padding: 0 8px;
+  font-family: var(--mono);
+}
+
+/* Playhead */
+.timeline__playhead {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 3px;
+  background: var(--red);
+  pointer-events: none;
+  z-index: 1;
+  transform: translateX(-1.5px);
+}
+.timeline__playhead-tri {
+  position: absolute;
+  top: -1px;
+  left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--red);
+}
+
+/* Speed controls */
+.timeline__speed {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+  padding: 2px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.timeline__speed-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--mono);
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.timeline__speed-btn:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+.timeline__speed-btn--active {
+  background: var(--accent);
+  color: #fff;
+}

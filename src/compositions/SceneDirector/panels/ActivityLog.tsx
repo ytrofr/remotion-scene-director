@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDirector } from '../context';
-import type { VersionEntry } from '../state';
 
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -8,11 +7,6 @@ function timeAgo(ts: number): string {
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   return `${Math.floor(diff / 3600)}h ago`;
-}
-
-function formatTime(ts: number): string {
-  const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 /** Inline activity log (compact, used inside Editor tab) */
@@ -25,89 +19,14 @@ export const ActivityLog: React.FC = () => {
   return (
     <div className="inspector__zoom-section">
       <div className="inspector__section-title">Activity Log ({entries.length})</div>
-      <div style={{ maxHeight: 160, overflowY: 'auto', fontSize: 11, fontFamily: 'var(--mono)' }}>
+      <div className="activity-log__list">
         {entries.map((e, i) => (
-          <div key={`${e.time}-${i}`} style={{
-            padding: '3px 0',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
-            color: 'var(--text-muted)',
-            display: 'flex',
-            gap: 6,
-          }}>
-            <span style={{ color: 'var(--text-dim)', minWidth: 42, flexShrink: 0 }}>{timeAgo(e.time)}</span>
-            <span style={{ color: 'var(--text)' }}>{e.action}</span>
-            {e.scene && <span style={{ color: 'var(--accent)', marginLeft: 'auto', flexShrink: 0 }}>{e.scene.split('-').slice(1).join('-')}</span>}
+          <div key={`${e.time}-${i}`} className="activity-log__entry">
+            <span className="activity-log__time">{timeAgo(e.time)}</span>
+            <span className="activity-log__action">{e.action}</span>
+            {e.scene && <span className="activity-log__scene">{e.scene.split('-').slice(1).join('-')}</span>}
           </div>
         ))}
-      </div>
-    </div>
-  );
-};
-
-/** Full History tab with version list + activity log */
-export const HistoryTab: React.FC = () => {
-  const { state, dispatch } = useDirector();
-  const scene = state.selectedScene;
-  const versions: VersionEntry[] = scene ? (state.versionHistory[scene] || []) : [];
-  const entries = state.activityLog;
-
-  return (
-    <div className="history-tab">
-      {/* Version history */}
-      <div className="history-tab__section">
-        <div className="inspector__section-title">
-          Versions{scene ? ` — ${scene.split('-').slice(1).join('-')}` : ''}
-        </div>
-        {versions.length === 0 ? (
-          <div className="history-tab__empty">No saved versions yet. Click Save to create one.</div>
-        ) : (
-          <div className="history-tab__list">
-            {[...versions].reverse().map((v) => (
-              <div key={v.version} className="history-tab__version">
-                <div className="history-tab__version-info">
-                  <span className="history-tab__version-num">v{v.version}</span>
-                  <span className="history-tab__version-time">{formatTime(v.timestamp)}</span>
-                  <span className="history-tab__version-detail">
-                    {v.snapshot.waypoints.length}pts | {v.snapshot.gesture} | {v.snapshot.dark ? 'light' : 'dark'}
-                  </span>
-                </div>
-                <button
-                  className="history-tab__restore-btn"
-                  onClick={() => {
-                    if (scene) {
-                      dispatch({ type: 'RESTORE_VERSION', scene, snapshot: v.snapshot });
-                    }
-                  }}
-                  title={`Restore to v${v.version}`}
-                >
-                  Restore
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Activity log */}
-      <div className="history-tab__section">
-        <div className="inspector__section-title">Activity Log ({entries.length})</div>
-        {entries.length === 0 ? (
-          <div className="history-tab__empty">No activity yet.</div>
-        ) : (
-          <div className="history-tab__log">
-            {entries.map((e, i) => (
-              <div key={`${e.time}-${i}`} className="history-tab__log-entry">
-                <span className="history-tab__log-time">{timeAgo(e.time)}</span>
-                <span className="history-tab__log-action">{e.action}</span>
-                {e.scene && (
-                  <span className="history-tab__log-scene">
-                    {e.scene.split('-').slice(1).join('-')}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

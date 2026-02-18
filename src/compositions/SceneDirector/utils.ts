@@ -8,20 +8,6 @@ import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
 import type { SceneInfo } from './state';
 import { GESTURE_PRESETS, type GestureTool } from './gestures';
 
-// Convert mouse event to composition coordinates
-export function mouseToComp(
-  e: React.MouseEvent,
-  container: HTMLElement,
-  previewScale: number,
-  compWidth: number,
-  compHeight: number,
-): { x: number; y: number } {
-  const rect = container.getBoundingClientRect();
-  const x = Math.round(((e.clientX - rect.left) / previewScale) * (compWidth / rect.width) * previewScale);
-  const y = Math.round(((e.clientY - rect.top) / previewScale) * (compHeight / rect.height) * previewScale);
-  return { x: Math.max(0, Math.min(compWidth, x)), y: Math.max(0, Math.min(compHeight, y)) };
-}
-
 // Simplify a raw path using Ramer-Douglas-Peucker
 export function simplifyPath(
   points: { x: number; y: number }[],

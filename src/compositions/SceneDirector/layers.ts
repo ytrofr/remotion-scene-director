@@ -3,7 +3,7 @@
  * Each effect (hand gesture, zoom, text) is a controllable layer with precise controls.
  */
 
-import type { HandPathPoint, LottieAnimation } from '../../components/FloatingHand/types';
+import type { HandPathPoint } from '../../components/FloatingHand/types';
 import type { GestureTool } from './gestures';
 
 // ── Coded Audio: scenes that already have inline <Audio> in source code ──
@@ -71,12 +71,11 @@ export interface LayerBase {
   order: number;
 }
 
-// Hand layer data (mirrors existing flat state per scene)
+// Hand layer data — waypoints + gesture only.
+// animation and dark are stored in flat records (sceneAnimation, sceneDark) as single source of truth.
 export interface HandLayerData {
   waypoints: HandPathPoint[];
   gesture: GestureTool;
-  animation: LottieAnimation;
-  dark: boolean;
 }
 
 export interface HandLayer extends LayerBase {
@@ -123,6 +122,9 @@ export const AUDIO_FILES = [
 
 export type Layer = HandLayer | ZoomLayer | AudioLayer;
 
+// Discriminated union of all layer data types
+export type LayerData = HandLayerData | ZoomLayerData | AudioLayerData;
+
 // Generate unique layer ID
 let layerCounter = 0;
 export function generateLayerId(type: LayerType): string {
@@ -134,8 +136,6 @@ export function createHandLayer(
   scene: string,
   waypoints: HandPathPoint[],
   gesture: GestureTool,
-  animation: LottieAnimation,
-  dark: boolean,
   order: number = 0,
 ): HandLayer {
   return {
@@ -146,7 +146,7 @@ export function createHandLayer(
     visible: true,
     locked: false,
     order,
-    data: { waypoints, gesture, animation, dark },
+    data: { waypoints, gesture },
   };
 }
 

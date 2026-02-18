@@ -1,0 +1,387 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCENE LIST
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.scene-list {
+  padding: 8px 0;
+}
+.scene-list__header {
+  padding: 8px 12px 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.scene-list__item {
+  padding: 8px 12px;
+  margin: 2px 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.scene-list__item:hover {
+  background: var(--panel-hover);
+}
+.scene-list__item--selected {
+  background: rgba(91,156,246,0.1);
+}
+.scene-list__item--active {
+  background: rgba(255,255,255,0.03);
+}
+.scene-list__item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.scene-list__item-info {
+  flex: 1;
+  min-width: 0;
+}
+.scene-list__item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.scene-list__name {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+.scene-list__name--selected {
+  color: #fff;
+  font-weight: 600;
+}
+.scene-list__badge {
+  font-size: 10px;
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+.scene-list__meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-family: var(--mono);
+}
+.scene-list__part {
+  margin-left: 6px;
+}
+.scene-list__gesture-chip {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(91,156,246,0.12);
+  border: 1px solid rgba(91,156,246,0.25);
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.scene-list__thumb {
+  flex-shrink: 0;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INSPECTOR
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.inspector {
+  padding: 12px;
+}
+.inspector__section-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.inspector__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__header-title {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.inspector__header-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+.inspector__empty-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px 0;
+  line-height: 1.5;
+}
+
+/* Scene gesture section */
+.inspector__scene-gesture {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__gesture-info {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+/* NumField */
+.inspector__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.inspector__field-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 52px;
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+.inspector__field-btn {
+  padding: 4px 7px;
+  font-size: 11px;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+}
+.inspector__field-btn:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__field-value {
+  font-size: 13px;
+  color: #fff;
+  font-family: var(--mono);
+  width: 44px;
+  text-align: center;
+}
+
+/* Gesture buttons */
+.inspector__gesture-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.inspector__gesture {
+  padding: 5px 10px;
+  font-size: 11px;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.inspector__gesture:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__gesture--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.inspector__gesture--active:hover {
+  background: var(--accent-hover);
+}
+
+/* Hand style picker */
+.inspector__hand-style {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__anim-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.inspector__anim-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.inspector__anim-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__anim-btn--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.inspector__anim-btn--active:hover {
+  background: var(--accent-hover);
+}
+.inspector__dark-row {
+  display: flex;
+  gap: 4px;
+}
+.inspector__dark-btn {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.inspector__dark-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__dark-btn--active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+/* Waypoint list */
+.inspector__waypoint-list {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__wp-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.inspector__wp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 100%;
+}
+.inspector__wp-row:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__wp-row--active {
+  background: rgba(88,166,255,0.12);
+  border-color: var(--accent);
+  color: #fff;
+}
+.inspector__wp-num {
+  width: 18px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--accent);
+}
+.inspector__wp-row--active .inspector__wp-num {
+  color: #f0883e;
+}
+.inspector__wp-coords {
+  flex: 1;
+  min-width: 0;
+}
+.inspector__wp-frame {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.inspector__wp-gesture {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--green);
+}
+
+/* Inspector tabs (Editor / History) */
+.inspector__tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__tab {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.inspector__tab:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__tab--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.inspector__tab--active:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Delete button */
+.inspector__delete-btn {
+  width: 100%;
+  padding: 7px;
+  font-size: 12px;
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  margin-top: 8px;
+}
+.inspector__delete-btn:hover {
+  background: rgba(240,80,80,0.1);
+}
+
+/* Zoom keyframe section (shared by inspector) */
+.inspector__zoom-section {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}

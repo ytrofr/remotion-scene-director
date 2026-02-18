@@ -1,0 +1,142 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EXPORT MODAL
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.export-modal__backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease;
+}
+.export-modal__box {
+  width: 70%;
+  max-width: 800px;
+  max-height: 80vh;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.export-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.export-modal__title {
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 600;
+}
+.export-modal__actions {
+  display: flex;
+  gap: 8px;
+}
+.export-modal__code {
+  flex: 1;
+  margin: 0;
+  padding: 20px;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text);
+  background: var(--bg);
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+/* Tabs */
+.export-modal__tabs {
+  display: flex;
+  gap: 4px;
+}
+.export-modal__tab {
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.export-modal__tab:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+.export-modal__tab--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.export-modal__tab--active:hover {
+  background: var(--accent-hover);
+}
+
+/* Import area */
+.export-modal__import-area {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+}
+.export-modal__import-textarea {
+  flex: 1;
+  min-height: 200px;
+  padding: 12px;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+}
+.export-modal__import-textarea:focus {
+  border-color: var(--accent);
+}
+.export-modal__import-textarea::placeholder {
+  color: var(--text-dim);
+}
+.export-modal__import-error {
+  font-size: 12px;
+  color: var(--red);
+  padding: 6px 0;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FRAME INDICATOR (animated dot on path)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.frame-indicator {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TRAIL GESTURE LABELS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.trail-gesture-label {
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.04em;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DRAWING CANVAS CROSSHAIRS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.drawing-canvas__crosshairs {
+  pointer-events: none;
+}

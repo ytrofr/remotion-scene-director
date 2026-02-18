@@ -16,6 +16,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDirector } from '../context';
+import { useToComp } from '../hooks/useToComp';
 import { simplifyPath } from '../utils';
 import { GESTURE_PRESETS, type GestureTool } from '../gestures';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -33,18 +34,11 @@ export const DrawingCanvas: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const rawPointsRef = useRef<{ x: number; y: number }[]>([]);
 
-  // Returns composition-space coordinates (for display/crosshairs)
+  const toCompRaw = useToComp(containerRef, compWidth, compHeight);
+  // Wraps hook to accept React.MouseEvent for convenience
   const toComp = useCallback((e: React.MouseEvent): { x: number; y: number } => {
-    const el = containerRef.current;
-    if (!el) return { x: 0, y: 0 };
-    const rect = el.getBoundingClientRect();
-    const x = Math.round((e.clientX - rect.left) * (compWidth / rect.width));
-    const y = Math.round((e.clientY - rect.top) * (compHeight / rect.height));
-    return {
-      x: Math.max(0, Math.min(compWidth, x)),
-      y: Math.max(0, Math.min(compHeight, y)),
-    };
-  }, [compWidth, compHeight]);
+    return toCompRaw(e.clientX, e.clientY);
+  }, [toCompRaw]);
 
   // Returns scene-space coordinates (for storage - subtracts globalOffsetY)
   const toScene = useCallback((pos: { x: number; y: number }): { x: number; y: number } => {

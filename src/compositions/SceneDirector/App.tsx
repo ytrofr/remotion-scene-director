@@ -5,8 +5,6 @@
 
 import React, { useReducer, useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { FloatingHand } from '../../components/FloatingHand';
-import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
 import { SceneDirectorModeProvider } from '../../components/FloatingHand/SceneDirectorMode';
 import { initialState } from './state';
 import { COMPOSITIONS, COMPOSITION_COMPONENTS } from './compositions';
@@ -14,12 +12,12 @@ import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
 import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
-import { computeZoomAtFrame, type ZoomLayer, type HandLayer, type AudioLayer } from './layers';
+import { computeZoomAtFrame, type ZoomLayer, type AudioLayer } from './layers';
 import { withAudioLayers, type AudioEntry } from './AudioLayerRenderer';
 import { loadSession, useSessionPersistence } from './hooks/useSessionPersistence';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePlayerControls } from './hooks/usePlayerControls';
-import './styles.css';
+import './styles/index.css';
 
 // Panels
 import { Toolbar } from './panels/Toolbar';
@@ -30,6 +28,7 @@ import { ExportModal } from './panels/ExportModal';
 
 // Overlays
 import { DrawingCanvas } from './overlays/DrawingCanvas';
+import { FloatingHandOverlay } from './overlays/FloatingHandOverlay';
 import { WaypointMarkers } from './overlays/WaypointMarkers';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
@@ -326,49 +325,18 @@ export const App: React.FC = () => {
             )}
 
             {/* FloatingHand: only renders when a visible hand layer exists */}
-            {/* When dragging a waypoint, hand snaps to the dragged position */}
-            {state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (() => {
-              // Hand only renders if a visible hand layer exists (layers are source of truth)
-              const handLayer = sceneLayers.find((l): l is HandLayer => l.type === 'hand');
-              if (!handLayer || !handLayer.visible) return null;
-              const isDragging = state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
-              const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
-              const handPath = dragWp
-                ? [{ ...dragWp, frame: 0 }]
-                : effectiveWaypoints;
-              const handFrame = dragWp ? 0 : frame;
-              const handStartFrame = dragWp ? 0 : currentScene.start;
-              return (
-                <div style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  overflow: 'hidden',
-                  pointerEvents: 'none',
-                  zIndex: 11,
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0, left: 0,
-                    width: composition.video.width,
-                    height: composition.video.height,
-                    transformOrigin: 'top left',
-                    transform: `scale(${playerScale}) translateY(${composition.globalOffsetY ?? 0}px)`,
-                    pointerEvents: 'none',
-                  }}>
-                    <FloatingHand
-                      frame={handFrame}
-                      path={handPath}
-                      startFrame={handStartFrame}
-                      animation={state.sceneAnimation[state.selectedScene!] ?? scenePreset.animation}
-                      size={scenePreset.size}
-                      showRipple={scenePreset.showRipple}
-                      dark={state.sceneDark[state.selectedScene!] ?? scenePreset.dark}
-                      physics={{ ...DEFAULT_PHYSICS, ...scenePreset.physics }}
-                    />
-                  </div>
-                </div>
-              );
-            })()}
+            {state.selectedScene && effectiveWaypoints.length > 0 && currentScene && scenePreset && (
+              <FloatingHandOverlay
+                state={state}
+                effectiveWaypoints={effectiveWaypoints}
+                sceneLayers={sceneLayers}
+                scenePreset={scenePreset}
+                composition={composition}
+                frame={frame}
+                playerScale={playerScale}
+                currentScene={currentScene}
+              />
+            )}
 
             {/* Trail overlay: manual waypoints in edit mode, or any waypoints when Trail toggled on */}
             {state.selectedScene && (

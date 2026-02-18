@@ -1,0 +1,127 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HISTORY TAB
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.history-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.history-tab__section {
+  margin-bottom: 4px;
+}
+.history-tab__empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 12px 0;
+}
+.history-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.history-tab__version {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.history-tab__version:hover {
+  border-color: var(--border-hover);
+}
+.history-tab__version-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.history-tab__version-num {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.history-tab__version-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+.history-tab__version-detail {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+.history-tab__restore-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.history-tab__restore-btn:hover {
+  background: rgba(91,156,246,0.1);
+}
+.history-tab__log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+.history-tab__log-entry {
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+}
+.history-tab__log-time {
+  color: var(--text-dim);
+  min-width: 42px;
+  flex-shrink: 0;
+}
+.history-tab__log-action {
+  color: var(--text);
+}
+.history-tab__log-scene {
+  color: var(--accent);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACTIVITY LOG (inline compact version)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.activity-log__list {
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+.activity-log__entry {
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+}
+.activity-log__time {
+  color: var(--text-dim);
+  min-width: 42px;
+  flex-shrink: 0;
+}
+.activity-log__action {
+  color: var(--text);
+}
+.activity-log__scene {
+  color: var(--accent);
+  margin-left: auto;
+  flex-shrink: 0;
+}

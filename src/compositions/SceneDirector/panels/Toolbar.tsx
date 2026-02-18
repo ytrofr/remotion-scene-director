@@ -43,12 +43,13 @@ export const Toolbar: React.FC = () => {
         const waypoints = state.waypoints[state.selectedScene] || [];
         const gesture = state.sceneGesture[state.selectedScene] || 'click';
         const preset = GESTURE_PRESETS[gesture];
+        const safeName = state.selectedScene.replace(/[^a-zA-Z0-9_-]/g, '');
         const res = await fetch('/api/save-path', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             compositionId: state.compositionId,
-            sceneName: state.selectedScene,
+            sceneName: safeName,
             path: waypoints,
             gesture,
             animation: state.sceneAnimation[state.selectedScene] ?? preset.animation,

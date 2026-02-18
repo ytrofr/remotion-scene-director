@@ -1,9 +1,10 @@
 /**
  * Session persistence hook - saves/restores SceneDirector state to localStorage.
- * MANUAL SAVE ONLY — nothing is saved unless the user clicks Save.
+ * Auto-saves on beforeunload so refresh restores the exact same state.
+ * Also exposes manual saveSession for the Save button.
  */
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import type { DirectorState, SceneSnapshot, VersionEntry } from '../state';
 import type { Layer } from '../layers';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -39,25 +40,42 @@ function saveSessionData(s: SavedSession) {
   } catch { /* ignore quota errors */ }
 }
 
+function buildSessionData(state: DirectorState, frame: number): SavedSession {
+  return {
+    compositionId: state.compositionId,
+    selectedScene: state.selectedScene,
+    frame,
+    sceneGesture: state.sceneGesture,
+    sceneAnimation: state.sceneAnimation,
+    sceneDark: state.sceneDark,
+    clearedSceneLayers: state.clearedSceneLayers,
+    layers: state.layers,
+    waypoints: state.waypoints,
+    savedSnapshots: state.savedSnapshots,
+    sidebarTab: state.sidebarTab,
+    versionHistory: state.versionHistory,
+  };
+}
+
 export function useSessionPersistence(state: DirectorState, frame: number) {
   const savedSession = useMemo(() => loadSession(), []);
 
-  // Manual save — only called when user clicks Save
+  // Keep refs up-to-date for beforeunload handler
+  const stateRef = useRef(state);
+  const frameRef = useRef(frame);
+  stateRef.current = state;
+  frameRef.current = frame;
+
+  // Auto-save on beforeunload (refresh/close)
+  useEffect(() => {
+    const handler = () => saveSessionData(buildSessionData(stateRef.current, frameRef.current));
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, []);
+
+  // Manual save — called when user clicks Save
   const saveSession = useCallback(() => {
-    saveSessionData({
-      compositionId: state.compositionId,
-      selectedScene: state.selectedScene,
-      frame,
-      sceneGesture: state.sceneGesture,
-      sceneAnimation: state.sceneAnimation,
-      sceneDark: state.sceneDark,
-      clearedSceneLayers: state.clearedSceneLayers,
-      layers: state.layers,
-      waypoints: state.waypoints,
-      savedSnapshots: state.savedSnapshots,
-      sidebarTab: state.sidebarTab,
-      versionHistory: state.versionHistory,
-    });
+    saveSessionData(buildSessionData(state, frame));
   }, [state, frame]);
 
   return { savedSession, saveSession };

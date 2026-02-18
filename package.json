@@ -21,7 +21,7 @@
     "capture": "npx ts-node scripts/capture-real-screens.ts",
     "capture:chat": "npx ts-node scripts/capture-chat-sequence.ts",
     "capture:mobile": "npx ts-node scripts/capture-mobile-chat.ts",
-    "scene-director": "vite --config vite.config.ts --port 3001"
+    "scene-director": "vite --config vite.config.ts --port 3001 --host"
   },
   "keywords": [
     "remotion",

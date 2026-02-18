@@ -7,6 +7,16 @@ function savePathPlugin(): Plugin {
   return {
     name: 'scene-director-save-path',
     configureServer(server) {
+      // Redirect / to /scene-director.html
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/') {
+          res.writeHead(302, { Location: '/scene-director.html' });
+          res.end();
+          return;
+        }
+        next();
+      });
+
       server.middlewares.use('/api/save-path', (req, res, next) => {
         if (req.method !== 'POST') return next();
 
@@ -20,8 +30,18 @@ function savePathPlugin(): Plugin {
               ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
               : {};
 
-            if (!existing[compositionId]) existing[compositionId] = {};
-            existing[compositionId][sceneName] = { gesture, animation, path: pathData };
+            if (!pathData || pathData.length === 0) {
+              // Empty path = user removed the hand — delete the scene entry
+              if (existing[compositionId]) {
+                delete existing[compositionId][sceneName];
+                if (Object.keys(existing[compositionId]).length === 0) {
+                  delete existing[compositionId];
+                }
+              }
+            } else {
+              if (!existing[compositionId]) existing[compositionId] = {};
+              existing[compositionId][sceneName] = { gesture, animation, path: pathData };
+            }
 
             fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));
             res.writeHead(200, { 'Content-Type': 'application/json' });

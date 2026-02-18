@@ -171,6 +171,17 @@ export const App: React.FC = () => {
     dispatch({ type: 'ENSURE_SCENE_LAYERS', scene: state.selectedScene, compositionId: state.compositionId, codedPath: coded });
   }, [state.selectedScene, state.compositionId, dispatch]);
 
+  // Hydrate layers for ALL scenes on mount and composition change (so timeline markers appear immediately)
+  const hydratedCompositionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (hydratedCompositionRef.current === state.compositionId) return;
+    hydratedCompositionRef.current = state.compositionId;
+    for (const scene of composition.scenes) {
+      const coded = getCodedPath(state.compositionId, scene.name);
+      dispatch({ type: 'ENSURE_SCENE_LAYERS', scene: scene.name, compositionId: state.compositionId, codedPath: coded });
+    }
+  }, [composition.scenes, state.compositionId, dispatch]);
+
   // Active gesture preset (null when tool is 'select')
   const activePreset = useMemo(
     () => state.activeTool !== 'select' ? GESTURE_PRESETS[state.activeTool] : null,

@@ -409,7 +409,7 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       if (!state.savedSnapshots[action.scene]) {
         const snapGesture: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
         const snapAnim = newState.sceneAnimation?.[action.scene] ?? state.sceneAnimation[action.scene] ?? GESTURE_PRESETS[snapGesture].animation;
-        const snapDark = newState.sceneDark?.[action.scene] ?? state.sceneDark[action.scene] ?? GESTURE_PRESETS[snapGesture].dark;
+        const snapDark = newState.sceneDark?.[action.scene] ?? state.sceneDark[action.scene] ?? coded?.dark ?? GESTURE_PRESETS[snapGesture].dark;
         newState.savedSnapshots = {
           ...(newState.savedSnapshots || state.savedSnapshots),
           [action.scene]: {
@@ -423,7 +423,8 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       // Persist computed dark/animation fallbacks so they survive scene switches
       if (state.sceneDark[action.scene] === undefined) {
         const gesture2: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
-        newState.sceneDark = { ...(newState.sceneDark || state.sceneDark), [action.scene]: GESTURE_PRESETS[gesture2].dark };
+        const darkValue = coded?.dark ?? GESTURE_PRESETS[gesture2].dark;
+        newState.sceneDark = { ...(newState.sceneDark || state.sceneDark), [action.scene]: darkValue };
       }
       if (state.sceneAnimation[action.scene] === undefined) {
         const gesture3: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';

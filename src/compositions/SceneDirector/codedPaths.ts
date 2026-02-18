@@ -14,6 +14,7 @@ export interface CodedPath {
   path: HandPathPoint[];
   gesture: GestureTool;
   animation: string;
+  dark?: boolean;
 }
 
 // ── MobileChatDemoCombined paths (from COMBINED_HAND_PATH_MARKERS) ──
@@ -74,6 +75,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '2-HomeScroll': {
     gesture: 'scroll',
     animation: 'hand-scroll-clean',
+    dark: true,
     path: [
       { x: 1050, y: 960, frame: 0, gesture: 'pointer', scale: 1, rotation: 0 },
       { x: 780, y: 960, frame: 20, gesture: 'pointer', scale: 1, rotation: 0 },
@@ -88,6 +90,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '3-TapBubble': {
     gesture: 'click',
     animation: 'hand-click',
+    dark: true,
     path: [
       { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 },
       { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 },
@@ -98,6 +101,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '4-ChatOpen': {
     gesture: 'click',
     animation: 'hand-click',
+    dark: true,
     path: [
       { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 1 },
       { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1 },
@@ -109,6 +113,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '5-UserTyping': {
     gesture: 'click',
     animation: 'hand-click',
+    dark: true,
     path: [
       { x: 750, y: 1520, frame: 70, gesture: 'pointer', scale: 1 },
       { x: 730, y: 1500, frame: 85, gesture: 'pointer', scale: 1 },
@@ -122,9 +127,19 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
 
 const saved = savedData as Record<string, Record<string, CodedPath>>;
 
+/** Merge saved paths over hardcoded, preserving hardcoded fields (like dark) that saved data may lack */
+function mergePaths(hardcoded: Record<string, CodedPath>, savedPaths: Record<string, CodedPath> | undefined): Record<string, CodedPath> {
+  if (!savedPaths) return { ...hardcoded };
+  const result = { ...hardcoded };
+  for (const [key, sp] of Object.entries(savedPaths)) {
+    result[key] = { ...(hardcoded[key] || {} as CodedPath), ...sp };
+  }
+  return result;
+}
+
 const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
-  MobileChatDemoCombined: { ...COMBINED_PATHS, ...saved.MobileChatDemoCombined },
-  DorianDemo: { ...DORIAN_PATHS, ...saved.DorianDemo },
+  MobileChatDemoCombined: mergePaths(COMBINED_PATHS, saved.MobileChatDemoCombined),
+  DorianDemo: mergePaths(DORIAN_PATHS, saved.DorianDemo),
   DashmorDemo: { ...saved.DashmorDemo },
 };
 

@@ -768,6 +768,41 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   color: var(--green);
 }
 
+/* Inspector tabs (Editor / History) */
+.inspector__tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.inspector__tab {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.inspector__tab:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.inspector__tab--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.inspector__tab--active:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
 /* Delete button */
 .inspector__delete-btn {
   width: 100%;
@@ -1318,3 +1353,101 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 }
 .zoom-kf__select:hover { border-color: var(--border-hover); }
 .zoom-kf__select:focus { border-color: var(--accent); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HISTORY TAB
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.history-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.history-tab__section {
+  margin-bottom: 4px;
+}
+.history-tab__empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 12px 0;
+}
+.history-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.history-tab__version {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.history-tab__version:hover {
+  border-color: var(--border-hover);
+}
+.history-tab__version-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.history-tab__version-num {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.history-tab__version-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+.history-tab__version-detail {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+.history-tab__restore-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.history-tab__restore-btn:hover {
+  background: rgba(91,156,246,0.1);
+}
+.history-tab__log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+.history-tab__log-entry {
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+}
+.history-tab__log-time {
+  color: var(--text-dim);
+  min-width: 42px;
+  flex-shrink: 0;
+}
+.history-tab__log-action {
+  color: var(--text);
+}
+.history-tab__log-scene {
+  color: var(--accent);
+  margin-left: auto;
+  flex-shrink: 0;
+}

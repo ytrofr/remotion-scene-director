@@ -34,6 +34,21 @@ export interface ActivityEntry {
   scene?: string;      // affected scene
 }
 
+// Saved snapshot per scene (for Revert)
+export interface SceneSnapshot {
+  waypoints: HandPathPoint[];
+  gesture: GestureTool;
+  animation: LottieAnimation;
+  dark: boolean;
+}
+
+// Version history entry
+export interface VersionEntry {
+  version: number;
+  timestamp: number;
+  snapshot: SceneSnapshot;
+}
+
 // Main state
 export interface DirectorState {
   compositionId: string;
@@ -55,6 +70,12 @@ export interface DirectorState {
   clearedSceneLayers: Record<string, boolean>;  // scenes where user explicitly removed layers
   // Activity log
   activityLog: ActivityEntry[];
+  // Saved snapshots for Revert (per scene, set on first load + after Save)
+  savedSnapshots: Record<string, SceneSnapshot>;
+  // Sidebar tab: editor or history
+  sidebarTab: 'editor' | 'history';
+  // Version history (per scene, appended on each Save)
+  versionHistory: Record<string, VersionEntry[]>;
 }
 
 // Actions
@@ -75,7 +96,10 @@ export type DirectorAction =
   | { type: 'IMPORT_PATHS'; scene: string; waypoints: HandPathPoint[]; gesture: GestureTool }
   | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
   | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
-  | { type: 'CLEAR_SCENE'; scene: string }
+  | { type: 'REVERT_SCENE'; scene: string }
+  | { type: 'MARK_SAVED'; scene: string }
+  | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
+  | { type: 'RESTORE_VERSION'; scene: string; snapshot: SceneSnapshot }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
   | { type: 'UNDO' }
@@ -110,6 +134,9 @@ export const initialState: DirectorState = {
   selectedLayerId: null,
   clearedSceneLayers: {},
   activityLog: [],
+  savedSnapshots: {},
+  sidebarTab: 'editor',
+  versionHistory: {},
 };
 
 const MAX_LOG = 50;
@@ -128,7 +155,9 @@ function describeAction(action: DirectorAction, state: DirectorState): { msg: st
     case 'SET_WAYPOINTS': return { msg: `Set ${action.waypoints.length} waypoints`, scene: action.scene };
     case 'SET_SCENE_ANIMATION': return { msg: `Set animation → ${action.animation}`, scene: action.scene };
     case 'SET_SCENE_DARK': return { msg: `Set hand ${action.dark ? 'light' : 'dark'}`, scene: action.scene };
-    case 'CLEAR_SCENE': return { msg: `Clear scene`, scene: action.scene };
+    case 'REVERT_SCENE': return { msg: `Revert scene`, scene: action.scene };
+    case 'MARK_SAVED': return { msg: `Saved`, scene: action.scene };
+    case 'RESTORE_VERSION': return { msg: `Restore version`, scene: action.scene };
     case 'IMPORT_PATHS': return { msg: `Import ${action.waypoints.length} waypoints`, scene: action.scene };
     case 'ADD_LAYER': return { msg: `Add ${action.layer.type} layer "${action.layer.name}"`, scene: action.scene };
     case 'REMOVE_LAYER': {
@@ -207,25 +236,88 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       return { ...state, draggingIndex: action.index, selectedWaypoint: action.index };
     case 'END_DRAG':
       return { ...state, draggingIndex: null };
-    case 'SET_SCENE_ANIMATION':
-      return { ...state, sceneAnimation: { ...state.sceneAnimation, [action.scene]: action.animation } };
-    case 'SET_SCENE_DARK':
-      return { ...state, sceneDark: { ...state.sceneDark, [action.scene]: action.dark } };
-    case 'CLEAR_SCENE': {
-      const newGestures = { ...state.sceneGesture };
-      delete newGestures[action.scene];
-      const newAnims = { ...state.sceneAnimation };
-      delete newAnims[action.scene];
-      const newDark = { ...state.sceneDark };
-      delete newDark[action.scene];
-      return {
+    case 'SET_SCENE_ANIMATION': {
+      const newState2: DirectorState = { ...state, sceneAnimation: { ...state.sceneAnimation, [action.scene]: action.animation } };
+      // Sync to hand layer data
+      const handLayerA = (newState2.layers[action.scene] || []).find(l => l.type === 'hand');
+      if (handLayerA) {
+        newState2.layers = { ...newState2.layers, [action.scene]: newState2.layers[action.scene].map(l =>
+          l.id === handLayerA.id ? { ...l, data: { ...l.data, animation: action.animation } } as Layer : l
+        )};
+      }
+      return newState2;
+    }
+    case 'SET_SCENE_DARK': {
+      const newState3: DirectorState = { ...state, sceneDark: { ...state.sceneDark, [action.scene]: action.dark } };
+      // Sync to hand layer data
+      const handLayerD = (newState3.layers[action.scene] || []).find(l => l.type === 'hand');
+      if (handLayerD) {
+        newState3.layers = { ...newState3.layers, [action.scene]: newState3.layers[action.scene].map(l =>
+          l.id === handLayerD.id ? { ...l, data: { ...l.data, dark: action.dark } } as Layer : l
+        )};
+      }
+      return newState3;
+    }
+    case 'REVERT_SCENE': {
+      const snap = state.savedSnapshots[action.scene];
+      if (!snap) return state; // No saved state to revert to
+      const reverted: DirectorState = {
         ...state,
-        waypoints: { ...state.waypoints, [action.scene]: [] },
-        sceneGesture: newGestures,
-        sceneAnimation: newAnims,
-        sceneDark: newDark,
+        waypoints: { ...state.waypoints, [action.scene]: [...snap.waypoints] },
+        sceneGesture: { ...state.sceneGesture, [action.scene]: snap.gesture },
+        sceneAnimation: { ...state.sceneAnimation, [action.scene]: snap.animation },
+        sceneDark: { ...state.sceneDark, [action.scene]: snap.dark },
         selectedWaypoint: null,
       };
+      // Rebuild hand layer from snapshot
+      const sceneLayers = (reverted.layers[action.scene] || []);
+      const handIdx = sceneLayers.findIndex(l => l.type === 'hand');
+      if (handIdx >= 0 && snap.waypoints.length > 0) {
+        const updated = [...sceneLayers];
+        updated[handIdx] = { ...updated[handIdx], data: { ...updated[handIdx].data, animation: snap.animation, dark: snap.dark } } as Layer;
+        reverted.layers = { ...reverted.layers, [action.scene]: updated };
+      }
+      return reverted;
+    }
+    case 'MARK_SAVED': {
+      const scene = action.scene;
+      const snap: SceneSnapshot = {
+        waypoints: [...(state.waypoints[scene] || [])],
+        gesture: state.sceneGesture[scene] || 'click',
+        animation: state.sceneAnimation[scene] || GESTURE_PRESETS[state.sceneGesture[scene] || 'click'].animation,
+        dark: state.sceneDark[scene] ?? false,
+      };
+      // Push version entry
+      const sceneVersions = [...(state.versionHistory[scene] || [])];
+      const nextVersion = sceneVersions.length > 0 ? sceneVersions[sceneVersions.length - 1].version + 1 : 1;
+      sceneVersions.push({ version: nextVersion, timestamp: Date.now(), snapshot: { ...snap } });
+      return {
+        ...state,
+        savedSnapshots: { ...state.savedSnapshots, [scene]: snap },
+        versionHistory: { ...state.versionHistory, [scene]: sceneVersions },
+      };
+    }
+    case 'SET_SIDEBAR_TAB':
+      return { ...state, sidebarTab: action.tab };
+    case 'RESTORE_VERSION': {
+      const s = action.snapshot;
+      const restored: DirectorState = {
+        ...state,
+        waypoints: { ...state.waypoints, [action.scene]: [...s.waypoints] },
+        sceneGesture: { ...state.sceneGesture, [action.scene]: s.gesture },
+        sceneAnimation: { ...state.sceneAnimation, [action.scene]: s.animation },
+        sceneDark: { ...state.sceneDark, [action.scene]: s.dark },
+        selectedWaypoint: null,
+      };
+      // Update hand layer
+      const layers2 = (restored.layers[action.scene] || []);
+      const hi = layers2.findIndex(l => l.type === 'hand');
+      if (hi >= 0 && s.waypoints.length > 0) {
+        const u = [...layers2];
+        u[hi] = { ...u[hi], data: { ...u[hi].data, animation: s.animation, dark: s.dark } } as Layer;
+        restored.layers = { ...restored.layers, [action.scene]: u };
+      }
+      return restored;
     }
     case 'ADOPT_CODED_PATH': {
       const updated: DirectorState = {
@@ -345,6 +437,30 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       }
       if (!state.sceneGesture[action.scene] && coded?.gesture) {
         newState.sceneGesture = { ...state.sceneGesture, [action.scene]: coded.gesture as GestureTool };
+      }
+      // Snapshot initial state for Revert (only if no saved snapshot exists yet)
+      if (!state.savedSnapshots[action.scene]) {
+        const snapGesture: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
+        const snapAnim = newState.sceneAnimation?.[action.scene] ?? state.sceneAnimation[action.scene] ?? GESTURE_PRESETS[snapGesture].animation;
+        const snapDark = newState.sceneDark?.[action.scene] ?? state.sceneDark[action.scene] ?? GESTURE_PRESETS[snapGesture].dark;
+        newState.savedSnapshots = {
+          ...(newState.savedSnapshots || state.savedSnapshots),
+          [action.scene]: {
+            waypoints: [...(newState.waypoints[action.scene] || state.waypoints[action.scene] || [])],
+            gesture: snapGesture,
+            animation: snapAnim,
+            dark: snapDark,
+          },
+        };
+      }
+      // Persist computed dark/animation fallbacks so they survive scene switches
+      if (state.sceneDark[action.scene] === undefined) {
+        const gesture2: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
+        newState.sceneDark = { ...(newState.sceneDark || state.sceneDark), [action.scene]: GESTURE_PRESETS[gesture2].dark };
+      }
+      if (state.sceneAnimation[action.scene] === undefined) {
+        const gesture3: GestureTool = newState.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
+        newState.sceneAnimation = { ...(newState.sceneAnimation || state.sceneAnimation), [action.scene]: GESTURE_PRESETS[gesture3].animation };
       }
       return newState;
     }

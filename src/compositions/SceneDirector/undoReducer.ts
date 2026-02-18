@@ -3,7 +3,7 @@
  * Wraps directorReducer with a history stack for Ctrl+Z undo.
  *
  * Undoable actions (create undo points):
- *   SET_WAYPOINTS, ADD_WAYPOINT, DELETE_WAYPOINT, CLEAR_SCENE,
+ *   SET_WAYPOINTS, ADD_WAYPOINT, DELETE_WAYPOINT, REVERT_SCENE, RESTORE_VERSION,
  *   IMPORT_PATHS, SET_SCENE_GESTURE, START_DRAG (entire drag = 1 undo step),
  *   UPDATE_WAYPOINT (only when not mid-drag)
  *
@@ -20,7 +20,8 @@ const UNDOABLE_ACTIONS = new Set([
   'SET_WAYPOINTS',
   'ADD_WAYPOINT',
   'DELETE_WAYPOINT',
-  'CLEAR_SCENE',
+  'REVERT_SCENE',
+  'RESTORE_VERSION',
   'IMPORT_PATHS',
   'SET_SCENE_GESTURE',
   'ADD_LAYER',

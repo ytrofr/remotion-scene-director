@@ -10,7 +10,7 @@ import { useDirector } from '../context';
 import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
 import type { AudioLayer, ZoomLayer } from '../layers';
 import { AudioInspector } from './AudioInspector';
-import { ActivityLog } from './ActivityLog';
+import { ActivityLog, HistoryTab } from './ActivityLog';
 import { LayerPanel } from './LayerPanel';
 import { NumField } from './NumField';
 import { ZoomInspector } from './ZoomInspector';
@@ -155,9 +155,41 @@ export const Inspector: React.FC = () => {
     <AudioInspector layer={selectedLayer as AudioLayer} scene={scene} />
   ) : null;
 
+  const sidebarTab = state.sidebarTab;
+
+  // Tab switcher (always visible)
+  const tabSwitcher = (
+    <div className="inspector__tabs">
+      <button
+        className={`inspector__tab ${sidebarTab === 'editor' ? 'inspector__tab--active' : ''}`}
+        onClick={() => dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' })}
+      >
+        Editor
+      </button>
+      <button
+        className={`inspector__tab ${sidebarTab === 'history' ? 'inspector__tab--active' : ''}`}
+        onClick={() => dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'history' })}
+      >
+        History
+      </button>
+    </div>
+  );
+
+  // History tab content
+  if (sidebarTab === 'history') {
+    return (
+      <div className="inspector">
+        {tabSwitcher}
+        <HistoryTab />
+      </div>
+    );
+  }
+
+  // Editor tab content
   if (idx === null || !waypoint) {
     return (
       <div className="inspector">
+        {tabSwitcher}
         <LayerPanel />
         {gestureHeader}
         {handStyleSection}
@@ -180,6 +212,7 @@ export const Inspector: React.FC = () => {
 
   return (
     <div className="inspector">
+      {tabSwitcher}
       <LayerPanel />
       {gestureHeader}
       {handStyleSection}

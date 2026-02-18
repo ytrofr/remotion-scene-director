@@ -56,6 +56,10 @@ export const Toolbar: React.FC = () => {
         });
         if (!res.ok) throw new Error('Save failed');
       }
+      // Mark scene as saved (creates version snapshot)
+      if (state.selectedScene) {
+        dispatch({ type: 'MARK_SAVED', scene: state.selectedScene });
+      }
       // Always persist full state to localStorage
       saveSession();
       setSaveState('saved');
@@ -249,13 +253,14 @@ export const Toolbar: React.FC = () => {
          saveState === 'error' ? 'Error!' : 'Save'}
       </button>
 
-      {/* Clear */}
-      {state.selectedScene && (
+      {/* Revert */}
+      {state.selectedScene && state.savedSnapshots[state.selectedScene] && (
         <button
-          onClick={() => dispatch({ type: 'CLEAR_SCENE', scene: state.selectedScene! })}
+          onClick={() => dispatch({ type: 'REVERT_SCENE', scene: state.selectedScene! })}
           className="toolbar__btn toolbar__btn--clear"
+          title="Revert to last saved state"
         >
-          Clear
+          Revert
         </button>
       )}
 

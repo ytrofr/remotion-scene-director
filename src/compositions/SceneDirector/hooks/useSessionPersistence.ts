@@ -4,7 +4,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import type { DirectorState } from '../state';
+import type { DirectorState, SceneSnapshot, VersionEntry } from '../state';
 import type { Layer } from '../layers';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 
@@ -20,6 +20,9 @@ export interface SavedSession {
   clearedSceneLayers?: Record<string, boolean>;
   layers?: Record<string, Layer[]>;
   waypoints?: Record<string, HandPathPoint[]>;
+  savedSnapshots?: Record<string, SceneSnapshot>;
+  sidebarTab?: 'editor' | 'history';
+  versionHistory?: Record<string, VersionEntry[]>;
 }
 
 export function loadSession(): SavedSession {
@@ -51,6 +54,9 @@ export function useSessionPersistence(state: DirectorState, frame: number) {
       clearedSceneLayers: state.clearedSceneLayers,
       layers: state.layers,
       waypoints: state.waypoints,
+      savedSnapshots: state.savedSnapshots,
+      sidebarTab: state.sidebarTab,
+      versionHistory: state.versionHistory,
     });
   }, [state, frame]);
 

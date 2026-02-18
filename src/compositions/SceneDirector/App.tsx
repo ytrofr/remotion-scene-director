@@ -47,6 +47,9 @@ export const App: React.FC = () => {
     ...(savedSession.clearedSceneLayers ? { clearedSceneLayers: savedSession.clearedSceneLayers } : {}),
     ...(savedSession.layers ? { layers: savedSession.layers } : {}),
     ...(savedSession.waypoints ? { waypoints: savedSession.waypoints } : {}),
+    ...(savedSession.savedSnapshots ? { savedSnapshots: savedSession.savedSnapshots } : {}),
+    ...(savedSession.sidebarTab ? { sidebarTab: savedSession.sidebarTab } : {}),
+    ...(savedSession.versionHistory ? { versionHistory: savedSession.versionHistory } : {}),
   }), []);
 
   const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: restoredInitial } as UndoableState);

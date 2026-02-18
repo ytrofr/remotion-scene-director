@@ -5,7 +5,7 @@
 
 import type { HandPathPoint, LottieAnimation } from '../../components/FloatingHand/types';
 import { GESTURE_PRESETS, type GestureTool } from './gestures';
-import { createHandLayer, type Layer, type ZoomKeyframe } from './layers';
+import { createHandLayer, createAudioLayer, getCodedAudio, AUDIO_FILES, type Layer, type ZoomKeyframe } from './layers';
 import type { CodedPath } from './codedPaths';
 
 // Scene info (unified format across compositions)
@@ -27,6 +27,13 @@ export interface CompositionEntry {
   globalOffsetY?: number;
 }
 
+// Activity log entry
+export interface ActivityEntry {
+  time: number;        // Date.now()
+  action: string;      // human-readable description
+  scene?: string;      // affected scene
+}
+
 // Main state
 export interface DirectorState {
   compositionId: string;
@@ -45,6 +52,9 @@ export interface DirectorState {
   // Layer system
   layers: Record<string, Layer[]>;       // scene name -> ordered layers
   selectedLayerId: string | null;
+  clearedSceneLayers: Record<string, boolean>;  // scenes where user explicitly removed layers
+  // Activity log
+  activityLog: ActivityEntry[];
 }
 
 // Actions
@@ -80,7 +90,7 @@ export type DirectorAction =
   | { type: 'TOGGLE_LAYER_VISIBILITY'; scene: string; layerId: string }
   | { type: 'TOGGLE_LAYER_LOCK'; scene: string; layerId: string }
   // Layer auto-migration
-  | { type: 'ENSURE_SCENE_LAYERS'; scene: string; codedPath: CodedPath | null };
+  | { type: 'ENSURE_SCENE_LAYERS'; scene: string; compositionId: string; codedPath: CodedPath | null };
 
 export const initialState: DirectorState = {
   compositionId: 'MobileChatDemoCombined',
@@ -98,9 +108,49 @@ export const initialState: DirectorState = {
   importOpen: false,
   layers: {},
   selectedLayerId: null,
+  clearedSceneLayers: {},
+  activityLog: [],
 };
 
+const MAX_LOG = 50;
+function log(state: DirectorState, action: string, scene?: string): DirectorState {
+  const entry: ActivityEntry = { time: Date.now(), action, scene };
+  return { ...state, activityLog: [entry, ...state.activityLog].slice(0, MAX_LOG) };
+}
+
+function describeAction(action: DirectorAction, state: DirectorState): { msg: string; scene?: string } | null {
+  switch (action.type) {
+    case 'SET_COMPOSITION': return { msg: `Switch composition → ${action.id}` };
+    case 'SET_SCENE_GESTURE': return { msg: `Set gesture → ${action.gesture}`, scene: action.scene };
+    case 'ADD_WAYPOINT': return { msg: `Add waypoint #${(state.waypoints[action.scene]?.length ?? 0) + 1}`, scene: action.scene };
+    case 'UPDATE_WAYPOINT': return { msg: `Move waypoint #${action.index + 1}`, scene: action.scene };
+    case 'DELETE_WAYPOINT': return { msg: `Delete waypoint #${action.index + 1}`, scene: action.scene };
+    case 'SET_WAYPOINTS': return { msg: `Set ${action.waypoints.length} waypoints`, scene: action.scene };
+    case 'SET_SCENE_ANIMATION': return { msg: `Set animation → ${action.animation}`, scene: action.scene };
+    case 'SET_SCENE_DARK': return { msg: `Set hand ${action.dark ? 'light' : 'dark'}`, scene: action.scene };
+    case 'CLEAR_SCENE': return { msg: `Clear scene`, scene: action.scene };
+    case 'IMPORT_PATHS': return { msg: `Import ${action.waypoints.length} waypoints`, scene: action.scene };
+    case 'ADD_LAYER': return { msg: `Add ${action.layer.type} layer "${action.layer.name}"`, scene: action.scene };
+    case 'REMOVE_LAYER': {
+      const layer = (state.layers[action.scene] || []).find(l => l.id === action.layerId);
+      return { msg: `Remove layer "${layer?.name ?? action.layerId}"`, scene: action.scene };
+    }
+    case 'UPDATE_LAYER_DATA': return { msg: `Edit layer data`, scene: action.scene };
+    case 'TOGGLE_LAYER_VISIBILITY': {
+      const layer = (state.layers[action.scene] || []).find(l => l.id === action.layerId);
+      return { msg: `Toggle "${layer?.name}" visibility`, scene: action.scene };
+    }
+    default: return null; // Skip noisy actions (SELECT_SCENE, SELECT_WAYPOINT, drag, etc.)
+  }
+}
+
 export function directorReducer(state: DirectorState, action: DirectorAction): DirectorState {
+  // Log meaningful actions
+  const desc = describeAction(action, state);
+  if (desc) {
+    state = log(state, desc.msg, desc.scene);
+  }
+
   switch (action.type) {
     case 'SET_COMPOSITION':
       return { ...state, compositionId: action.id, selectedScene: null, selectedWaypoint: null };
@@ -190,7 +240,9 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
     // Layer actions
     case 'ADD_LAYER': {
       const sceneLayers = [...(state.layers[action.scene] || []), action.layer];
-      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers }, selectedLayerId: action.layer.id };
+      const cleared = { ...state.clearedSceneLayers };
+      delete cleared[action.scene];
+      return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers }, selectedLayerId: action.layer.id, clearedSceneLayers: cleared };
     }
     case 'REMOVE_LAYER': {
       const removedLayer = (state.layers[action.scene] || []).find(l => l.id === action.layerId);
@@ -203,6 +255,10 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       // When removing a hand layer, also clear flat waypoints so the hand disappears
       if (removedLayer?.type === 'hand') {
         newState.waypoints = { ...state.waypoints, [action.scene]: [] };
+      }
+      // Mark scene as cleared so ENSURE_SCENE_LAYERS won't recreate on reload
+      if (sceneLayers.length === 0) {
+        newState.clearedSceneLayers = { ...state.clearedSceneLayers, [action.scene]: true };
       }
       return newState;
     }
@@ -239,29 +295,53 @@ export function directorReducer(state: DirectorState, action: DirectorAction): D
       );
       return { ...state, layers: { ...state.layers, [action.scene]: sceneLayers } };
     }
-    // Layer auto-migration: idempotently create hand layer from existing data
+    // Layer auto-migration: idempotently create hand + audio layers from existing data
     case 'ENSURE_SCENE_LAYERS': {
       if ((state.layers[action.scene] || []).length > 0) return state;
+      // User explicitly cleared all layers for this scene — respect deletion
+      if (state.clearedSceneLayers[action.scene]) return state;
 
-      const waypoints = state.waypoints[action.scene] || [];
-      const coded = action.codedPath;
-      const effectiveWaypoints = waypoints.length > 0 ? waypoints : (coded?.path ?? []);
-      if (effectiveWaypoints.length === 0) return state;
+      const layers: Layer[] = [];
+      let order = 0;
 
-      const gesture: GestureTool = state.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
-      const animation = state.sceneAnimation[action.scene] ?? GESTURE_PRESETS[gesture].animation;
-      const dark = state.sceneDark[action.scene] ?? GESTURE_PRESETS[gesture].dark;
+      // ── Hand layer ──
+      // If user explicitly cleared this scene (waypoints set to []), don't re-create.
+      // undefined = never loaded (use coded path), [] = user cleared (respect deletion).
+      const waypoints = state.waypoints[action.scene];
+      const userCleared = waypoints !== undefined && waypoints.length === 0;
 
-      const handLayer = createHandLayer(action.scene, effectiveWaypoints, gesture, animation, dark, 0);
+      if (!userCleared) {
+        const coded = action.codedPath;
+        const effectiveWaypoints = (waypoints && waypoints.length > 0) ? waypoints : (coded?.path ?? []);
+        if (effectiveWaypoints.length > 0) {
+          const gesture: GestureTool = state.sceneGesture[action.scene] ?? (coded?.gesture as GestureTool) ?? 'click';
+          const animation = state.sceneAnimation[action.scene] ?? GESTURE_PRESETS[gesture].animation;
+          const dark = state.sceneDark[action.scene] ?? GESTURE_PRESETS[gesture].dark;
+          layers.push(createHandLayer(action.scene, effectiveWaypoints, gesture, animation, dark, order++));
+        }
+      }
+
+      // ── Audio layers from coded audio ──
+      const codedAudio = getCodedAudio(action.compositionId, action.scene);
+      for (const entry of codedAudio) {
+        const audioLayer = createAudioLayer(action.scene, order++);
+        const label = AUDIO_FILES.find(f => f.id === entry.file)?.label ?? 'Audio';
+        audioLayer.data = { file: entry.file, startFrame: entry.startFrame, durationInFrames: entry.durationInFrames, volume: entry.volume };
+        audioLayer.name = `Audio - ${label}`;
+        layers.push(audioLayer);
+      }
+
+      if (layers.length === 0) return state;
 
       const newState: DirectorState = {
         ...state,
-        layers: { ...state.layers, [action.scene]: [handLayer] },
-        selectedLayerId: handLayer.id,
+        layers: { ...state.layers, [action.scene]: layers },
+        selectedLayerId: layers[0].id,
       };
       // Also adopt waypoints into flat state if they came from coded path
-      if (waypoints.length === 0) {
-        newState.waypoints = { ...state.waypoints, [action.scene]: effectiveWaypoints };
+      const coded = action.codedPath;
+      if ((!waypoints || waypoints.length === 0) && coded?.path?.length) {
+        newState.waypoints = { ...state.waypoints, [action.scene]: coded.path };
       }
       if (!state.sceneGesture[action.scene] && coded?.gesture) {
         newState.sceneGesture = { ...state.sceneGesture, [action.scene]: coded.gesture as GestureTool };

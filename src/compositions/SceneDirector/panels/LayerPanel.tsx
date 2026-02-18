@@ -5,7 +5,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDirector } from '../context';
-import { createHandLayer, createZoomLayer, type Layer, type LayerType, type ZoomLayer } from '../layers';
+import { createHandLayer, createZoomLayer, createAudioLayer, type Layer, type LayerType, type ZoomLayer } from '../layers';
 import { GESTURE_PRESETS, type GestureTool } from '../gestures';
 
 export const LayerPanel: React.FC = () => {
@@ -25,6 +25,9 @@ export const LayerPanel: React.FC = () => {
       dispatch({ type: 'ADD_LAYER', scene, layer });
     } else if (type === 'zoom') {
       const layer = createZoomLayer(scene, order);
+      dispatch({ type: 'ADD_LAYER', scene, layer });
+    } else if (type === 'audio') {
+      const layer = createAudioLayer(scene, order);
       dispatch({ type: 'ADD_LAYER', scene, layer });
     }
     setShowAddMenu(false);
@@ -65,7 +68,7 @@ export const LayerPanel: React.FC = () => {
 
   if (!scene) return null;
 
-  const typeIcon = (type: LayerType) => type === 'hand' ? '\u{1F590}' : '\u{1F50D}';
+  const typeIcon = (type: LayerType) => type === 'hand' ? '\u{1F590}' : type === 'zoom' ? '\u{1F50D}' : '\u{266B}';
 
   return (
     <div className="layer-panel">
@@ -86,6 +89,9 @@ export const LayerPanel: React.FC = () => {
               </button>
               <button className="layer-panel__add-menu-item" onClick={() => handleAddLayer('zoom')}>
                 Zoom
+              </button>
+              <button className="layer-panel__add-menu-item" onClick={() => handleAddLayer('audio')}>
+                Audio
               </button>
             </div>
           )}

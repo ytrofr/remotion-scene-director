@@ -29,6 +29,7 @@ export interface DirectorContextValue {
   setCursorScale: (scale: number) => void;
   sceneLayers: Layer[];
   selectedLayer: Layer | null;
+  saveSession: () => void;
 }
 
 const Ctx = createContext<DirectorContextValue>(null!);

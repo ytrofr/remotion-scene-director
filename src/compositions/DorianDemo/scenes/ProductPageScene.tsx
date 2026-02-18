@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Audio,
   Img,
   staticFile,
   useCurrentFrame,
@@ -77,6 +78,9 @@ export const ProductPageScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
+      {/* Swipe sound when hand starts scrolling */}
+      {frame === 118 && <Audio src={staticFile('audio/u_nharq4usid-swipe-255512.mp3')} volume={0.3} />}
+
       <AnimatedText
         delay={0}
         style={{

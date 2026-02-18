@@ -33,10 +33,10 @@ export const TapAIBubbleScene: React.FC = () => {
   // Hand path - approach bubble, then track it as zoom moves it
   const savedTap = getSavedPath('DorianDemo', '3-TapBubble');
   const handPath: HandPathPoint[] = savedTap?.path ?? [
-    { x: 780, y: 1200, frame: 0, gesture: 'pointer' },        // H1: Start above
-    { x: 800, y: 1400, frame: 30, gesture: 'pointer' },       // H2: Moving down
-    { x: 818, y: 1546, frame: zoomStartFrame, gesture: 'pointer' }, // H3: At bubble, zoom starts
-    { x: 518, y: 992, frame: clickFrame, gesture: 'click', duration: 2 }, // H4: CLICK at zoomed position
+    { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 },        // H1: Start above
+    { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 },       // H2: Moving down
+    { x: 818, y: 1546, frame: zoomStartFrame, gesture: 'pointer', scale: 1 }, // H3: At bubble, zoom starts
+    { x: 518, y: 992, frame: clickFrame, gesture: 'click', duration: 2, scale: 2.2 }, // H4: CLICK at zoomed position (scaled with 3x zoom)
   ];
 
   return (

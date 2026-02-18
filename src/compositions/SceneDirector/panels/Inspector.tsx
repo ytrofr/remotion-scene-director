@@ -8,7 +8,9 @@ import React, { useCallback } from 'react';
 import type { HandPathPoint, LottieAnimation } from '../../../components/FloatingHand/types';
 import { useDirector } from '../context';
 import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
-import type { ZoomLayer } from '../layers';
+import type { AudioLayer, ZoomLayer } from '../layers';
+import { AudioInspector } from './AudioInspector';
+import { ActivityLog } from './ActivityLog';
 import { LayerPanel } from './LayerPanel';
 import { NumField } from './NumField';
 import { ZoomInspector } from './ZoomInspector';
@@ -148,6 +150,11 @@ export const Inspector: React.FC = () => {
     <ZoomInspector layer={selectedLayer as ZoomLayer} scene={scene} />
   ) : null;
 
+  // Audio layer inspector (when an audio layer is selected)
+  const audioInspectorSection = selectedLayer?.type === 'audio' ? (
+    <AudioInspector layer={selectedLayer as AudioLayer} scene={scene} />
+  ) : null;
+
   if (idx === null || !waypoint) {
     return (
       <div className="inspector">
@@ -155,12 +162,14 @@ export const Inspector: React.FC = () => {
         {gestureHeader}
         {handStyleSection}
         {zoomInspectorSection}
+        {audioInspectorSection}
         {waypointList}
-        {!waypointList && !zoomInspectorSection && (
+        {!waypointList && !zoomInspectorSection && !audioInspectorSection && (
           <div className="inspector__empty-text">
             Pick a gesture tool and click on the video
           </div>
         )}
+        <ActivityLog />
       </div>
     );
   }
@@ -175,6 +184,7 @@ export const Inspector: React.FC = () => {
       {gestureHeader}
       {handStyleSection}
       {zoomInspectorSection}
+      {audioInspectorSection}
       {waypointList}
 
       <div className="inspector__header">
@@ -194,6 +204,7 @@ export const Inspector: React.FC = () => {
       >
         Delete Waypoint
       </button>
+      <ActivityLog />
     </div>
   );
 };

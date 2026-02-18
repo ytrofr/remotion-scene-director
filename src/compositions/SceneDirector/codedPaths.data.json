@@ -135,7 +135,7 @@
           "y": 992,
           "frame": 73,
           "gesture": "click",
-          "scale": 1,
+          "scale": 2.2,
           "duration": 2
         }
       ]
@@ -186,69 +186,6 @@
           "frame": 90,
           "gesture": "pointer",
           "scale": 1
-        }
-      ]
-    },
-    "5-UserTyping": {
-      "gesture": "click",
-      "animation": "hand-click",
-      "path": [
-        {
-          "x": 750,
-          "y": 1520,
-          "frame": 70,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 730,
-          "y": 1500,
-          "frame": 85,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 720,
-          "y": 1490,
-          "frame": 100,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 720,
-          "y": 1490,
-          "frame": 105,
-          "gesture": "click",
-          "scale": 1,
-          "duration": 10
-        }
-      ]
-    },
-    "7-AIResponse": {
-      "gesture": "click",
-      "animation": "hand-click",
-      "path": [
-        {
-          "x": 540,
-          "y": 1600,
-          "frame": 70,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 540,
-          "y": 1480,
-          "frame": 85,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 540,
-          "y": 1450,
-          "frame": 95,
-          "gesture": "click",
-          "scale": 1,
-          "duration": 10
         }
       ]
     },

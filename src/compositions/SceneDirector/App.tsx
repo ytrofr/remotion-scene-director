@@ -14,7 +14,8 @@ import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
 import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
-import { computeZoomAtFrame, type ZoomLayer, type HandLayer } from './layers';
+import { computeZoomAtFrame, type ZoomLayer, type HandLayer, type AudioLayer } from './layers';
+import { withAudioLayers, type AudioEntry } from './AudioLayerRenderer';
 import { loadSession, useSessionPersistence } from './hooks/useSessionPersistence';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePlayerControls } from './hooks/usePlayerControls';
@@ -43,6 +44,9 @@ export const App: React.FC = () => {
     ...(savedSession.sceneGesture ? { sceneGesture: savedSession.sceneGesture } : {}),
     ...(savedSession.sceneAnimation ? { sceneAnimation: savedSession.sceneAnimation } : {}),
     ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
+    ...(savedSession.clearedSceneLayers ? { clearedSceneLayers: savedSession.clearedSceneLayers } : {}),
+    ...(savedSession.layers ? { layers: savedSession.layers } : {}),
+    ...(savedSession.waypoints ? { waypoints: savedSession.waypoints } : {}),
   }), []);
 
   const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: restoredInitial } as UndoableState);
@@ -76,8 +80,8 @@ export const App: React.FC = () => {
     }
   });
 
-  // Session persistence
-  useSessionPersistence(state, frame);
+  // Session persistence (manual save only)
+  const { saveSession } = useSessionPersistence(state, frame);
 
   // Track player frame dimensions for coordinate mapping (composition -> screen space)
   const [playerScale, setPlayerScale] = useState(1);
@@ -98,7 +102,36 @@ export const App: React.FC = () => {
     [state.compositionId],
   );
 
-  const VideoComponent = COMPOSITION_COMPONENTS[composition.id];
+  const BaseVideoComponent = COMPOSITION_COMPONENTS[composition.id];
+
+  // Collect audio entries ONLY from user-edited audio layers (not coded fallbacks).
+  // Compositions already play their own inline <Audio> tags — we only inject extras
+  // when the user has explicitly added/edited audio layers in SceneDirector.
+  const audioEntries: AudioEntry[] = useMemo(() => {
+    const entries: AudioEntry[] = [];
+    for (const [sceneName, layers] of Object.entries(state.layers)) {
+      const scene = composition.scenes.find(s => s.name === sceneName);
+      if (!scene) continue;
+      for (const layer of layers) {
+        if (layer.type !== 'audio' || !layer.visible) continue;
+        const audioData = (layer as AudioLayer).data;
+        entries.push({
+          id: layer.id,
+          file: audioData.file,
+          globalFrom: scene.start + audioData.startFrame,
+          durationInFrames: audioData.durationInFrames || 60,
+          volume: audioData.volume,
+        });
+      }
+    }
+    return entries;
+  }, [state.layers, composition.scenes]);
+
+  // Wrap composition with audio layers
+  const VideoComponent = useMemo(
+    () => audioEntries.length > 0 ? withAudioLayers(BaseVideoComponent, audioEntries) : BaseVideoComponent,
+    [BaseVideoComponent, audioEntries],
+  );
 
   // Current scene
   const currentScene = useMemo(
@@ -133,7 +166,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (!state.selectedScene) return;
     const coded = getCodedPath(state.compositionId, state.selectedScene);
-    dispatch({ type: 'ENSURE_SCENE_LAYERS', scene: state.selectedScene, codedPath: coded });
+    dispatch({ type: 'ENSURE_SCENE_LAYERS', scene: state.selectedScene, compositionId: state.compositionId, codedPath: coded });
   }, [state.selectedScene, state.compositionId, dispatch]);
 
   // Active gesture preset (null when tool is 'select')
@@ -163,9 +196,11 @@ export const App: React.FC = () => {
     [state.selectedLayerId, sceneLayers],
   );
 
-  // Compute zoom transform from visible zoom layers
+  // Compute zoom transform from visible zoom layers (clamped to scene bounds)
   const zoomTransform = useMemo(() => {
     if (!currentScene) return null;
+    // Only apply zoom when playhead is within the selected scene
+    if (frame < currentScene.start || frame >= currentScene.end) return null;
     const zoomLayers = sceneLayers.filter(
       (l): l is ZoomLayer => l.type === 'zoom' && l.visible,
     );
@@ -194,16 +229,32 @@ export const App: React.FC = () => {
     setCursorScale,
     sceneLayers,
     selectedLayer,
-  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo, playbackRate, playerScale, cursorScale, setCursorScale, sceneLayers, selectedLayer]);
+    saveSession,
+  }), [state, frame, composition, currentScene, sceneWaypoints, effectiveWaypoints, activePreset, scenePreset, canUndo, playbackRate, playerScale, cursorScale, setCursorScale, sceneLayers, selectedLayer, saveSession]);
 
-  // Track frame from Player
+  // Track frame from Player + auto-select scene under playhead during playback
+  const selectedSceneRef = useRef(state.selectedScene);
+  selectedSceneRef.current = state.selectedScene;
+  const scenesRef = useRef(composition.scenes);
+  scenesRef.current = composition.scenes;
+
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
-    const handler = (e: { detail: { frame: number } }) => setFrame(e.detail.frame);
+    const handler = (e: { detail: { frame: number } }) => {
+      const f = e.detail.frame;
+      setFrame(f);
+      // Auto-select scene under playhead during playback
+      if (player.isPlaying()) {
+        const scene = scenesRef.current.find(s => f >= s.start && f < s.end);
+        if (scene && scene.name !== selectedSceneRef.current) {
+          dispatch({ type: 'SELECT_SCENE', name: scene.name });
+        }
+      }
+    };
     player.addEventListener('frameupdate', handler as any);
     return () => player.removeEventListener('frameupdate', handler as any);
-  }, [state.compositionId]);
+  }, [state.compositionId, dispatch]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({ frame, composition, state, dispatch, playerRef, setZoom, setPan });
@@ -256,6 +307,7 @@ export const App: React.FC = () => {
                   fps={composition.video.fps}
                   durationInFrames={composition.video.frames}
                   playbackRate={playbackRate}
+                  numberOfSharedAudioTags={15}
                   controls={false}
                   style={{
                     width: '100%',

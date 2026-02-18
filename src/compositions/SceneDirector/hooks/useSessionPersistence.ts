@@ -1,9 +1,12 @@
 /**
  * Session persistence hook - saves/restores SceneDirector state to localStorage.
+ * MANUAL SAVE ONLY — nothing is saved unless the user clicks Save.
  */
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { DirectorState } from '../state';
+import type { Layer } from '../layers';
+import type { HandPathPoint } from '../../../components/FloatingHand/types';
 
 const STORAGE_KEY = 'scene-director-session';
 
@@ -14,6 +17,9 @@ export interface SavedSession {
   sceneGesture?: Record<string, string>;
   sceneAnimation?: Record<string, string>;
   sceneDark?: Record<string, boolean>;
+  clearedSceneLayers?: Record<string, boolean>;
+  layers?: Record<string, Layer[]>;
+  waypoints?: Record<string, HandPathPoint[]>;
 }
 
 export function loadSession(): SavedSession {
@@ -33,7 +39,8 @@ function saveSessionData(s: SavedSession) {
 export function useSessionPersistence(state: DirectorState, frame: number) {
   const savedSession = useMemo(() => loadSession(), []);
 
-  useEffect(() => {
+  // Manual save — only called when user clicks Save
+  const saveSession = useCallback(() => {
     saveSessionData({
       compositionId: state.compositionId,
       selectedScene: state.selectedScene,
@@ -41,8 +48,11 @@ export function useSessionPersistence(state: DirectorState, frame: number) {
       sceneGesture: state.sceneGesture,
       sceneAnimation: state.sceneAnimation,
       sceneDark: state.sceneDark,
+      clearedSceneLayers: state.clearedSceneLayers,
+      layers: state.layers,
+      waypoints: state.waypoints,
     });
-  }, [state.compositionId, state.selectedScene, frame, state.sceneGesture, state.sceneAnimation, state.sceneDark]);
+  }, [state, frame]);
 
-  return savedSession;
+  return { savedSession, saveSession };
 }

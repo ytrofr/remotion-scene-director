@@ -18,7 +18,7 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 ];
 
 export const Toolbar: React.FC = () => {
-  const { state, dispatch, canUndo, cursorScale, setCursorScale } = useDirector();
+  const { state, dispatch, canUndo, cursorScale, setCursorScale, saveSession } = useDirector();
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [openDropdown, setOpenDropdown] = useState<GestureTool | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,34 +36,35 @@ export const Toolbar: React.FC = () => {
   }, [openDropdown]);
 
   const handleSave = useCallback(async () => {
-    if (!state.selectedScene) return;
-    const waypoints = state.waypoints[state.selectedScene] || [];
-    if (waypoints.length === 0) return;
-
-    const gesture = state.sceneGesture[state.selectedScene] || 'click';
-    const preset = GESTURE_PRESETS[gesture];
-
     setSaveState('saving');
     try {
-      const res = await fetch('/api/save-path', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          compositionId: state.compositionId,
-          sceneName: state.selectedScene,
-          path: waypoints,
-          gesture,
-          animation: state.sceneAnimation[state.selectedScene] ?? preset.animation,
-        }),
-      });
-      if (!res.ok) throw new Error('Save failed');
+      // Save path to disk if a scene is selected
+      if (state.selectedScene) {
+        const waypoints = state.waypoints[state.selectedScene] || [];
+        const gesture = state.sceneGesture[state.selectedScene] || 'click';
+        const preset = GESTURE_PRESETS[gesture];
+        const res = await fetch('/api/save-path', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            compositionId: state.compositionId,
+            sceneName: state.selectedScene,
+            path: waypoints,
+            gesture,
+            animation: state.sceneAnimation[state.selectedScene] ?? preset.animation,
+          }),
+        });
+        if (!res.ok) throw new Error('Save failed');
+      }
+      // Always persist full state to localStorage
+      saveSession();
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 2000);
     } catch {
       setSaveState('error');
       setTimeout(() => setSaveState('idle'), 3000);
     }
-  }, [state.selectedScene, state.waypoints, state.sceneGesture, state.sceneAnimation, state.compositionId]);
+  }, [state.selectedScene, state.waypoints, state.sceneGesture, state.sceneAnimation, state.compositionId, saveSession]);
 
   // Listen for Ctrl+S custom event from App.tsx
   useEffect(() => {
@@ -235,7 +236,7 @@ export const Toolbar: React.FC = () => {
       {/* Save */}
       <button
         onClick={handleSave}
-        disabled={!state.selectedScene || saveState === 'saving' || (state.waypoints[state.selectedScene || ''] || []).length === 0}
+        disabled={saveState === 'saving'}
         className={`toolbar__btn ${
           saveState === 'saved' ? 'toolbar__btn--save-ok' :
           saveState === 'error' ? 'toolbar__btn--clear' :

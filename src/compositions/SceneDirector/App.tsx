@@ -36,20 +36,36 @@ const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
 export const App: React.FC = () => {
   // Restore session from localStorage
   const savedSession = useMemo(() => loadSession(), []);
-  const restoredInitial = useMemo(() => ({
-    ...initialState,
-    ...(savedSession.compositionId ? { compositionId: savedSession.compositionId } : {}),
-    ...(savedSession.selectedScene ? { selectedScene: savedSession.selectedScene } : {}),
-    ...(savedSession.sceneGesture ? { sceneGesture: savedSession.sceneGesture } : {}),
-    ...(savedSession.sceneAnimation ? { sceneAnimation: savedSession.sceneAnimation } : {}),
-    ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
-    ...(savedSession.clearedSceneLayers ? { clearedSceneLayers: savedSession.clearedSceneLayers } : {}),
-    ...(savedSession.layers ? { layers: savedSession.layers } : {}),
-    ...(savedSession.waypoints ? { waypoints: savedSession.waypoints } : {}),
-    ...(savedSession.savedSnapshots ? { savedSnapshots: savedSession.savedSnapshots } : {}),
-    ...(savedSession.sidebarTab ? { sidebarTab: savedSession.sidebarTab } : {}),
-    ...(savedSession.versionHistory ? { versionHistory: savedSession.versionHistory } : {}),
-  }), []);
+  const restoredInitial = useMemo(() => {
+    // Sync stale localStorage waypoints with current coded paths.
+    // If stored waypoints match a coded path's frame structure (auto-derived),
+    // refresh them so coded path updates (e.g. scale changes) propagate.
+    const waypoints = savedSession.waypoints ? { ...savedSession.waypoints } : undefined;
+    if (waypoints && savedSession.compositionId) {
+      for (const [scene, wp] of Object.entries(waypoints)) {
+        if (!wp?.length) continue;
+        const coded = getCodedPath(savedSession.compositionId, scene);
+        if (!coded || coded.path.length !== wp.length) continue;
+        if (wp.every((w, i) => w.frame === coded.path[i].frame)) {
+          waypoints[scene] = coded.path.map(p => ({ ...p }));
+        }
+      }
+    }
+    return {
+      ...initialState,
+      ...(savedSession.compositionId ? { compositionId: savedSession.compositionId } : {}),
+      ...(savedSession.selectedScene ? { selectedScene: savedSession.selectedScene } : {}),
+      ...(savedSession.sceneGesture ? { sceneGesture: savedSession.sceneGesture } : {}),
+      ...(savedSession.sceneAnimation ? { sceneAnimation: savedSession.sceneAnimation } : {}),
+      ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
+      ...(savedSession.clearedSceneLayers ? { clearedSceneLayers: savedSession.clearedSceneLayers } : {}),
+      ...(savedSession.layers ? { layers: savedSession.layers } : {}),
+      ...(waypoints ? { waypoints } : {}),
+      ...(savedSession.savedSnapshots ? { savedSnapshots: savedSession.savedSnapshots } : {}),
+      ...(savedSession.sidebarTab ? { sidebarTab: savedSession.sidebarTab } : {}),
+      ...(savedSession.versionHistory ? { versionHistory: savedSession.versionHistory } : {}),
+    };
+  }, []);
 
   const [undoState, dispatch] = useReducer(undoableReducer, { past: [], present: restoredInitial } as UndoableState);
   const state = undoState.present;

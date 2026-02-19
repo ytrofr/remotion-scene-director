@@ -1,6 +1,6 @@
 import React from 'react';
-import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Audio } from 'remotion';
-import { COLORS, TEXT_CONTENT, SPRING_CONFIG } from '../constants';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
+import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -9,7 +9,7 @@ import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { fontFamily } from '../../../lib/fonts';
 
-// Scene 4: Chat Opens with zoom effect + hand taps input + starts typing
+// Scene 4: Chat Opens with zoom-out + hand taps input (no typing — typing is in scene 5)
 export const ChatOpenScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -17,14 +17,15 @@ export const ChatOpenScene: React.FC = () => {
   const chatSlide = spring({
     frame,
     fps,
-    config: { damping: 18, mass: 1, stiffness: 120 }, // Smoother slide
+    config: { damping: 18, mass: 1, stiffness: 120 },
   });
 
   // Zoom out from scene 3's zoomed-in state (5.4 @ -860, -1730) back to normal (1.8)
+  // Gentle spring — takes ~35 frames to settle for smooth cinematic feel
   const zoomOutProgress = spring({
     frame,
     fps,
-    config: { damping: 18, mass: 1, stiffness: 80 },
+    config: { damping: 22, mass: 1.5, stiffness: 40 },
   });
   const zoomScale = interpolate(zoomOutProgress, [0, 1], [5.4, 1.8]);
   const zoomOffsetX = interpolate(zoomOutProgress, [0, 1], [-860, 0]);
@@ -33,36 +34,22 @@ export const ChatOpenScene: React.FC = () => {
   // Chat height - 30% of phone screen (844 * 0.30 = ~250px)
   const chatHeight = 260;
 
-  // Typing in input box - starts after hand taps input at frame 50
-  const message = TEXT_CONTENT.userTyping.userMessage;
-  const typingStartFrame = 55;
-  const typedChars = Math.floor(interpolate(frame, [typingStartFrame, 85], [0, 12], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
-  const typedText = message.slice(0, typedChars);
-
   // Input focus state - active after hand taps
   const inputFocused = frame >= 48;
 
-  // Hand path: move to input box after zoom settles, tap it, stay during typing
+  // Hand path: move to input box after zoom settles, tap it, then exit
   const savedChatOpen = getSavedPath('DorianDemo', '4-ChatOpen');
   const handPath: HandPathPoint[] = savedChatOpen?.path ?? [
-    { x: 518, y: 992, frame: 0, gesture: 'pointer' },       // Start where scene 3 ended (zoomed click pos)
-    { x: 500, y: 1200, frame: 20, gesture: 'pointer' },     // Moving down as zoom settles
-    { x: 480, y: 1520, frame: 45, gesture: 'pointer' },     // Approaching input box
-    { x: 480, y: 1550, frame: 48, gesture: 'click', duration: 5 }, // TAP input box
-    { x: 480, y: 1550, frame: 60, gesture: 'pointer' },     // Stay near input during typing
-    { x: 480, y: 1550, frame: 90, gesture: 'pointer' },     // Hold position until scene end
+    { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 },   // Match scene 3 end (big hand)
+    { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1.5 }, // Shrinking with zoom-out
+    { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 },   // Normal size, approaching input
+    { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
+    { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 },   // Linger briefly
+    { x: 480, y: 1550, frame: 90, gesture: 'pointer', scale: 1 },   // Hold position until scene end
   ];
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Tap sound when hand clicks input box */}
-      {frame === 48 && <Audio src={staticFile('audio/send-click.wav')} volume={0.4} />}
-
-      {/* Typing sound - loops during typing */}
-      {frame === typingStartFrame && (
-        <Audio src={staticFile('audio/typing-soft.wav')} volume={0.3} />
-      )}
-
       <AnimatedText
         delay={0}
         style={{
@@ -117,7 +104,7 @@ export const ChatOpenScene: React.FC = () => {
               zIndex: 5,
             }}
           >
-            {/* Chat header - more compact */}
+            {/* Chat header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <AIBubble scale={0.6} />
               <div>
@@ -126,7 +113,7 @@ export const ChatOpenScene: React.FC = () => {
               </div>
             </div>
 
-            {/* AI greeting message - more compact */}
+            {/* AI greeting message */}
             <div
               style={{
                 background: '#f0f0f0',
@@ -141,7 +128,7 @@ export const ChatOpenScene: React.FC = () => {
               Hi! How can I help you today?
             </div>
 
-            {/* Input field at bottom - highlights on focus */}
+            {/* Input field at bottom - highlights on focus, no typing (typing is in scene 5) */}
             <div
               style={{
                 position: 'absolute',
@@ -155,11 +142,10 @@ export const ChatOpenScene: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 border: inputFocused ? `2px solid ${COLORS.primary}` : '2px solid transparent',
-                transition: 'all 0.2s',
               }}
             >
-              <span style={{ color: typedChars > 0 ? COLORS.text : '#999', fontSize: 13 }}>
-                {typedChars > 0 ? typedText : 'Type a message...'}
+              <span style={{ color: '#999', fontSize: 13 }}>
+                Type a message...
                 {inputFocused && <span style={{ opacity: frame % 15 < 8 ? 1 : 0, color: COLORS.text }}>|</span>}
               </span>
               <div
@@ -173,7 +159,7 @@ export const ChatOpenScene: React.FC = () => {
                   justifyContent: 'center',
                 }}
               >
-                <span style={{ color: 'white', fontSize: 18 }}>→</span>
+                <span style={{ color: 'white', fontSize: 18 }}>{'\u2192'}</span>
               </div>
             </div>
           </div>
@@ -181,13 +167,13 @@ export const ChatOpenScene: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Hand - moves to input box and taps, then hides during typing */}
+      {/* Floating Hand - moves to input box and taps, then hides */}
       {frame <= 53 && (
         <FloatingHand
           path={handPath}
           startFrame={0}
           animation="hand-click"
-          size={130}
+          size={140}
           dark={true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"

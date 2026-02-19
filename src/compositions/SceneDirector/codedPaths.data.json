@@ -149,14 +149,14 @@
           "y": 992,
           "frame": 0,
           "gesture": "pointer",
-          "scale": 1
+          "scale": 2.2
         },
         {
           "x": 500,
           "y": 1200,
           "frame": 20,
           "gesture": "pointer",
-          "scale": 1
+          "scale": 1.5
         },
         {
           "x": 480,

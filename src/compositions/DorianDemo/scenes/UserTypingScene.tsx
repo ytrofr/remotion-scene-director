@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Audio } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
 import { COLORS, TEXT_CONTENT } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -8,14 +8,13 @@ import { AIBubble } from '../../../components/DorianPhone/AIBubble';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { fontFamily } from '../../../lib/fonts';
 
-// Scene 5: User Types Message with zoom on chat (continues from Scene 4's 10 chars)
+// Scene 5: User Types Message with zoom on chat (all typing happens here)
 export const UserTypingScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const message = TEXT_CONTENT.userTyping.userMessage;
-  const startChars = 12; // Scene 4 typed first 12 chars
-  const typedChars = Math.floor(interpolate(frame, [0, 60], [startChars, message.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
+  const typedChars = Math.floor(interpolate(frame, [5, 70], [0, message.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
   const typedText = message.slice(0, typedChars);
 
   const sendButtonPulse = frame > 105 ? 1 + Math.sin((frame - 105) * 0.3) * 0.08 : 1;
@@ -35,7 +34,7 @@ export const UserTypingScene: React.FC = () => {
   // Chat height - 30% of phone screen
   const chatHeight = 260;
 
-  // Hand reappears after typing, moves to send button and clicks
+  // Hand appears after typing finishes, moves to send button and clicks
   // Send button is at the right side of the input field
   // At zoom 2.76 with offset -560, approximate send button position:
   const sendHandPath: HandPathPoint[] = [
@@ -47,12 +46,6 @@ export const UserTypingScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Typing sound - continues from scene 4 */}
-      {frame === 0 && <Audio src={staticFile('audio/typing-soft.wav')} volume={0.3} />}
-
-      {/* Tap sound when hand clicks send button */}
-      {frame === 105 && <Audio src={staticFile('audio/send-click.wav')} volume={0.5} />}
-
       <AnimatedText
         delay={0}
         style={{
@@ -148,7 +141,7 @@ export const UserTypingScene: React.FC = () => {
               </div>
             )}
 
-            {/* Input field - focused from start (continues scene 4) */}
+            {/* Input field - focused from start (scene 4 tapped it), typing begins at frame 5 */}
             <div
               style={{
                 position: 'absolute',
@@ -164,8 +157,8 @@ export const UserTypingScene: React.FC = () => {
                 border: frame < 105 ? `2px solid ${COLORS.primary}` : '2px solid transparent',
               }}
             >
-              <span style={{ color: frame < 105 ? COLORS.text : '#999', fontSize: 11, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {frame < 105 ? typedText : 'Type a message...'}
+              <span style={{ color: (typedChars > 0 && frame < 105) ? COLORS.text : '#999', fontSize: 11, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {frame < 105 ? (typedChars > 0 ? typedText : 'Type a message...') : 'Type a message...'}
                 {frame < 105 && <span style={{ opacity: frame % 15 < 8 ? 1 : 0, color: COLORS.text }}>|</span>}
               </span>
               <div

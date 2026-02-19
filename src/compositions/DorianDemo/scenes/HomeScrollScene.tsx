@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, useVideoConfig, Audio } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, useVideoConfig } from 'remotion';
 import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -42,9 +42,6 @@ export const HomeScrollScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Swipe sound when scroll starts */}
-      {frame === 28 && <Audio src={staticFile('audio/u_nharq4usid-swipe-255512.mp3')} volume={0.3} />}
-
       <AnimatedText
         delay={0}
         style={{

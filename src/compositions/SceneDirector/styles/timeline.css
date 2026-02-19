@@ -1,5 +1,5 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TIMELINE
+   TIMELINE v4 - Multi-row with scenes, hand, audio tracks
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .timeline {
   display: flex;
@@ -47,24 +47,58 @@
   color: var(--text-muted);
 }
 
-/* Timeline bar */
-.timeline__bar {
+/* Multi-row tracks container */
+.timeline__tracks {
   position: relative;
-  flex: 1;
+  display: flex;
   margin: 0 16px;
   cursor: pointer;
-  min-height: 60px;
   user-select: none;
 }
-.timeline__bar--scrubbing {
+.timeline__tracks--scrubbing {
   cursor: ew-resize;
+}
+
+/* Left gutter with row labels */
+.timeline__labels {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.timeline__row-label {
+  font-size: 9px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+  white-space: nowrap;
+}
+.timeline__row-label--hand {
+  color: var(--green);
+}
+.timeline__row-label--audio {
+  color: #f59e0b;
+}
+
+/* Track area (right side, holds all bars + playhead) */
+.timeline__track-area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Each horizontal track row */
+.timeline__row {
+  position: relative;
+  width: 100%;
 }
 
 /* Scene bars */
 .timeline__scene {
   position: absolute;
   top: 0;
-  height: 28px;
+  height: 100%;
   background: rgba(42,47,58,0.6);
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -88,26 +122,47 @@
   overflow: hidden;
   font-family: var(--mono);
 }
-.timeline__scene-wp-count {
-  margin-left: 3px;
-}
 
-/* Waypoint dots */
-.timeline__dot {
+/* Hand gesture bars */
+.timeline__hand-bar {
   position: absolute;
-  top: 32px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  transform: translateX(-3.5px);
+  top: 0;
+  height: 100%;
+  background: rgba(45, 212, 191, 0.25);
+  border: 1px solid rgba(45, 212, 191, 0.5);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-width: 4px;
+  overflow: hidden;
+  transition: border-color 0.12s, background 0.12s;
+}
+.timeline__hand-bar:hover {
+  background: rgba(45, 212, 191, 0.4);
+  border-color: rgba(45, 212, 191, 0.7);
+}
+.timeline__hand-bar--selected {
+  background: rgba(45, 212, 191, 0.45);
+  border-color: #2dd4bf;
+}
+.timeline__hand-label {
+  font-size: 9px;
+  color: #2dd4bf;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   pointer-events: none;
+  padding: 0 6px;
+  font-family: var(--mono);
 }
 
-/* Audio bars (below scene bars) */
+/* Audio bars */
 .timeline__audio-bar {
   position: absolute;
-  top: 42px;
-  height: 14px;
+  top: 0;
+  height: 100%;
   background: rgba(245, 158, 11, 0.35);
   border: 1px solid rgba(245, 158, 11, 0.6);
   border-radius: 3px;
@@ -152,7 +207,7 @@
   font-family: var(--mono);
 }
 
-/* Playhead */
+/* Playhead (spans all rows) */
 .timeline__playhead {
   position: absolute;
   top: -3px;
@@ -160,7 +215,7 @@
   width: 3px;
   background: var(--red);
   pointer-events: none;
-  z-index: 1;
+  z-index: 5;
   transform: translateX(-1.5px);
 }
 .timeline__playhead-tri {

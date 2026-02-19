@@ -103,8 +103,8 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
     animation: 'hand-click',
     dark: true,
     path: [
-      { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 1 },
-      { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1 },
+      { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 },
+      { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1.5 },
       { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 },
       { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 },
       { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 },

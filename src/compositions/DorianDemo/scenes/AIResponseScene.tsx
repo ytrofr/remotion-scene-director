@@ -1,8 +1,6 @@
 import React from 'react';
 import {
   AbsoluteFill,
-  Audio,
-  staticFile,
   useCurrentFrame,
   interpolate,
   spring,
@@ -57,9 +55,6 @@ export const AIResponseScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Click sound when hand taps "View Products" button */}
-      {frame === 95 && <Audio src={staticFile('audio/send-click.wav')} volume={0.5} />}
-
       <AnimatedText
         delay={0}
         style={{

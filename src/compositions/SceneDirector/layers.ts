@@ -34,10 +34,9 @@ const DORIAN_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
   '4-ChatOpen': [
     { file: 'audio/send-click.wav', startFrame: 48, durationInFrames: 15, volume: 0.4 },
-    { file: 'audio/typing-soft.wav', startFrame: 50, durationInFrames: 40, volume: 0.3 },
   ],
   '5-UserTyping': [
-    { file: 'audio/typing-soft.wav', startFrame: 0, durationInFrames: 100, volume: 0.3 },
+    { file: 'audio/typing-soft.wav', startFrame: 5, durationInFrames: 65, volume: 0.3 },
     { file: 'audio/send-click.wav', startFrame: 105, durationInFrames: 15, volume: 0.5 },
   ],
   '7-AIResponse': [

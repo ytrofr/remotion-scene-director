@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, staticFile, useCurrentFrame, interpolate, spring, useVideoConfig, Audio } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
 import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -41,9 +41,6 @@ export const TapAIBubbleScene: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Click sound at frame 73 (absolute 298) */}
-      {frame === 73 && <Audio src={staticFile('audio/send-click.wav')} volume={0.5} />}
-
       <AnimatedText
         delay={0}
         style={{

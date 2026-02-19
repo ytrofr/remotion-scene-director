@@ -1,9 +1,11 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Audio,
   useCurrentFrame,
   useVideoConfig,
   Sequence,
+  staticFile,
 } from 'remotion';
 import { COLORS, SCENES } from './constants';
 import {
@@ -22,12 +24,57 @@ import {
   ProductDetailScene,
   OutroScene,
 } from './scenes';
+import { getCodedAudio } from '../SceneDirector/layers';
+
+// ============ CENTRALIZED AUDIO ============
+// All audio is driven from the coded audio registry (layers.ts).
+// Scene components no longer contain inline <Audio> — this is the single source of truth.
+
+const SCENE_ENTRIES = [
+  { name: '1-Intro', start: SCENES.intro.start, duration: SCENES.intro.duration },
+  { name: '2-HomeScroll', start: SCENES.homeScroll.start, duration: SCENES.homeScroll.duration },
+  { name: '3-TapBubble', start: SCENES.tapBubble.start, duration: SCENES.tapBubble.duration },
+  { name: '4-ChatOpen', start: SCENES.chatOpen.start, duration: SCENES.chatOpen.duration },
+  { name: '5-UserTyping', start: SCENES.userTyping.start, duration: SCENES.userTyping.duration },
+  { name: '6-AIThinking', start: SCENES.aiThinking.start, duration: SCENES.aiThinking.duration },
+  { name: '7-AIResponse', start: SCENES.aiResponse.start, duration: SCENES.aiResponse.duration },
+  { name: '8-ProductPage', start: SCENES.productPage.start, duration: SCENES.productPage.duration },
+  { name: '9-ProductDetail', start: SCENES.productDetail.start, duration: SCENES.productDetail.duration },
+  { name: '10-Outro', start: SCENES.outro.start, duration: SCENES.outro.duration },
+];
+
+const DorianAudio: React.FC = () => {
+  // In SceneDirector, audio is injected via withAudioLayers() HOC — skip to avoid double playback
+  const isSceneDirector = typeof window !== 'undefined' && window.location.pathname.includes('scene-director');
+  if (isSceneDirector) return null;
+
+  const audioElements: React.ReactElement[] = [];
+  for (const scene of SCENE_ENTRIES) {
+    const entries = getCodedAudio('DorianDemo', scene.name);
+    for (const entry of entries) {
+      const globalFrom = scene.start + entry.startFrame;
+      audioElements.push(
+        <Sequence
+          key={`${scene.name}-${entry.file}-${entry.startFrame}`}
+          from={globalFrom}
+          durationInFrames={entry.durationInFrames}
+        >
+          <Audio src={staticFile(entry.file)} volume={entry.volume} />
+        </Sequence>,
+      );
+    }
+  }
+  return <>{audioElements}</>;
+};
 
 // ============ MAIN COMPOSITION ============
 
 export const DorianDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
+      {/* Audio layer — single source of truth */}
+      <DorianAudio />
+
       <Sequence from={SCENES.intro.start} durationInFrames={SCENES.intro.duration} name="1-Intro">
         <IntroScene />
       </Sequence>

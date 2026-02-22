@@ -61,7 +61,7 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* ── App Grid ── */
 .app {
   display: grid;
-  grid-template-rows: 48px 1fr 110px;
+  grid-template-rows: 48px 1fr auto;
   grid-template-columns: 210px 1fr 250px;
   grid-template-areas:
     "toolbar  toolbar   toolbar"

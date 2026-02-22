@@ -28,91 +28,120 @@ export function useKeyboardShortcuts({
   setZoom,
   setPan,
 }: KeyboardShortcutDeps) {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Don't capture when typing in inputs
-    const tag = (e.target as HTMLElement).tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Don't capture when typing in inputs
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
-    // Gesture tool shortcuts: 1-5
-    const gestureTool = GESTURE_KEYS[e.key];
-    if (gestureTool) {
-      e.preventDefault();
-      dispatch({ type: 'SET_TOOL', tool: gestureTool });
-      return;
-    }
-
-    // Ctrl+Z → Undo
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-      e.preventDefault();
-      dispatch({ type: 'UNDO' });
-      return;
-    }
-
-    switch (e.key) {
-      case 's': case 'S':
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          window.dispatchEvent(new CustomEvent('scene-director-save'));
-        } else {
-          e.preventDefault();
-          dispatch({ type: 'SET_TOOL', tool: 'select' });
-        }
-        break;
-      case ' ':
+      // Gesture tool shortcuts: 1-5
+      const gestureTool = GESTURE_KEYS[e.key];
+      if (gestureTool) {
         e.preventDefault();
-        if (playerRef.current) {
-          if (playerRef.current.isPlaying()) {
-            playerRef.current.pause();
+        dispatch({ type: 'SET_TOOL', tool: gestureTool });
+        return;
+      }
+
+      // Ctrl+Z → Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        dispatch({ type: 'UNDO' });
+        return;
+      }
+
+      switch (e.key) {
+        case 's':
+        case 'S':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('scene-director-save'));
           } else {
-            playerRef.current.play();
+            e.preventDefault();
+            dispatch({ type: 'SET_TOOL', tool: 'select' });
           }
-        }
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        if (playerRef.current) {
-          const step = e.shiftKey ? 10 : 1;
-          const next = Math.max(0, frame - step);
-          playerRef.current.seekTo(next);
-        }
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        if (playerRef.current) {
-          const step = e.shiftKey ? 10 : 1;
-          const next = Math.min(composition.video.frames - 1, frame + step);
-          playerRef.current.seekTo(next);
-        }
-        break;
-      case 'Delete': case 'Backspace':
-        if (state.selectedWaypoint !== null && state.selectedScene) {
+          break;
+        case ' ':
           e.preventDefault();
-          dispatch({ type: 'DELETE_WAYPOINT', scene: state.selectedScene, index: state.selectedWaypoint });
-        }
-        break;
-      case 't': case 'T':
-        e.preventDefault();
-        dispatch({ type: 'TOGGLE_TRAIL' });
-        break;
-      case 'e': case 'E':
-        e.preventDefault();
-        dispatch({ type: 'TOGGLE_EXPORT' });
-        break;
-      case '0':
-        e.preventDefault();
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-        break;
-      case 'Escape':
-        e.preventDefault();
-        if (state.exportOpen) {
+          if (playerRef.current) {
+            if (playerRef.current.isPlaying()) {
+              playerRef.current.pause();
+            } else {
+              playerRef.current.play();
+            }
+          }
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (playerRef.current) {
+            const step = e.shiftKey ? 10 : 1;
+            const next = Math.max(0, frame - step);
+            playerRef.current.seekTo(next);
+          }
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (playerRef.current) {
+            const step = e.shiftKey ? 10 : 1;
+            const next = Math.min(composition.video.frames - 1, frame + step);
+            playerRef.current.seekTo(next);
+          }
+          break;
+        case 'Delete':
+        case 'Backspace':
+          if (state.selectedWaypoint !== null && state.selectedScene) {
+            e.preventDefault();
+            dispatch({
+              type: 'DELETE_WAYPOINT',
+              scene: state.selectedScene,
+              index: state.selectedWaypoint,
+            });
+          } else if (state.selectedLayerId && state.selectedScene) {
+            e.preventDefault();
+            dispatch({
+              type: 'REMOVE_LAYER',
+              scene: state.selectedScene,
+              layerId: state.selectedLayerId,
+            });
+          }
+          break;
+        case 't':
+        case 'T':
+          e.preventDefault();
+          dispatch({ type: 'TOGGLE_TRAIL' });
+          break;
+        case 'e':
+        case 'E':
+          e.preventDefault();
           dispatch({ type: 'TOGGLE_EXPORT' });
-        } else if (state.selectedWaypoint !== null) {
-          dispatch({ type: 'SELECT_WAYPOINT', index: null });
-        }
-        break;
-    }
-  }, [frame, composition.video.frames, state.selectedWaypoint, state.selectedScene, state.exportOpen, dispatch, playerRef, setZoom, setPan]);
+          break;
+        case '0':
+          e.preventDefault();
+          setZoom(1);
+          setPan({ x: 0, y: 0 });
+          break;
+        case 'Escape':
+          e.preventDefault();
+          if (state.exportOpen) {
+            dispatch({ type: 'TOGGLE_EXPORT' });
+          } else if (state.selectedWaypoint !== null) {
+            dispatch({ type: 'SELECT_WAYPOINT', index: null });
+          }
+          break;
+      }
+    },
+    [
+      frame,
+      composition.video.frames,
+      state.selectedWaypoint,
+      state.selectedScene,
+      state.selectedLayerId,
+      state.exportOpen,
+      dispatch,
+      playerRef,
+      setZoom,
+      setPan,
+    ],
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);

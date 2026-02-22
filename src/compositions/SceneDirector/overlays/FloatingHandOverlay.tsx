@@ -13,7 +13,7 @@ import type { GesturePreset } from '../gestures';
 import type { CompositionEntry, DirectorState } from '../state';
 import type { Layer } from '../layers';
 
-const FADE_OUT_FRAMES = 8;
+const FADE_FRAMES = 8;
 
 interface Props {
   state: DirectorState;
@@ -47,23 +47,41 @@ export const FloatingHandOverlay: React.FC<Props> = ({
   const handFrame = dragWp ? 0 : frame;
   const handStartFrame = dragWp ? 0 : currentScene.start;
 
-  // Compute the global frame where the last waypoint ends
-  const handEndFrame = useMemo(() => {
-    if (!effectiveWaypoints.length) return currentScene.end;
+  // Compute the global frames where the first waypoint starts and last ends
+  const { handStartGlobal, handEndGlobal } = useMemo(() => {
+    if (!effectiveWaypoints.length)
+      return {
+        handStartGlobal: currentScene.start,
+        handEndGlobal: currentScene.end,
+      };
+    const first = effectiveWaypoints[0];
     const last = effectiveWaypoints[effectiveWaypoints.length - 1];
-    const lastFrame = last.frame ?? 0;
-    const lastDuration = last.duration ?? 0;
-    return currentScene.start + lastFrame + lastDuration;
+    return {
+      handStartGlobal: currentScene.start + (first.frame ?? 0),
+      handEndGlobal:
+        currentScene.start + (last.frame ?? 0) + (last.duration ?? 0),
+    };
   }, [effectiveWaypoints, currentScene.start, currentScene.end]);
 
-  // Fade out after last waypoint ends; fully hidden after FADE_OUT_FRAMES
-  const framesAfterEnd = frame - handEndFrame;
-  if (framesAfterEnd > FADE_OUT_FRAMES) return null;
-  const opacity = dragWp
-    ? 1
-    : framesAfterEnd <= 0
-      ? 1
-      : 1 - framesAfterEnd / FADE_OUT_FRAMES;
+  // Hide before first waypoint (with fade-in) and after last waypoint (with fade-out)
+  const framesBefore = handStartGlobal - frame;
+  const framesAfterEnd = frame - handEndGlobal;
+  if (dragWp) {
+    // Always visible during drag
+  } else if (framesBefore > FADE_FRAMES) {
+    return null;
+  } else if (framesAfterEnd > FADE_FRAMES) {
+    return null;
+  }
+
+  let opacity = 1;
+  if (!dragWp) {
+    if (framesBefore > 0) {
+      opacity = 1 - framesBefore / FADE_FRAMES; // fade in
+    } else if (framesAfterEnd > 0) {
+      opacity = 1 - framesAfterEnd / FADE_FRAMES; // fade out
+    }
+  }
 
   return (
     <div

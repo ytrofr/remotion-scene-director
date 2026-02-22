@@ -624,20 +624,22 @@ export function directorReducer(
     }
     // Layer auto-migration: idempotently create hand + audio layers from existing data
     case 'ENSURE_SCENE_LAYERS': {
-      if ((state.layers[action.scene] || []).length > 0) return state;
       // User explicitly cleared all layers for this scene — respect deletion
       if (state.clearedSceneLayers[action.scene]) return state;
 
-      const layers: Layer[] = [];
-      let order = 0;
+      const existing = state.layers[action.scene] || [];
+      const hasHand = existing.some((l) => l.type === 'hand');
+      const hasAudio = existing.some((l) => l.type === 'audio');
 
-      // ── Hand layer ──
-      // If user explicitly cleared this scene (waypoints set to []), don't re-create.
+      const newLayers: Layer[] = [];
+      let order = existing.length;
+
+      // ── Hand layer (skip if one already exists) ──
       // undefined = never loaded (use coded path), [] = user cleared (respect deletion).
       const waypoints = state.waypoints[action.scene];
       const userCleared = waypoints !== undefined && waypoints.length === 0;
 
-      if (!userCleared) {
+      if (!hasHand && !userCleared) {
         const coded = action.codedPath;
         const effectiveWaypoints =
           waypoints && waypoints.length > 0 ? waypoints : (coded?.path ?? []);
@@ -646,34 +648,37 @@ export function directorReducer(
             state.sceneGesture[action.scene] ??
             (coded?.gesture as GestureTool) ??
             'click';
-          layers.push(
+          newLayers.push(
             createHandLayer(action.scene, effectiveWaypoints, gesture, order++),
           );
         }
       }
 
-      // ── Audio layers from coded audio ──
-      const codedAudio = getCodedAudio(action.compositionId, action.scene);
-      for (const entry of codedAudio) {
-        const audioLayer = createAudioLayer(action.scene, order++);
-        const label =
-          AUDIO_FILES.find((f) => f.id === entry.file)?.label ?? 'Audio';
-        audioLayer.data = {
-          file: entry.file,
-          startFrame: entry.startFrame,
-          durationInFrames: entry.durationInFrames,
-          volume: entry.volume,
-        };
-        audioLayer.name = `Audio - ${label}`;
-        layers.push(audioLayer);
+      // ── Audio layers from coded audio (skip if audio layers already exist) ──
+      if (!hasAudio) {
+        const codedAudio = getCodedAudio(action.compositionId, action.scene);
+        for (const entry of codedAudio) {
+          const audioLayer = createAudioLayer(action.scene, order++);
+          const label =
+            AUDIO_FILES.find((f) => f.id === entry.file)?.label ?? 'Audio';
+          audioLayer.data = {
+            file: entry.file,
+            startFrame: entry.startFrame,
+            durationInFrames: entry.durationInFrames,
+            volume: entry.volume,
+          };
+          audioLayer.name = `Audio - ${label}`;
+          newLayers.push(audioLayer);
+        }
       }
 
-      if (layers.length === 0) return state;
+      if (newLayers.length === 0) return state;
 
+      const layers = [...existing, ...newLayers];
       const newState: DirectorState = {
         ...state,
         layers: { ...state.layers, [action.scene]: layers },
-        selectedLayerId: layers[0].id,
+        selectedLayerId: newLayers[0].id,
       };
       // Also adopt waypoints into flat state if they came from coded path
       const coded = action.codedPath;

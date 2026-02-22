@@ -353,9 +353,12 @@ export function directorReducer(
     case 'SET_TOOL':
       return { ...state, activeTool: action.tool, selectedWaypoint: null };
     case 'SET_SCENE_GESTURE': {
+      // Auto-update animation to match the new gesture's default
+      const newAnim = GESTURE_PRESETS[action.gesture].animation;
       const withGesture = {
         ...state,
         sceneGesture: { ...state.sceneGesture, [action.scene]: action.gesture },
+        sceneAnimation: { ...state.sceneAnimation, [action.scene]: newAnim },
       };
       return syncHandLayer(withGesture, action.scene);
     }

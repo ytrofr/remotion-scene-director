@@ -99,21 +99,23 @@
   position: absolute;
   top: 0;
   height: 100%;
-  background: rgba(42,47,58,0.6);
+  background: rgba(42, 47, 58, 0.6);
   border: 1px solid var(--border);
   border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: border-color 0.12s, background 0.12s;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
 }
 .timeline__scene:hover {
   border-color: var(--border-hover);
-  background: rgba(42,47,58,0.8);
+  background: rgba(42, 47, 58, 0.8);
 }
 .timeline__scene--selected {
-  background: rgba(91,156,246,0.12);
+  background: rgba(91, 156, 246, 0.12);
 }
 .timeline__scene-label {
   font-size: 10px;
@@ -137,7 +139,9 @@
   cursor: pointer;
   min-width: 4px;
   overflow: hidden;
-  transition: border-color 0.12s, background 0.12s;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
 }
 .timeline__hand-bar:hover {
   background: rgba(45, 212, 191, 0.4);
@@ -176,6 +180,10 @@
 .timeline__audio-bar--selected {
   background: rgba(245, 158, 11, 0.55);
   border-color: #f59e0b;
+  cursor: grab;
+}
+.timeline__audio-bar--selected:active {
+  cursor: grabbing;
 }
 .timeline__audio-handle {
   position: absolute;

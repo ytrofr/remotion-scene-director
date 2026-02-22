@@ -19,7 +19,9 @@ function formatTime(ts: number): string {
 export const HistoryTab: React.FC = () => {
   const { state, dispatch } = useDirector();
   const scene = state.selectedScene;
-  const versions: VersionEntry[] = scene ? (state.versionHistory[scene] || []) : [];
+  const versions: VersionEntry[] = scene
+    ? state.versionHistory[scene] || []
+    : [];
   const entries = state.activityLog;
 
   return (
@@ -30,23 +32,32 @@ export const HistoryTab: React.FC = () => {
           Versions{scene ? ` — ${scene.split('-').slice(1).join('-')}` : ''}
         </div>
         {versions.length === 0 ? (
-          <div className="history-tab__empty">No saved versions yet. Click Save to create one.</div>
+          <div className="history-tab__empty">
+            No saved versions yet. Click Save to create one.
+          </div>
         ) : (
           <div className="history-tab__list">
             {[...versions].reverse().map((v) => (
               <div key={v.version} className="history-tab__version">
                 <div className="history-tab__version-info">
                   <span className="history-tab__version-num">v{v.version}</span>
-                  <span className="history-tab__version-time">{formatTime(v.timestamp)}</span>
+                  <span className="history-tab__version-time">
+                    {formatTime(v.timestamp)}
+                  </span>
                   <span className="history-tab__version-detail">
-                    {v.snapshot.waypoints.length}pts | {v.snapshot.gesture} | {v.snapshot.dark ? 'light' : 'dark'}
+                    {v.snapshot.waypoints.length}pts | {v.snapshot.gesture} |{' '}
+                    {v.snapshot.dark ? 'light' : 'dark'}
                   </span>
                 </div>
                 <button
                   className="history-tab__restore-btn"
                   onClick={() => {
                     if (scene) {
-                      dispatch({ type: 'RESTORE_VERSION', scene, snapshot: v.snapshot });
+                      dispatch({
+                        type: 'RESTORE_VERSION',
+                        scene,
+                        snapshot: v.snapshot,
+                      });
                     }
                   }}
                   title={`Restore to v${v.version}`}
@@ -61,7 +72,9 @@ export const HistoryTab: React.FC = () => {
 
       {/* Activity log */}
       <div className="history-tab__section">
-        <div className="inspector__section-title">Activity Log ({entries.length})</div>
+        <div className="inspector__section-title">
+          Activity Log ({entries.length})
+        </div>
         {entries.length === 0 ? (
           <div className="history-tab__empty">No activity yet.</div>
         ) : (
@@ -74,6 +87,20 @@ export const HistoryTab: React.FC = () => {
                   <span className="history-tab__log-scene">
                     {e.scene.split('-').slice(1).join('-')}
                   </span>
+                )}
+                {e.snapshot && (
+                  <button
+                    className="history-tab__restore-btn history-tab__restore-btn--small"
+                    onClick={() =>
+                      dispatch({
+                        type: 'RESTORE_ACTIVITY',
+                        snapshot: e.snapshot!,
+                      })
+                    }
+                    title="Restore to this point"
+                  >
+                    Restore
+                  </button>
                 )}
               </div>
             ))}

@@ -1,10 +1,10 @@
 /**
  * Session persistence hook - saves/restores SceneDirector state to localStorage.
- * Auto-saves on beforeunload so refresh restores the exact same state.
- * Also exposes manual saveSession for the Save button.
+ * Only persists when the user explicitly clicks Save (or Ctrl+S).
+ * NO auto-save on refresh/close — unsaved changes are intentionally lost.
  */
 
-import { useMemo, useCallback, useEffect, useRef } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { DirectorState, SceneSnapshot, VersionEntry } from '../state';
 import type { Layer } from '../layers';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -31,13 +31,17 @@ export function loadSession(): SavedSession {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     return JSON.parse(raw);
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 
 function saveSessionData(s: SavedSession) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  } catch { /* ignore quota errors */ }
+  } catch {
+    /* ignore quota errors */
+  }
 }
 
 function buildSessionData(state: DirectorState, frame: number): SavedSession {
@@ -60,20 +64,7 @@ function buildSessionData(state: DirectorState, frame: number): SavedSession {
 export function useSessionPersistence(state: DirectorState, frame: number) {
   const savedSession = useMemo(() => loadSession(), []);
 
-  // Keep refs up-to-date for beforeunload handler
-  const stateRef = useRef(state);
-  const frameRef = useRef(frame);
-  stateRef.current = state;
-  frameRef.current = frame;
-
-  // Auto-save on beforeunload (refresh/close)
-  useEffect(() => {
-    const handler = () => saveSessionData(buildSessionData(stateRef.current, frameRef.current));
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, []);
-
-  // Manual save — called when user clicks Save
+  // Manual save only — called when user clicks Save or presses Ctrl+S
   const saveSession = useCallback(() => {
     saveSessionData(buildSessionData(state, frame));
   }, [state, frame]);

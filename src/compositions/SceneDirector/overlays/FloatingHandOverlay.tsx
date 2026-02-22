@@ -1,7 +1,7 @@
 /**
  * FloatingHandOverlay - Renders the FloatingHand preview in SceneDirector editor.
  * Extracted from App.tsx IIFE for modularity.
- * Fades out ~8 frames after the last waypoint ends.
+ * Instant show/hide based on waypoint frame range + duration.
  */
 
 import React, { useMemo } from 'react';
@@ -12,8 +12,6 @@ import type { HandLayer } from '../layers';
 import type { GesturePreset } from '../gestures';
 import type { CompositionEntry, DirectorState } from '../state';
 import type { Layer } from '../layers';
-
-const FADE_FRAMES = 8;
 
 interface Props {
   state: DirectorState;
@@ -63,23 +61,10 @@ export const FloatingHandOverlay: React.FC<Props> = ({
     };
   }, [effectiveWaypoints, currentScene.start, currentScene.end]);
 
-  // Hide before first waypoint (with fade-in) and after last waypoint (with fade-out)
-  const framesBefore = handStartGlobal - frame;
-  const framesAfterEnd = frame - handEndGlobal;
-  if (dragWp) {
-    // Always visible during drag
-  } else if (framesBefore > FADE_FRAMES) {
-    return null;
-  } else if (framesAfterEnd > FADE_FRAMES) {
-    return null;
-  }
-
-  let opacity = 1;
+  // Instant hide outside waypoint frame range (no fade)
   if (!dragWp) {
-    if (framesBefore > 0) {
-      opacity = 1 - framesBefore / FADE_FRAMES; // fade in
-    } else if (framesAfterEnd > 0) {
-      opacity = 1 - framesAfterEnd / FADE_FRAMES; // fade out
+    if (frame < handStartGlobal || frame > handEndGlobal) {
+      return null;
     }
   }
 
@@ -94,8 +79,6 @@ export const FloatingHandOverlay: React.FC<Props> = ({
         overflow: 'hidden',
         pointerEvents: 'none',
         zIndex: 11,
-        opacity,
-        transition: 'none',
       }}
     >
       <div

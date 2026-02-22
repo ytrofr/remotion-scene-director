@@ -461,6 +461,7 @@ export const Timeline: React.FC = () => {
                       e.stopPropagation();
                       dispatch({ type: 'SELECT_LAYER', layerId: layer.id });
                       dispatch({ type: 'SELECT_SCENE', name: sceneName });
+                      dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
                     }}
                   >
                     <span className="timeline__hand-label">{gesture}</span>
@@ -505,6 +506,7 @@ export const Timeline: React.FC = () => {
                         }
                         dispatch({ type: 'SELECT_LAYER', layerId: layer.id });
                         dispatch({ type: 'SELECT_SCENE', name: sceneName });
+                        dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
                       }}
                     >
                       <div

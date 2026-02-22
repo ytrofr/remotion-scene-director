@@ -193,18 +193,27 @@ export const DrawingCanvas: React.FC = () => {
           },
         });
       } else {
-        // Freehand draw → simplify → replace entire path with drawn curve
-        const simplified = simplifyPath(rawScene, 15);
+        // Freehand draw → use first and last points only (click + release)
+        const first = rawScene[0];
+        const last = rawScene[rawScene.length - 1];
+        const localFrame = Math.max(0, frame - currentScene.start);
         const sceneDuration = currentScene.end - currentScene.start;
-        const newWaypoints: HandPathPoint[] = simplified.map((p, i) => ({
-          x: p.x,
-          y: p.y,
-          frame: Math.round(
-            (i / Math.max(1, simplified.length - 1)) * sceneDuration,
-          ),
-          gesture: 'pointer' as const,
-          scale: 1,
-        }));
+        const newWaypoints: HandPathPoint[] = [
+          {
+            x: first.x,
+            y: first.y,
+            frame: localFrame,
+            gesture: 'pointer' as const,
+            scale: 1,
+          },
+          {
+            x: last.x,
+            y: last.y,
+            frame: Math.min(localFrame + 30, sceneDuration),
+            gesture: 'pointer' as const,
+            scale: 1,
+          },
+        ];
         dispatch({
           type: 'SET_WAYPOINTS',
           scene: currentScene.name,

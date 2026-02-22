@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+.playwright-mcp/
+screenshots/
+*.mp4
+*.webm
+*.wav

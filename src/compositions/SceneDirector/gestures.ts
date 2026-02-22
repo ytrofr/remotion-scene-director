@@ -4,7 +4,12 @@
  * Central source of truth - replaces per-scene animation/physics/size/ripple/dark config.
  */
 
-import type { HandPathPoint, HandPhysicsConfig, HandGesture, LottieAnimation } from '../../components/FloatingHand/types';
+import type {
+  HandPathPoint,
+  HandPhysicsConfig,
+  HandGesture,
+  LottieAnimation,
+} from '../../components/FloatingHand/types';
 
 // Available gesture tools
 export type GestureTool = 'click' | 'scroll' | 'drag' | 'swipe' | 'point';
@@ -80,15 +85,11 @@ const clickPreset: GesturePreset = {
   showRipple: true,
   dark: false,
   inputMode: 'click',
-  generatePath({ target, startFrame, compWidth, compHeight }) {
+  generatePath({ target, startFrame }) {
     if (!target) return [];
     const { x, y } = target;
-    const f = startFrame;
     return [
-      { x: clamp(x + 250, 0, compWidth), y: clamp(y + 300, 0, compHeight), frame: f, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x, y, frame: f + 8, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x, y, frame: f + 9, gesture: 'click' as HandGesture, scale: 1, duration: 8 },
-      { x: clamp(x - 150, 0, compWidth), y: clamp(y + 250, 0, compHeight), frame: f + 22, gesture: 'pointer' as HandGesture, scale: 1 },
+      { x, y, frame: startFrame, gesture: 'click' as HandGesture, scale: 1 },
     ];
   },
 };
@@ -106,19 +107,18 @@ const scrollPreset: GesturePreset = {
   showRipple: false,
   dark: false,
   inputMode: 'click',
-  generatePath({ target, startFrame, compWidth }) {
+  generatePath({ target, startFrame }) {
     if (!target) return [];
     const { x, y } = target;
-    const f = startFrame;
     return [
-      { x: clamp(compWidth - 30, 0, compWidth), y, frame: f, gesture: 'pointer' as HandGesture, scale: 1, rotation: 0 },
-      { x, y, frame: f + 20, gesture: 'pointer' as HandGesture, scale: 1, rotation: 0 },
-      { x, y, frame: f + 28, gesture: 'drag' as HandGesture, scale: 1, rotation: -30 },
-      { x, y, frame: f + 60, gesture: 'drag' as HandGesture, scale: 1, rotation: -30 },
-      { x, y, frame: f + 90, gesture: 'drag' as HandGesture, scale: 1, rotation: -30 },
-      { x, y, frame: f + 118, gesture: 'drag' as HandGesture, scale: 1, rotation: -30 },
-      { x, y, frame: f + 125, gesture: 'pointer' as HandGesture, scale: 1, rotation: 0 },
-      { x, y, frame: f + 150, gesture: 'pointer' as HandGesture, scale: 1, rotation: 0 },
+      {
+        x,
+        y,
+        frame: startFrame,
+        gesture: 'drag' as HandGesture,
+        scale: 1,
+        rotation: -30,
+      },
     ];
   },
 };
@@ -168,7 +168,10 @@ const dragPreset: GesturePreset = {
       path.push({
         x: pt.x,
         y: pt.y,
-        frame: f + 12 + Math.round((i / Math.max(1, drawnPoints.length - 1)) * dragFrames),
+        frame:
+          f +
+          12 +
+          Math.round((i / Math.max(1, drawnPoints.length - 1)) * dragFrames),
         gesture: 'drag' as HandGesture,
         scale: 1,
       });
@@ -217,11 +220,41 @@ const swipePreset: GesturePreset = {
     const f = startFrame;
 
     return [
-      { x: clamp(first.x + 200, 0, compWidth), y: clamp(first.y + 200, 0, compHeight), frame: f, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x: first.x, y: first.y, frame: f + 8, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x: first.x, y: first.y, frame: f + 10, gesture: 'drag' as HandGesture, scale: 1 },
-      { x: last.x, y: last.y, frame: f + 25, gesture: 'drag' as HandGesture, scale: 1 },
-      { x: last.x, y: last.y, frame: f + 28, gesture: 'pointer' as HandGesture, scale: 1 },
+      {
+        x: clamp(first.x + 200, 0, compWidth),
+        y: clamp(first.y + 200, 0, compHeight),
+        frame: f,
+        gesture: 'pointer' as HandGesture,
+        scale: 1,
+      },
+      {
+        x: first.x,
+        y: first.y,
+        frame: f + 8,
+        gesture: 'pointer' as HandGesture,
+        scale: 1,
+      },
+      {
+        x: first.x,
+        y: first.y,
+        frame: f + 10,
+        gesture: 'drag' as HandGesture,
+        scale: 1,
+      },
+      {
+        x: last.x,
+        y: last.y,
+        frame: f + 25,
+        gesture: 'drag' as HandGesture,
+        scale: 1,
+      },
+      {
+        x: last.x,
+        y: last.y,
+        frame: f + 28,
+        gesture: 'pointer' as HandGesture,
+        scale: 1,
+      },
     ];
   },
 };
@@ -239,14 +272,11 @@ const pointPreset: GesturePreset = {
   showRipple: false,
   dark: false,
   inputMode: 'click',
-  generatePath({ target, startFrame, compWidth, compHeight }) {
+  generatePath({ target, startFrame }) {
     if (!target) return [];
     const { x, y } = target;
-    const f = startFrame;
     return [
-      { x: clamp(x + 200, 0, compWidth), y: clamp(y + 200, 0, compHeight), frame: f, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x, y, frame: f + 12, gesture: 'pointer' as HandGesture, scale: 1 },
-      { x, y, frame: f + 42, gesture: 'pointer' as HandGesture, scale: 1 },
+      { x, y, frame: startFrame, gesture: 'pointer' as HandGesture, scale: 1 },
     ];
   },
 };
@@ -261,25 +291,22 @@ export const GESTURE_PRESETS: Record<GestureTool, GesturePreset> = {
 };
 
 // Compatible animations for each gesture type (for the hand style picker)
-export const GESTURE_ANIMATIONS: Record<GestureTool, { id: LottieAnimation; label: string }[]> = {
+export const GESTURE_ANIMATIONS: Record<
+  GestureTool,
+  { id: LottieAnimation; label: string }[]
+> = {
   click: [
     { id: 'hand-click', label: 'Click' },
     { id: 'hand-tap', label: 'Tap' },
     { id: 'hand-tap-alt', label: 'Tap Alt' },
   ],
-  scroll: [
-    { id: 'hand-scroll-clean', label: 'Scroll' },
-  ],
+  scroll: [{ id: 'hand-scroll-clean', label: 'Scroll' }],
   drag: [
     { id: 'hand-drag', label: 'Drag' },
     { id: 'hand-pinch', label: 'Pinch' },
   ],
-  swipe: [
-    { id: 'hand-swipe-up', label: 'Swipe Up' },
-  ],
-  point: [
-    { id: 'hand-point', label: 'Point' },
-  ],
+  swipe: [{ id: 'hand-swipe-up', label: 'Swipe Up' }],
+  point: [{ id: 'hand-point', label: 'Point' }],
 };
 
 // Keyboard shortcut mapping

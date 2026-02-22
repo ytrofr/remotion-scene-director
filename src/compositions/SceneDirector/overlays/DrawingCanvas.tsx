@@ -24,95 +24,142 @@ import { Crosshairs } from './Crosshairs';
 import { HandCursorPreview } from './HandCursorPreview';
 
 export const DrawingCanvas: React.FC = () => {
-  const { state, dispatch, frame, currentScene, sceneWaypoints, composition, activePreset } = useDirector();
+  const {
+    state,
+    dispatch,
+    frame,
+    currentScene,
+    sceneWaypoints,
+    composition,
+    activePreset,
+  } = useDirector();
   const compWidth = composition.video.width;
   const compHeight = composition.video.height;
   const offsetY = composition.globalOffsetY ?? 0;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isDrawing, setIsDrawing] = useState(false);
   const rawPointsRef = useRef<{ x: number; y: number }[]>([]);
 
   const toCompRaw = useToComp(containerRef, compWidth, compHeight);
   // Wraps hook to accept React.MouseEvent for convenience
-  const toComp = useCallback((e: React.MouseEvent): { x: number; y: number } => {
-    return toCompRaw(e.clientX, e.clientY);
-  }, [toCompRaw]);
+  const toComp = useCallback(
+    (e: React.MouseEvent): { x: number; y: number } => {
+      return toCompRaw(e.clientX, e.clientY);
+    },
+    [toCompRaw],
+  );
 
   // Returns scene-space coordinates (for storage - subtracts globalOffsetY)
-  const toScene = useCallback((pos: { x: number; y: number }): { x: number; y: number } => {
-    return { x: pos.x, y: pos.y - offsetY };
-  }, [offsetY]);
+  const toScene = useCallback(
+    (pos: { x: number; y: number }): { x: number; y: number } => {
+      return { x: pos.x, y: pos.y - offsetY };
+    },
+    [offsetY],
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const pos = toComp(e);
-    setMousePos(pos);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      const pos = toComp(e);
+      setMousePos(pos);
 
-    // Track freehand drawing in both edit and create modes
-    if (isDrawing) {
-      rawPointsRef.current.push(pos);
-    }
-  }, [toComp, isDrawing]);
+      // Track freehand drawing in both edit and create modes
+      if (isDrawing) {
+        rawPointsRef.current.push(pos);
+      }
+    },
+    [toComp, isDrawing],
+  );
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!currentScene) return;
-    const pos = toComp(e);
-    const scenePos = toScene(pos);
-    const hasExistingWaypoints = sceneWaypoints.length > 0;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!currentScene) return;
+      const pos = toComp(e);
+      const scenePos = toScene(pos);
+      const hasExistingWaypoints = sceneWaypoints.length > 0;
 
-    // === EDIT MODE: dots are visible ===
-    if (hasExistingWaypoints) {
-      // Select tool in edit mode: just deselect, no drawing/adding
-      if (state.activeTool === 'select') {
+      // === EDIT MODE: dots are visible ===
+      if (hasExistingWaypoints) {
+        // Select tool in edit mode: just deselect, no drawing/adding
+        if (state.activeTool === 'select') {
+          dispatch({ type: 'SELECT_WAYPOINT', index: null });
+          return;
+        }
+        if (state.selectedWaypoint !== null && state.selectedScene) {
+          // A dot is selected → move it to this position, then deselect
+          dispatch({
+            type: 'UPDATE_WAYPOINT',
+            scene: state.selectedScene,
+            index: state.selectedWaypoint,
+            point: { x: scenePos.x, y: scenePos.y },
+          });
+          dispatch({ type: 'SELECT_WAYPOINT', index: null });
+          return;
+        }
+        // No dot selected → start potential draw (distinguish click vs drag on mouseUp)
+        setIsDrawing(true);
+        rawPointsRef.current = [pos];
+        return;
+      }
+
+      // === CREATE MODE: no dots yet ===
+      const tool = state.activeTool;
+      if (tool === 'select') {
         dispatch({ type: 'SELECT_WAYPOINT', index: null });
         return;
       }
-      if (state.selectedWaypoint !== null && state.selectedScene) {
-        // A dot is selected → move it to this position, then deselect
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: state.selectedScene,
-          index: state.selectedWaypoint,
-          point: { x: scenePos.x, y: scenePos.y },
+
+      if (!activePreset) return;
+
+      if (activePreset.inputMode === 'click') {
+        // Single click adds one waypoint at the clicked position
+        const localFrame = Math.max(0, frame - currentScene.start);
+        const path = activePreset.generatePath({
+          target: scenePos,
+          startFrame: localFrame,
+          compWidth,
+          compHeight,
         });
-        dispatch({ type: 'SELECT_WAYPOINT', index: null });
-        return;
+        for (const pt of path) {
+          dispatch({
+            type: 'ADD_WAYPOINT',
+            scene: currentScene.name,
+            point: pt,
+          });
+        }
+        // Set gesture type if not already set for this scene
+        if (!state.sceneGesture[currentScene.name]) {
+          dispatch({
+            type: 'SET_SCENE_GESTURE',
+            scene: currentScene.name,
+            gesture: tool as GestureTool,
+          });
+        }
+      } else if (activePreset.inputMode === 'draw') {
+        // Start drawing (raw points in comp space, converted on mouseUp)
+        setIsDrawing(true);
+        rawPointsRef.current = [pos];
       }
-      // No dot selected → start potential draw (distinguish click vs drag on mouseUp)
-      setIsDrawing(true);
-      rawPointsRef.current = [pos];
-      return;
-    }
-
-    // === CREATE MODE: no dots yet ===
-    const tool = state.activeTool;
-    if (tool === 'select') {
-      dispatch({ type: 'SELECT_WAYPOINT', index: null });
-      return;
-    }
-
-    if (!activePreset) return;
-
-    if (activePreset.inputMode === 'click') {
-      // Single click generates complete path (use scene-space target)
-      const localFrame = Math.max(0, frame - currentScene.start);
-      const path = activePreset.generatePath({
-        target: scenePos,
-        startFrame: localFrame,
-        compWidth,
-        compHeight,
-      });
-      if (path.length > 0) {
-        dispatch({ type: 'SET_WAYPOINTS', scene: currentScene.name, waypoints: path });
-        dispatch({ type: 'SET_SCENE_GESTURE', scene: currentScene.name, gesture: tool as GestureTool });
-      }
-    } else if (activePreset.inputMode === 'draw') {
-      // Start drawing (raw points in comp space, converted on mouseUp)
-      setIsDrawing(true);
-      rawPointsRef.current = [pos];
-    }
-  }, [state.activeTool, state.selectedWaypoint, state.selectedScene, sceneWaypoints.length, currentScene, activePreset, dispatch, toComp, toScene, frame, compWidth, compHeight]);
+    },
+    [
+      state.activeTool,
+      state.selectedWaypoint,
+      state.selectedScene,
+      state.sceneGesture,
+      sceneWaypoints.length,
+      currentScene,
+      activePreset,
+      dispatch,
+      toComp,
+      toScene,
+      frame,
+      compWidth,
+      compHeight,
+    ],
+  );
 
   const handleMouseUp = useCallback(() => {
     if (!isDrawing || !currentScene) {
@@ -126,7 +173,7 @@ export const DrawingCanvas: React.FC = () => {
     const hasExistingWaypoints = sceneWaypoints.length > 0;
 
     // Convert raw comp-space points to scene-space
-    const rawScene = raw.map(p => toScene(p));
+    const rawScene = raw.map((p) => toScene(p));
 
     if (hasExistingWaypoints) {
       // EDIT MODE: distinguish click (short) vs freehand draw (long)
@@ -152,15 +199,25 @@ export const DrawingCanvas: React.FC = () => {
         const newWaypoints: HandPathPoint[] = simplified.map((p, i) => ({
           x: p.x,
           y: p.y,
-          frame: Math.round((i / Math.max(1, simplified.length - 1)) * sceneDuration),
+          frame: Math.round(
+            (i / Math.max(1, simplified.length - 1)) * sceneDuration,
+          ),
           gesture: 'pointer' as const,
           scale: 1,
         }));
-        dispatch({ type: 'SET_WAYPOINTS', scene: currentScene.name, waypoints: newWaypoints });
+        dispatch({
+          type: 'SET_WAYPOINTS',
+          scene: currentScene.name,
+          waypoints: newWaypoints,
+        });
       }
       // Sync scene gesture to active tool so hand animation matches
       if (state.activeTool !== 'select') {
-        dispatch({ type: 'SET_SCENE_GESTURE', scene: currentScene.name, gesture: state.activeTool as GestureTool });
+        dispatch({
+          type: 'SET_SCENE_GESTURE',
+          scene: currentScene.name,
+          gesture: state.activeTool as GestureTool,
+        });
       }
       return;
     }
@@ -179,27 +236,50 @@ export const DrawingCanvas: React.FC = () => {
     });
 
     if (path.length > 0) {
-      dispatch({ type: 'SET_WAYPOINTS', scene: currentScene.name, waypoints: path });
-      dispatch({ type: 'SET_SCENE_GESTURE', scene: currentScene.name, gesture: state.activeTool as GestureTool });
+      dispatch({
+        type: 'SET_WAYPOINTS',
+        scene: currentScene.name,
+        waypoints: path,
+      });
+      dispatch({
+        type: 'SET_SCENE_GESTURE',
+        scene: currentScene.name,
+        gesture: state.activeTool as GestureTool,
+      });
     }
-  }, [isDrawing, currentScene, activePreset, frame, compWidth, compHeight, dispatch, state.activeTool, sceneWaypoints.length, toScene]);
+  }, [
+    isDrawing,
+    currentScene,
+    activePreset,
+    frame,
+    compWidth,
+    compHeight,
+    dispatch,
+    state.activeTool,
+    sceneWaypoints.length,
+    toScene,
+  ]);
 
   // Cursor logic: Lottie hand when gesture tool active, crosshair for precision placement
   const hasExistingWaypoints = sceneWaypoints.length > 0;
   const isSelectTool = state.activeTool === 'select';
 
   // Hand cursor: when gesture tool active and not in precision waypoint placement
-  const showHandCursor = activePreset !== null && state.selectedWaypoint === null;
+  const showHandCursor =
+    activePreset !== null && state.selectedWaypoint === null;
 
   const cursorStyle = showHandCursor
     ? 'none'
-    : (isSelectTool
+    : isSelectTool
       ? 'default'
-      : (hasExistingWaypoints
-        ? (state.selectedWaypoint !== null ? 'crosshair' : 'default')
-        : 'crosshair'));
+      : hasExistingWaypoints
+        ? state.selectedWaypoint !== null
+          ? 'crosshair'
+          : 'default'
+        : 'crosshair';
 
-  const showPrecisionCrosshairs = hasExistingWaypoints && state.selectedWaypoint !== null && !isSelectTool;
+  const showPrecisionCrosshairs =
+    hasExistingWaypoints && state.selectedWaypoint !== null && !isSelectTool;
 
   return (
     <div
@@ -207,7 +287,10 @@ export const DrawingCanvas: React.FC = () => {
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
-      onMouseLeave={() => { setMousePos(null); setIsDrawing(false); }}
+      onMouseLeave={() => {
+        setMousePos(null);
+        setIsDrawing(false);
+      }}
       style={{
         position: 'absolute',
         top: 0,
@@ -237,7 +320,8 @@ export const DrawingCanvas: React.FC = () => {
         <svg
           style={{
             position: 'absolute',
-            top: 0, left: 0,
+            top: 0,
+            left: 0,
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
@@ -247,7 +331,7 @@ export const DrawingCanvas: React.FC = () => {
           preserveAspectRatio="none"
         >
           <polyline
-            points={rawPointsRef.current.map(p => `${p.x},${p.y}`).join(' ')}
+            points={rawPointsRef.current.map((p) => `${p.x},${p.y}`).join(' ')}
             fill="none"
             stroke="var(--accent)"
             strokeWidth={3}
@@ -255,7 +339,6 @@ export const DrawingCanvas: React.FC = () => {
           />
         </svg>
       )}
-
     </div>
   );
 };

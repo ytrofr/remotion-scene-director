@@ -150,6 +150,10 @@
 .timeline__hand-bar--selected {
   background: rgba(45, 212, 191, 0.45);
   border-color: #2dd4bf;
+  cursor: grab;
+}
+.timeline__hand-bar--selected:active {
+  cursor: grabbing;
 }
 .timeline__hand-label {
   font-size: 9px;

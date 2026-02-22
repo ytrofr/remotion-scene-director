@@ -48,6 +48,16 @@ export const Timeline: React.FC = () => {
     preDragState: typeof state;
   } | null>(null);
 
+  // Hand bar drag state (single-waypoint only)
+  const [handDrag, setHandDrag] = useState<{
+    scene: string;
+    edge: 'left' | 'right' | 'move';
+    startX: number;
+    originalFrame: number;
+    originalDuration: number;
+    preDragState: typeof state;
+  } | null>(null);
+
   const playheadPct = (frame / totalFrames) * 100;
 
   // Convert mouse clientX to frame number using the tracks area rect
@@ -77,10 +87,10 @@ export const Timeline: React.FC = () => {
     [playerRef, scenes, state.selectedScene, dispatch],
   );
 
-  // Start scrubbing on mousedown (only if not dragging audio)
+  // Start scrubbing on mousedown (only if not dragging audio/hand)
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (audioDrag) return;
+      if (audioDrag || handDrag) return;
       e.preventDefault();
       setIsScrubbing(true);
       wasPlayingRef.current = playerRef.current?.isPlaying() ?? false;
@@ -90,7 +100,7 @@ export const Timeline: React.FC = () => {
       const targetFrame = clientXToFrame(e.clientX);
       seekAndSelect(targetFrame);
     },
-    [clientXToFrame, seekAndSelect, playerRef, audioDrag],
+    [clientXToFrame, seekAndSelect, playerRef, audioDrag, handDrag],
   );
 
   // Global mousemove/mouseup while scrubbing
@@ -198,6 +208,92 @@ export const Timeline: React.FC = () => {
       window.removeEventListener('mouseup', handleUp);
     };
   }, [audioDrag, totalFrames, dispatch]);
+
+  // Hand bar edge/move drag (single-waypoint only)
+  const handleHandEdgeDown = useCallback(
+    (
+      e: React.MouseEvent,
+      sceneName: string,
+      edge: 'left' | 'right' | 'move',
+      currentFrame: number,
+      currentDuration: number,
+    ) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setHandDrag({
+        scene: sceneName,
+        edge,
+        startX: e.clientX,
+        originalFrame: currentFrame,
+        originalDuration: currentDuration,
+        preDragState: state,
+      });
+    },
+    [state],
+  );
+
+  useEffect(() => {
+    if (!handDrag) return;
+    const handleMove = (e: MouseEvent) => {
+      const el = tracksRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const pxPerFrame = rect.width / totalFrames;
+      const deltaPx = e.clientX - handDrag.startX;
+      const deltaFrames = Math.round(deltaPx / pxPerFrame);
+      if (handDrag.edge === 'move') {
+        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
+        dispatch({
+          type: 'UPDATE_WAYPOINT',
+          scene: handDrag.scene,
+          index: 0,
+          point: { frame: newFrame },
+        });
+      } else if (handDrag.edge === 'left') {
+        const rightEdge = handDrag.originalFrame + handDrag.originalDuration;
+        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
+        const newDuration = Math.max(0, rightEdge - newFrame);
+        dispatch({
+          type: 'UPDATE_WAYPOINT',
+          scene: handDrag.scene,
+          index: 0,
+          point: { frame: newFrame, duration: newDuration },
+        });
+      } else {
+        const newDuration = Math.max(
+          0,
+          handDrag.originalDuration + deltaFrames,
+        );
+        dispatch({
+          type: 'UPDATE_WAYPOINT',
+          scene: handDrag.scene,
+          index: 0,
+          point: { duration: newDuration },
+        });
+      }
+    };
+    const handleUp = () => {
+      const label =
+        handDrag.edge === 'move'
+          ? 'Move'
+          : handDrag.edge === 'left'
+            ? 'Trim start'
+            : 'Trim end';
+      dispatch({
+        type: 'LOG_ACTIVITY',
+        action: `${label} hand`,
+        scene: handDrag.scene,
+        snapshot: handDrag.preDragState,
+      });
+      setHandDrag(null);
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [handDrag, totalFrames, dispatch]);
 
   const isPlaying = playerRef.current?.isPlaying() ?? false;
 
@@ -425,19 +521,21 @@ export const Timeline: React.FC = () => {
             >
               {handLayers.map(({ layer, sceneStart, sceneEnd, sceneName }) => {
                 const wps = layer.data.waypoints;
+                const isSingle = wps && wps.length === 1;
                 let globalStart: number;
                 let globalEnd: number;
+                let wpFrame = 0;
+                let wpDuration = 0;
                 if (wps && wps.length > 0) {
                   const firstFrame = wps[0].frame ?? 0;
                   const lastFrame = wps[wps.length - 1].frame ?? 0;
                   const duration = wps[wps.length - 1].duration ?? 0;
+                  wpFrame = firstFrame;
+                  wpDuration = duration;
                   globalStart = sceneStart + firstFrame;
-                  globalEnd = Math.min(
-                    sceneEnd,
-                    sceneStart + lastFrame + duration,
-                  );
+                  // No scene clamp — bar can extend past scene boundary
+                  globalEnd = sceneStart + lastFrame + Math.max(duration, 1);
                 } else {
-                  // Empty waypoints: show placeholder spanning full scene
                   globalStart = sceneStart;
                   globalEnd = sceneEnd;
                 }
@@ -459,12 +557,50 @@ export const Timeline: React.FC = () => {
                     title={`${gesture} (f${globalStart - sceneStart}-${globalEnd - sceneStart})`}
                     onMouseDown={(e) => {
                       e.stopPropagation();
+                      if (isSelected && isSingle) {
+                        handleHandEdgeDown(
+                          e,
+                          sceneName,
+                          'move',
+                          wpFrame,
+                          wpDuration,
+                        );
+                        return;
+                      }
                       dispatch({ type: 'SELECT_LAYER', layerId: layer.id });
                       dispatch({ type: 'SELECT_SCENE', name: sceneName });
                       dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
                     }}
                   >
+                    {isSingle && isSelected && (
+                      <div
+                        className="timeline__audio-handle timeline__audio-handle--left"
+                        onMouseDown={(e) =>
+                          handleHandEdgeDown(
+                            e,
+                            sceneName,
+                            'left',
+                            wpFrame,
+                            wpDuration,
+                          )
+                        }
+                      />
+                    )}
                     <span className="timeline__hand-label">{gesture}</span>
+                    {isSingle && isSelected && (
+                      <div
+                        className="timeline__audio-handle timeline__audio-handle--right"
+                        onMouseDown={(e) =>
+                          handleHandEdgeDown(
+                            e,
+                            sceneName,
+                            'right',
+                            wpFrame,
+                            wpDuration,
+                          )
+                        }
+                      />
+                    )}
                   </div>
                 );
               })}

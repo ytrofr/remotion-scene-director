@@ -145,55 +145,52 @@ export const DrawingCanvas: React.FC = () => {
 
     if (hasExistingWaypoints) {
       // EDIT MODE: distinguish click (short) vs freehand draw (long)
+      const localFrame = Math.max(0, frame - currentScene.start);
+      const gesture = (
+        state.activeTool !== 'select' ? state.activeTool : 'click'
+      ) as GestureTool;
       if (rawScene.length < 5) {
-        // Short click → append new waypoint to existing path
+        // Short click → create NEW independent hand gesture
         const pos = rawScene[0];
-        const localFrame = Math.max(0, frame - currentScene.start);
         dispatch({
-          type: 'ADD_WAYPOINT',
+          type: 'ADD_HAND_GESTURE',
           scene: currentScene.name,
-          point: {
-            x: pos.x,
-            y: pos.y,
-            frame: localFrame,
-            gesture: 'pointer' as const,
-            scale: 1,
-          },
+          points: [
+            {
+              x: pos.x,
+              y: pos.y,
+              frame: localFrame,
+              gesture: 'pointer' as const,
+              scale: 1,
+            },
+          ],
+          gesture,
         });
       } else {
-        // Freehand draw → use first and last points only (click + release)
+        // Freehand draw → create NEW independent hand gesture with 2 waypoints
         const first = rawScene[0];
         const last = rawScene[rawScene.length - 1];
-        const localFrame = Math.max(0, frame - currentScene.start);
         const sceneDuration = currentScene.end - currentScene.start;
-        const newWaypoints: HandPathPoint[] = [
-          {
-            x: first.x,
-            y: first.y,
-            frame: localFrame,
-            gesture: 'pointer' as const,
-            scale: 1,
-          },
-          {
-            x: last.x,
-            y: last.y,
-            frame: Math.min(localFrame + 30, sceneDuration),
-            gesture: 'pointer' as const,
-            scale: 1,
-          },
-        ];
         dispatch({
-          type: 'SET_WAYPOINTS',
+          type: 'ADD_HAND_GESTURE',
           scene: currentScene.name,
-          waypoints: newWaypoints,
-        });
-      }
-      // Sync scene gesture to active tool so hand animation matches
-      if (state.activeTool !== 'select') {
-        dispatch({
-          type: 'SET_SCENE_GESTURE',
-          scene: currentScene.name,
-          gesture: state.activeTool as GestureTool,
+          points: [
+            {
+              x: first.x,
+              y: first.y,
+              frame: localFrame,
+              gesture: 'pointer' as const,
+              scale: 1,
+            },
+            {
+              x: last.x,
+              y: last.y,
+              frame: Math.min(localFrame + 30, sceneDuration),
+              gesture: 'pointer' as const,
+              scale: 1,
+            },
+          ],
+          gesture,
         });
       }
       return;

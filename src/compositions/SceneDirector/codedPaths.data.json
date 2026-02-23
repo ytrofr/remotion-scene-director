@@ -250,6 +250,40 @@
           "rotation": 0
         }
       ]
+    },
+    "7-AIResponse": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 323,
+          "y": 1141,
+          "frame": 94,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 39
+        }
+      ]
+    },
+    "5-UserTyping": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 544,
+          "y": 1287,
+          "frame": 83,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 953,
+          "y": 1291,
+          "frame": 113,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ]
     }
   }
 }

@@ -1,72 +1,101 @@
 /**
- * FloatingHandOverlay - Renders the FloatingHand preview in SceneDirector editor.
- * Extracted from App.tsx IIFE for modularity.
- * Instant show/hide based on waypoint frame range + duration.
+ * FloatingHandOverlay - Renders ALL visible hand layers in SceneDirector editor.
+ * Each hand layer gets its own FloatingHand instance with gesture-appropriate animation.
+ * Instant show/hide based on each layer's waypoint frame range + duration.
  */
 
 import React, { useMemo } from 'react';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../../components/FloatingHand/types';
-import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { HandLayer } from '../layers';
-import type { GesturePreset } from '../gestures';
+import { GESTURE_PRESETS } from '../gestures';
 import type { CompositionEntry, DirectorState } from '../state';
 import type { Layer } from '../layers';
 
 interface Props {
   state: DirectorState;
-  effectiveWaypoints: HandPathPoint[];
   sceneLayers: Layer[];
-  scenePreset: GesturePreset;
   composition: CompositionEntry;
   frame: number;
   playerScale: number;
   currentScene: { start: number; end: number };
 }
 
+/** Renders a single hand layer's FloatingHand */
+const SingleHandRenderer: React.FC<{
+  layer: HandLayer;
+  isPrimary: boolean;
+  state: DirectorState;
+  frame: number;
+  currentScene: { start: number; end: number };
+}> = ({ layer, isPrimary, state, frame, currentScene }) => {
+  const wps = layer.data.waypoints;
+  if (!wps || wps.length === 0) return null;
+
+  const gesture = layer.data.gesture || 'click';
+  const preset = GESTURE_PRESETS[gesture];
+
+  // Check if this specific layer is being dragged
+  const isSelected = state.selectedLayerId === layer.id;
+  const isDragging =
+    isSelected && state.draggingIndex !== null && wps[state.draggingIndex];
+  const dragWp = isDragging ? wps[state.draggingIndex!] : null;
+  const handPath = dragWp ? [{ ...dragWp, frame: 0 }] : wps;
+  const handFrame = dragWp ? 0 : frame;
+  const handStartFrame = dragWp ? 0 : currentScene.start;
+
+  // Compute global frame range for instant show/hide
+  const first = wps[0];
+  const last = wps[wps.length - 1];
+  const handStartGlobal = currentScene.start + (first.frame ?? 0);
+  const handEndGlobal =
+    currentScene.start + (last.frame ?? 0) + (last.duration ?? 0);
+
+  // Instant hide outside range (unless dragging)
+  if (!dragWp && (frame < handStartGlobal || frame > handEndGlobal)) {
+    return null;
+  }
+
+  // Primary layer uses scene-level overrides; secondary layers use gesture defaults
+  const animation = isPrimary
+    ? (state.sceneAnimation[state.selectedScene!] ?? preset.animation)
+    : preset.animation;
+  const dark = isPrimary
+    ? (state.sceneDark[state.selectedScene!] ?? preset.dark)
+    : preset.dark;
+
+  return (
+    <FloatingHand
+      frame={handFrame}
+      path={handPath}
+      startFrame={handStartFrame}
+      animation={animation}
+      size={preset.size}
+      showRipple={preset.showRipple}
+      dark={dark}
+      physics={{ ...DEFAULT_PHYSICS, ...preset.physics }}
+    />
+  );
+};
+
 export const FloatingHandOverlay: React.FC<Props> = ({
   state,
-  effectiveWaypoints,
   sceneLayers,
-  scenePreset,
   composition,
   frame,
   playerScale,
   currentScene,
 }) => {
-  // Hand only renders if a visible hand layer exists (layers are source of truth)
-  const handLayer = sceneLayers.find((l): l is HandLayer => l.type === 'hand');
-  if (!handLayer || !handLayer.visible) return null;
+  const visibleHandLayers = useMemo(
+    () =>
+      sceneLayers.filter((l): l is HandLayer => l.type === 'hand' && l.visible),
+    [sceneLayers],
+  );
 
-  const isDragging =
-    state.draggingIndex !== null && effectiveWaypoints[state.draggingIndex];
-  const dragWp = isDragging ? effectiveWaypoints[state.draggingIndex!] : null;
-  const handPath = dragWp ? [{ ...dragWp, frame: 0 }] : effectiveWaypoints;
-  const handFrame = dragWp ? 0 : frame;
-  const handStartFrame = dragWp ? 0 : currentScene.start;
+  if (visibleHandLayers.length === 0) return null;
 
-  // Compute the global frames where the first waypoint starts and last ends
-  const { handStartGlobal, handEndGlobal } = useMemo(() => {
-    if (!effectiveWaypoints.length)
-      return {
-        handStartGlobal: currentScene.start,
-        handEndGlobal: currentScene.end,
-      };
-    const first = effectiveWaypoints[0];
-    const last = effectiveWaypoints[effectiveWaypoints.length - 1];
-    return {
-      handStartGlobal: currentScene.start + (first.frame ?? 0),
-      handEndGlobal:
-        currentScene.start + (last.frame ?? 0) + (last.duration ?? 0),
-    };
-  }, [effectiveWaypoints, currentScene.start, currentScene.end]);
-
-  // Instant hide outside waypoint frame range (no fade)
-  if (!dragWp) {
-    if (frame < handStartGlobal || frame > handEndGlobal) {
-      return null;
-    }
-  }
+  // The first hand layer is the "primary" (synced from state.waypoints, uses scene-level overrides)
+  const primaryId = visibleHandLayers[0].id;
 
   return (
     <div
@@ -93,18 +122,16 @@ export const FloatingHandOverlay: React.FC<Props> = ({
           pointerEvents: 'none',
         }}
       >
-        <FloatingHand
-          frame={handFrame}
-          path={handPath}
-          startFrame={handStartFrame}
-          animation={
-            state.sceneAnimation[state.selectedScene!] ?? scenePreset.animation
-          }
-          size={scenePreset.size}
-          showRipple={scenePreset.showRipple}
-          dark={state.sceneDark[state.selectedScene!] ?? scenePreset.dark}
-          physics={{ ...DEFAULT_PHYSICS, ...scenePreset.physics }}
-        />
+        {visibleHandLayers.map((layer) => (
+          <SingleHandRenderer
+            key={layer.id}
+            layer={layer}
+            isPrimary={layer.id === primaryId}
+            state={state}
+            frame={frame}
+            currentScene={currentScene}
+          />
+        ))}
       </div>
     </div>
   );

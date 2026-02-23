@@ -158,6 +158,13 @@ export type DirectorAction =
       snapshot: DirectorState;
     }
   | { type: 'RESTORE_ACTIVITY'; snapshot: DirectorState }
+  // Add independent hand gesture (creates new hand layer)
+  | {
+      type: 'ADD_HAND_GESTURE';
+      scene: string;
+      points: HandPathPoint[];
+      gesture: GestureTool;
+    }
   // Layer auto-migration
   | {
       type: 'ENSURE_SCENE_LAYERS';
@@ -263,6 +270,11 @@ function describeAction(
     case 'ADD_WAYPOINT':
       return {
         msg: `Add waypoint #${(state.waypoints[action.scene]?.length ?? 0) + 1}`,
+        scene: action.scene,
+      };
+    case 'ADD_HAND_GESTURE':
+      return {
+        msg: `Add ${action.gesture} gesture`,
         scene: action.scene,
       };
     case 'UPDATE_WAYPOINT':
@@ -374,7 +386,62 @@ export function directorReducer(
       };
       return syncHandLayer(withWp, action.scene);
     }
+    case 'ADD_HAND_GESTURE': {
+      // Create a new independent hand layer with its own waypoints
+      const sceneLayers = state.layers[action.scene] || [];
+      const order = sceneLayers.length;
+      const newLayer = createHandLayer(
+        action.scene,
+        action.points,
+        action.gesture,
+        order,
+      );
+      const cleared = { ...state.clearedSceneLayers };
+      delete cleared[action.scene];
+      return {
+        ...state,
+        layers: {
+          ...state.layers,
+          [action.scene]: [...sceneLayers, newLayer],
+        },
+        selectedLayerId: newLayer.id,
+        selectedWaypoint: 0,
+        clearedSceneLayers: cleared,
+        // Don't override scene-level gesture/animation — secondary layers carry their own
+      };
+    }
     case 'UPDATE_WAYPOINT': {
+      // Check if selected layer is a secondary hand layer (not synced via state.waypoints)
+      if (state.selectedLayerId) {
+        const sceneLayers = state.layers[action.scene] || [];
+        const selIdx = sceneLayers.findIndex(
+          (l) => l.id === state.selectedLayerId,
+        );
+        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
+        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
+        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
+          // Secondary hand layer: modify layer.data.waypoints directly
+          const layerWps = [
+            ...((selLayer.data as { waypoints?: HandPathPoint[] }).waypoints ||
+              []),
+          ];
+          if (layerWps[action.index]) {
+            layerWps[action.index] = {
+              ...layerWps[action.index],
+              ...action.point,
+            };
+          }
+          const updated = sceneLayers.map((l, i) =>
+            i === selIdx
+              ? ({ ...l, data: { ...l.data, waypoints: layerWps } } as Layer)
+              : l,
+          );
+          return {
+            ...state,
+            layers: { ...state.layers, [action.scene]: updated },
+          };
+        }
+      }
       const wps = [...(state.waypoints[action.scene] || [])];
       if (wps[action.index]) {
         wps[action.index] = { ...wps[action.index], ...action.point };
@@ -386,6 +453,44 @@ export function directorReducer(
       return syncHandLayer(withWp, action.scene);
     }
     case 'DELETE_WAYPOINT': {
+      // Check if selected layer is a secondary hand layer
+      if (state.selectedLayerId) {
+        const sceneLayers = state.layers[action.scene] || [];
+        const selIdx = sceneLayers.findIndex(
+          (l) => l.id === state.selectedLayerId,
+        );
+        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
+        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
+        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
+          const layerWps = [
+            ...((selLayer.data as { waypoints?: HandPathPoint[] }).waypoints ||
+              []),
+          ];
+          layerWps.splice(action.index, 1);
+          if (layerWps.length === 0) {
+            // No waypoints left: remove the layer entirely
+            return {
+              ...state,
+              layers: {
+                ...state.layers,
+                [action.scene]: sceneLayers.filter((_, i) => i !== selIdx),
+              },
+              selectedLayerId: null,
+              selectedWaypoint: null,
+            };
+          }
+          const updated = sceneLayers.map((l, i) =>
+            i === selIdx
+              ? ({ ...l, data: { ...l.data, waypoints: layerWps } } as Layer)
+              : l,
+          );
+          return {
+            ...state,
+            layers: { ...state.layers, [action.scene]: updated },
+            selectedWaypoint: null,
+          };
+        }
+      }
       const wps = [...(state.waypoints[action.scene] || [])];
       wps.splice(action.index, 1);
       const withWp = {
@@ -540,9 +645,17 @@ export function directorReducer(
             ? null
             : state.selectedLayerId,
       };
-      // When removing a hand layer, also clear flat waypoints so the hand disappears
+      // When removing the PRIMARY hand layer, also clear flat waypoints so the hand disappears
+      // Secondary hand layers only store waypoints in layer.data (removed with the layer itself)
       if (removedLayer?.type === 'hand') {
-        newState.waypoints = { ...state.waypoints, [action.scene]: [] };
+        const allHandLayers = (state.layers[action.scene] || []).filter(
+          (l) => l.type === 'hand',
+        );
+        const isPrimary =
+          allHandLayers.length > 0 && allHandLayers[0].id === action.layerId;
+        if (isPrimary) {
+          newState.waypoints = { ...state.waypoints, [action.scene]: [] };
+        }
       }
       // Mark scene as cleared so ENSURE_SCENE_LAYERS won't recreate on reload
       if (sceneLayers.length === 0) {

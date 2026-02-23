@@ -19,6 +19,7 @@ import { undoableReducer, type UndoableState } from './undoReducer';
 import { DirectorProvider } from './context';
 import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
+import type { HandPathPoint } from '../../components/FloatingHand/types';
 import { computeZoomAtFrame, type ZoomLayer, type AudioLayer } from './layers';
 import { withAudioLayers, type AudioEntry } from './AudioLayerRenderer';
 import {
@@ -213,10 +214,25 @@ export const App: React.FC = () => {
     [composition.scenes, state.selectedScene],
   );
 
-  // Waypoints for selected scene (manual)
-  const sceneWaypoints = state.selectedScene
-    ? state.waypoints[state.selectedScene] || []
-    : [];
+  // Waypoints for selected hand layer (or primary scene waypoints)
+  const sceneWaypoints = useMemo(() => {
+    if (!state.selectedScene) return [];
+    // If a hand layer is selected, use its data.waypoints
+    if (state.selectedLayerId) {
+      const layers = state.layers[state.selectedScene] || [];
+      const sel = layers.find((l) => l.id === state.selectedLayerId);
+      if (sel?.type === 'hand') {
+        return (sel.data as { waypoints?: HandPathPoint[] }).waypoints || [];
+      }
+    }
+    // Default: primary scene waypoints
+    return state.waypoints[state.selectedScene] || [];
+  }, [
+    state.selectedScene,
+    state.selectedLayerId,
+    state.layers,
+    state.waypoints,
+  ]);
 
   // Coded path for current scene (from composition source code)
   const codedPath = useMemo(
@@ -483,16 +499,13 @@ export const App: React.FC = () => {
               <DrawingCanvas />
             )}
 
-            {/* FloatingHand: only renders when a visible hand layer exists */}
+            {/* FloatingHand: renders all visible hand layers */}
             {state.selectedScene &&
-              effectiveWaypoints.length > 0 &&
               currentScene &&
-              scenePreset && (
+              sceneLayers.some((l) => l.type === 'hand' && l.visible) && (
                 <FloatingHandOverlay
                   state={state}
-                  effectiveWaypoints={effectiveWaypoints}
                   sceneLayers={sceneLayers}
-                  scenePreset={scenePreset}
                   composition={composition}
                   frame={frame}
                   playerScale={playerScale}

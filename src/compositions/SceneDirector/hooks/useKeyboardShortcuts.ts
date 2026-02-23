@@ -35,10 +35,20 @@ export function useKeyboardShortcuts({
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
       // Gesture tool shortcuts: 1-5
+      // First press: select tool. Same key again: toggle dark/light hand.
       const gestureTool = GESTURE_KEYS[e.key];
       if (gestureTool) {
         e.preventDefault();
-        dispatch({ type: 'SET_TOOL', tool: gestureTool });
+        if (state.activeTool === gestureTool && state.selectedScene) {
+          const currentDark = state.sceneDark[state.selectedScene] ?? false;
+          dispatch({
+            type: 'SET_SCENE_DARK',
+            scene: state.selectedScene,
+            dark: !currentDark,
+          });
+        } else {
+          dispatch({ type: 'SET_TOOL', tool: gestureTool });
+        }
         return;
       }
 
@@ -142,9 +152,11 @@ export function useKeyboardShortcuts({
     [
       frame,
       composition.video.frames,
+      state.activeTool,
       state.selectedWaypoint,
       state.selectedScene,
       state.selectedLayerId,
+      state.sceneDark,
       state.exportOpen,
       dispatch,
       playerRef,

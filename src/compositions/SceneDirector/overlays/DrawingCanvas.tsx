@@ -17,7 +17,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useDirector } from '../context';
 import { useToComp } from '../hooks/useToComp';
-import { simplifyPath } from '../utils';
 import { GESTURE_PRESETS, type GestureTool } from '../gestures';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import { Crosshairs } from './Crosshairs';
@@ -106,58 +105,27 @@ export const DrawingCanvas: React.FC = () => {
       }
 
       // === CREATE MODE: no dots yet ===
-      const tool = state.activeTool;
-      if (tool === 'select') {
+      if (state.activeTool === 'select') {
         dispatch({ type: 'SELECT_WAYPOINT', index: null });
         return;
       }
 
       if (!activePreset) return;
 
-      if (activePreset.inputMode === 'click') {
-        // Single click adds one waypoint at the clicked position
-        const localFrame = Math.max(0, frame - currentScene.start);
-        const path = activePreset.generatePath({
-          target: scenePos,
-          startFrame: localFrame,
-          compWidth,
-          compHeight,
-        });
-        for (const pt of path) {
-          dispatch({
-            type: 'ADD_WAYPOINT',
-            scene: currentScene.name,
-            point: pt,
-          });
-        }
-        // Set gesture type if not already set for this scene
-        if (!state.sceneGesture[currentScene.name]) {
-          dispatch({
-            type: 'SET_SCENE_GESTURE',
-            scene: currentScene.name,
-            gesture: tool as GestureTool,
-          });
-        }
-      } else if (activePreset.inputMode === 'draw') {
-        // Start drawing (raw points in comp space, converted on mouseUp)
-        setIsDrawing(true);
-        rawPointsRef.current = [pos];
-      }
+      // Always start drawing — mouseUp distinguishes click vs drag
+      setIsDrawing(true);
+      rawPointsRef.current = [pos];
     },
     [
       state.activeTool,
       state.selectedWaypoint,
       state.selectedScene,
-      state.sceneGesture,
       sceneWaypoints.length,
       currentScene,
       activePreset,
       dispatch,
       toComp,
       toScene,
-      frame,
-      compWidth,
-      compHeight,
     ],
   );
 
@@ -231,25 +199,50 @@ export const DrawingCanvas: React.FC = () => {
       return;
     }
 
-    // CREATE MODE: original behavior
-    if (!activePreset || rawScene.length < 2) return;
-
-    const simplified = simplifyPath(rawScene, 15);
+    // CREATE MODE: click (short) vs drag (long)
+    if (!activePreset) return;
     const localFrame = Math.max(0, frame - currentScene.start);
+    const sceneDuration = currentScene.end - currentScene.start;
 
-    const path = activePreset.generatePath({
-      drawnPoints: simplified,
-      startFrame: localFrame,
-      compWidth,
-      compHeight,
-    });
-
-    if (path.length > 0) {
+    if (rawScene.length < 5) {
+      // Short interaction → single waypoint at click position
+      const pos = rawScene[0];
+      const path = activePreset.generatePath({
+        target: pos,
+        startFrame: localFrame,
+        compWidth,
+        compHeight,
+      });
+      for (const pt of path) {
+        dispatch({ type: 'ADD_WAYPOINT', scene: currentScene.name, point: pt });
+      }
+    } else {
+      // Drag → 2 waypoints: first + last position
+      const first = rawScene[0];
+      const last = rawScene[rawScene.length - 1];
+      const newWaypoints: HandPathPoint[] = [
+        {
+          x: first.x,
+          y: first.y,
+          frame: localFrame,
+          gesture: 'pointer' as const,
+          scale: 1,
+        },
+        {
+          x: last.x,
+          y: last.y,
+          frame: Math.min(localFrame + 30, sceneDuration),
+          gesture: 'pointer' as const,
+          scale: 1,
+        },
+      ];
       dispatch({
         type: 'SET_WAYPOINTS',
         scene: currentScene.name,
-        waypoints: path,
+        waypoints: newWaypoints,
       });
+    }
+    if (state.activeTool !== 'select') {
       dispatch({
         type: 'SET_SCENE_GESTURE',
         scene: currentScene.name,

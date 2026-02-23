@@ -201,11 +201,15 @@ export const Timeline: React.FC = () => {
       });
       setAudioDrag(null);
     };
+    // Clear drag on window blur (e.g. Alt+Tab) to prevent stuck state
+    const handleBlur = () => setAudioDrag(null);
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
+    window.addEventListener('blur', handleBlur);
     return () => {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('blur', handleBlur);
     };
   }, [audioDrag, totalFrames, dispatch]);
 
@@ -287,11 +291,15 @@ export const Timeline: React.FC = () => {
       });
       setHandDrag(null);
     };
+    // Clear drag on window blur (e.g. Alt+Tab) to prevent stuck state
+    const handleBlur = () => setHandDrag(null);
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
+    window.addEventListener('blur', handleBlur);
     return () => {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('blur', handleBlur);
     };
   }, [handDrag, totalFrames, dispatch]);
 

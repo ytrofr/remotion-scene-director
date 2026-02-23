@@ -46,7 +46,7 @@ export const DrawingCanvas: React.FC = () => {
   const toCompRaw = useToComp(containerRef, compWidth, compHeight);
   // Wraps hook to accept React.MouseEvent for convenience
   const toComp = useCallback(
-    (e: React.MouseEvent): { x: number; y: number } => {
+    (e: React.MouseEvent): { x: number; y: number } | null => {
       return toCompRaw(e.clientX, e.clientY);
     },
     [toCompRaw],
@@ -63,6 +63,7 @@ export const DrawingCanvas: React.FC = () => {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       const pos = toComp(e);
+      if (!pos) return;
       setMousePos(pos);
 
       // Track freehand drawing in both edit and create modes
@@ -77,6 +78,7 @@ export const DrawingCanvas: React.FC = () => {
     (e: React.MouseEvent) => {
       if (!currentScene) return;
       const pos = toComp(e);
+      if (!pos) return;
       const scenePos = toScene(pos);
       const hasExistingWaypoints = sceneWaypoints.length > 0;
 

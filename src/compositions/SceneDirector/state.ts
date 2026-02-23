@@ -638,13 +638,14 @@ export function directorReducer(
       const sceneLayers = (state.layers[action.scene] || []).filter(
         (l) => l.id !== action.layerId,
       );
+      const isSelectedLayer = state.selectedLayerId === action.layerId;
       const newState: DirectorState = {
         ...state,
         layers: { ...state.layers, [action.scene]: sceneLayers },
-        selectedLayerId:
-          state.selectedLayerId === action.layerId
-            ? null
-            : state.selectedLayerId,
+        selectedLayerId: isSelectedLayer ? null : state.selectedLayerId,
+        // Clear interaction state when removing the active layer
+        selectedWaypoint: isSelectedLayer ? null : state.selectedWaypoint,
+        draggingIndex: isSelectedLayer ? null : state.draggingIndex,
       };
       // When removing the PRIMARY hand layer, also clear flat waypoints so the hand disappears
       // Secondary hand layers only store waypoints in layer.data (removed with the layer itself)
@@ -687,8 +688,26 @@ export function directorReducer(
         layers: { ...state.layers, [action.scene]: sceneLayers },
       };
     }
-    case 'SELECT_LAYER':
-      return { ...state, selectedLayerId: action.layerId };
+    case 'SELECT_LAYER': {
+      // Clamp selectedWaypoint to the new layer's waypoint count to prevent out-of-bounds
+      let clampedWaypoint = state.selectedWaypoint;
+      if (action.layerId && state.selectedScene) {
+        const layers = state.layers[state.selectedScene] || [];
+        const layer = layers.find((l) => l.id === action.layerId);
+        if (layer?.type === 'hand') {
+          const wps =
+            (layer.data as { waypoints?: HandPathPoint[] }).waypoints || [];
+          if (clampedWaypoint !== null && clampedWaypoint >= wps.length) {
+            clampedWaypoint = wps.length > 0 ? wps.length - 1 : null;
+          }
+        }
+      }
+      return {
+        ...state,
+        selectedLayerId: action.layerId,
+        selectedWaypoint: clampedWaypoint,
+      };
+    }
     case 'REORDER_LAYERS': {
       const existing = state.layers[action.scene] || [];
       const ordered = action.layerIds

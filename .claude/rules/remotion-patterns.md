@@ -76,3 +76,29 @@
     DynamicIsland, DorianNavHeader, DorianLogo) are wrapped in React.memo.
     Any new purely-props-driven component that renders every frame should
     also be wrapped.
+
+21. **Multi-hand-layer architecture**: Each click/draw in SceneDirector edit mode
+    creates a NEW independent hand layer via `ADD_HAND_GESTURE`. Never use
+    `ADD_WAYPOINT` or `SET_WAYPOINTS` in edit mode — those modify the primary layer.
+    Secondary layers store waypoints ONLY in `layer.data.waypoints`, never in
+    `state.waypoints[scene]`. Primary = index 0 (synced by syncHandLayer).
+
+22. **Secondary hand layer routing**: `UPDATE_WAYPOINT` and `DELETE_WAYPOINT`
+    check `state.selectedLayerId` to decide whether to route to primary (flat
+    state.waypoints) or secondary (layer.data.waypoints). Always dispatch
+    `SELECT_LAYER` before any waypoint mutation on a secondary layer.
+
+23. **REMOVE_LAYER clears flat waypoints for primary only**: When removing a
+    hand layer, only clear `state.waypoints[scene]` if removing the FIRST hand
+    layer (primary). Secondary layers carry their own waypoints — removing them
+    needs no flat state cleanup.
+
+24. **Undo/redo future stack**: undoableReducer has `past`, `present`, `future`.
+    Any new undoable action MUST clear `future: []`. ADD_HAND_GESTURE is
+    undoable. Non-undoable actions (SELECT_SCENE, SELECT_WAYPOINT, UI toggles)
+    preserve the future stack so redo still works after navigation.
+
+25. **Zoom-to-cursor via refs**: Wheel zoom handler reads current zoom/pan via
+    refs (not stale closure state). New pan = `mouseRel - (mouseRel - oldPan) / oldZoom * newZoom`
+    where mouseRel is mouse distance from player-area center. Always update
+    zoom and pan atomically in same event handler.

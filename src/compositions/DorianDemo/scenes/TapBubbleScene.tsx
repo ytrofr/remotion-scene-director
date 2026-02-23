@@ -100,13 +100,14 @@ export const TapAIBubbleScene: React.FC = () => {
         animation="hand-click"
         size={140}
         dark={savedTap?.dark ?? true}
-        showRipple={false}
+        showRipple={true}
+        rippleColor="rgba(45, 212, 191, 0.6)"
         physics={{
           floatAmplitude: 0, // No float - steady hand
           floatSpeed: 0,
           velocityScale: 0.8, // High rotation based on movement direction
           maxRotation: 35, // Allow more rotation to follow trail
-          shadowEnabled: false,
+          shadowEnabled: true,
           shadowDistance: 12,
           shadowBlur: 15,
           smoothing: 0.12, // Responsive to direction changes

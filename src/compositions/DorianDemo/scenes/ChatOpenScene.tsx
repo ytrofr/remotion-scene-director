@@ -215,13 +215,14 @@ export const ChatOpenScene: React.FC = () => {
           animation="hand-click"
           size={140}
           dark={savedChatOpen?.dark ?? true}
-          showRipple={false}
+          showRipple={true}
+          rippleColor="rgba(45, 212, 191, 0.5)"
           physics={{
             floatAmplitude: 2,
             floatSpeed: 0.04,
             velocityScale: 0.6,
             maxRotation: 25,
-            shadowEnabled: false,
+            shadowEnabled: true,
             shadowDistance: 10,
             shadowBlur: 12,
             smoothing: 0.15,

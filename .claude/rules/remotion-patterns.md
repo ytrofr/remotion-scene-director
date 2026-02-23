@@ -102,3 +102,8 @@
     refs (not stale closure state). New pan = `mouseRel - (mouseRel - oldPan) / oldZoom * newZoom`
     where mouseRel is mouse distance from player-area center. Always update
     zoom and pan atomically in same event handler.
+
+26. **Determinism**: NEVER use `Math.random()` — causes different renders on
+    each frame. Use `random('seed')` from Remotion for seeded randomness.
+    ALWAYS use `staticFile()` for assets in `/public` — never construct paths
+    manually.

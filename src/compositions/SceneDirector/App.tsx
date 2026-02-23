@@ -99,9 +99,11 @@ export const App: React.FC = () => {
   const [undoState, dispatch] = useReducer(undoableReducer, {
     past: [],
     present: restoredInitial,
+    future: [],
   } as UndoableState);
   const state = undoState.present;
   const canUndo = undoState.past.length > 0;
+  const canRedo = undoState.future.length > 0;
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState(savedSession.frame ?? 0);
@@ -363,6 +365,7 @@ export const App: React.FC = () => {
       activePreset,
       scenePreset,
       canUndo,
+      canRedo,
       playbackRate,
       setPlaybackRate,
       playerScale,
@@ -382,6 +385,7 @@ export const App: React.FC = () => {
       activePreset,
       scenePreset,
       canUndo,
+      canRedo,
       playbackRate,
       playerScale,
       cursorScale,

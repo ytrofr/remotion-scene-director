@@ -49,6 +49,16 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // Ctrl+Y or Ctrl+Shift+Z → Redo
+      if (
+        ((e.ctrlKey || e.metaKey) && e.key === 'y') ||
+        ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey)
+      ) {
+        e.preventDefault();
+        dispatch({ type: 'REDO' });
+        return;
+      }
+
       switch (e.key) {
         case 's':
         case 'S':

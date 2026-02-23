@@ -125,6 +125,7 @@ export type DirectorAction =
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
   | { type: 'UNDO' }
+  | { type: 'REDO' }
   | {
       type: 'ADOPT_CODED_PATH';
       scene: string;

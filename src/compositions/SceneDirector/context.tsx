@@ -3,10 +3,20 @@
  * Provides state, dispatch, frame, playerRef, derived values, and active gesture preset.
  */
 
-import React, { createContext, useContext, type Dispatch, type RefObject } from 'react';
+import React, {
+  createContext,
+  useContext,
+  type Dispatch,
+  type RefObject,
+} from 'react';
 import type { PlayerRef } from '@remotion/player';
 import type { HandPathPoint } from '../../components/FloatingHand/types';
-import type { DirectorState, DirectorAction, CompositionEntry, SceneInfo } from './state';
+import type {
+  DirectorState,
+  DirectorAction,
+  CompositionEntry,
+  SceneInfo,
+} from './state';
 import type { GesturePreset } from './gestures';
 import type { Layer } from './layers';
 
@@ -22,6 +32,7 @@ export interface DirectorContextValue {
   activePreset: GesturePreset | null;
   scenePreset: GesturePreset | null;
   canUndo: boolean;
+  canRedo: boolean;
   playbackRate: number;
   setPlaybackRate: (rate: number) => void;
   playerScale: number;

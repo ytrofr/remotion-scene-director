@@ -15,6 +15,7 @@ export interface CodedPath {
   gesture: GestureTool;
   animation: string;
   dark?: boolean;
+  secondaryLayers?: Array<{ gesture: GestureTool; path: HandPathPoint[] }>;
 }
 
 // ── MobileChatDemoCombined paths (from COMBINED_HAND_PATH_MARKERS) ──
@@ -292,4 +293,16 @@ export function getSavedPath(
   sceneName: string,
 ): CodedPath | null {
   return (saved[compositionId]?.[sceneName] as CodedPath) ?? null;
+}
+
+/**
+ * Get secondary hand layers for a scene (user-added gestures beyond the primary).
+ * Returns empty array if none exist.
+ */
+export function getSavedSecondaryLayers(
+  compositionId: string,
+  sceneName: string,
+): Array<{ gesture: GestureTool; path: HandPathPoint[] }> {
+  const coded = getCodedPath(compositionId, sceneName);
+  return coded?.secondaryLayers ?? [];
 }

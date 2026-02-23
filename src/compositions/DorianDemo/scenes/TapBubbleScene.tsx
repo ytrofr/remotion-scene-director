@@ -1,5 +1,11 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  useCurrentFrame,
+  interpolate,
+  spring,
+  useVideoConfig,
+} from 'remotion';
 import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -16,8 +22,8 @@ export const TapAIBubbleScene: React.FC = () => {
   // AI bubble position on phone (non-zoomed): (818, 1546)
   // Zoom starts at frame 278 (scene frame 53), click at frame 298 (scene frame 73)
   // After 3x zoom, bubble appears at (518, 992) — that's where hand clicks
-  const zoomStartFrame = 53;  // Frame 278 = scene3Start(225) + 53
-  const clickFrame = 73;      // Frame 298 = scene3Start(225) + 73
+  const zoomStartFrame = 53; // Frame 278 = scene3Start(225) + 53
+  const clickFrame = 73; // Frame 298 = scene3Start(225) + 73
 
   // Zoom in effect - starts when hand reaches bubble, 3X ZOOM
   const zoomProgress = spring({
@@ -25,7 +31,7 @@ export const TapAIBubbleScene: React.FC = () => {
     fps,
     config: { damping: 15, mass: 1, stiffness: 80 },
   });
-  const zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 5.4]);  // 3x zoom
+  const zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 5.4]); // 3x zoom
   // Center zoom on AI bubble at (818, 1546) - offsets: -(target - center) * 3
   const zoomOffsetX = interpolate(zoomProgress, [0, 1], [0, -860]);
   const zoomOffsetY = interpolate(zoomProgress, [0, 1], [0, -1730]);
@@ -33,10 +39,17 @@ export const TapAIBubbleScene: React.FC = () => {
   // Hand path - approach bubble, then track it as zoom moves it
   const savedTap = getSavedPath('DorianDemo', '3-TapBubble');
   const handPath: HandPathPoint[] = savedTap?.path ?? [
-    { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 },        // H1: Start above
-    { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 },       // H2: Moving down
+    { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 }, // H1: Start above
+    { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 }, // H2: Moving down
     { x: 818, y: 1546, frame: zoomStartFrame, gesture: 'pointer', scale: 1 }, // H3: At bubble, zoom starts
-    { x: 518, y: 992, frame: clickFrame, gesture: 'click', duration: 2, scale: 2.2 }, // H4: CLICK at zoomed position (scaled with 3x zoom)
+    {
+      x: 518,
+      y: 992,
+      frame: clickFrame,
+      gesture: 'click',
+      duration: 2,
+      scale: 2.2,
+    }, // H4: CLICK at zoomed position (scaled with 3x zoom)
   ];
 
   return (
@@ -65,12 +78,14 @@ export const TapAIBubbleScene: React.FC = () => {
       </AnimatedText>
 
       {/* Phone with same scrolled view as end of Scene 2 - zoom centers on bubble */}
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        transform: `translate(${zoomOffsetX}px, ${zoomOffsetY}px)`,
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          transform: `translate(${zoomOffsetX}px, ${zoomOffsetY}px)`,
+        }}
+      >
         <DorianPhoneMockupNew
           scrollProgress={1}
           scale={zoomScale}
@@ -84,18 +99,17 @@ export const TapAIBubbleScene: React.FC = () => {
         startFrame={0}
         animation="hand-click"
         size={140}
-        dark={true}
-        showRipple={true}
-        rippleColor="rgba(45, 212, 191, 0.6)"
+        dark={savedTap?.dark ?? true}
+        showRipple={false}
         physics={{
-          floatAmplitude: 0,        // No float - steady hand
+          floatAmplitude: 0, // No float - steady hand
           floatSpeed: 0,
-          velocityScale: 0.8,       // High rotation based on movement direction
-          maxRotation: 35,          // Allow more rotation to follow trail
-          shadowEnabled: true,
+          velocityScale: 0.8, // High rotation based on movement direction
+          maxRotation: 35, // Allow more rotation to follow trail
+          shadowEnabled: false,
           shadowDistance: 12,
           shadowBlur: 15,
-          smoothing: 0.12,          // Responsive to direction changes
+          smoothing: 0.12, // Responsive to direction changes
         }}
       />
     </AbsoluteFill>

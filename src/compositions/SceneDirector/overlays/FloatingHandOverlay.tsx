@@ -56,13 +56,10 @@ const SingleHandRenderer: React.FC<{
     return null;
   }
 
-  // Primary layer uses scene-level overrides; secondary layers use gesture defaults
-  const animation = isPrimary
-    ? (state.sceneAnimation[state.selectedScene!] ?? preset.animation)
-    : preset.animation;
-  const dark = isPrimary
-    ? (state.sceneDark[state.selectedScene!] ?? preset.dark)
-    : preset.dark;
+  // All layers inherit scene-level dark/animation (set by ENSURE_SCENE_LAYERS or user toggle)
+  const animation =
+    state.sceneAnimation[state.selectedScene!] ?? preset.animation;
+  const dark = state.sceneDark[state.selectedScene!] ?? preset.dark;
 
   return (
     <FloatingHand

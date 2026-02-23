@@ -7,7 +7,11 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useDirector } from '../context';
 import { COMPOSITIONS } from '../compositions';
-import { GESTURE_PRESETS, GESTURE_ANIMATIONS, type GestureTool } from '../gestures';
+import {
+  GESTURE_PRESETS,
+  GESTURE_ANIMATIONS,
+  type GestureTool,
+} from '../gestures';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
   { id: 'click', key: '1' },
@@ -18,8 +22,11 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 ];
 
 export const Toolbar: React.FC = () => {
-  const { state, dispatch, canUndo, cursorScale, setCursorScale, saveSession } = useDirector();
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const { state, dispatch, canUndo, cursorScale, setCursorScale, saveSession } =
+    useDirector();
+  const [saveState, setSaveState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
   const [openDropdown, setOpenDropdown] = useState<GestureTool | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +34,10 @@ export const Toolbar: React.FC = () => {
   useEffect(() => {
     if (!openDropdown) return;
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpenDropdown(null);
       }
     };
@@ -52,7 +62,18 @@ export const Toolbar: React.FC = () => {
             sceneName: safeName,
             path: waypoints,
             gesture,
-            animation: state.sceneAnimation[state.selectedScene] ?? preset.animation,
+            animation:
+              state.sceneAnimation[state.selectedScene] ?? preset.animation,
+            dark: state.sceneDark[state.selectedScene],
+            secondaryLayers: (() => {
+              const sceneLayers = state.layers[state.selectedScene] || [];
+              const handLayers = sceneLayers.filter((l) => l.type === 'hand');
+              const secondary = handLayers.slice(1).map((l) => ({
+                gesture: l.data.gesture,
+                path: (l.data as { waypoints?: unknown[] }).waypoints || [],
+              }));
+              return secondary.length > 0 ? secondary : undefined;
+            })(),
           }),
         });
         if (!res.ok) throw new Error('Save failed');
@@ -69,7 +90,16 @@ export const Toolbar: React.FC = () => {
       setSaveState('error');
       setTimeout(() => setSaveState('idle'), 3000);
     }
-  }, [state.selectedScene, state.waypoints, state.sceneGesture, state.sceneAnimation, state.compositionId, saveSession]);
+  }, [
+    state.selectedScene,
+    state.waypoints,
+    state.sceneGesture,
+    state.sceneAnimation,
+    state.sceneDark,
+    state.layers,
+    state.compositionId,
+    saveSession,
+  ]);
 
   // Listen for Ctrl+S custom event from App.tsx
   useEffect(() => {
@@ -80,7 +110,10 @@ export const Toolbar: React.FC = () => {
 
   // Current effective animation and dark for the selected scene
   const scene = state.selectedScene;
-  const currentAnimation = scene ? (state.sceneAnimation[scene] ?? GESTURE_PRESETS[state.sceneGesture[scene] ?? 'click']?.animation) : null;
+  const currentAnimation = scene
+    ? (state.sceneAnimation[scene] ??
+      GESTURE_PRESETS[state.sceneGesture[scene] ?? 'click']?.animation)
+    : null;
   const currentDark = scene ? (state.sceneDark[scene] ?? false) : false;
 
   return (
@@ -92,10 +125,14 @@ export const Toolbar: React.FC = () => {
       <select
         className="toolbar__select"
         value={state.compositionId}
-        onChange={(e) => dispatch({ type: 'SET_COMPOSITION', id: e.target.value })}
+        onChange={(e) =>
+          dispatch({ type: 'SET_COMPOSITION', id: e.target.value })
+        }
       >
-        {COMPOSITIONS.map(c => (
-          <option key={c.id} value={c.id}>{c.label}</option>
+        {COMPOSITIONS.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.label}
+          </option>
         ))}
       </select>
 
@@ -103,7 +140,7 @@ export const Toolbar: React.FC = () => {
 
       {/* Gesture tool buttons with variant dropdown */}
       <div className="toolbar__gesture-group" ref={dropdownRef}>
-        {GESTURE_TOOLS.map(t => {
+        {GESTURE_TOOLS.map((t) => {
           const preset = GESTURE_PRESETS[t.id];
           const active = state.activeTool === t.id;
           const dropdownOpen = openDropdown === t.id;
@@ -127,7 +164,11 @@ export const Toolbar: React.FC = () => {
               >
                 {preset.label}
                 <kbd className="toolbar__kbd">{t.key}</kbd>
-                {active && <span className="toolbar__btn-arrow">{dropdownOpen ? '\u25B2' : '\u25BC'}</span>}
+                {active && (
+                  <span className="toolbar__btn-arrow">
+                    {dropdownOpen ? '\u25B2' : '\u25BC'}
+                  </span>
+                )}
               </button>
 
               {/* Variant dropdown */}
@@ -135,16 +176,24 @@ export const Toolbar: React.FC = () => {
                 <div className="toolbar__dropdown">
                   <div className="toolbar__dropdown-title">Hand Style</div>
                   <div className="toolbar__dropdown-anims">
-                    {animations.map(anim => {
+                    {animations.map((anim) => {
                       const isActive = currentAnimation === anim.id;
                       return (
                         <button
                           key={anim.id}
                           onClick={() => {
                             if (scene) {
-                              dispatch({ type: 'SET_SCENE_ANIMATION', scene, animation: anim.id });
+                              dispatch({
+                                type: 'SET_SCENE_ANIMATION',
+                                scene,
+                                animation: anim.id,
+                              });
                               if (!state.sceneGesture[scene]) {
-                                dispatch({ type: 'SET_SCENE_GESTURE', scene, gesture: t.id });
+                                dispatch({
+                                  type: 'SET_SCENE_GESTURE',
+                                  scene,
+                                  gesture: t.id,
+                                });
                               }
                             }
                           }}
@@ -157,13 +206,27 @@ export const Toolbar: React.FC = () => {
                   </div>
                   <div className="toolbar__dropdown-dark">
                     <button
-                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: false }); }}
+                      onClick={() => {
+                        if (scene)
+                          dispatch({
+                            type: 'SET_SCENE_DARK',
+                            scene,
+                            dark: false,
+                          });
+                      }}
                       className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Light
                     </button>
                     <button
-                      onClick={() => { if (scene) dispatch({ type: 'SET_SCENE_DARK', scene, dark: true }); }}
+                      onClick={() => {
+                        if (scene)
+                          dispatch({
+                            type: 'SET_SCENE_DARK',
+                            scene,
+                            dark: true,
+                          });
+                      }}
                       className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Dark
@@ -180,7 +243,10 @@ export const Toolbar: React.FC = () => {
 
       {/* Select tool */}
       <button
-        onClick={() => { dispatch({ type: 'SET_TOOL', tool: 'select' }); setOpenDropdown(null); }}
+        onClick={() => {
+          dispatch({ type: 'SET_TOOL', tool: 'select' });
+          setOpenDropdown(null);
+        }}
         className={`toolbar__btn ${state.activeTool === 'select' ? 'toolbar__btn--active' : ''}`}
         title="Select mode (S)"
       >
@@ -213,7 +279,9 @@ export const Toolbar: React.FC = () => {
               onChange={(e) => setCursorScale(parseFloat(e.target.value))}
               className="toolbar__slider"
             />
-            <span className="toolbar__slider-label">{cursorScale.toFixed(1)}x</span>
+            <span className="toolbar__slider-label">
+              {cursorScale.toFixed(1)}x
+            </span>
           </div>
         </>
       )}
@@ -243,21 +311,29 @@ export const Toolbar: React.FC = () => {
         onClick={handleSave}
         disabled={saveState === 'saving'}
         className={`toolbar__btn ${
-          saveState === 'saved' ? 'toolbar__btn--save-ok' :
-          saveState === 'error' ? 'toolbar__btn--clear' :
-          'toolbar__btn--save'
+          saveState === 'saved'
+            ? 'toolbar__btn--save-ok'
+            : saveState === 'error'
+              ? 'toolbar__btn--clear'
+              : 'toolbar__btn--save'
         }`}
         title="Save path to file (Ctrl+S)"
       >
-        {saveState === 'saving' ? 'Saving...' :
-         saveState === 'saved' ? 'Saved!' :
-         saveState === 'error' ? 'Error!' : 'Save'}
+        {saveState === 'saving'
+          ? 'Saving...'
+          : saveState === 'saved'
+            ? 'Saved!'
+            : saveState === 'error'
+              ? 'Error!'
+              : 'Save'}
       </button>
 
       {/* Revert */}
       {state.selectedScene && state.savedSnapshots[state.selectedScene] && (
         <button
-          onClick={() => dispatch({ type: 'REVERT_SCENE', scene: state.selectedScene! })}
+          onClick={() =>
+            dispatch({ type: 'REVERT_SCENE', scene: state.selectedScene! })
+          }
           className="toolbar__btn toolbar__btn--clear"
           title="Revert to last saved state"
         >

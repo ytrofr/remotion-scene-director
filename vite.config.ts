@@ -24,8 +24,19 @@ function savePathPlugin(): Plugin {
         req.on('data', (chunk: string) => (body += chunk));
         req.on('end', () => {
           try {
-            const { compositionId, sceneName, path: pathData, gesture, animation } = JSON.parse(body);
-            const filePath = path.resolve(__dirname, 'src/compositions/SceneDirector/codedPaths.data.json');
+            const {
+              compositionId,
+              sceneName,
+              path: pathData,
+              gesture,
+              animation,
+              dark,
+              secondaryLayers,
+            } = JSON.parse(body);
+            const filePath = path.resolve(
+              __dirname,
+              'src/compositions/SceneDirector/codedPaths.data.json',
+            );
             const existing = fs.existsSync(filePath)
               ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
               : {};
@@ -40,7 +51,15 @@ function savePathPlugin(): Plugin {
               }
             } else {
               if (!existing[compositionId]) existing[compositionId] = {};
-              existing[compositionId][sceneName] = { gesture, animation, path: pathData };
+              const entry: Record<string, unknown> = {
+                gesture,
+                animation,
+                path: pathData,
+              };
+              if (dark !== undefined) entry.dark = dark;
+              if (secondaryLayers?.length > 0)
+                entry.secondaryLayers = secondaryLayers;
+              existing[compositionId][sceneName] = entry;
             }
 
             fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));

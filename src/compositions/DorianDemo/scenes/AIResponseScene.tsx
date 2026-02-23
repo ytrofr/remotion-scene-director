@@ -43,7 +43,12 @@ export const AIResponseScene: React.FC = () => {
   });
 
   // Chars revealed for typewriter effect
-  const revealedChars = Math.floor(interpolate(frame, [5, 50], [0, aiMessage.length], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }));
+  const revealedChars = Math.floor(
+    interpolate(frame, [5, 50], [0, aiMessage.length], {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    }),
+  );
 
   // Hand appears and taps "View Products" button
   const savedPath = getSavedPath('DorianDemo', '7-AIResponse');
@@ -78,165 +83,192 @@ export const AIResponseScene: React.FC = () => {
         </div>
       </AnimatedText>
 
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        transform: `translate(0px, ${zoomOffsetY}px)`,
-      }}>
-        <div style={{
+      <div
+        style={{
           position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: `translate(-50%, -50%) scale(${zoomScale})`,
-        }}>
-        <DorianPhoneStaticNew showAIBubble={false} scrollOffset={702}>
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 60,
-              left: 0,
-              right: 0,
-              height: chatHeight,
-              background: 'white',
-              borderRadius: '24px 24px 0 0',
-              boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
-              padding: '15px 16px',
-              fontFamily,
-              overflow: 'hidden',
-            }}
-          >
-            {/* Chat header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <AIBubble scale={0.5} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 12, color: COLORS.text }}>Dorian</div>
-                <div style={{ fontSize: 9, color: COLORS.primary }}>Your AI Assistant</div>
+          width: '100%',
+          height: '100%',
+          transform: `translate(0px, ${zoomOffsetY}px)`,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: `translate(-50%, -50%) scale(${zoomScale})`,
+          }}
+        >
+          <DorianPhoneStaticNew showAIBubble={false} scrollOffset={702}>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 60,
+                left: 0,
+                right: 0,
+                height: chatHeight,
+                background: 'white',
+                borderRadius: '24px 24px 0 0',
+                boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
+                padding: '15px 16px',
+                fontFamily,
+                overflow: 'hidden',
+              }}
+            >
+              {/* Chat header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  marginBottom: 8,
+                }}
+              >
+                <AIBubble scale={0.5} />
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 12,
+                      color: COLORS.text,
+                    }}
+                  >
+                    Dorian
+                  </div>
+                  <div style={{ fontSize: 9, color: COLORS.primary }}>
+                    Your AI Assistant
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* AI greeting - smaller to make room */}
-            <div
-              style={{
-                background: '#f0f0f0',
-                padding: '6px 10px',
-                borderRadius: '12px 12px 12px 4px',
-                maxWidth: '85%',
-                fontSize: 10,
-                color: COLORS.text,
-                marginBottom: 6,
-                lineHeight: 1.3,
-              }}
-            >
-              Hi! How can I help you today?
-            </div>
-
-            {/* User message */}
-            <div
-              style={{
-                background: COLORS.primary,
-                padding: '6px 10px',
-                borderRadius: '12px 12px 4px 12px',
-                maxWidth: '80%',
-                marginLeft: 'auto',
-                fontSize: 10,
-                color: 'white',
-                lineHeight: 1.3,
-                marginBottom: 6,
-              }}
-            >
-              {message}
-            </div>
-
-            {/* AI Response - slides in */}
-            <div
-              style={{
-                transform: `translateY(${(1 - responseSlide) * 30}px)`,
-                opacity: responseSlide,
-              }}
-            >
+              {/* AI greeting - smaller to make room */}
               <div
                 style={{
                   background: '#f0f0f0',
                   padding: '6px 10px',
                   borderRadius: '12px 12px 12px 4px',
-                  maxWidth: '90%',
+                  maxWidth: '85%',
                   fontSize: 10,
                   color: COLORS.text,
+                  marginBottom: 6,
+                  lineHeight: 1.3,
+                }}
+              >
+                Hi! How can I help you today?
+              </div>
+
+              {/* User message */}
+              <div
+                style={{
+                  background: COLORS.primary,
+                  padding: '6px 10px',
+                  borderRadius: '12px 12px 4px 12px',
+                  maxWidth: '80%',
+                  marginLeft: 'auto',
+                  fontSize: 10,
+                  color: 'white',
                   lineHeight: 1.3,
                   marginBottom: 6,
                 }}
               >
-                {aiMessage.slice(0, revealedChars)}
-                {revealedChars < aiMessage.length && <span style={{ opacity: frame % 10 < 5 ? 1 : 0 }}>|</span>}
+                {message}
               </div>
 
-              {/* View Products button */}
-              {frame >= 40 && (
-                <div
-                  style={{
-                    background: COLORS.primary,
-                    padding: '8px 16px',
-                    borderRadius: 16,
-                    textAlign: 'center',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: 'white',
-                    maxWidth: '60%',
-                    opacity: buttonAppear,
-                    transform: `scale(${buttonAppear})`,
-                  }}
-                >
-                  View Products {'\u2192'}
-                </div>
-              )}
-            </div>
-
-            {/* Input field */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 10,
-                left: 12,
-                right: 12,
-                background: '#f5f5f5',
-                borderRadius: 18,
-                padding: '7px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                border: '2px solid transparent',
-              }}
-            >
-              <span style={{ color: '#999', fontSize: 10 }}>Type a message...</span>
+              {/* AI Response - slides in */}
               <div
                 style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  background: '#ccc',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
+                  transform: `translateY(${(1 - responseSlide) * 30}px)`,
+                  opacity: responseSlide,
                 }}
               >
-                <span style={{ color: 'white', fontSize: 12 }}>{'\u2192'}</span>
+                <div
+                  style={{
+                    background: '#f0f0f0',
+                    padding: '6px 10px',
+                    borderRadius: '12px 12px 12px 4px',
+                    maxWidth: '90%',
+                    fontSize: 10,
+                    color: COLORS.text,
+                    lineHeight: 1.3,
+                    marginBottom: 6,
+                  }}
+                >
+                  {aiMessage.slice(0, revealedChars)}
+                  {revealedChars < aiMessage.length && (
+                    <span style={{ opacity: frame % 10 < 5 ? 1 : 0 }}>|</span>
+                  )}
+                </div>
+
+                {/* View Products button */}
+                {frame >= 40 && (
+                  <div
+                    style={{
+                      background: COLORS.primary,
+                      padding: '8px 16px',
+                      borderRadius: 16,
+                      textAlign: 'center',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: 'white',
+                      maxWidth: '60%',
+                      opacity: buttonAppear,
+                      transform: `scale(${buttonAppear})`,
+                    }}
+                  >
+                    View Products {'\u2192'}
+                  </div>
+                )}
+              </div>
+
+              {/* Input field */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 10,
+                  left: 12,
+                  right: 12,
+                  background: '#f5f5f5',
+                  borderRadius: 18,
+                  padding: '7px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  border: '2px solid transparent',
+                }}
+              >
+                <span style={{ color: '#999', fontSize: 10 }}>
+                  Type a message...
+                </span>
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    background: '#ccc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ color: 'white', fontSize: 12 }}>
+                    {'\u2192'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </DorianPhoneStaticNew>
+          </DorianPhoneStaticNew>
         </div>
       </div>
 
       {/* Hand taps "View Products" button */}
-      {frame >= 70 && (
+      {frame >= (savedPath ? (handPath[0]?.frame ?? 0) : 70) && (
         <FloatingHand
           path={handPath}
-          startFrame={70}
+          startFrame={savedPath ? 0 : 70}
           animation="hand-click"
           size={120}
-          dark={true}
+          dark={savedPath?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"
           physics={{

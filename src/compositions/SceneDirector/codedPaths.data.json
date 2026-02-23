@@ -256,12 +256,26 @@
       "animation": "hand-click",
       "path": [
         {
-          "x": 323,
-          "y": 1141,
-          "frame": 94,
+          "x": 540,
+          "y": 1600,
+          "frame": 70,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1480,
+          "frame": 85,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1450,
+          "frame": 95,
           "gesture": "click",
           "scale": 1,
-          "duration": 39
+          "duration": 10
         }
       ]
     },

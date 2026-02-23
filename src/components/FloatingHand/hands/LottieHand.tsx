@@ -4,25 +4,91 @@ import { staticFile, delayRender, continueRender } from 'remotion';
 import { HandStyleProps } from '../types';
 
 /**
- * LottieHand - Professional animated hand using Lottie
+ * LottieHand - Renders hand using @remotion/lottie (Remotion's native Lottie).
  *
- * Uses pre-made Lottie animations from LottieFiles for smooth,
- * professional hand gestures with built-in click/tap animations.
- *
- * Available animations in public/lottie/:
- * - hand-click.json       (10KB)  - Click gesture with finger press animation
- * - hand-tap.json         (14KB)  - Quick tap gesture
- * - hand-tap-alt.json     (12KB)  - Alternative tap gesture (James Lashmar)
- * - hand-point.json       (4KB)   - Pointing finger icon (Eray Asena)
- * - hand-swipe-up.json    (5KB)   - Swipe up with arrow indicator
- * - hand-swipe-right.json (5KB)   - Swipe right gesture
- * - hand-scroll.json      (36KB)  - Scroll gesture with UI cards
- * - hand-scroll-clean.json (5KB) - ★ Clean dark finger scroll (no arrow)
- * - hand-drag.json        (64KB)  - Drag and drop gesture
- * - hand-pinch.json       (106KB) - Pinch zoom in/out gesture (David Tanner)
- *
- * @see https://www.remotion.dev/docs/lottie
+ * Frozen at frame 0: playbackRate=0.001, loop=false.
+ * These values NEVER change — no gesture-based rate switching, no loop resets,
+ * no frame jumps. The hand position/rotation/scale come from useHandAnimation;
+ * the Lottie just shows a static hand image.
  */
+
+/**
+ * Invert Lottie layer colors in-place (dark mode).
+ * Walks the layer tree and inverts all color values [r,g,b,a] → [1-r,1-g,1-b,a].
+ * This replaces CSS invert(1) which caused rendering artifacts in headless Chrome.
+ */
+function invertLottieColors(layers: Array<Record<string, unknown>>): void {
+  for (const layer of layers) {
+    invertColorsInObject(layer);
+  }
+}
+
+function invertColorsInObject(obj: unknown): void {
+  if (!obj || typeof obj !== 'object') return;
+  if (Array.isArray(obj)) {
+    for (const item of obj) invertColorsInObject(item);
+    return;
+  }
+  const record = obj as Record<string, unknown>;
+  // Lottie color keys: "c" (color), "fc" (fill color), "sc" (stroke color)
+  for (const colorKey of ['c', 'fc', 'sc']) {
+    const colorProp = record[colorKey];
+    if (colorProp && typeof colorProp === 'object') {
+      const cp = colorProp as Record<string, unknown>;
+      // Static color: { k: [r, g, b, a] }
+      if (
+        Array.isArray(cp.k) &&
+        cp.k.length >= 3 &&
+        typeof cp.k[0] === 'number'
+      ) {
+        cp.k = [
+          1 - (cp.k[0] as number),
+          1 - (cp.k[1] as number),
+          1 - (cp.k[2] as number),
+          ...(cp.k.length > 3 ? [cp.k[3]] : []),
+        ];
+      }
+      // Animated color: { k: [{ s: [r,g,b,a], ... }, ...] }
+      if (
+        Array.isArray(cp.k) &&
+        cp.k.length > 0 &&
+        typeof cp.k[0] === 'object'
+      ) {
+        for (const kf of cp.k) {
+          const keyframe = kf as Record<string, unknown>;
+          if (
+            Array.isArray(keyframe.s) &&
+            keyframe.s.length >= 3 &&
+            typeof keyframe.s[0] === 'number'
+          ) {
+            keyframe.s = [
+              1 - (keyframe.s[0] as number),
+              1 - (keyframe.s[1] as number),
+              1 - (keyframe.s[2] as number),
+              ...(keyframe.s.length > 3 ? [keyframe.s[3]] : []),
+            ];
+          }
+          if (
+            Array.isArray(keyframe.e) &&
+            keyframe.e.length >= 3 &&
+            typeof keyframe.e[0] === 'number'
+          ) {
+            keyframe.e = [
+              1 - (keyframe.e[0] as number),
+              1 - (keyframe.e[1] as number),
+              1 - (keyframe.e[2] as number),
+              ...(keyframe.e.length > 3 ? [keyframe.e[3]] : []),
+            ];
+          }
+        }
+      }
+    }
+  }
+  // Recurse into all object values
+  for (const val of Object.values(record)) {
+    if (val && typeof val === 'object') invertColorsInObject(val);
+  }
+}
 
 /** Available Lottie animation files */
 export type LottieAnimationFile =
@@ -35,86 +101,73 @@ export type LottieAnimationFile =
   | 'hand-scroll'
   | 'hand-drag'
   | 'hand-pinch'
-  | string; // Allow custom files
+  | string;
 
-interface LottieHandProps extends Omit<HandStyleProps, 'color' | 'strokeColor' | 'strokeWidth'> {
-  /** Which Lottie animation file to use */
+interface LottieHandProps extends Omit<
+  HandStyleProps,
+  'color' | 'strokeColor' | 'strokeWidth'
+> {
   animationFile?: LottieAnimationFile;
-  /** Playback speed (1 = normal, 2 = 2x speed) */
   playbackRate?: number;
-  /** Loop the animation */
   loop?: boolean;
-  /** Animation direction: 'forward' or 'backward' */
   direction?: 'forward' | 'backward';
-  /** Use dark variant (for light backgrounds) */
   dark?: boolean;
 }
 
 export const LottieHand: React.FC<LottieHandProps> = ({
-  gesture = 'pointer',
   size = 64,
   animationFile = 'hand-click',
-  playbackRate = 1,
-  loop = true,
-  direction = 'forward',
   dark = false,
 }) => {
-  const [animationData, setAnimationData] = useState<LottieAnimationData | null>(null);
+  const [animationData, setAnimationData] =
+    useState<LottieAnimationData | null>(null);
   const [handle] = useState(() => delayRender('Loading Lottie animation'));
 
   useEffect(() => {
     fetch(staticFile(`lottie/${animationFile}.json`))
-      .then(r => r.json())
-      .then(data => {
-        setAnimationData(data as LottieAnimationData);
+      .then((r) => r.json())
+      .then((data: Record<string, unknown>) => {
+        // Strip decorative layers (click indicator lines, etc.) — keep only
+        // the "Hand" / shape layers. These decorative elements cause visual
+        // artifacts in Remotion's headless render.
+        if (Array.isArray(data.layers)) {
+          data.layers = (data.layers as Array<Record<string, unknown>>).filter(
+            (l) => {
+              const name = String(l.nm || '');
+              return !name.includes('Lines');
+            },
+          );
+        }
+        // Invert colors at JSON level for dark mode — avoids CSS invert(1)
+        // compositing artifacts with transparency in headless Chrome.
+        if (dark && Array.isArray(data.layers)) {
+          invertLottieColors(data.layers as Array<Record<string, unknown>>);
+        }
+        setAnimationData(data as unknown as LottieAnimationData);
         continueRender(handle);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Failed to load Lottie animation:', error);
         continueRender(handle);
       });
-  }, [animationFile, handle]);
-
-  // Adjust playback based on gesture
-  // ONLY animate on 'click' gesture - nearly freeze on all other gestures
-  const getPlaybackRate = () => {
-    switch (gesture) {
-      case 'click':
-        return playbackRate * 1.2; // Play animation on click
-      case 'drag':
-      case 'scroll':
-        return playbackRate * 0.5; // Slow scroll animation
-      default:
-        return 0.001; // Nearly frozen - Lottie requires playbackRate > 0
-    }
-  };
+  }, [animationFile, dark, handle]);
 
   if (!animationData) {
     return null;
   }
-
-  // Build filter string - dark mode inverts colors for light backgrounds
-  const filterStyle = dark
-    ? 'invert(1) drop-shadow(3px 4px 6px rgba(0,0,0,0.4))'
-    : 'drop-shadow(3px 4px 6px rgba(0,0,0,0.3))';
 
   return (
     <div
       style={{
         width: size,
         height: size,
-        filter: filterStyle,
       }}
     >
       <Lottie
         animationData={animationData}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-        playbackRate={getPlaybackRate()}
-        loop={loop}
-        direction={direction}
+        style={{ width: '100%', height: '100%' }}
+        playbackRate={0.001}
+        loop={false}
       />
     </div>
   );

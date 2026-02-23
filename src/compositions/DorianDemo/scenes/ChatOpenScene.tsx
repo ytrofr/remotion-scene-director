@@ -1,5 +1,11 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
+import {
+  AbsoluteFill,
+  useCurrentFrame,
+  interpolate,
+  spring,
+  useVideoConfig,
+} from 'remotion';
 import { COLORS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -40,12 +46,12 @@ export const ChatOpenScene: React.FC = () => {
   // Hand path: move to input box after zoom settles, tap it, then exit
   const savedChatOpen = getSavedPath('DorianDemo', '4-ChatOpen');
   const handPath: HandPathPoint[] = savedChatOpen?.path ?? [
-    { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 },   // Match scene 3 end (big hand)
+    { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 }, // Match scene 3 end (big hand)
     { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1.5 }, // Shrinking with zoom-out
-    { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 },   // Normal size, approaching input
+    { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 }, // Normal size, approaching input
     { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
-    { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 },   // Linger briefly
-    { x: 480, y: 1550, frame: 90, gesture: 'pointer', scale: 1 },   // Hold position until scene end
+    { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 }, // Linger briefly
+    { x: 480, y: 1550, frame: 90, gesture: 'pointer', scale: 1 }, // Hold position until scene end
   ];
 
   return (
@@ -74,96 +80,130 @@ export const ChatOpenScene: React.FC = () => {
       </AnimatedText>
 
       {/* Phone with zoom-out effect - matches scene 3 transform structure for seamless transition */}
-      <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        transform: `translate(${zoomOffsetX}px, ${zoomOffsetY}px)`,
-      }}>
-        <div style={{
+      <div
+        style={{
           position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: `translate(-50%, -50%) scale(${zoomScale})`,
-        }}>
-        <DorianPhoneStaticNew showAIBubble={true} scrollOffset={702}>
-          {/* Chat overlay sliding up - 30% of screen, covers the AI bubble */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 60,
-              left: 0,
-              right: 0,
-              height: chatHeight,
-              background: 'white',
-              borderRadius: '24px 24px 0 0',
-              boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
-              transform: `translateY(${(1 - chatSlide) * chatHeight}px)`,
-              padding: '15px 16px',
-              fontFamily,
-              zIndex: 5,
-            }}
-          >
-            {/* Chat header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <AIBubble scale={0.6} />
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: COLORS.text }}>Dorian</div>
-                <div style={{ fontSize: 10, color: COLORS.primary }}>Your AI Assistant</div>
-              </div>
-            </div>
-
-            {/* AI greeting message */}
-            <div
-              style={{
-                background: '#f0f0f0',
-                padding: '10px 14px',
-                borderRadius: '16px 16px 16px 4px',
-                maxWidth: '85%',
-                fontSize: 13,
-                color: COLORS.text,
-                lineHeight: 1.4,
-              }}
-            >
-              Hi! How can I help you today?
-            </div>
-
-            {/* Input field at bottom - highlights on focus, no typing (typing is in scene 5) */}
+          width: '100%',
+          height: '100%',
+          transform: `translate(${zoomOffsetX}px, ${zoomOffsetY}px)`,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: `translate(-50%, -50%) scale(${zoomScale})`,
+          }}
+        >
+          <DorianPhoneStaticNew showAIBubble={true} scrollOffset={702}>
+            {/* Chat overlay sliding up - 30% of screen, covers the AI bubble */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 12,
-                left: 12,
-                right: 12,
-                background: inputFocused ? '#fff' : '#f5f5f5',
-                borderRadius: 20,
-                padding: '10px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                border: inputFocused ? `2px solid ${COLORS.primary}` : '2px solid transparent',
+                bottom: 60,
+                left: 0,
+                right: 0,
+                height: chatHeight,
+                background: 'white',
+                borderRadius: '24px 24px 0 0',
+                boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
+                transform: `translateY(${(1 - chatSlide) * chatHeight}px)`,
+                padding: '15px 16px',
+                fontFamily,
+                zIndex: 5,
               }}
             >
-              <span style={{ color: '#999', fontSize: 13 }}>
-                Type a message...
-                {inputFocused && <span style={{ opacity: frame % 15 < 8 ? 1 : 0, color: COLORS.text }}>|</span>}
-              </span>
+              {/* Chat header */}
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: '#ccc',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: 10,
+                  marginBottom: 12,
                 }}
               >
-                <span style={{ color: 'white', fontSize: 18 }}>{'\u2192'}</span>
+                <AIBubble scale={0.6} />
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 14,
+                      color: COLORS.text,
+                    }}
+                  >
+                    Dorian
+                  </div>
+                  <div style={{ fontSize: 10, color: COLORS.primary }}>
+                    Your AI Assistant
+                  </div>
+                </div>
+              </div>
+
+              {/* AI greeting message */}
+              <div
+                style={{
+                  background: '#f0f0f0',
+                  padding: '10px 14px',
+                  borderRadius: '16px 16px 16px 4px',
+                  maxWidth: '85%',
+                  fontSize: 13,
+                  color: COLORS.text,
+                  lineHeight: 1.4,
+                }}
+              >
+                Hi! How can I help you today?
+              </div>
+
+              {/* Input field at bottom - highlights on focus, no typing (typing is in scene 5) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 12,
+                  left: 12,
+                  right: 12,
+                  background: inputFocused ? '#fff' : '#f5f5f5',
+                  borderRadius: 20,
+                  padding: '10px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  border: inputFocused
+                    ? `2px solid ${COLORS.primary}`
+                    : '2px solid transparent',
+                }}
+              >
+                <span style={{ color: '#999', fontSize: 13 }}>
+                  Type a message...
+                  {inputFocused && (
+                    <span
+                      style={{
+                        opacity: frame % 15 < 8 ? 1 : 0,
+                        color: COLORS.text,
+                      }}
+                    >
+                      |
+                    </span>
+                  )}
+                </span>
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: '#ccc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <span style={{ color: 'white', fontSize: 18 }}>
+                    {'\u2192'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </DorianPhoneStaticNew>
+          </DorianPhoneStaticNew>
         </div>
       </div>
 
@@ -174,15 +214,14 @@ export const ChatOpenScene: React.FC = () => {
           startFrame={0}
           animation="hand-click"
           size={140}
-          dark={true}
-          showRipple={true}
-          rippleColor="rgba(45, 212, 191, 0.5)"
+          dark={savedChatOpen?.dark ?? true}
+          showRipple={false}
           physics={{
             floatAmplitude: 2,
             floatSpeed: 0.04,
             velocityScale: 0.6,
             maxRotation: 25,
-            shadowEnabled: true,
+            shadowEnabled: false,
             shadowDistance: 10,
             shadowBlur: 12,
             smoothing: 0.15,

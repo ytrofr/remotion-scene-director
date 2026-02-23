@@ -146,19 +146,21 @@ export const DrawingCanvas: React.FC = () => {
     if (hasExistingWaypoints) {
       // EDIT MODE: distinguish click (short) vs freehand draw (long)
       if (rawScene.length < 5) {
-        // Short interaction → add single new waypoint
+        // Short click → replace waypoints with single new one (moves gesture)
         const pos = rawScene[0];
         const localFrame = Math.max(0, frame - currentScene.start);
         dispatch({
-          type: 'ADD_WAYPOINT',
+          type: 'SET_WAYPOINTS',
           scene: currentScene.name,
-          point: {
-            x: pos.x,
-            y: pos.y,
-            frame: localFrame,
-            gesture: 'pointer' as const,
-            scale: 1,
-          },
+          waypoints: [
+            {
+              x: pos.x,
+              y: pos.y,
+              frame: localFrame,
+              gesture: 'pointer' as const,
+              scale: 1,
+            },
+          ],
         });
       } else {
         // Freehand draw → use first and last points only (click + release)

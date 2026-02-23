@@ -63,9 +63,17 @@
     screenshots that CANNOT be recaptured (Cloudflare blocks automation).
     Never delete, rename, or overwrite without user confirmation.
 
-18. **2x speed via ffmpeg blend**: Use `npm run postrender:2x` (ffmpeg
-    minterpolate blend + setpts). Never change composition fps as a
-    speed hack — it breaks spring timing.
+18. **2x speed via setpts ONLY — no minterpolate blend**: Use `npm run postrender:2x`
+    (plain `setpts=0.5*PTS`). NEVER use `minterpolate=mi_mode=blend` — it creates
+    ghost frames at every scene boundary by pixel-averaging adjacent frames, producing
+    overlapping hands, double titles, and blurry artifacts. Never change composition
+    fps as a speed hack either — it breaks spring timing.
+
+18b. **Debug rendering artifacts by isolating scenes first**: When the full video
+has visual artifacts but it's unclear where they come from, render each hand-gesture
+scene individually with `--frames=START-END`. If individual scenes look clean,
+the bug is in post-processing (ffmpeg filters, encoding) or at scene boundaries —
+NOT in the component rendering. This avoids hours of debugging the wrong layer.
 
 19. **Centralized font loading**: Import `fontFamily` from `src/lib/fonts.ts`.
     Never call `loadFont()` directly in scene or component files. The shared

@@ -10,6 +10,7 @@ import {
   type Dispatch,
   type RefObject,
 } from 'react';
+import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { DirectorState, DirectorAction } from '../state.types';
 
 // ─── Shared types ───────────────────────────────────────────────
@@ -32,6 +33,10 @@ interface HandDragState {
   startX: number;
   originalFrame: number;
   originalDuration: number;
+  /** All waypoint frames at drag start — used to shift entire gesture on move */
+  originalWaypoints: HandPathPoint[];
+  /** Layer ID if this is a secondary hand layer (data stored in layer.data.waypoints) */
+  layerId: string | null;
   preDragState: DirectorState;
 }
 
@@ -176,6 +181,8 @@ export interface HandDragResult {
     edge: DragEdge,
     currentFrame: number,
     currentDuration: number,
+    waypoints: HandPathPoint[],
+    layerId: string | null,
   ) => void;
 }
 
@@ -194,6 +201,8 @@ export function useHandDrag({
       edge: DragEdge,
       currentFrame: number,
       currentDuration: number,
+      waypoints: HandPathPoint[],
+      layerId: string | null,
     ) => {
       e.stopPropagation();
       e.preventDefault();
@@ -203,6 +212,8 @@ export function useHandDrag({
         startX: e.clientX,
         originalFrame: currentFrame,
         originalDuration: currentDuration,
+        originalWaypoints: waypoints,
+        layerId,
         preDragState: state,
       });
     },
@@ -219,13 +230,27 @@ export function useHandDrag({
       const deltaPx = e.clientX - handDrag.startX;
       const deltaFrames = Math.round(deltaPx / pxPerFrame);
       if (handDrag.edge === 'move') {
-        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { frame: newFrame },
-        });
+        // Shift ALL waypoints by the same frame delta
+        const shifted = handDrag.originalWaypoints.map((wp) => ({
+          ...wp,
+          frame: Math.max(0, (wp.frame ?? 0) + deltaFrames),
+        }));
+        if (handDrag.layerId) {
+          // Secondary hand layer — update via layer data
+          dispatch({
+            type: 'UPDATE_LAYER_DATA',
+            scene: handDrag.scene,
+            layerId: handDrag.layerId,
+            data: { waypoints: shifted },
+          });
+        } else {
+          // Primary hand layer — update via flat waypoints
+          dispatch({
+            type: 'SET_WAYPOINTS',
+            scene: handDrag.scene,
+            waypoints: shifted,
+          });
+        }
       } else if (handDrag.edge === 'left') {
         const rightEdge = handDrag.originalFrame + handDrag.originalDuration;
         const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);

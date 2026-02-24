@@ -303,13 +303,25 @@ export const Timeline: React.FC = () => {
                     title={`${gesture} (f${globalStart - sceneStart}-${globalEnd - sceneStart})`}
                     onMouseDown={(e) => {
                       e.stopPropagation();
-                      if (isSelected && isSingle) {
+                      if (isSelected) {
+                        // Determine if this is a secondary layer
+                        const sceneLayers = state.layers[sceneName] || [];
+                        const primaryIdx = sceneLayers.findIndex(
+                          (l) => l.type === 'hand',
+                        );
+                        const selIdx = sceneLayers.findIndex(
+                          (l) => l.id === layer.id,
+                        );
+                        const isSecondary =
+                          selIdx >= 0 && selIdx !== primaryIdx;
                         handleHandEdgeDown(
                           e,
                           sceneName,
                           'move',
                           wpFrame,
                           wpDuration,
+                          wps || [],
+                          isSecondary ? layer.id : null,
                         );
                         return;
                       }
@@ -328,6 +340,8 @@ export const Timeline: React.FC = () => {
                             'left',
                             wpFrame,
                             wpDuration,
+                            wps || [],
+                            null,
                           )
                         }
                       />
@@ -343,6 +357,8 @@ export const Timeline: React.FC = () => {
                             'right',
                             wpFrame,
                             wpDuration,
+                            wps || [],
+                            null,
                           )
                         }
                       />

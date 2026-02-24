@@ -69,6 +69,15 @@ src/
 │   │   ├── useHandAnimation.ts           # Physics hook
 │   │   ├── types.ts                      # TypeScript interfaces
 │   │   └── hands/LottieHand.tsx          # Professional Lottie animation
+│   ├── debug/                            # Shared debug component library (rule 27)
+│   │   ├── useDebugCoordinates.ts        # Hook: click → composition coords
+│   │   ├── DebugCrosshair.tsx            # Crosshair overlay (H+V lines)
+│   │   ├── DebugClickMarkers.tsx         # Numbered click markers + copy/clear
+│   │   ├── DebugSceneOverlay.tsx         # Frame/scene/time info panel
+│   │   ├── DebugPathVisualization.tsx    # SVG path lines between markers
+│   │   ├── DebugSceneTimeline.tsx        # Horizontal scene progress bar
+│   │   ├── types.ts                      # DebugMarker, DebugSceneInfo, DebugPathMarker
+│   │   └── index.ts                      # Barrel export
 │   └── DorianPhone/                      # Shared Dorian UI components
 │       ├── StatusBar.tsx, DynamicIsland.tsx, DorianNavHeader.tsx
 │       ├── AIBubble.tsx, ChatHeader.tsx, AnimatedText.tsx
@@ -178,6 +187,7 @@ Read these files when working on the relevant area:
 | FloatingHand, Lottie, hand gestures | `docs/floating-hand.md`              |
 | Screenshot capture, Playwright      | `docs/capture-workflow.md`           |
 | SceneDirector editor architecture   | `docs/scene-director.md`             |
-| Enforced coding rules (26 rules)    | `.claude/rules/remotion-patterns.md` |
+| Shared debug component library      | `docs/debug-tools.md`                |
+| Enforced coding rules (27 rules)    | `.claude/rules/remotion-patterns.md` |
 | Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`  |
 | Remotion framework docs             | https://www.remotion.dev/docs        |

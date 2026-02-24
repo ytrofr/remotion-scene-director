@@ -115,3 +115,9 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     each frame. Use `random('seed')` from Remotion for seeded randomness.
     ALWAYS use `staticFile()` for assets in `/public` — never construct paths
     manually.
+
+27. **Shared debug library**: Import debug components from `src/components/debug/`
+    (DebugCrosshair, DebugClickMarkers, DebugSceneOverlay, DebugPathVisualization,
+    DebugSceneTimeline) and the `useDebugCoordinates` hook. Never re-implement
+    coordinate conversion, crosshair lines, click-marker panels, or scene-info
+    overlays inline in composition files. See `docs/debug-tools.md` for the API.

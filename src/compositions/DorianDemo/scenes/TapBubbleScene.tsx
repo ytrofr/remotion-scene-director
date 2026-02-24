@@ -25,16 +25,16 @@ export const TapAIBubbleScene: React.FC = () => {
   const zoomStartFrame = 53; // Frame 278 = scene3Start(225) + 53
   const clickFrame = 73; // Frame 298 = scene3Start(225) + 73
 
-  // Zoom in effect - starts when hand reaches bubble, 3X ZOOM
+  // Gentle zoom to bottom of phone — full mockup stays visible, just emphasis on lower area
+  // Ends at (2.2, 0, -240) — scene 4 starts from this exact state
   const zoomProgress = spring({
     frame: frame - zoomStartFrame,
     fps,
     config: { damping: 15, mass: 1, stiffness: 80 },
   });
-  const zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 5.4]); // 3x zoom
-  // Center zoom on AI bubble at (818, 1546) - offsets: -(target - center) * 3
-  const zoomOffsetX = interpolate(zoomProgress, [0, 1], [0, -860]);
-  const zoomOffsetY = interpolate(zoomProgress, [0, 1], [0, -1730]);
+  const zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 2.75]);
+  const zoomOffsetX = 0; // No horizontal shift — phone stays centered
+  const zoomOffsetY = interpolate(zoomProgress, [0, 1], [0, -374]);
 
   // Hand path - approach bubble, then track it as zoom moves it
   const savedTap = getSavedPath('DorianDemo', '3-TapBubble');
@@ -43,13 +43,13 @@ export const TapAIBubbleScene: React.FC = () => {
     { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 }, // H2: Moving down
     { x: 818, y: 1546, frame: zoomStartFrame, gesture: 'pointer', scale: 1 }, // H3: At bubble, zoom starts
     {
-      x: 518,
-      y: 992,
+      x: 790,
+      y: 1420,
       frame: clickFrame,
       gesture: 'click',
       duration: 2,
-      scale: 2.2,
-    }, // H4: CLICK at zoomed position (scaled with 3x zoom)
+      scale: 1.2,
+    }, // H4: CLICK — slight shift from gentle zoom
   ];
 
   return (

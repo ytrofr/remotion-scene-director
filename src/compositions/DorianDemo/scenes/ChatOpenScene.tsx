@@ -2,7 +2,6 @@ import React from 'react';
 import {
   AbsoluteFill,
   useCurrentFrame,
-  interpolate,
   spring,
   useVideoConfig,
 } from 'remotion';
@@ -26,19 +25,13 @@ export const ChatOpenScene: React.FC = () => {
     config: { damping: 18, mass: 1, stiffness: 120 },
   });
 
-  // Zoom out from scene 3's zoomed-in state (5.4 @ -860, -1730) back to normal (1.8)
-  // Gentle spring — takes ~35 frames to settle for smooth cinematic feel
-  const zoomOutProgress = spring({
-    frame,
-    fps,
-    config: { damping: 22, mass: 1.5, stiffness: 40 },
-  });
-  const zoomScale = interpolate(zoomOutProgress, [0, 1], [5.4, 1.8]);
-  const zoomOffsetX = interpolate(zoomOutProgress, [0, 1], [-860, 0]);
-  const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-1730, 0]);
+  // Fixed zoom — matches scene 3 end, same across scenes 4/5/6
+  const zoomScale = 2.75;
+  const zoomOffsetX = 0;
+  const zoomOffsetY = -374;
 
-  // Chat height - 30% of phone screen (844 * 0.30 = ~250px)
-  const chatHeight = 260;
+  // Chat height - tall enough to cover the AI bubble
+  const chatHeight = 370;
 
   // Input focus state - active after hand taps
   const inputFocused = frame >= 48;
@@ -46,12 +39,12 @@ export const ChatOpenScene: React.FC = () => {
   // Hand path: move to input box after zoom settles, tap it, then exit
   const savedChatOpen = getSavedPath('DorianDemo', '4-ChatOpen');
   const handPath: HandPathPoint[] = savedChatOpen?.path ?? [
-    { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 }, // Match scene 3 end (big hand)
-    { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1.5 }, // Shrinking with zoom-out
-    { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 }, // Normal size, approaching input
-    { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
-    { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 }, // Linger briefly
-    { x: 480, y: 1550, frame: 90, gesture: 'pointer', scale: 1 }, // Hold position until scene end
+    { x: 790, y: 1420, frame: 0, gesture: 'pointer', scale: 1.2 }, // Match scene 3 end position
+    { x: 700, y: 1480, frame: 20, gesture: 'pointer', scale: 1 }, // Moving toward input
+    { x: 500, y: 1550, frame: 45, gesture: 'pointer', scale: 1 }, // Approaching input
+    { x: 500, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
+    { x: 500, y: 1550, frame: 60, gesture: 'pointer', scale: 1 }, // Linger briefly
+    { x: 500, y: 1550, frame: 90, gesture: 'pointer', scale: 1 }, // Hold position until scene end
   ];
 
   return (
@@ -97,11 +90,11 @@ export const ChatOpenScene: React.FC = () => {
           }}
         >
           <DorianPhoneStaticNew showAIBubble={true} scrollOffset={702}>
-            {/* Chat overlay sliding up - 30% of screen, covers the AI bubble */}
+            {/* Chat overlay sliding up - covers bottom of phone fully */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 60,
+                bottom: 0,
                 left: 0,
                 right: 0,
                 height: chatHeight,

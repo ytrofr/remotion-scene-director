@@ -3,7 +3,6 @@ import {
   AbsoluteFill,
   useCurrentFrame,
   interpolate,
-  spring,
   useVideoConfig,
 } from 'remotion';
 import { COLORS, TEXT_CONTENT } from '../constants';
@@ -32,20 +31,13 @@ export const UserTypingScene: React.FC = () => {
   const sendButtonPulse =
     frame > 105 ? 1 + Math.sin((frame - 105) * 0.3) * 0.08 : 1;
 
-  // Zoom into chat area - chat center is at ~(540, 1378) in composition space
-  // Zoom from 1.8 to 3.6 (2x) to center the chat panel on screen
-  const zoomInProgress = spring({
-    frame,
-    fps,
-    config: { damping: 18, mass: 1, stiffness: 80 },
-  });
-  const zoomScale = interpolate(zoomInProgress, [0, 1], [1.8, 2.76]);
-  // Offset to bring chat area closer to center
-  const zoomOffsetX = 0; // Chat is horizontally centered
-  const zoomOffsetY = interpolate(zoomInProgress, [0, 1], [0, -560]);
+  // Fixed zoom — same across scenes 4/5/6
+  const zoomScale = 2.75;
+  const zoomOffsetX = 0;
+  const zoomOffsetY = -374;
 
-  // Chat height - 30% of phone screen
-  const chatHeight = 260;
+  // Chat height - tall enough to cover the AI bubble
+  const chatHeight = 370;
 
   // Hand appears after typing finishes, moves to send button and clicks
   // Send button is at the right side of the input field
@@ -101,11 +93,11 @@ export const UserTypingScene: React.FC = () => {
           }}
         >
           <DorianPhoneStaticNew showAIBubble={false} scrollOffset={702}>
-            {/* Chat overlay - 30% height */}
+            {/* Chat overlay - covers bottom of phone fully */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 60,
+                bottom: 0,
                 left: 0,
                 right: 0,
                 height: chatHeight,

@@ -6,15 +6,10 @@
  * Playhead spans all rows. Row labels on the left.
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  useMemo,
-} from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDirector } from '../context';
-import type { AudioLayer, HandLayer } from '../layers';
+import { useAudioDrag, useHandDrag } from './useTimelineDrag';
+import { useHandLayers, useAudioRows } from './useTimelineData';
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2];
 const ROW_HEIGHT = 22;
@@ -37,26 +32,19 @@ export const Timeline: React.FC = () => {
   const [isScrubbing, setIsScrubbing] = useState(false);
   const wasPlayingRef = useRef(false);
 
-  // Audio bar drag state
-  const [audioDrag, setAudioDrag] = useState<{
-    layerId: string;
-    scene: string;
-    edge: 'left' | 'right' | 'move';
-    startX: number;
-    originalStart: number;
-    originalDuration: number;
-    preDragState: typeof state;
-  } | null>(null);
-
-  // Hand bar drag state (single-waypoint only)
-  const [handDrag, setHandDrag] = useState<{
-    scene: string;
-    edge: 'left' | 'right' | 'move';
-    startX: number;
-    originalFrame: number;
-    originalDuration: number;
-    preDragState: typeof state;
-  } | null>(null);
+  // Audio & hand bar drag hooks (extracted to useTimelineDrag.ts)
+  const { audioDrag, handleAudioEdgeDown } = useAudioDrag({
+    state,
+    dispatch,
+    tracksRef,
+    totalFrames,
+  });
+  const { handDrag, handleHandEdgeDown } = useHandDrag({
+    state,
+    dispatch,
+    tracksRef,
+    totalFrames,
+  });
 
   const playheadPct = (frame / totalFrames) * 100;
 
@@ -120,261 +108,11 @@ export const Timeline: React.FC = () => {
     };
   }, [isScrubbing, clientXToFrame, seekAndSelect, playerRef]);
 
-  // Audio bar edge/move drag
-  const handleAudioEdgeDown = useCallback(
-    (
-      e: React.MouseEvent,
-      layerId: string,
-      sceneName: string,
-      edge: 'left' | 'right' | 'move',
-      currentStart: number,
-      currentDuration: number,
-    ) => {
-      e.stopPropagation();
-      e.preventDefault();
-      setAudioDrag({
-        layerId,
-        scene: sceneName,
-        edge,
-        startX: e.clientX,
-        originalStart: currentStart,
-        originalDuration: currentDuration,
-        preDragState: state,
-      });
-    },
-    [state],
-  );
-
-  useEffect(() => {
-    if (!audioDrag) return;
-    const handleMove = (e: MouseEvent) => {
-      const el = tracksRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const pxPerFrame = rect.width / totalFrames;
-      const deltaPx = e.clientX - audioDrag.startX;
-      const deltaFrames = Math.round(deltaPx / pxPerFrame);
-      if (audioDrag.edge === 'move') {
-        const newStart = Math.max(0, audioDrag.originalStart + deltaFrames);
-        dispatch({
-          type: 'UPDATE_LAYER_DATA',
-          scene: audioDrag.scene,
-          layerId: audioDrag.layerId,
-          data: { startFrame: newStart },
-        });
-      } else if (audioDrag.edge === 'left') {
-        const newStart = Math.max(0, audioDrag.originalStart + deltaFrames);
-        const endFrame = audioDrag.originalStart + audioDrag.originalDuration;
-        const newDuration = Math.max(1, endFrame - newStart);
-        dispatch({
-          type: 'UPDATE_LAYER_DATA',
-          scene: audioDrag.scene,
-          layerId: audioDrag.layerId,
-          data: { startFrame: newStart, durationInFrames: newDuration },
-        });
-      } else {
-        const newDuration = Math.max(
-          1,
-          audioDrag.originalDuration + deltaFrames,
-        );
-        dispatch({
-          type: 'UPDATE_LAYER_DATA',
-          scene: audioDrag.scene,
-          layerId: audioDrag.layerId,
-          data: { durationInFrames: newDuration },
-        });
-      }
-    };
-    const handleUp = () => {
-      // Log a single activity entry with pre-drag snapshot for restore
-      const label =
-        audioDrag.edge === 'move'
-          ? 'Move'
-          : audioDrag.edge === 'left'
-            ? 'Trim start'
-            : 'Trim end';
-      dispatch({
-        type: 'LOG_ACTIVITY',
-        action: `${label} audio`,
-        scene: audioDrag.scene,
-        snapshot: audioDrag.preDragState,
-      });
-      setAudioDrag(null);
-    };
-    // Clear drag on window blur (e.g. Alt+Tab) to prevent stuck state
-    const handleBlur = () => setAudioDrag(null);
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
-    window.addEventListener('blur', handleBlur);
-    return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleUp);
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, [audioDrag, totalFrames, dispatch]);
-
-  // Hand bar edge/move drag (single-waypoint only)
-  const handleHandEdgeDown = useCallback(
-    (
-      e: React.MouseEvent,
-      sceneName: string,
-      edge: 'left' | 'right' | 'move',
-      currentFrame: number,
-      currentDuration: number,
-    ) => {
-      e.stopPropagation();
-      e.preventDefault();
-      setHandDrag({
-        scene: sceneName,
-        edge,
-        startX: e.clientX,
-        originalFrame: currentFrame,
-        originalDuration: currentDuration,
-        preDragState: state,
-      });
-    },
-    [state],
-  );
-
-  useEffect(() => {
-    if (!handDrag) return;
-    const handleMove = (e: MouseEvent) => {
-      const el = tracksRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const pxPerFrame = rect.width / totalFrames;
-      const deltaPx = e.clientX - handDrag.startX;
-      const deltaFrames = Math.round(deltaPx / pxPerFrame);
-      if (handDrag.edge === 'move') {
-        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { frame: newFrame },
-        });
-      } else if (handDrag.edge === 'left') {
-        const rightEdge = handDrag.originalFrame + handDrag.originalDuration;
-        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
-        const newDuration = Math.max(0, rightEdge - newFrame);
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { frame: newFrame, duration: newDuration },
-        });
-      } else {
-        const newDuration = Math.max(
-          0,
-          handDrag.originalDuration + deltaFrames,
-        );
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { duration: newDuration },
-        });
-      }
-    };
-    const handleUp = () => {
-      const label =
-        handDrag.edge === 'move'
-          ? 'Move'
-          : handDrag.edge === 'left'
-            ? 'Trim start'
-            : 'Trim end';
-      dispatch({
-        type: 'LOG_ACTIVITY',
-        action: `${label} hand`,
-        scene: handDrag.scene,
-        snapshot: handDrag.preDragState,
-      });
-      setHandDrag(null);
-    };
-    // Clear drag on window blur (e.g. Alt+Tab) to prevent stuck state
-    const handleBlur = () => setHandDrag(null);
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
-    window.addEventListener('blur', handleBlur);
-    return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleUp);
-      window.removeEventListener('blur', handleBlur);
-    };
-  }, [handDrag, totalFrames, dispatch]);
-
   const isPlaying = playerRef.current?.isPlaying() ?? false;
 
-  // Collect hand layers across all scenes
-  const handLayers = useMemo(() => {
-    const result: {
-      layer: HandLayer;
-      sceneStart: number;
-      sceneEnd: number;
-      sceneName: string;
-    }[] = [];
-    for (const [sceneName, layers] of Object.entries(state.layers)) {
-      const scene = scenes.find((s) => s.name === sceneName);
-      if (!scene) continue;
-      for (const l of layers) {
-        if (l.type === 'hand' && l.visible) {
-          result.push({
-            layer: l as HandLayer,
-            sceneStart: scene.start,
-            sceneEnd: scene.end,
-            sceneName,
-          });
-        }
-      }
-    }
-    return result;
-  }, [state.layers, scenes]);
-
-  // Collect audio layers across all scenes, assign sub-rows for overlaps
-  const audioRows = useMemo(() => {
-    const allAudio: {
-      layer: AudioLayer;
-      sceneStart: number;
-      sceneName: string;
-      globalStart: number;
-      globalEnd: number;
-    }[] = [];
-    for (const [sceneName, layers] of Object.entries(state.layers)) {
-      const scene = scenes.find((s) => s.name === sceneName);
-      if (!scene) continue;
-      for (const l of layers) {
-        if (l.type === 'audio' && l.visible) {
-          const a = l as AudioLayer;
-          const gs = scene.start + a.data.startFrame;
-          const ge = gs + (a.data.durationInFrames || 60);
-          allAudio.push({
-            layer: a,
-            sceneStart: scene.start,
-            sceneName,
-            globalStart: gs,
-            globalEnd: ge,
-          });
-        }
-      }
-    }
-    // Assign rows greedily: each audio bar goes in the first row where it doesn't overlap
-    const rows: (typeof allAudio)[] = [];
-    for (const entry of allAudio.sort(
-      (a, b) => a.globalStart - b.globalStart,
-    )) {
-      let placed = false;
-      for (const row of rows) {
-        const lastInRow = row[row.length - 1];
-        if (entry.globalStart >= lastInRow.globalEnd) {
-          row.push(entry);
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) rows.push([entry]);
-    }
-    return rows;
-  }, [state.layers, scenes]);
+  // Collect hand/audio layers across all scenes (extracted to useTimelineData.ts)
+  const handLayers = useHandLayers(state.layers, scenes);
+  const audioRows = useAudioRows(state.layers, scenes);
 
   const hasHand = handLayers.length > 0;
   const audioRowCount = Math.max(1, audioRows.length);

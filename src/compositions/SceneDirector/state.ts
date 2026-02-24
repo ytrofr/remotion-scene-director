@@ -1,342 +1,30 @@
 /**
  * SceneDirector State v3
  * Gesture-first state: activeTool + per-scene gesture type replace all manual config.
+ *
+ * Types/interfaces: ./state.types.ts
+ * Helper functions: ./state.helpers.ts
+ * Handler groups:   ./state.handlers.ts, ./state.layerHandlers.ts
  */
 
-import type {
-  HandPathPoint,
-  LottieAnimation,
-} from '../../components/FloatingHand/types';
-import { GESTURE_PRESETS, type GestureTool } from './gestures';
+import { GESTURE_PRESETS } from './gestures';
+import type { DirectorAction, DirectorState } from './state.types';
+import { syncHandLayer, describeAction, log } from './state.helpers';
 import {
-  createHandLayer,
-  createAudioLayer,
-  getCodedAudio,
-  AUDIO_FILES,
-  type Layer,
-  type LayerBase,
-  type LayerData,
-} from './layers';
-import type { CodedPath } from './codedPaths';
+  handleWaypointAction,
+  handleLayerAction,
+  handleSceneManagementAction,
+} from './state.handlers';
 
-// Scene info (unified format across compositions)
-export interface SceneInfo {
-  name: string;
-  start: number;
-  end: number;
-  part?: string;
-  hand?: string;
-}
-
-// Composition entry
-export interface CompositionEntry {
-  id: string;
-  label: string;
-  video: { width: number; height: number; fps: number; frames: number };
-  scenes: SceneInfo[];
-  /** Global Y offset applied by the composition (e.g. translateY(120px) in Combined) */
-  globalOffsetY?: number;
-}
-
-// Activity log entry
-export interface ActivityEntry {
-  time: number; // Date.now()
-  action: string; // human-readable description
-  scene?: string; // affected scene
-  snapshot?: DirectorState; // full state snapshot for restore
-}
-
-// Saved snapshot per scene (for Revert)
-export interface SceneSnapshot {
-  waypoints: HandPathPoint[];
-  gesture: GestureTool;
-  animation: LottieAnimation;
-  dark: boolean;
-}
-
-// Version history entry
-export interface VersionEntry {
-  version: number;
-  timestamp: number;
-  snapshot: SceneSnapshot;
-}
-
-// Main state
-export interface DirectorState {
-  compositionId: string;
-  selectedScene: string | null;
-  activeTool: GestureTool | 'select'; // replaces drawMode
-  sceneGesture: Record<string, GestureTool>; // per-scene gesture type
-  waypoints: Record<string, HandPathPoint[]>; // scene name -> waypoints
-  selectedWaypoint: number | null; // index in current scene
-  draggingIndex: number | null; // waypoint index being dragged (for hand snap)
-  sceneAnimation: Record<string, LottieAnimation>; // per-scene animation override
-  sceneDark: Record<string, boolean>; // per-scene dark mode override
-  preview: boolean;
-  showTrail: boolean;
-  exportOpen: boolean;
-  importOpen: boolean;
-  // Layer system
-  layers: Record<string, Layer[]>; // scene name -> ordered layers
-  selectedLayerId: string | null;
-  clearedSceneLayers: Record<string, boolean>; // scenes where user explicitly removed layers
-  // Activity log
-  activityLog: ActivityEntry[];
-  // Saved snapshots for Revert (per scene, set on first load + after Save)
-  savedSnapshots: Record<string, SceneSnapshot>;
-  // Sidebar tab: editor or history
-  sidebarTab: 'editor' | 'history';
-  // Version history (per scene, appended on each Save)
-  versionHistory: Record<string, VersionEntry[]>;
-}
-
-// Actions
-export type DirectorAction =
-  | { type: 'SET_COMPOSITION'; id: string }
-  | { type: 'SELECT_SCENE'; name: string }
-  | { type: 'SET_TOOL'; tool: GestureTool | 'select' }
-  | { type: 'SET_SCENE_GESTURE'; scene: string; gesture: GestureTool }
-  | { type: 'ADD_WAYPOINT'; scene: string; point: HandPathPoint }
-  | {
-      type: 'UPDATE_WAYPOINT';
-      scene: string;
-      index: number;
-      point: Partial<HandPathPoint>;
-    }
-  | { type: 'DELETE_WAYPOINT'; scene: string; index: number }
-  | { type: 'SET_WAYPOINTS'; scene: string; waypoints: HandPathPoint[] }
-  | { type: 'SELECT_WAYPOINT'; index: number | null }
-  | { type: 'TOGGLE_PREVIEW' }
-  | { type: 'TOGGLE_TRAIL' }
-  | { type: 'TOGGLE_EXPORT' }
-  | { type: 'TOGGLE_IMPORT' }
-  | {
-      type: 'IMPORT_PATHS';
-      scene: string;
-      waypoints: HandPathPoint[];
-      gesture: GestureTool;
-    }
-  | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
-  | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
-  | { type: 'REVERT_SCENE'; scene: string }
-  | { type: 'MARK_SAVED'; scene: string }
-  | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
-  | { type: 'RESTORE_VERSION'; scene: string; snapshot: SceneSnapshot }
-  | { type: 'START_DRAG'; index: number }
-  | { type: 'END_DRAG' }
-  | { type: 'UNDO' }
-  | { type: 'REDO' }
-  | {
-      type: 'ADOPT_CODED_PATH';
-      scene: string;
-      waypoints: HandPathPoint[];
-      gesture?: GestureTool;
-    }
-  // Layer actions
-  | { type: 'ADD_LAYER'; scene: string; layer: Layer }
-  | { type: 'REMOVE_LAYER'; scene: string; layerId: string }
-  | {
-      type: 'UPDATE_LAYER';
-      scene: string;
-      layerId: string;
-      changes: Partial<Layer>;
-    }
-  | {
-      type: 'UPDATE_LAYER_DATA';
-      scene: string;
-      layerId: string;
-      data: Partial<LayerData>;
-    }
-  | { type: 'SELECT_LAYER'; layerId: string | null }
-  | { type: 'REORDER_LAYERS'; scene: string; layerIds: string[] }
-  | { type: 'TOGGLE_LAYER_VISIBILITY'; scene: string; layerId: string }
-  | { type: 'TOGGLE_LAYER_LOCK'; scene: string; layerId: string }
-  // Activity log with snapshot
-  | {
-      type: 'LOG_ACTIVITY';
-      action: string;
-      scene?: string;
-      snapshot: DirectorState;
-    }
-  | { type: 'RESTORE_ACTIVITY'; snapshot: DirectorState }
-  // Add independent hand gesture (creates new hand layer)
-  | {
-      type: 'ADD_HAND_GESTURE';
-      scene: string;
-      points: HandPathPoint[];
-      gesture: GestureTool;
-    }
-  // Layer auto-migration
-  | {
-      type: 'ENSURE_SCENE_LAYERS';
-      scene: string;
-      compositionId: string;
-      codedPath: CodedPath | null;
-    };
-
-export const initialState: DirectorState = {
-  compositionId: 'MobileChatDemoCombined',
-  selectedScene: null,
-  activeTool: 'select',
-  sceneGesture: {},
-  waypoints: {},
-  selectedWaypoint: null,
-  draggingIndex: null,
-  sceneAnimation: {},
-  sceneDark: {},
-  preview: false,
-  showTrail: false,
-  exportOpen: false,
-  importOpen: false,
-  layers: {},
-  selectedLayerId: null,
-  clearedSceneLayers: {},
-  activityLog: [],
-  savedSnapshots: {},
-  sidebarTab: 'editor',
-  versionHistory: {},
-};
-
-// Type-safe layer update helper — preserves discriminated union type through spread
-function updateLayer(layer: Layer, changes: Partial<LayerBase>): Layer {
-  return { ...layer, ...changes, id: layer.id, type: layer.type } as Layer;
-}
-
-/**
- * Sync hand layer in state.layers after any waypoint mutation.
- * If hand layer exists, update its waypoints+gesture data.
- * If no hand layer exists and waypoints are non-empty, create one.
- * Also clears clearedSceneLayers flag since user is actively editing.
- */
-function syncHandLayer(st: DirectorState, scene: string): DirectorState {
-  const wps = st.waypoints[scene] || [];
-  const sceneLayers = st.layers[scene] || [];
-  const existingIdx = sceneLayers.findIndex((l) => l.type === 'hand');
-  const gesture: GestureTool = st.sceneGesture[scene] || 'click';
-
-  if (existingIdx >= 0) {
-    // Update existing hand layer's waypoints + gesture
-    const updated = sceneLayers.map((l, i) =>
-      i === existingIdx
-        ? ({ ...l, data: { ...l.data, waypoints: wps, gesture } } as Layer)
-        : l,
-    );
-    return {
-      ...st,
-      layers: { ...st.layers, [scene]: updated },
-    };
-  }
-
-  // No hand layer yet — create one if waypoints exist
-  if (wps.length === 0) return st;
-
-  const order = sceneLayers.length;
-  const handLayer = createHandLayer(scene, wps, gesture, order);
-  const cleared = { ...st.clearedSceneLayers };
-  delete cleared[scene];
-  return {
-    ...st,
-    layers: { ...st.layers, [scene]: [...sceneLayers, handLayer] },
-    clearedSceneLayers: cleared,
-  };
-}
-
-const MAX_LOG = 50;
-function log(
-  state: DirectorState,
-  action: string,
-  scene?: string,
-): DirectorState {
-  const entry: ActivityEntry = {
-    time: Date.now(),
-    action,
-    scene,
-    snapshot: { ...state },
-  };
-  return {
-    ...state,
-    activityLog: [entry, ...state.activityLog].slice(0, MAX_LOG),
-  };
-}
-
-function describeAction(
-  action: DirectorAction,
-  state: DirectorState,
-): { msg: string; scene?: string } | null {
-  switch (action.type) {
-    case 'SET_COMPOSITION':
-      return { msg: `Switch composition → ${action.id}` };
-    case 'SET_SCENE_GESTURE':
-      return { msg: `Set gesture → ${action.gesture}`, scene: action.scene };
-    case 'ADD_WAYPOINT':
-      return {
-        msg: `Add waypoint #${(state.waypoints[action.scene]?.length ?? 0) + 1}`,
-        scene: action.scene,
-      };
-    case 'ADD_HAND_GESTURE':
-      return {
-        msg: `Add ${action.gesture} gesture`,
-        scene: action.scene,
-      };
-    case 'UPDATE_WAYPOINT':
-      return { msg: `Move waypoint #${action.index + 1}`, scene: action.scene };
-    case 'DELETE_WAYPOINT':
-      return {
-        msg: `Delete waypoint #${action.index + 1}`,
-        scene: action.scene,
-      };
-    case 'SET_WAYPOINTS':
-      return {
-        msg: `Set ${action.waypoints.length} waypoints`,
-        scene: action.scene,
-      };
-    case 'SET_SCENE_ANIMATION':
-      return {
-        msg: `Set animation → ${action.animation}`,
-        scene: action.scene,
-      };
-    case 'SET_SCENE_DARK':
-      return {
-        msg: `Set hand ${action.dark ? 'light' : 'dark'}`,
-        scene: action.scene,
-      };
-    case 'REVERT_SCENE':
-      return { msg: `Revert scene`, scene: action.scene };
-    case 'MARK_SAVED':
-      return { msg: `Saved`, scene: action.scene };
-    case 'RESTORE_VERSION':
-      return { msg: `Restore version`, scene: action.scene };
-    case 'IMPORT_PATHS':
-      return {
-        msg: `Import ${action.waypoints.length} waypoints`,
-        scene: action.scene,
-      };
-    case 'ADD_LAYER':
-      return {
-        msg: `Add ${action.layer.type} layer "${action.layer.name}"`,
-        scene: action.scene,
-      };
-    case 'REMOVE_LAYER': {
-      const layer = (state.layers[action.scene] || []).find(
-        (l) => l.id === action.layerId,
-      );
-      return {
-        msg: `Remove layer "${layer?.name ?? action.layerId}"`,
-        scene: action.scene,
-      };
-    }
-    case 'UPDATE_LAYER_DATA':
-      return null; // Suppressed — logged once on drag end, not per-frame
-    case 'TOGGLE_LAYER_VISIBILITY': {
-      const layer = (state.layers[action.scene] || []).find(
-        (l) => l.id === action.layerId,
-      );
-      return { msg: `Toggle "${layer?.name}" visibility`, scene: action.scene };
-    }
-    default:
-      return null; // Skip noisy actions (SELECT_SCENE, SELECT_WAYPOINT, drag, etc.)
-  }
-}
+// Re-export all types so downstream imports from './state' keep working
+export * from './state.types';
+export {
+  updateLayer,
+  syncHandLayer,
+  log,
+  describeAction,
+  MAX_LOG,
+} from './state.helpers';
 
 export function directorReducer(
   state: DirectorState,
@@ -349,6 +37,7 @@ export function directorReducer(
   }
 
   switch (action.type) {
+    // ── Simple UI / navigation actions (inline — one-liners) ──────────────
     case 'SET_COMPOSITION':
       return {
         ...state,
@@ -375,139 +64,6 @@ export function directorReducer(
       };
       return syncHandLayer(withGesture, action.scene);
     }
-    case 'ADD_WAYPOINT': {
-      const prev = state.waypoints[action.scene] || [];
-      const withWp = {
-        ...state,
-        waypoints: {
-          ...state.waypoints,
-          [action.scene]: [...prev, action.point],
-        },
-        selectedWaypoint: prev.length,
-      };
-      return syncHandLayer(withWp, action.scene);
-    }
-    case 'ADD_HAND_GESTURE': {
-      // Create a new independent hand layer with its own waypoints
-      const sceneLayers = state.layers[action.scene] || [];
-      const order = sceneLayers.length;
-      const newLayer = createHandLayer(
-        action.scene,
-        action.points,
-        action.gesture,
-        order,
-      );
-      const cleared = { ...state.clearedSceneLayers };
-      delete cleared[action.scene];
-      return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [action.scene]: [...sceneLayers, newLayer],
-        },
-        selectedLayerId: newLayer.id,
-        selectedWaypoint: 0,
-        clearedSceneLayers: cleared,
-        // Don't override scene-level gesture/animation — secondary layers carry their own
-      };
-    }
-    case 'UPDATE_WAYPOINT': {
-      // Check if selected layer is a secondary hand layer (not synced via state.waypoints)
-      if (state.selectedLayerId) {
-        const sceneLayers = state.layers[action.scene] || [];
-        const selIdx = sceneLayers.findIndex(
-          (l) => l.id === state.selectedLayerId,
-        );
-        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
-        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
-        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
-          // Secondary hand layer: modify layer.data.waypoints directly
-          const layerWps = [
-            ...((selLayer.data as { waypoints?: HandPathPoint[] }).waypoints ||
-              []),
-          ];
-          if (layerWps[action.index]) {
-            layerWps[action.index] = {
-              ...layerWps[action.index],
-              ...action.point,
-            };
-          }
-          const updated = sceneLayers.map((l, i) =>
-            i === selIdx
-              ? ({ ...l, data: { ...l.data, waypoints: layerWps } } as Layer)
-              : l,
-          );
-          return {
-            ...state,
-            layers: { ...state.layers, [action.scene]: updated },
-          };
-        }
-      }
-      const wps = [...(state.waypoints[action.scene] || [])];
-      if (wps[action.index]) {
-        wps[action.index] = { ...wps[action.index], ...action.point };
-      }
-      const withWp = {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: wps },
-      };
-      return syncHandLayer(withWp, action.scene);
-    }
-    case 'DELETE_WAYPOINT': {
-      // Check if selected layer is a secondary hand layer
-      if (state.selectedLayerId) {
-        const sceneLayers = state.layers[action.scene] || [];
-        const selIdx = sceneLayers.findIndex(
-          (l) => l.id === state.selectedLayerId,
-        );
-        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
-        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
-        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
-          const layerWps = [
-            ...((selLayer.data as { waypoints?: HandPathPoint[] }).waypoints ||
-              []),
-          ];
-          layerWps.splice(action.index, 1);
-          if (layerWps.length === 0) {
-            // No waypoints left: remove the layer entirely
-            return {
-              ...state,
-              layers: {
-                ...state.layers,
-                [action.scene]: sceneLayers.filter((_, i) => i !== selIdx),
-              },
-              selectedLayerId: null,
-              selectedWaypoint: null,
-            };
-          }
-          const updated = sceneLayers.map((l, i) =>
-            i === selIdx
-              ? ({ ...l, data: { ...l.data, waypoints: layerWps } } as Layer)
-              : l,
-          );
-          return {
-            ...state,
-            layers: { ...state.layers, [action.scene]: updated },
-            selectedWaypoint: null,
-          };
-        }
-      }
-      const wps = [...(state.waypoints[action.scene] || [])];
-      wps.splice(action.index, 1);
-      const withWp = {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: wps },
-        selectedWaypoint: null,
-      };
-      return syncHandLayer(withWp, action.scene);
-    }
-    case 'SET_WAYPOINTS': {
-      const withWp = {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: action.waypoints },
-      };
-      return syncHandLayer(withWp, action.scene);
-    }
     case 'SELECT_WAYPOINT':
       return { ...state, selectedWaypoint: action.index };
     case 'TOGGLE_PREVIEW':
@@ -518,15 +74,6 @@ export function directorReducer(
       return { ...state, exportOpen: !state.exportOpen, importOpen: false };
     case 'TOGGLE_IMPORT':
       return { ...state, importOpen: !state.importOpen };
-    case 'IMPORT_PATHS': {
-      const withWp = {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: action.waypoints },
-        sceneGesture: { ...state.sceneGesture, [action.scene]: action.gesture },
-        importOpen: false,
-      };
-      return syncHandLayer(withWp, action.scene);
-    }
     case 'START_DRAG':
       return {
         ...state,
@@ -548,335 +95,39 @@ export function directorReducer(
         ...state,
         sceneDark: { ...state.sceneDark, [action.scene]: action.dark },
       };
-    case 'REVERT_SCENE': {
-      const snap = state.savedSnapshots[action.scene];
-      if (!snap) return state; // No saved state to revert to
-      return {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: [...snap.waypoints] },
-        sceneGesture: { ...state.sceneGesture, [action.scene]: snap.gesture },
-        sceneAnimation: {
-          ...state.sceneAnimation,
-          [action.scene]: snap.animation,
-        },
-        sceneDark: { ...state.sceneDark, [action.scene]: snap.dark },
-        selectedWaypoint: null,
-      };
-    }
-    case 'MARK_SAVED': {
-      const scene = action.scene;
-      const snap: SceneSnapshot = {
-        waypoints: [...(state.waypoints[scene] || [])],
-        gesture: state.sceneGesture[scene] || 'click',
-        animation:
-          state.sceneAnimation[scene] ||
-          GESTURE_PRESETS[state.sceneGesture[scene] || 'click'].animation,
-        dark: state.sceneDark[scene] ?? false,
-      };
-      // Push version entry
-      const sceneVersions = [...(state.versionHistory[scene] || [])];
-      const nextVersion =
-        sceneVersions.length > 0
-          ? sceneVersions[sceneVersions.length - 1].version + 1
-          : 1;
-      sceneVersions.push({
-        version: nextVersion,
-        timestamp: Date.now(),
-        snapshot: { ...snap },
-      });
-      return {
-        ...state,
-        savedSnapshots: { ...state.savedSnapshots, [scene]: snap },
-        versionHistory: { ...state.versionHistory, [scene]: sceneVersions },
-      };
-    }
     case 'SET_SIDEBAR_TAB':
       return { ...state, sidebarTab: action.tab };
-    case 'RESTORE_VERSION': {
-      const s = action.snapshot;
-      return {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: [...s.waypoints] },
-        sceneGesture: { ...state.sceneGesture, [action.scene]: s.gesture },
-        sceneAnimation: {
-          ...state.sceneAnimation,
-          [action.scene]: s.animation,
-        },
-        sceneDark: { ...state.sceneDark, [action.scene]: s.dark },
-        selectedWaypoint: null,
-      };
-    }
-    case 'ADOPT_CODED_PATH': {
-      const updated: DirectorState = {
-        ...state,
-        waypoints: { ...state.waypoints, [action.scene]: action.waypoints },
-      };
-      if (action.gesture) {
-        updated.sceneGesture = {
-          ...state.sceneGesture,
-          [action.scene]: action.gesture,
-        };
-      }
-      return syncHandLayer(updated, action.scene);
-    }
-    // Layer actions
-    case 'ADD_LAYER': {
-      const sceneLayers = [...(state.layers[action.scene] || []), action.layer];
-      const cleared = { ...state.clearedSceneLayers };
-      delete cleared[action.scene];
-      return {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-        selectedLayerId: action.layer.id,
-        clearedSceneLayers: cleared,
-      };
-    }
-    case 'REMOVE_LAYER': {
-      const removedLayer = (state.layers[action.scene] || []).find(
-        (l) => l.id === action.layerId,
-      );
-      const sceneLayers = (state.layers[action.scene] || []).filter(
-        (l) => l.id !== action.layerId,
-      );
-      const isSelectedLayer = state.selectedLayerId === action.layerId;
-      const newState: DirectorState = {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-        selectedLayerId: isSelectedLayer ? null : state.selectedLayerId,
-        // Clear interaction state when removing the active layer
-        selectedWaypoint: isSelectedLayer ? null : state.selectedWaypoint,
-        draggingIndex: isSelectedLayer ? null : state.draggingIndex,
-      };
-      // When removing the PRIMARY hand layer, also clear flat waypoints so the hand disappears
-      // Secondary hand layers only store waypoints in layer.data (removed with the layer itself)
-      if (removedLayer?.type === 'hand') {
-        const allHandLayers = (state.layers[action.scene] || []).filter(
-          (l) => l.type === 'hand',
-        );
-        const isPrimary =
-          allHandLayers.length > 0 && allHandLayers[0].id === action.layerId;
-        if (isPrimary) {
-          newState.waypoints = { ...state.waypoints, [action.scene]: [] };
-        }
-      }
-      // Mark scene as cleared so ENSURE_SCENE_LAYERS won't recreate on reload
-      if (sceneLayers.length === 0) {
-        newState.clearedSceneLayers = {
-          ...state.clearedSceneLayers,
-          [action.scene]: true,
-        };
-      }
-      return newState;
-    }
-    case 'UPDATE_LAYER': {
-      const sceneLayers = (state.layers[action.scene] || []).map((l) =>
-        l.id === action.layerId ? updateLayer(l, action.changes) : l,
-      );
-      return {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-      };
-    }
-    case 'UPDATE_LAYER_DATA': {
-      const sceneLayers = (state.layers[action.scene] || []).map((l) =>
-        l.id === action.layerId
-          ? ({ ...l, data: { ...l.data, ...action.data } } as Layer)
-          : l,
-      );
-      return {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-      };
-    }
-    case 'SELECT_LAYER': {
-      // Clamp selectedWaypoint to the new layer's waypoint count to prevent out-of-bounds
-      let clampedWaypoint = state.selectedWaypoint;
-      if (action.layerId && state.selectedScene) {
-        const layers = state.layers[state.selectedScene] || [];
-        const layer = layers.find((l) => l.id === action.layerId);
-        if (layer?.type === 'hand') {
-          const wps =
-            (layer.data as { waypoints?: HandPathPoint[] }).waypoints || [];
-          if (clampedWaypoint !== null && clampedWaypoint >= wps.length) {
-            clampedWaypoint = wps.length > 0 ? wps.length - 1 : null;
-          }
-        }
-      }
-      return {
-        ...state,
-        selectedLayerId: action.layerId,
-        selectedWaypoint: clampedWaypoint,
-      };
-    }
-    case 'REORDER_LAYERS': {
-      const existing = state.layers[action.scene] || [];
-      const ordered = action.layerIds
-        .map((id) => existing.find((l) => l.id === id))
-        .filter((l): l is Layer => !!l);
-      return { ...state, layers: { ...state.layers, [action.scene]: ordered } };
-    }
-    case 'TOGGLE_LAYER_VISIBILITY': {
-      const sceneLayers = (state.layers[action.scene] || []).map((l) =>
-        l.id === action.layerId ? updateLayer(l, { visible: !l.visible }) : l,
-      );
-      return {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-      };
-    }
-    case 'TOGGLE_LAYER_LOCK': {
-      const sceneLayers = (state.layers[action.scene] || []).map((l) =>
-        l.id === action.layerId ? updateLayer(l, { locked: !l.locked }) : l,
-      );
-      return {
-        ...state,
-        layers: { ...state.layers, [action.scene]: sceneLayers },
-      };
-    }
-    case 'LOG_ACTIVITY': {
-      const entry: ActivityEntry = {
-        time: Date.now(),
-        action: action.action,
-        scene: action.scene,
-        snapshot: action.snapshot,
-      };
-      return {
-        ...state,
-        activityLog: [entry, ...state.activityLog].slice(0, MAX_LOG),
-      };
-    }
-    case 'RESTORE_ACTIVITY': {
-      // Restore full state but keep activityLog and versionHistory
-      return {
-        ...action.snapshot,
-        activityLog: state.activityLog,
-        versionHistory: state.versionHistory,
-        savedSnapshots: state.savedSnapshots,
-        sidebarTab: state.sidebarTab,
-      };
-    }
-    // Layer auto-migration: idempotently create hand + audio layers from existing data
-    case 'ENSURE_SCENE_LAYERS': {
-      // User explicitly cleared all layers for this scene — respect deletion
-      if (state.clearedSceneLayers[action.scene]) return state;
 
-      const existing = state.layers[action.scene] || [];
-      const hasHand = existing.some((l) => l.type === 'hand');
-      const hasAudio = existing.some((l) => l.type === 'audio');
+    // ── Waypoint actions (delegated) ──────────────────────────────────────
+    case 'ADD_WAYPOINT':
+    case 'ADD_HAND_GESTURE':
+    case 'UPDATE_WAYPOINT':
+    case 'DELETE_WAYPOINT':
+    case 'SET_WAYPOINTS':
+    case 'ADOPT_CODED_PATH':
+    case 'IMPORT_PATHS':
+      return handleWaypointAction(state, action);
 
-      const newLayers: Layer[] = [];
-      let order = existing.length;
+    // ── Layer actions (delegated) ─────────────────────────────────────────
+    case 'ADD_LAYER':
+    case 'REMOVE_LAYER':
+    case 'UPDATE_LAYER':
+    case 'UPDATE_LAYER_DATA':
+    case 'SELECT_LAYER':
+    case 'REORDER_LAYERS':
+    case 'TOGGLE_LAYER_VISIBILITY':
+    case 'TOGGLE_LAYER_LOCK':
+    case 'ENSURE_SCENE_LAYERS':
+      return handleLayerAction(state, action);
 
-      // ── Hand layer (skip if one already exists) ──
-      // undefined = never loaded (use coded path), [] = user cleared (respect deletion).
-      const waypoints = state.waypoints[action.scene];
-      const userCleared = waypoints !== undefined && waypoints.length === 0;
+    // ── Scene management actions (delegated) ──────────────────────────────
+    case 'REVERT_SCENE':
+    case 'MARK_SAVED':
+    case 'RESTORE_VERSION':
+    case 'LOG_ACTIVITY':
+    case 'RESTORE_ACTIVITY':
+      return handleSceneManagementAction(state, action);
 
-      if (!hasHand && !userCleared) {
-        const coded = action.codedPath;
-        const effectiveWaypoints =
-          waypoints && waypoints.length > 0 ? waypoints : (coded?.path ?? []);
-        if (effectiveWaypoints.length > 0) {
-          const gesture: GestureTool =
-            state.sceneGesture[action.scene] ??
-            (coded?.gesture as GestureTool) ??
-            'click';
-          newLayers.push(
-            createHandLayer(action.scene, effectiveWaypoints, gesture, order++),
-          );
-        }
-      }
-
-      // ── Audio layers from coded audio (skip if audio layers already exist) ──
-      if (!hasAudio) {
-        const codedAudio = getCodedAudio(action.compositionId, action.scene);
-        for (const entry of codedAudio) {
-          const audioLayer = createAudioLayer(action.scene, order++);
-          const label =
-            AUDIO_FILES.find((f) => f.id === entry.file)?.label ?? 'Audio';
-          audioLayer.data = {
-            file: entry.file,
-            startFrame: entry.startFrame,
-            durationInFrames: entry.durationInFrames,
-            volume: entry.volume,
-          };
-          audioLayer.name = `Audio - ${label}`;
-          newLayers.push(audioLayer);
-        }
-      }
-
-      if (newLayers.length === 0) return state;
-
-      const layers = [...existing, ...newLayers];
-      const newState: DirectorState = {
-        ...state,
-        layers: { ...state.layers, [action.scene]: layers },
-        selectedLayerId: newLayers[0].id,
-      };
-      // Also adopt waypoints into flat state if they came from coded path
-      const coded = action.codedPath;
-      if ((!waypoints || waypoints.length === 0) && coded?.path?.length) {
-        newState.waypoints = { ...state.waypoints, [action.scene]: coded.path };
-      }
-      if (!state.sceneGesture[action.scene] && coded?.gesture) {
-        newState.sceneGesture = {
-          ...state.sceneGesture,
-          [action.scene]: coded.gesture as GestureTool,
-        };
-      }
-      // Snapshot initial state for Revert (only if no saved snapshot exists yet)
-      if (!state.savedSnapshots[action.scene]) {
-        const snapGesture: GestureTool =
-          newState.sceneGesture[action.scene] ??
-          (coded?.gesture as GestureTool) ??
-          'click';
-        const snapAnim =
-          newState.sceneAnimation?.[action.scene] ??
-          state.sceneAnimation[action.scene] ??
-          GESTURE_PRESETS[snapGesture].animation;
-        const snapDark =
-          newState.sceneDark?.[action.scene] ??
-          state.sceneDark[action.scene] ??
-          coded?.dark ??
-          GESTURE_PRESETS[snapGesture].dark;
-        newState.savedSnapshots = {
-          ...(newState.savedSnapshots || state.savedSnapshots),
-          [action.scene]: {
-            waypoints: [
-              ...(newState.waypoints[action.scene] ||
-                state.waypoints[action.scene] ||
-                []),
-            ],
-            gesture: snapGesture,
-            animation: snapAnim,
-            dark: snapDark,
-          },
-        };
-      }
-      // Persist computed dark/animation fallbacks so they survive scene switches
-      if (state.sceneDark[action.scene] === undefined) {
-        const gesture2: GestureTool =
-          newState.sceneGesture[action.scene] ??
-          (coded?.gesture as GestureTool) ??
-          'click';
-        const darkValue = coded?.dark ?? GESTURE_PRESETS[gesture2].dark;
-        newState.sceneDark = {
-          ...(newState.sceneDark || state.sceneDark),
-          [action.scene]: darkValue,
-        };
-      }
-      if (state.sceneAnimation[action.scene] === undefined) {
-        const gesture3: GestureTool =
-          newState.sceneGesture[action.scene] ??
-          (coded?.gesture as GestureTool) ??
-          'click';
-        newState.sceneAnimation = {
-          ...(newState.sceneAnimation || state.sceneAnimation),
-          [action.scene]: GESTURE_PRESETS[gesture3].animation,
-        };
-      }
-      return newState;
-    }
     default:
       return state;
   }

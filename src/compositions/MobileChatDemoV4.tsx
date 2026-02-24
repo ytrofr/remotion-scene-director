@@ -24,15 +24,54 @@ import {
 import { AudioLayer } from '../audio/AudioLayer';
 
 // Constants
-import { COLORS, TRANSITIONS, TIMINGS, TOTAL_FRAMES } from './MobileChatDemoV4/constants';
+import {
+  COLORS,
+  TRANSITIONS,
+  TIMINGS,
+  TOTAL_FRAMES,
+} from './MobileChatDemoV4/constants';
+
+// Shared debug components
+import type { DebugSceneInfo } from '../components/debug';
+import {
+  useDebugCoordinates,
+  DebugCrosshair,
+  DebugClickMarkers,
+  DebugSceneOverlay,
+  DebugSceneTimeline,
+} from '../components/debug';
 
 // Scene info for debug overlay (accounting for 15-frame fade transition after intro)
-const SCENE_INFO = [
+const SCENE_INFO: DebugSceneInfo[] = [
   { name: '1-Intro', start: 0, end: 35, hand: 'none', gesture: 'none' },
-  { name: '2-ChatWithResponse', start: 20, end: 65, hand: 'none', gesture: 'none' },
-  { name: '3-Typing', start: 65, end: 150, hand: 'hand-click', gesture: 'click @ frame 5' },
-  { name: '4-Send', start: 150, end: 180, hand: 'hand-click', gesture: 'click @ frame 13' },
-  { name: '5-UserMessage', start: 180, end: 210, hand: 'none', gesture: 'none' },
+  {
+    name: '2-ChatWithResponse',
+    start: 20,
+    end: 65,
+    hand: 'none',
+    gesture: 'none',
+  },
+  {
+    name: '3-Typing',
+    start: 65,
+    end: 150,
+    hand: 'hand-click',
+    gesture: 'click @ frame 5',
+  },
+  {
+    name: '4-Send',
+    start: 150,
+    end: 180,
+    hand: 'hand-click',
+    gesture: 'click @ frame 13',
+  },
+  {
+    name: '5-UserMessage',
+    start: 180,
+    end: 210,
+    hand: 'none',
+    gesture: 'none',
+  },
   { name: '6-Thinking', start: 210, end: 255, hand: 'none', gesture: 'none' },
   { name: '7-Response', start: 255, end: 315, hand: 'none', gesture: 'none' },
   { name: '8-Outro', start: 300, end: 335, hand: 'none', gesture: 'none' },
@@ -61,7 +100,13 @@ export const MobileChatDemoV4: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.background }}>
       {/* Global vertical offset - shift everything down 120px */}
-      <div style={{ transform: 'translateY(120px)', width: '100%', height: '100%' }}>
+      <div
+        style={{
+          transform: 'translateY(120px)',
+          width: '100%',
+          height: '100%',
+        }}
+      >
         <TransitionSeries>
           {/* Scene 1: Intro - Phone slides in */}
           <TransitionSeries.Sequence
@@ -165,258 +210,72 @@ export default MobileChatDemoV4;
 export const MobileChatDemoV4DebugInteractive: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
-  const [markers, setMarkers] = React.useState<Array<{x: number, y: number, frame: number, label: string}>>([]);
-  const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+  const { mousePos, handleMouseMove, handleClick, markers, clearMarkers } =
+    useDebugCoordinates(1080, 1920);
 
-  // Find current scene
-  const currentScene = SCENE_INFO.find(s => frame >= s.start && frame < s.end) || SCENE_INFO[0];
-  const frameInScene = frame - currentScene.start;
-
-  // Time formatting
-  const seconds = Math.floor(frame / fps);
-  const frames = frame % fps;
-  const timeStr = `${seconds}:${frames.toString().padStart(2, '0')}`;
-
-  const handleClick = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const scaleX = 1080 / rect.width;
-    const scaleY = 1920 / rect.height;
-    const x = Math.round((e.clientX - rect.left) * scaleX);
-    const y = Math.round((e.clientY - rect.top) * scaleY);
-    const label = `M${markers.length + 1}`;
-    setMarkers([...markers, { x, y, frame, label }]);
-    console.log(`MARKER ${label}: (${x}, ${y}) @ frame ${frame} [${timeStr}] - ${currentScene.name}`);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const scaleX = 1080 / rect.width;
-    const scaleY = 1920 / rect.height;
-    setMousePos({
-      x: Math.round((e.clientX - rect.left) * scaleX),
-      y: Math.round((e.clientY - rect.top) * scaleY),
-    });
-  };
-
-  const exportMarkers = () => {
-    const output = markers.map(m => `{ x: ${m.x}, y: ${m.y}, frame: ${m.frame} }, // ${m.label}`).join('\n');
+  const handleExportCopy = () => {
+    const output = markers
+      .map((m) => `{ x: ${m.x}, y: ${m.y}, frame: ${m.frame} }, // ${m.label}`)
+      .join('\n');
     navigator.clipboard.writeText(output);
-    alert('Markers copied to clipboard!\n\n' + output);
   };
 
   return (
     <AbsoluteFill
       style={{ background: COLORS.background, cursor: 'crosshair' }}
-      onClick={handleClick}
+      onClick={(e) => handleClick(e, frame)}
       onMouseMove={handleMouseMove}
     >
       {/* Main Demo */}
       <MobileChatDemoV4 />
 
       {/* Crosshairs */}
-      <div style={{ position: 'absolute', left: mousePos.x, top: 0, bottom: 0, width: 1, background: 'rgba(255,0,0,0.5)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: mousePos.y, left: 0, right: 0, height: 1, background: 'rgba(255,0,0,0.5)', pointerEvents: 'none' }} />
+      <DebugCrosshair
+        x={mousePos.x}
+        y={mousePos.y}
+        width={1080}
+        height={1920}
+      />
 
-      {/* All Markers (persistent across all frames) */}
-      {markers.map((m, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: m.x,
-            top: m.y,
-            transform: 'translate(-50%, -50%)',
-            pointerEvents: 'none',
-            zIndex: 9998,
-          }}
-        >
-          {/* Marker dot */}
-          <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              background: frame === m.frame ? '#ff0' : '#f00',
-              border: '3px solid #fff',
-              boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-            }}
-          />
-          {/* Label */}
-          <div
-            style={{
-              position: 'absolute',
-              top: -25,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: '#000',
-              color: '#fff',
-              padding: '2px 6px',
-              borderRadius: 4,
-              fontSize: 10,
-              fontFamily: 'monospace',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {m.label} ({m.x},{m.y}) @{m.frame}
-          </div>
-        </div>
-      ))}
+      {/* Click Markers */}
+      <DebugClickMarkers
+        markers={markers}
+        currentFrame={frame}
+        onClear={clearMarkers}
+        onCopy={handleExportCopy}
+      />
 
       {/* Debug Panel - Top Left */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 15,
-          left: 15,
-          background: 'rgba(0,0,0,0.95)',
-          border: '2px solid #00ff00',
-          borderRadius: 12,
-          padding: '12px 16px',
-          fontFamily: 'monospace',
-          fontSize: 13,
-          color: '#fff',
-          minWidth: 300,
-          zIndex: 9999,
-          pointerEvents: 'auto',
-        }}
-        onClick={(e) => e.stopPropagation()}
+      <DebugSceneOverlay
+        scenes={SCENE_INFO}
+        currentFrame={frame}
+        fps={fps}
+        mousePos={mousePos}
+        markerCount={markers.length}
+        showHandInfo
       >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, borderBottom: '1px solid #333', paddingBottom: 8 }}>
-          <span style={{ color: '#00ff00', fontSize: 20, fontWeight: 'bold' }}>{timeStr}</span>
-          <span style={{ color: '#ff0' }}>Frame {frame}</span>
-        </div>
-
-        {/* Scene */}
-        <div style={{ marginBottom: 8 }}>
-          <span style={{ color: '#888' }}>Scene: </span>
-          <span style={{ color: '#00d9ff', fontWeight: 'bold' }}>{currentScene.name}</span>
-          <span style={{ color: '#666' }}> (local frame {frameInScene})</span>
-        </div>
-
-        {/* Mouse Position */}
-        <div style={{ marginBottom: 8, padding: 8, background: '#111', borderRadius: 6 }}>
-          <div style={{ color: '#f00', marginBottom: 4 }}>🎯 MOUSE POSITION</div>
-          <div style={{ fontSize: 16, color: '#ff0' }}>x: {mousePos.x}, y: {mousePos.y}</div>
-        </div>
-
-        {/* Hand Info */}
-        <div style={{ marginBottom: 8, padding: 8, background: '#111', borderRadius: 6 }}>
-          <div style={{ color: '#f80', marginBottom: 4 }}>✋ HAND</div>
-          <div><span style={{ color: '#888' }}>Animation: </span>{currentScene.hand}</div>
-          <div><span style={{ color: '#888' }}>Gesture: </span><span style={{ color: '#0f0' }}>{currentScene.gesture}</span></div>
-        </div>
-
-        {/* Markers */}
-        <div style={{ marginBottom: 8 }}>
-          <div style={{ color: '#f0f', marginBottom: 4 }}>📍 MARKERS ({markers.length})</div>
-          <div style={{ maxHeight: 100, overflowY: 'auto', fontSize: 11 }}>
-            {markers.length === 0 && <div style={{ color: '#666' }}>Click on video to add markers...</div>}
-            {markers.slice(-5).map((m, i) => (
-              <div key={i} style={{ color: frame === m.frame ? '#ff0' : '#888' }}>
-                {m.label}: ({m.x}, {m.y}) @{m.frame}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={exportMarkers}
-            style={{ flex: 1, padding: '8px', background: '#0a0', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            COPY ALL
-          </button>
-          <button
-            onClick={() => setMarkers([])}
-            style={{ flex: 1, padding: '8px', background: '#a00', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            CLEAR
-          </button>
-        </div>
-
         {/* Instructions */}
-        <div style={{ marginTop: 10, fontSize: 10, color: '#666', borderTop: '1px solid #333', paddingTop: 8 }}>
-          Click anywhere to mark • Markers persist across frames<br/>
-          Tell Claude: "Move hand from M1 to M2 at frame X"
-        </div>
-      </div>
-
-      {/* Scene Timeline - Bottom */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 15,
-          left: 15,
-          right: 15,
-          background: 'rgba(0,0,0,0.9)',
-          border: '2px solid #444',
-          borderRadius: 8,
-          padding: '10px 12px',
-          fontFamily: 'monospace',
-          fontSize: 11,
-          pointerEvents: 'none',
-          zIndex: 9999,
-        }}
-      >
-        <div style={{ display: 'flex', gap: 4, height: 30 }}>
-          {SCENE_INFO.map((scene, i) => {
-            const width = ((scene.end - scene.start) / durationInFrames) * 100;
-            const isActive = frame >= scene.start && frame < scene.end;
-            const isPast = frame >= scene.end;
-            const sceneProgress = isActive
-              ? ((frame - scene.start) / (scene.end - scene.start)) * 100
-              : 0;
-
-            return (
-              <div
-                key={i}
-                style={{
-                  width: `${width}%`,
-                  height: '100%',
-                  background: isActive ? '#00d9ff' : isPast ? '#2a5a6a' : '#333',
-                  borderRadius: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: isActive ? '#000' : '#888',
-                  fontWeight: isActive ? 'bold' : 'normal',
-                  fontSize: 10,
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                {scene.name.split('-')[0]}
-                {isActive && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: `${sceneProgress}%`,
-                      background: 'rgba(0,255,0,0.3)',
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {/* Playhead */}
         <div
           style={{
-            position: 'absolute',
-            left: `${(frame / durationInFrames) * 100}%`,
-            top: 8,
-            bottom: 8,
-            width: 2,
-            background: '#ff0',
-            marginLeft: 12,
+            marginTop: 10,
+            fontSize: 10,
+            color: '#666',
+            borderTop: '1px solid #333',
+            paddingTop: 8,
           }}
-        />
-      </div>
+        >
+          Click anywhere to mark - Markers persist across frames
+          <br />
+          Tell Claude: &quot;Move hand from M1 to M2 at frame X&quot;
+        </div>
+      </DebugSceneOverlay>
+
+      {/* Scene Timeline - Bottom */}
+      <DebugSceneTimeline
+        scenes={SCENE_INFO}
+        currentFrame={frame}
+        totalFrames={durationInFrames}
+      />
 
       {/* Quick Scene Reference - Top Right */}
       <div
@@ -445,7 +304,8 @@ export const MobileChatDemoV4DebugInteractive: React.FC = () => {
                 marginBottom: 2,
               }}
             >
-              {isActive ? '▶' : '○'} {scene.name}: {scene.start}-{scene.end} {scene.hand !== 'none' ? `[${scene.hand}]` : ''}
+              {isActive ? '▶' : '○'} {scene.name}: {scene.start}-{scene.end}{' '}
+              {scene.hand !== 'none' ? `[${scene.hand}]` : ''}
             </div>
           );
         })}

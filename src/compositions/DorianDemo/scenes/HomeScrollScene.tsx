@@ -5,7 +5,7 @@ import {
   interpolate,
   useVideoConfig,
 } from 'remotion';
-import { COLORS } from '../constants';
+import { COLORS, HAND_PHYSICS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -83,16 +83,7 @@ export const HomeScrollScene: React.FC = () => {
         size={140}
         dark={savedScroll?.dark ?? true}
         showRipple={false}
-        physics={{
-          floatAmplitude: 0, // No floating - keep stable
-          floatSpeed: 0,
-          velocityScale: 0.1, // Minimal rotation from movement
-          maxRotation: 5, // Very limited rotation
-          shadowEnabled: true,
-          shadowDistance: 8,
-          shadowBlur: 10,
-          smoothing: 0.2, // Smooth movement
-        }}
+        physics={HAND_PHYSICS.scroll}
       />
     </AbsoluteFill>
   );

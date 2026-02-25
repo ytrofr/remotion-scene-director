@@ -207,7 +207,7 @@ const dragPreset: GesturePreset = {
  */
 const swipePreset: GesturePreset = {
   label: 'Swipe',
-  animation: 'hand-swipe-right',
+  animation: 'hand-swipe-up',
   physics: PHYSICS_PRESETS.snappy,
   size: 120,
   showRipple: false,

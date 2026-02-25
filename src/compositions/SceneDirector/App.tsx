@@ -11,8 +11,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import { Player, type PlayerRef } from '@remotion/player';
-import { SceneDirectorModeProvider } from '../../components/FloatingHand/SceneDirectorMode';
+import type { PlayerRef } from '@remotion/player';
 import { initialState } from './state';
 import { COMPOSITIONS, COMPOSITION_COMPONENTS } from './compositions';
 import { undoableReducer, type UndoableState } from './undoReducer';
@@ -20,12 +19,11 @@ import { DirectorProvider } from './context';
 import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
 import type { HandPathPoint } from '../../components/FloatingHand/types';
-import { computeZoomAtFrame, type ZoomLayer, type AudioLayer } from './layers';
-import { withAudioLayers, type AudioEntry } from './AudioLayerRenderer';
-import {
-  loadSession,
-  useSessionPersistence,
-} from './hooks/useSessionPersistence';
+import { computeZoomAtFrame, type ZoomLayer } from './layers';
+import { withAudioLayers } from './AudioLayerRenderer';
+import { useSessionPersistence } from './hooks/useSessionPersistence';
+import { useRestoredInitialState } from './hooks/useRestoredInitialState';
+import { useAudioEntries } from './hooks/useAudioEntries';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePlayerControls } from './hooks/usePlayerControls';
 import './styles/index.css';
@@ -36,65 +34,14 @@ import { SceneList } from './panels/SceneList';
 import { Inspector } from './panels/Inspector';
 import { Timeline } from './panels/Timeline';
 import { ExportModal } from './panels/ExportModal';
-
-// Overlays
-import { DrawingCanvas } from './overlays/DrawingCanvas';
-import { FloatingHandOverlay } from './overlays/FloatingHandOverlay';
-import { WaypointMarkers } from './overlays/WaypointMarkers';
+import PlayerArea from './panels/PlayerArea';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
 
 export const App: React.FC = () => {
   // Restore session from localStorage
-  const savedSession = useMemo(() => loadSession(), []);
-  const restoredInitial = useMemo(() => {
-    // Sync stale localStorage waypoints with current coded paths.
-    // If stored waypoints match a coded path's frame structure (auto-derived),
-    // refresh them so coded path updates (e.g. scale changes) propagate.
-    const waypoints = savedSession.waypoints
-      ? { ...savedSession.waypoints }
-      : undefined;
-    if (waypoints && savedSession.compositionId) {
-      for (const [scene, wp] of Object.entries(waypoints)) {
-        if (!wp?.length) continue;
-        const coded = getCodedPath(savedSession.compositionId, scene);
-        if (!coded || coded.path.length !== wp.length) continue;
-        if (wp.every((w, i) => w.frame === coded.path[i].frame)) {
-          waypoints[scene] = coded.path.map((p) => ({ ...p }));
-        }
-      }
-    }
-    return {
-      ...initialState,
-      ...(savedSession.compositionId
-        ? { compositionId: savedSession.compositionId }
-        : {}),
-      ...(savedSession.selectedScene
-        ? { selectedScene: savedSession.selectedScene }
-        : {}),
-      ...(savedSession.sceneGesture
-        ? { sceneGesture: savedSession.sceneGesture }
-        : {}),
-      ...(savedSession.sceneAnimation
-        ? { sceneAnimation: savedSession.sceneAnimation }
-        : {}),
-      ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
-      ...(savedSession.clearedSceneLayers
-        ? { clearedSceneLayers: savedSession.clearedSceneLayers }
-        : {}),
-      ...(savedSession.layers ? { layers: savedSession.layers } : {}),
-      ...(waypoints ? { waypoints } : {}),
-      ...(savedSession.savedSnapshots
-        ? { savedSnapshots: savedSession.savedSnapshots }
-        : {}),
-      ...(savedSession.sidebarTab
-        ? { sidebarTab: savedSession.sidebarTab }
-        : {}),
-      ...(savedSession.versionHistory
-        ? { versionHistory: savedSession.versionHistory }
-        : {}),
-    };
-  }, []);
+  const { restoredInitial, savedSession } =
+    useRestoredInitialState(initialState);
 
   const [undoState, dispatch] = useReducer(undoableReducer, {
     past: [],
@@ -177,28 +124,8 @@ export const App: React.FC = () => {
 
   const BaseVideoComponent = COMPOSITION_COMPONENTS[composition.id];
 
-  // Collect audio entries ONLY from user-edited audio layers (not coded fallbacks).
-  // Compositions already play their own inline <Audio> tags — we only inject extras
-  // when the user has explicitly added/edited audio layers in SceneDirector.
-  const audioEntries: AudioEntry[] = useMemo(() => {
-    const entries: AudioEntry[] = [];
-    for (const [sceneName, layers] of Object.entries(state.layers)) {
-      const scene = composition.scenes.find((s) => s.name === sceneName);
-      if (!scene) continue;
-      for (const layer of layers) {
-        if (layer.type !== 'audio' || !layer.visible) continue;
-        const audioData = (layer as AudioLayer).data;
-        entries.push({
-          id: layer.id,
-          file: audioData.file,
-          globalFrom: scene.start + audioData.startFrame,
-          durationInFrames: audioData.durationInFrames || 60,
-          volume: audioData.volume,
-        });
-      }
-    }
-    return entries;
-  }, [state.layers, composition.scenes]);
+  // Collect audio entries from user-edited audio layers
+  const audioEntries = useAudioEntries(state.layers, composition.scenes);
 
   // Wrap composition with audio layers
   const VideoComponent = useMemo(
@@ -445,135 +372,33 @@ export const App: React.FC = () => {
         </div>
 
         {/* Player Area */}
-        <div
-          ref={playerAreaRef}
-          className="player-area"
-          onMouseDown={handlePanStart}
-          onMouseMove={handlePanMove}
-          onMouseUp={handlePanEnd}
-          onMouseLeave={handlePanEnd}
-        >
-          {/* Aspect-ratio container - keeps 9:16 centered */}
-          <div
-            ref={playerFrameRef}
-            className="player-frame"
-            style={{
-              aspectRatio: `${composition.video.width} / ${composition.video.height}`,
-              transform:
-                zoom > 1
-                  ? `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`
-                  : undefined,
-            }}
-          >
-            <div
-              style={
-                zoomTransform
-                  ? {
-                      transform: `scale(${zoomTransform.zoom}) translate(${(-(zoomTransform.centerX - 0.5) * 100) / zoomTransform.zoom}%, ${(-(zoomTransform.centerY - 0.5) * 100) / zoomTransform.zoom}%)`,
-                      transformOrigin: 'center center',
-                      width: '100%',
-                      height: '100%',
-                    }
-                  : { width: '100%', height: '100%' }
-              }
-            >
-              <SceneDirectorModeProvider
-                value={!!(state.selectedScene && effectiveWaypoints.length > 0)}
-              >
-                <Player
-                  ref={playerRef}
-                  component={VideoComponent}
-                  compositionWidth={composition.video.width}
-                  compositionHeight={composition.video.height}
-                  fps={composition.video.fps}
-                  durationInFrames={composition.video.frames}
-                  playbackRate={playbackRate}
-                  numberOfSharedAudioTags={15}
-                  controls={false}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                  }}
-                />
-              </SceneDirectorModeProvider>
-            </div>
-
-            {/* Drawing canvas overlays the player */}
-            {state.selectedScene && !state.preview && !state.exportOpen && (
-              <DrawingCanvas />
-            )}
-
-            {/* FloatingHand: renders all visible hand layers */}
-            {state.selectedScene &&
-              currentScene &&
-              sceneLayers.some((l) => l.type === 'hand' && l.visible) && (
-                <FloatingHandOverlay
-                  state={state}
-                  sceneLayers={sceneLayers}
-                  composition={composition}
-                  frame={frame}
-                  playerScale={playerScale}
-                  currentScene={currentScene}
-                />
-              )}
-
-            {/* Trail overlay: show markers only when playhead is within hand gesture frame range */}
-            {state.selectedScene &&
-              currentScene &&
-              (() => {
-                const wps = state.showTrail
-                  ? effectiveWaypoints
-                  : sceneWaypoints;
-                if (wps.length === 0) return null;
-                // Compute hand gesture frame range
-                const first = wps[0];
-                const last = wps[wps.length - 1];
-                const handStart = currentScene.start + (first.frame ?? 0);
-                const handEnd =
-                  currentScene.start + (last.frame ?? 0) + (last.duration ?? 0);
-                // Only show when playhead is within range (or in trail mode always show)
-                const inRange =
-                  state.showTrail || (frame >= handStart && frame <= handEnd);
-                if (state.preview || !inRange) return null;
-                return (
-                  <WaypointMarkers
-                    containerRef={playerFrameRef}
-                    editable={!state.preview}
-                    waypoints={wps}
-                  />
-                );
-              })()}
-
-            {/* Scene info banner with debug info */}
-            {state.selectedScene && currentScene && (
-              <div className="info-banner">
-                {state.selectedScene} | f{currentScene.start}-{currentScene.end}{' '}
-                | local: {Math.max(0, frame - currentScene.start)}
-                {' | '}
-                {sceneWaypoints.length > 0
-                  ? `EDIT(${sceneWaypoints.length}pts)`
-                  : 'CREATE'}
-                {state.selectedWaypoint !== null &&
-                  ` | sel:#${state.selectedWaypoint + 1}`}
-                {state.showTrail && ' | TRAIL'}
-                {state.preview && ' | PREVIEW'}
-              </div>
-            )}
-          </div>
-
-          {/* Zoom indicator */}
-          {zoom > 1 && (
-            <div
-              className="zoom-indicator"
-              onClick={() => {
-                setZoom(1);
-                setPan({ x: 0, y: 0 });
-              }}
-            >
-              {Math.round(zoom * 100)}% — Alt+drag to pan, 0 to reset
-            </div>
-          )}
-        </div>
+        <PlayerArea
+          playerAreaRef={playerAreaRef}
+          playerFrameRef={playerFrameRef}
+          playerRef={playerRef}
+          handlePanStart={handlePanStart}
+          handlePanMove={handlePanMove}
+          handlePanEnd={handlePanEnd}
+          composition={composition}
+          VideoComponent={VideoComponent}
+          zoom={zoom}
+          setZoom={setZoom}
+          pan={pan}
+          setPan={setPan}
+          zoomTransform={zoomTransform}
+          sceneDirectorActive={
+            !!(state.selectedScene && effectiveWaypoints.length > 0)
+          }
+          playbackRate={playbackRate}
+          state={state}
+          frame={frame}
+          playerScale={playerScale}
+          currentScene={currentScene}
+          sceneLayers={sceneLayers}
+          showTrail={state.showTrail}
+          effectiveWaypoints={effectiveWaypoints}
+          sceneWaypoints={sceneWaypoints}
+        />
 
         {/* Inspector (right panel) */}
         <div className="panel inspector-panel">

@@ -97,8 +97,7 @@ export type LottieAnimationFile =
   | 'hand-tap-alt'
   | 'hand-point'
   | 'hand-swipe-up'
-  | 'hand-swipe-right'
-  | 'hand-scroll'
+  | 'hand-scroll-clean'
   | 'hand-drag'
   | 'hand-pinch'
   | string;

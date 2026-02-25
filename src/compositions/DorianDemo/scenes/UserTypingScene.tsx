@@ -5,7 +5,7 @@ import {
   interpolate,
   useVideoConfig,
 } from 'remotion';
-import { COLORS, TEXT_CONTENT } from '../constants';
+import { COLORS, TEXT_CONTENT, HAND_PHYSICS } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -245,16 +245,7 @@ export const UserTypingScene: React.FC = () => {
           dark={savedTyping?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"
-          physics={{
-            floatAmplitude: 2,
-            floatSpeed: 0.04,
-            velocityScale: 0.5,
-            maxRotation: 20,
-            shadowEnabled: true,
-            shadowDistance: 10,
-            shadowBlur: 12,
-            smoothing: 0.15,
-          }}
+          physics={HAND_PHYSICS.tapGentle}
         />
       )}
     </AbsoluteFill>

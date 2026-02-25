@@ -20,6 +20,8 @@ import {
 } from './compositions/DorianDemo';
 import {
   DashmorDemo,
+  DebugSectionPicker,
+  DebugSectionPickerInteractive,
   VIDEO as DASHMOR_VIDEO,
 } from './compositions/DashmorDemo';
 
@@ -128,6 +130,28 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="DashmorDemo"
         component={DashmorDemo}
+        durationInFrames={DASHMOR_VIDEO.durationInFrames}
+        fps={DASHMOR_VIDEO.fps}
+        width={DASHMOR_VIDEO.width}
+        height={DASHMOR_VIDEO.height}
+      />
+      {/* ★ Dashmor DEBUG - Section scroll position picker */}
+      <Composition
+        id="DashmorDemo-DEBUG"
+        component={DebugSectionPicker as React.FC}
+        durationInFrames={DASHMOR_VIDEO.durationInFrames}
+        fps={DASHMOR_VIDEO.fps}
+        width={DASHMOR_VIDEO.width}
+        height={DASHMOR_VIDEO.height}
+        defaultProps={{
+          sectionIndex: 0,
+          scrollY: 0,
+        }}
+      />
+      {/* ★★ Dashmor INTERACTIVE - Click to adjust scroll positions */}
+      <Composition
+        id="DashmorDemo-INTERACTIVE"
+        component={DebugSectionPickerInteractive}
         durationInFrames={DASHMOR_VIDEO.durationInFrames}
         fps={DASHMOR_VIDEO.fps}
         width={DASHMOR_VIDEO.width}

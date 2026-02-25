@@ -5,7 +5,7 @@ import {
   spring,
   useVideoConfig,
 } from 'remotion';
-import { COLORS } from '../constants';
+import { COLORS, HAND_PHYSICS, SPRING_CONFIG } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -22,7 +22,7 @@ export const ChatOpenScene: React.FC = () => {
   const chatSlide = spring({
     frame,
     fps,
-    config: { damping: 18, mass: 1, stiffness: 120 },
+    config: SPRING_CONFIG.slide,
   });
 
   // Fixed zoom — matches scene 3 end, same across scenes 4/5/6
@@ -210,16 +210,7 @@ export const ChatOpenScene: React.FC = () => {
           dark={savedChatOpen?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"
-          physics={{
-            floatAmplitude: 2,
-            floatSpeed: 0.04,
-            velocityScale: 0.6,
-            maxRotation: 25,
-            shadowEnabled: true,
-            shadowDistance: 10,
-            shadowBlur: 12,
-            smoothing: 0.15,
-          }}
+          physics={HAND_PHYSICS.tap}
         />
       )}
     </AbsoluteFill>

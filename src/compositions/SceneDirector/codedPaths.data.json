@@ -187,7 +187,8 @@
           "gesture": "pointer",
           "scale": 1
         }
-      ]
+      ],
+      "dark": true
     },
     "8-ProductPage": {
       "gesture": "scroll",

@@ -229,14 +229,14 @@ export function useHandDrag({
       const pxPerFrame = rect.width / totalFrames;
       const deltaPx = e.clientX - handDrag.startX;
       const deltaFrames = Math.round(deltaPx / pxPerFrame);
+      const wps = handDrag.originalWaypoints;
       if (handDrag.edge === 'move') {
         // Shift ALL waypoints by the same frame delta
-        const shifted = handDrag.originalWaypoints.map((wp) => ({
+        const shifted = wps.map((wp) => ({
           ...wp,
           frame: Math.max(0, (wp.frame ?? 0) + deltaFrames),
         }));
         if (handDrag.layerId) {
-          // Secondary hand layer — update via layer data
           dispatch({
             type: 'UPDATE_LAYER_DATA',
             scene: handDrag.scene,
@@ -244,34 +244,76 @@ export function useHandDrag({
             data: { waypoints: shifted },
           });
         } else {
-          // Primary hand layer — update via flat waypoints
           dispatch({
             type: 'SET_WAYPOINTS',
             scene: handDrag.scene,
             waypoints: shifted,
           });
         }
-      } else if (handDrag.edge === 'left') {
-        const rightEdge = handDrag.originalFrame + handDrag.originalDuration;
-        const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
-        const newDuration = Math.max(0, rightEdge - newFrame);
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { frame: newFrame, duration: newDuration },
-        });
+      } else if (wps.length <= 1) {
+        // Single-waypoint: adjust frame/duration directly
+        if (handDrag.edge === 'left') {
+          const rightEdge = handDrag.originalFrame + handDrag.originalDuration;
+          const newFrame = Math.max(0, handDrag.originalFrame + deltaFrames);
+          const newDuration = Math.max(0, rightEdge - newFrame);
+          dispatch({
+            type: 'UPDATE_WAYPOINT',
+            scene: handDrag.scene,
+            index: 0,
+            point: { frame: newFrame, duration: newDuration },
+          });
+        } else {
+          const newDuration = Math.max(
+            0,
+            handDrag.originalDuration + deltaFrames,
+          );
+          dispatch({
+            type: 'UPDATE_WAYPOINT',
+            scene: handDrag.scene,
+            index: 0,
+            point: { duration: newDuration },
+          });
+        }
       } else {
-        const newDuration = Math.max(
-          0,
-          handDrag.originalDuration + deltaFrames,
-        );
-        dispatch({
-          type: 'UPDATE_WAYPOINT',
-          scene: handDrag.scene,
-          index: 0,
-          point: { duration: newDuration },
+        // Multi-waypoint: proportionally scale all waypoint frames
+        const firstFrame = wps[0].frame ?? 0;
+        const lastFrame = wps[wps.length - 1].frame ?? 0;
+        const origSpan = lastFrame - firstFrame;
+        if (origSpan <= 0) return;
+
+        let newFirstFrame = firstFrame;
+        let newLastFrame = lastFrame;
+        if (handDrag.edge === 'left') {
+          newFirstFrame = Math.max(0, firstFrame + deltaFrames);
+          // Don't let left edge pass right edge
+          if (newFirstFrame >= lastFrame) newFirstFrame = lastFrame - 1;
+        } else {
+          newLastFrame = Math.max(firstFrame + 1, lastFrame + deltaFrames);
+        }
+        const newSpan = newLastFrame - newFirstFrame;
+
+        const scaled = wps.map((wp) => {
+          const f = wp.frame ?? 0;
+          const relativePos = (f - firstFrame) / origSpan;
+          return {
+            ...wp,
+            frame: Math.round(newFirstFrame + relativePos * newSpan),
+          };
         });
+        if (handDrag.layerId) {
+          dispatch({
+            type: 'UPDATE_LAYER_DATA',
+            scene: handDrag.scene,
+            layerId: handDrag.layerId,
+            data: { waypoints: scaled },
+          });
+        } else {
+          dispatch({
+            type: 'SET_WAYPOINTS',
+            scene: handDrag.scene,
+            waypoints: scaled,
+          });
+        }
       }
     };
     const handleUp = () => {

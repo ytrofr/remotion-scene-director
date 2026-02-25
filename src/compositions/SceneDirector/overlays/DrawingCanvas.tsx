@@ -167,6 +167,7 @@ export const DrawingCanvas: React.FC = () => {
             },
           ],
           gesture,
+          sceneZoom: currentScene.zoom,
         });
       } else {
         // Freehand draw → create NEW independent hand gesture with 2 waypoints
@@ -193,6 +194,7 @@ export const DrawingCanvas: React.FC = () => {
             },
           ],
           gesture,
+          sceneZoom: currentScene.zoom,
         });
       }
       return;

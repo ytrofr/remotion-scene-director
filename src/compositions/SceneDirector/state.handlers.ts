@@ -53,11 +53,17 @@ export function handleWaypointAction(
       // Create a new independent hand layer with its own waypoints
       const sceneLayers = state.layers[action.scene] || [];
       const order = sceneLayers.length;
+      // Default size: base 120 scaled by scene zoom ratio
+      const baseZoom = 1.8;
+      const defaultSize = Math.round(
+        120 * ((action.sceneZoom ?? baseZoom) / baseZoom),
+      );
       const newLayer = createHandLayer(
         action.scene,
         action.points,
         action.gesture,
         order,
+        defaultSize,
       );
       const cleared = { ...state.clearedSceneLayers };
       delete cleared[action.scene];

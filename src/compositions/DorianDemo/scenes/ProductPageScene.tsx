@@ -13,6 +13,7 @@ import {
   TEXT_CONTENT,
   SPRING_CONFIG,
   HAND_PHYSICS,
+  handSizeForZoom,
 } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -43,7 +44,7 @@ export const ProductPageScene: React.FC = () => {
   // Phase 5 (frames 105-150): Hand scrolls listing
 
   const zoomOutProgress = spring({ frame, fps, config: SPRING_CONFIG.zoom });
-  const zoomScale = interpolate(zoomOutProgress, [0, 1], [2.76, 1.8]);
+  const zoomScale = interpolate(zoomOutProgress, [0, 1], [2.75, 1.8]);
   const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-560, 0]);
 
   const chatSlide = interpolate(frame, [25, 40], [0, 1], {
@@ -236,7 +237,7 @@ export const ProductPageScene: React.FC = () => {
           path={scrollHandPath}
           startFrame={savedScroll ? 0 : 105}
           animation="hand-scroll-clean"
-          size={140}
+          size={handSizeForZoom(zoomScale)}
           dark={savedScroll?.dark ?? true}
           showRipple={false}
           physics={HAND_PHYSICS.scroll}

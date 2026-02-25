@@ -18,6 +18,7 @@ export interface SceneInfo {
   end: number;
   part?: string;
   hand?: string;
+  zoom?: number; // scene's zoom level (default: 1.8 = base phone scale)
 }
 
 // Composition entry
@@ -157,6 +158,7 @@ export type DirectorAction =
       scene: string;
       points: HandPathPoint[];
       gesture: GestureTool;
+      sceneZoom?: number; // scene's zoom level for default hand size
     }
   // Layer auto-migration
   | {
@@ -164,6 +166,7 @@ export type DirectorAction =
       scene: string;
       compositionId: string;
       codedPath: CodedPath | null;
+      sceneZoom?: number; // scene's zoom level for default hand size
     };
 
 export const initialState: DirectorState = {

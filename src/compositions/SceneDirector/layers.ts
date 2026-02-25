@@ -17,42 +17,98 @@ export interface CodedAudioEntry {
 
 const COMBINED_AUDIO: Record<string, CodedAudioEntry[]> = {
   '3-V2-Typing': [
-    { file: 'audio/send-click.wav', startFrame: 0, durationInFrames: 15, volume: 0.5 },
-    { file: 'audio/typing-soft.wav', startFrame: 5, durationInFrames: 60, volume: 0.5 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 0,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 5,
+      durationInFrames: 60,
+      volume: 0.5,
+    },
   ],
   '9-V4-Send': [
-    { file: 'audio/send-click.wav', startFrame: 13, durationInFrames: 15, volume: 0.6 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 13,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
   ],
 };
 
 const DORIAN_AUDIO: Record<string, CodedAudioEntry[]> = {
   '2-HomeScroll': [
-    { file: 'audio/u_nharq4usid-swipe-255512.mp3', startFrame: 28, durationInFrames: 90, volume: 0.3 },
+    {
+      file: 'audio/u_nharq4usid-swipe-255512.mp3',
+      startFrame: 28,
+      durationInFrames: 90,
+      volume: 0.3,
+    },
   ],
   '3-TapBubble': [
-    { file: 'audio/send-click.wav', startFrame: 73, durationInFrames: 15, volume: 0.5 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 73,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
   ],
   '4-ChatOpen': [
-    { file: 'audio/send-click.wav', startFrame: 48, durationInFrames: 15, volume: 0.4 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 48,
+      durationInFrames: 15,
+      volume: 0.4,
+    },
   ],
   '5-UserTyping': [
-    { file: 'audio/typing-soft.wav', startFrame: 5, durationInFrames: 65, volume: 0.3 },
-    { file: 'audio/send-click.wav', startFrame: 105, durationInFrames: 15, volume: 0.5 },
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 5,
+      durationInFrames: 65,
+      volume: 0.3,
+    },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 105,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
   ],
   '7-AIResponse': [
-    { file: 'audio/send-click.wav', startFrame: 95, durationInFrames: 15, volume: 0.5 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 95,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
   ],
   '8-ProductPage': [
-    { file: 'audio/u_nharq4usid-swipe-255512.mp3', startFrame: 118, durationInFrames: 30, volume: 0.3 },
+    {
+      file: 'audio/u_nharq4usid-swipe-255512.mp3',
+      startFrame: 118,
+      durationInFrames: 30,
+      volume: 0.3,
+    },
   ],
 };
 
-const CODED_AUDIO_REGISTRY: Record<string, Record<string, CodedAudioEntry[]>> = {
+const CODED_AUDIO_REGISTRY: Record<
+  string,
+  Record<string, CodedAudioEntry[]>
+> = {
   MobileChatDemoCombined: COMBINED_AUDIO,
   DorianDemo: DORIAN_AUDIO,
 };
 
-export function getCodedAudio(compositionId: string, sceneName: string): CodedAudioEntry[] {
+export function getCodedAudio(
+  compositionId: string,
+  sceneName: string,
+): CodedAudioEntry[] {
   return CODED_AUDIO_REGISTRY[compositionId]?.[sceneName] ?? [];
 }
 
@@ -70,11 +126,12 @@ export interface LayerBase {
   order: number;
 }
 
-// Hand layer data — waypoints + gesture only.
+// Hand layer data — waypoints + gesture + per-layer size.
 // animation and dark are stored in flat records (sceneAnimation, sceneDark) as single source of truth.
 export interface HandLayerData {
   waypoints: HandPathPoint[];
   gesture: GestureTool;
+  size?: number; // per-layer hand size (effective, zoom-adjusted)
 }
 
 export interface HandLayer extends LayerBase {
@@ -85,9 +142,9 @@ export interface HandLayer extends LayerBase {
 // Zoom keyframe — a single zoom state at a specific frame
 export interface ZoomKeyframe {
   frame: number;
-  zoom: number;        // 1.0 = normal, 2.0 = 2x
-  centerX: number;     // 0-1 normalized
-  centerY: number;     // 0-1 normalized
+  zoom: number; // 1.0 = normal, 2.0 = 2x
+  centerX: number; // 0-1 normalized
+  centerY: number; // 0-1 normalized
   easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';
 }
 
@@ -102,10 +159,10 @@ export interface ZoomLayer extends LayerBase {
 
 // Audio layer
 export interface AudioLayerData {
-  file: string;          // e.g. 'audio/send-click.wav'
-  startFrame: number;    // local frame within scene
+  file: string; // e.g. 'audio/send-click.wav'
+  startFrame: number; // local frame within scene
   durationInFrames: number; // how many frames the audio plays
-  volume: number;        // 0-1
+  volume: number; // 0-1
 }
 
 export interface AudioLayer extends LayerBase {
@@ -136,6 +193,7 @@ export function createHandLayer(
   waypoints: HandPathPoint[],
   gesture: GestureTool,
   order: number = 0,
+  size?: number,
 ): HandLayer {
   return {
     id: generateLayerId('hand'),
@@ -145,7 +203,7 @@ export function createHandLayer(
     visible: true,
     locked: false,
     order,
-    data: { waypoints, gesture },
+    data: { waypoints, gesture, size },
   };
 }
 
@@ -174,7 +232,12 @@ export function createAudioLayer(scene: string, order: number = 2): AudioLayer {
     visible: true,
     locked: false,
     order,
-    data: { file: defaultFile.id, startFrame: 0, durationInFrames: 60, volume: 1 },
+    data: {
+      file: defaultFile.id,
+      startFrame: 0,
+      durationInFrames: 60,
+      volume: 1,
+    },
   };
 }
 
@@ -185,7 +248,7 @@ export function computeZoomAtFrame(
 ): { zoom: number; centerX: number; centerY: number } | null {
   // Combine keyframes from all visible zoom layers, sorted by frame
   const allKeyframes = zoomLayers
-    .flatMap(l => l.data.keyframes)
+    .flatMap((l) => l.data.keyframes)
     .sort((a, b) => a.frame - b.frame);
 
   if (allKeyframes.length === 0) return null;
@@ -223,9 +286,13 @@ export function computeZoomAtFrame(
 
 function applyEasing(t: number, easing: ZoomKeyframe['easing']): number {
   switch (easing) {
-    case 'ease-in': return t * t;
-    case 'ease-out': return 1 - (1 - t) * (1 - t);
-    case 'ease-in-out': return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
-    default: return t; // linear
+    case 'ease-in':
+      return t * t;
+    case 'ease-out':
+      return 1 - (1 - t) * (1 - t);
+    case 'ease-in-out':
+      return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+    default:
+      return t; // linear
   }
 }

@@ -81,11 +81,22 @@ export const Inspector: React.FC = () => {
     [dispatch, playerRef, currentScene],
   );
 
-  // Current effective animation and dark mode
+  // Current effective animation, dark mode, and hand size
   const currentAnimation: LottieAnimation | null =
     state.sceneAnimation[scene] ?? scenePreset?.animation ?? null;
   const currentDark: boolean =
     state.sceneDark[scene] ?? scenePreset?.dark ?? false;
+  // Per-layer hand size: prefer selected hand layer, fallback to first visible hand layer in scene
+  const selectedHandLayer =
+    selectedLayer?.type === 'hand'
+      ? selectedLayer
+      : (sceneLayers.find((l) => l.type === 'hand' && l.visible) ?? null);
+  // Default size scales with scene zoom (base 120 at zoom 1.8)
+  const sceneZoom = currentScene?.zoom ?? 1.8;
+  const zoomDefault = Math.round(120 * (sceneZoom / 1.8));
+  const layerSize: number =
+    (selectedHandLayer?.data as { size?: number } | undefined)?.size ??
+    zoomDefault;
 
   // Scene gesture header (always visible)
   const gestureHeader = (
@@ -112,7 +123,7 @@ export const Inspector: React.FC = () => {
       {currentGesture && (
         <div className="inspector__gesture-info">
           {currentAnimation ?? GESTURE_PRESETS[currentGesture].animation} |{' '}
-          {GESTURE_PRESETS[currentGesture].size}px
+          {layerSize}px
         </div>
       )}
     </div>
@@ -162,6 +173,28 @@ export const Inspector: React.FC = () => {
           Dark
         </button>
       </div>
+      {selectedHandLayer && (
+        <div className="inspector__size-row">
+          <label className="inspector__size-label">Size</label>
+          <input
+            type="range"
+            min={40}
+            max={300}
+            step={5}
+            value={layerSize}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_LAYER_DATA',
+                scene,
+                layerId: selectedHandLayer.id,
+                data: { size: Number(e.target.value) },
+              })
+            }
+            className="inspector__size-slider"
+          />
+          <span className="inspector__size-value">{layerSize}</span>
+        </div>
+      )}
     </div>
   );
 

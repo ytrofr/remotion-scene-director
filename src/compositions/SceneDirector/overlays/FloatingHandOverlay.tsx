@@ -9,7 +9,7 @@ import { FloatingHand } from '../../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../../components/FloatingHand/types';
 import type { HandLayer } from '../layers';
 import { GESTURE_PRESETS } from '../gestures';
-import type { CompositionEntry, DirectorState } from '../state';
+import type { CompositionEntry, DirectorState, SceneInfo } from '../state';
 import type { Layer } from '../layers';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
   composition: CompositionEntry;
   frame: number;
   playerScale: number;
-  currentScene: { start: number; end: number };
+  currentScene: SceneInfo;
 }
 
 /** Renders a single hand layer's FloatingHand */
@@ -27,7 +27,7 @@ const SingleHandRenderer: React.FC<{
   isPrimary: boolean;
   state: DirectorState;
   frame: number;
-  currentScene: { start: number; end: number };
+  currentScene: SceneInfo;
 }> = ({ layer, isPrimary, state, frame, currentScene }) => {
   const wps = layer.data.waypoints;
   if (!wps || wps.length === 0) return null;
@@ -60,6 +60,9 @@ const SingleHandRenderer: React.FC<{
   const animation =
     state.sceneAnimation[state.selectedScene!] ?? preset.animation;
   const dark = state.sceneDark[state.selectedScene!] ?? preset.dark;
+  // Per-layer size. Falls back to zoom-adjusted default (base 120 at zoom 1.8).
+  const zoomDefault = Math.round(120 * ((currentScene.zoom ?? 1.8) / 1.8));
+  const size = layer.data.size ?? zoomDefault;
 
   return (
     <FloatingHand
@@ -67,7 +70,7 @@ const SingleHandRenderer: React.FC<{
       path={handPath}
       startFrame={handStartFrame}
       animation={animation}
-      size={preset.size}
+      size={size}
       showRipple={preset.showRipple}
       dark={dark}
       physics={{ ...DEFAULT_PHYSICS, ...preset.physics }}

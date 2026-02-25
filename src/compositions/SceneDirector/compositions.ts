@@ -7,9 +7,21 @@
 import React from 'react';
 import type { CompositionEntry, SceneInfo } from './state';
 
-import { MobileChatDemoCombined, COMBINED_SCENE_INFO, COMBINED_VIDEO } from '../MobileChatDemoCombined';
-import { DorianDemo, DORIAN_SCENE_INFO, VIDEO as DORIAN_VIDEO } from '../DorianDemo';
-import { DashmorDemo, DASHMOR_SCENE_TIMINGS, VIDEO as DASHMOR_VIDEO } from '../DashmorDemo';
+import {
+  MobileChatDemoCombined,
+  COMBINED_SCENE_INFO,
+  COMBINED_VIDEO,
+} from '../MobileChatDemoCombined';
+import {
+  DorianDemo,
+  DORIAN_SCENE_INFO,
+  VIDEO as DORIAN_VIDEO,
+} from '../DorianDemo';
+import {
+  DashmorDemo,
+  DASHMOR_SCENE_TIMINGS,
+  VIDEO as DASHMOR_VIDEO,
+} from '../DashmorDemo';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -23,20 +35,47 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'MobileChatDemoCombined',
     label: 'Combined (V2+V4)',
-    video: { width: 1080, height: 1920, fps: 30, frames: COMBINED_VIDEO.durationInFrames },
-    scenes: COMBINED_SCENE_INFO.map(s => ({ name: s.name, start: s.start, end: s.end, part: s.part, hand: s.hand })),
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: COMBINED_VIDEO.durationInFrames,
+    },
+    scenes: COMBINED_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+      part: s.part,
+      hand: s.hand,
+    })),
     globalOffsetY: 120,
   },
   {
     id: 'DorianDemo',
     label: 'Dorian (Marketplace)',
-    video: { width: 1080, height: 1920, fps: 30, frames: DORIAN_VIDEO.durationInFrames },
-    scenes: DORIAN_SCENE_INFO.map(s => ({ name: s.name, start: s.start, end: s.end, hand: s.hand })),
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: DORIAN_VIDEO.durationInFrames,
+    },
+    scenes: DORIAN_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+      hand: s.hand,
+      zoom: s.zoom,
+    })),
   },
   {
     id: 'DashmorDemo',
     label: 'Dashmor (Dashboard)',
-    video: { width: 1080, height: 1920, fps: 30, frames: DASHMOR_VIDEO.durationInFrames },
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: DASHMOR_VIDEO.durationInFrames,
+    },
     scenes: dashmorSceneInfo(),
   },
 ];

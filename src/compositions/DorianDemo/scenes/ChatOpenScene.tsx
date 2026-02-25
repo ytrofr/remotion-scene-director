@@ -5,7 +5,12 @@ import {
   spring,
   useVideoConfig,
 } from 'remotion';
-import { COLORS, HAND_PHYSICS, SPRING_CONFIG } from '../constants';
+import {
+  COLORS,
+  HAND_PHYSICS,
+  SPRING_CONFIG,
+  handSizeForZoom,
+} from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -39,12 +44,12 @@ export const ChatOpenScene: React.FC = () => {
   // Hand path: move to input box after zoom settles, tap it, then exit
   const savedChatOpen = getSavedPath('DorianDemo', '4-ChatOpen');
   const handPath: HandPathPoint[] = savedChatOpen?.path ?? [
-    { x: 790, y: 1420, frame: 0, gesture: 'pointer', scale: 1.2 }, // Match scene 3 end position
+    { x: 790, y: 1420, frame: 0, gesture: 'pointer', scale: 1 }, // Match scene 3 end
     { x: 700, y: 1480, frame: 20, gesture: 'pointer', scale: 1 }, // Moving toward input
-    { x: 500, y: 1550, frame: 45, gesture: 'pointer', scale: 1 }, // Approaching input
-    { x: 500, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
-    { x: 500, y: 1550, frame: 60, gesture: 'pointer', scale: 1 }, // Linger briefly
-    { x: 500, y: 1550, frame: 90, gesture: 'pointer', scale: 1 }, // Hold position until scene end
+    { x: 480, y: 1520, frame: 45, gesture: 'pointer', scale: 1 }, // Approaching input
+    { x: 480, y: 1550, frame: 48, gesture: 'click', scale: 1, duration: 5 }, // TAP input box
+    { x: 480, y: 1550, frame: 60, gesture: 'pointer', scale: 1 }, // Linger briefly
+    { x: 480, y: 1550, frame: 90, gesture: 'pointer', scale: 1 }, // Hold position until scene end
   ];
 
   return (
@@ -206,7 +211,7 @@ export const ChatOpenScene: React.FC = () => {
           path={handPath}
           startFrame={0}
           animation="hand-click"
-          size={140}
+          size={handSizeForZoom(zoomScale)}
           dark={savedChatOpen?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"

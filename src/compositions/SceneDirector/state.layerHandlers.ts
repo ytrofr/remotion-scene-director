@@ -173,8 +173,19 @@ export function handleLayerAction(
             state.sceneGesture[action.scene] ??
             (coded?.gesture as GestureTool) ??
             'click';
+          // Default size: base 120 scaled by scene zoom ratio
+          const baseZoom = 1.8;
+          const defaultSize = Math.round(
+            120 * ((action.sceneZoom ?? baseZoom) / baseZoom),
+          );
           newLayers.push(
-            createHandLayer(action.scene, effectiveWaypoints, gesture, order++),
+            createHandLayer(
+              action.scene,
+              effectiveWaypoints,
+              gesture,
+              order++,
+              defaultSize,
+            ),
           );
         }
       }

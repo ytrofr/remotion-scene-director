@@ -37,6 +37,7 @@ import { ExportModal } from './panels/ExportModal';
 import PlayerArea from './panels/PlayerArea';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
+const PLAYBACK_RATE_KEY = 'scene-director-playback-rate';
 
 export const App: React.FC = () => {
   // Restore session from localStorage
@@ -54,7 +55,19 @@ export const App: React.FC = () => {
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState(savedSession.frame ?? 0);
-  const [playbackRate, setPlaybackRate] = useState(1);
+  const [playbackRate, setPlaybackRateRaw] = useState(() => {
+    try {
+      return parseFloat(localStorage.getItem(PLAYBACK_RATE_KEY) || '1') || 1;
+    } catch {
+      return 1;
+    }
+  });
+  const setPlaybackRate = useCallback((rate: number) => {
+    setPlaybackRateRaw(rate);
+    try {
+      localStorage.setItem(PLAYBACK_RATE_KEY, String(rate));
+    } catch {}
+  }, []);
 
   // Cursor preview scale multiplier (persisted to localStorage)
   const [cursorScale, setCursorScaleRaw] = useState(() => {
@@ -203,13 +216,17 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (!state.selectedScene) return;
     const coded = getCodedPath(state.compositionId, state.selectedScene);
+    const sceneZoom = composition.scenes.find(
+      (s) => s.name === state.selectedScene,
+    )?.zoom;
     dispatch({
       type: 'ENSURE_SCENE_LAYERS',
       scene: state.selectedScene,
       compositionId: state.compositionId,
       codedPath: coded,
+      sceneZoom,
     });
-  }, [state.selectedScene, state.compositionId, dispatch]);
+  }, [state.selectedScene, state.compositionId, composition.scenes, dispatch]);
 
   // Hydrate layers for ALL scenes on mount and composition change (so timeline markers appear immediately)
   const hydratedCompositionRef = useRef<string | null>(null);
@@ -223,6 +240,7 @@ export const App: React.FC = () => {
         scene: scene.name,
         compositionId: state.compositionId,
         codedPath: coded,
+        sceneZoom: scene.zoom,
       });
     }
   }, [composition.scenes, state.compositionId, dispatch]);

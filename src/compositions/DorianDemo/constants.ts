@@ -46,6 +46,14 @@ export const PHONE = {
   centerY: 960,
 };
 
+// Hand size scales proportionally with zoom.
+// Base size (at zoom 1.8) matches SceneDirector default (120).
+// Zoomed scenes get proportionally larger hands automatically.
+const HAND_BASE_SIZE = 120;
+const HAND_BASE_ZOOM = PHONE.displayScale; // 1.8
+export const handSizeForZoom = (zoom: number) =>
+  HAND_BASE_SIZE * (zoom / HAND_BASE_ZOOM);
+
 // Text overlays content
 export const TEXT_CONTENT = {
   intro: {

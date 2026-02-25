@@ -124,18 +124,25 @@
           "scale": 1
         },
         {
-          "x": 818,
-          "y": 1546,
-          "frame": 53,
+          "x": 800,
+          "y": 1400,
+          "frame": 20,
           "gesture": "pointer",
           "scale": 1
         },
         {
-          "x": 518,
-          "y": 992,
-          "frame": 73,
+          "x": 818,
+          "y": 1546,
+          "frame": 35,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 790,
+          "y": 1420,
+          "frame": 45,
           "gesture": "click",
-          "scale": 2.2,
+          "scale": 1,
           "duration": 2
         }
       ]
@@ -145,47 +152,18 @@
       "animation": "hand-click",
       "path": [
         {
-          "x": 518,
-          "y": 992,
+          "x": 957,
+          "y": 1465,
           "frame": 0,
-          "gesture": "pointer",
-          "scale": 2.2
-        },
-        {
-          "x": 500,
-          "y": 1200,
-          "frame": 20,
           "gesture": "pointer",
           "scale": 1.5
         },
         {
-          "x": 480,
-          "y": 1520,
-          "frame": 45,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 480,
-          "y": 1550,
-          "frame": 48,
-          "gesture": "click",
-          "scale": 1,
-          "duration": 5
-        },
-        {
-          "x": 480,
-          "y": 1550,
-          "frame": 60,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 480,
-          "y": 1550,
+          "x": 494,
+          "y": 1652,
           "frame": 90,
           "gesture": "pointer",
-          "scale": 1
+          "scale": 1.5
         }
       ],
       "dark": true
@@ -278,27 +256,29 @@
           "scale": 1,
           "duration": 10
         }
-      ]
+      ],
+      "dark": true
     },
     "5-UserTyping": {
       "gesture": "click",
       "animation": "hand-click",
       "path": [
         {
-          "x": 544,
-          "y": 1287,
-          "frame": 83,
+          "x": 482,
+          "y": 1666,
+          "frame": 76,
           "gesture": "pointer",
           "scale": 1
         },
         {
-          "x": 953,
-          "y": 1291,
-          "frame": 113,
+          "x": 969,
+          "y": 1658,
+          "frame": 106,
           "gesture": "pointer",
           "scale": 1
         }
-      ]
+      ],
+      "dark": true
     }
   }
 }

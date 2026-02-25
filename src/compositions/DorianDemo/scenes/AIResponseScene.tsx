@@ -11,6 +11,7 @@ import {
   TEXT_CONTENT,
   SPRING_CONFIG,
   HAND_PHYSICS,
+  handSizeForZoom,
 } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -28,10 +29,10 @@ export const AIResponseScene: React.FC = () => {
   const message = TEXT_CONTENT.userTyping.userMessage;
   const aiMessage = TEXT_CONTENT.aiResponse.aiMessage;
 
-  // Stay zoomed in
-  const zoomScale = 2.76;
-  const zoomOffsetY = -560;
-  const chatHeight = 260;
+  // Fixed zoom — same across scenes 4/5/6/7
+  const zoomScale = 2.75;
+  const zoomOffsetY = -374;
+  const chatHeight = 370;
 
   // AI response slides in
   const responseSlide = spring({
@@ -108,7 +109,7 @@ export const AIResponseScene: React.FC = () => {
             <div
               style={{
                 position: 'absolute',
-                bottom: 60,
+                bottom: 0,
                 left: 0,
                 right: 0,
                 height: chatHeight,
@@ -117,7 +118,6 @@ export const AIResponseScene: React.FC = () => {
                 boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
                 padding: '15px 16px',
                 fontFamily,
-                overflow: 'hidden',
               }}
             >
               {/* Chat header */}
@@ -126,36 +126,36 @@ export const AIResponseScene: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
-                  marginBottom: 8,
+                  marginBottom: 10,
                 }}
               >
-                <AIBubble scale={0.5} />
+                <AIBubble scale={0.6} />
                 <div>
                   <div
                     style={{
                       fontWeight: 700,
-                      fontSize: 12,
+                      fontSize: 14,
                       color: COLORS.text,
                     }}
                   >
                     Dorian
                   </div>
-                  <div style={{ fontSize: 9, color: COLORS.primary }}>
+                  <div style={{ fontSize: 10, color: COLORS.primary }}>
                     Your AI Assistant
                   </div>
                 </div>
               </div>
 
-              {/* AI greeting - smaller to make room */}
+              {/* AI greeting */}
               <div
                 style={{
                   background: '#f0f0f0',
-                  padding: '6px 10px',
-                  borderRadius: '12px 12px 12px 4px',
+                  padding: '8px 12px',
+                  borderRadius: '14px 14px 14px 4px',
                   maxWidth: '85%',
-                  fontSize: 10,
+                  fontSize: 12,
                   color: COLORS.text,
-                  marginBottom: 6,
+                  marginBottom: 8,
                   lineHeight: 1.3,
                 }}
               >
@@ -166,14 +166,14 @@ export const AIResponseScene: React.FC = () => {
               <div
                 style={{
                   background: COLORS.primary,
-                  padding: '6px 10px',
-                  borderRadius: '12px 12px 4px 12px',
+                  padding: '8px 12px',
+                  borderRadius: '14px 14px 4px 14px',
                   maxWidth: '80%',
                   marginLeft: 'auto',
-                  fontSize: 10,
+                  fontSize: 12,
                   color: 'white',
                   lineHeight: 1.3,
-                  marginBottom: 6,
+                  marginBottom: 8,
                 }}
               >
                 {message}
@@ -189,13 +189,13 @@ export const AIResponseScene: React.FC = () => {
                 <div
                   style={{
                     background: '#f0f0f0',
-                    padding: '6px 10px',
-                    borderRadius: '12px 12px 12px 4px',
+                    padding: '8px 12px',
+                    borderRadius: '14px 14px 14px 4px',
                     maxWidth: '90%',
-                    fontSize: 10,
+                    fontSize: 12,
                     color: COLORS.text,
                     lineHeight: 1.3,
-                    marginBottom: 6,
+                    marginBottom: 8,
                   }}
                 >
                   {aiMessage.slice(0, revealedChars)}
@@ -212,7 +212,7 @@ export const AIResponseScene: React.FC = () => {
                       padding: '8px 16px',
                       borderRadius: 16,
                       textAlign: 'center',
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 700,
                       color: 'white',
                       maxWidth: '60%',
@@ -225,29 +225,29 @@ export const AIResponseScene: React.FC = () => {
                 )}
               </div>
 
-              {/* Input field */}
+              {/* Input field - inactive after send */}
               <div
                 style={{
                   position: 'absolute',
-                  bottom: 10,
+                  bottom: 12,
                   left: 12,
                   right: 12,
                   background: '#f5f5f5',
                   borderRadius: 18,
-                  padding: '7px 12px',
+                  padding: '8px 12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   border: '2px solid transparent',
                 }}
               >
-                <span style={{ color: '#999', fontSize: 10 }}>
+                <span style={{ color: '#999', fontSize: 11 }}>
                   Type a message...
                 </span>
                 <div
                   style={{
-                    width: 24,
-                    height: 24,
+                    width: 26,
+                    height: 26,
                     borderRadius: '50%',
                     background: '#ccc',
                     display: 'flex',
@@ -256,7 +256,7 @@ export const AIResponseScene: React.FC = () => {
                     flexShrink: 0,
                   }}
                 >
-                  <span style={{ color: 'white', fontSize: 12 }}>
+                  <span style={{ color: 'white', fontSize: 14 }}>
                     {'\u2192'}
                   </span>
                 </div>
@@ -272,7 +272,7 @@ export const AIResponseScene: React.FC = () => {
           path={handPath}
           startFrame={savedPath ? 0 : 70}
           animation="hand-click"
-          size={120}
+          size={handSizeForZoom(zoomScale)}
           dark={savedPath?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"

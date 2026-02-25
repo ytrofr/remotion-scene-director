@@ -121,3 +121,10 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     DebugSceneTimeline) and the `useDebugCoordinates` hook. Never re-implement
     coordinate conversion, crosshair lines, click-marker panels, or scene-info
     overlays inline in composition files. See `docs/debug-tools.md` for the API.
+
+28. **Saved session is sacred**: NEVER auto-modify, overwrite, or "sync" user-saved
+    SceneDirector data (waypoints, layers, gestures) on load. The Save button is
+    the single source of truth. `useRestoredInitialState` must restore saved data
+    exactly as-is. `codedPaths.data.json` is only a default for scenes with NO
+    saved data (via `ENSURE_SCENE_LAYERS`). Any code that mutates saved state on
+    load is a bug.

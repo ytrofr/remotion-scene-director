@@ -330,10 +330,19 @@ export const Timeline: React.FC = () => {
                       dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
                     }}
                   >
-                    {isSingle && isSelected && (
+                    {isSelected && (
                       <div
                         className="timeline__audio-handle timeline__audio-handle--left"
-                        onMouseDown={(e) =>
+                        onMouseDown={(e) => {
+                          const sceneLayers = state.layers[sceneName] || [];
+                          const primaryIdx = sceneLayers.findIndex(
+                            (l) => l.type === 'hand',
+                          );
+                          const selIdx = sceneLayers.findIndex(
+                            (l) => l.id === layer.id,
+                          );
+                          const isSecondary =
+                            selIdx >= 0 && selIdx !== primaryIdx;
                           handleHandEdgeDown(
                             e,
                             sceneName,
@@ -341,16 +350,25 @@ export const Timeline: React.FC = () => {
                             wpFrame,
                             wpDuration,
                             wps || [],
-                            null,
-                          )
-                        }
+                            isSecondary ? layer.id : null,
+                          );
+                        }}
                       />
                     )}
                     <span className="timeline__hand-label">{gesture}</span>
-                    {isSingle && isSelected && (
+                    {isSelected && (
                       <div
                         className="timeline__audio-handle timeline__audio-handle--right"
-                        onMouseDown={(e) =>
+                        onMouseDown={(e) => {
+                          const sceneLayers = state.layers[sceneName] || [];
+                          const primaryIdx = sceneLayers.findIndex(
+                            (l) => l.type === 'hand',
+                          );
+                          const selIdx = sceneLayers.findIndex(
+                            (l) => l.id === layer.id,
+                          );
+                          const isSecondary =
+                            selIdx >= 0 && selIdx !== primaryIdx;
                           handleHandEdgeDown(
                             e,
                             sceneName,
@@ -358,9 +376,9 @@ export const Timeline: React.FC = () => {
                             wpFrame,
                             wpDuration,
                             wps || [],
-                            null,
-                          )
-                        }
+                            isSecondary ? layer.id : null,
+                          );
+                        }}
                       />
                     )}
                   </div>

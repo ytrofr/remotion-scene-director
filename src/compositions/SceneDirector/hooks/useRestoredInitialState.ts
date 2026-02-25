@@ -1,40 +1,33 @@
 /**
  * useRestoredInitialState - Restores SceneDirector initial state from localStorage session.
- * Merges saved session data over initial state and syncs stale waypoints with coded paths.
+ *
+ * INVARIANT: Saved session data is NEVER modified on load.
+ * The Save button is the single source of truth. Once the user saves,
+ * their waypoints, layers, gestures, and all state are restored exactly
+ * as-is on next load. No auto-sync, no coded-path overwrite, no silent mutation.
+ * Only ENSURE_SCENE_LAYERS may add NEW layers for scenes that have none.
  */
 
 import { useMemo } from 'react';
 import type { DirectorState } from '../state';
-import { getCodedPath } from '../codedPaths';
 import { loadSession, type SavedSession } from './useSessionPersistence';
 
 /**
  * Loads the saved session and merges it over the provided initial state.
- * Syncs stale localStorage waypoints with current coded paths so that
- * coded path updates (e.g. scale changes) propagate correctly.
- *
- * @returns { restoredInitial, savedSession } - merged state and raw session data
+ * Saved data always wins — codedPaths are only used as initial defaults
+ * when no saved data exists (via ENSURE_SCENE_LAYERS, not here).
  */
 export function useRestoredInitialState(initialState: DirectorState) {
   const savedSession = useMemo(() => loadSession(), []);
 
   const restoredInitial = useMemo(() => {
-    // Sync stale localStorage waypoints with current coded paths.
-    // If stored waypoints match a coded path's frame structure (auto-derived),
-    // refresh them so coded path updates (e.g. scale changes) propagate.
+    // User-saved waypoints and layers are trusted as-is.
+    // No auto-sync with coded paths — manual edits always win.
     const waypoints = savedSession.waypoints
       ? { ...savedSession.waypoints }
       : undefined;
-    if (waypoints && savedSession.compositionId) {
-      for (const [scene, wp] of Object.entries(waypoints)) {
-        if (!wp?.length) continue;
-        const coded = getCodedPath(savedSession.compositionId, scene);
-        if (!coded || coded.path.length !== wp.length) continue;
-        if (wp.every((w, i) => w.frame === coded.path[i].frame)) {
-          waypoints[scene] = coded.path.map((p) => ({ ...p }));
-        }
-      }
-    }
+    const layers = savedSession.layers ? { ...savedSession.layers } : undefined;
+
     return {
       ...initialState,
       ...(savedSession.compositionId
@@ -53,7 +46,7 @@ export function useRestoredInitialState(initialState: DirectorState) {
       ...(savedSession.clearedSceneLayers
         ? { clearedSceneLayers: savedSession.clearedSceneLayers }
         : {}),
-      ...(savedSession.layers ? { layers: savedSession.layers } : {}),
+      ...(layers ? { layers } : {}),
       ...(waypoints ? { waypoints } : {}),
       ...(savedSession.savedSnapshots
         ? { savedSnapshots: savedSession.savedSnapshots }

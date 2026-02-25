@@ -254,6 +254,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.homeScroll.start + SCENES.homeScroll.duration,
     hand: 'hand-scroll-clean',
     gesture: 'drag (scroll)',
+    zoom: 1.8,
   },
   {
     name: '3-TapBubble',
@@ -261,6 +262,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.tapBubble.start + SCENES.tapBubble.duration,
     hand: 'hand-click',
     gesture: 'pointer → click',
+    zoom: 2.75,
   },
   {
     name: '4-ChatOpen',
@@ -268,6 +270,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.chatOpen.start + SCENES.chatOpen.duration,
     hand: 'hand-click',
     gesture: 'pointer → click (input box) → hide',
+    zoom: 2.75,
   },
   {
     name: '5-UserTyping',
@@ -275,6 +278,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.userTyping.start + SCENES.userTyping.duration,
     hand: 'hand-click',
     gesture: 'pointer → click (send btn)',
+    zoom: 2.75,
   },
   {
     name: '6-AIThinking',
@@ -282,6 +286,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.aiThinking.start + SCENES.aiThinking.duration,
     hand: 'none',
     gesture: 'thinking dots',
+    zoom: 2.75,
   },
   {
     name: '7-AIResponse',
@@ -289,6 +294,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.aiResponse.start + SCENES.aiResponse.duration,
     hand: 'hand-click',
     gesture: 'pointer → click (View Products)',
+    zoom: 2.75,
   },
   {
     name: '8-ProductPage',
@@ -296,6 +302,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.productPage.start + SCENES.productPage.duration,
     hand: 'hand-scroll-clean',
     gesture: 'drag (scroll listing)',
+    zoom: 1.8,
   },
   {
     name: '9-ProductDetail',
@@ -303,6 +310,7 @@ export const DORIAN_SCENE_INFO = [
     end: SCENES.productDetail.start + SCENES.productDetail.duration,
     hand: 'none',
     gesture: 'crossfade',
+    zoom: 1.8,
   },
   {
     name: '10-Outro',

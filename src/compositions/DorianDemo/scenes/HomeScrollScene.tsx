@@ -5,7 +5,7 @@ import {
   interpolate,
   useVideoConfig,
 } from 'remotion';
-import { COLORS, HAND_PHYSICS } from '../constants';
+import { COLORS, HAND_PHYSICS, PHONE, handSizeForZoom } from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -80,7 +80,7 @@ export const HomeScrollScene: React.FC = () => {
         path={scrollHandPath}
         startFrame={0}
         animation="hand-scroll-clean"
-        size={140}
+        size={handSizeForZoom(PHONE.displayScale)}
         dark={savedScroll?.dark ?? true}
         showRipple={false}
         physics={HAND_PHYSICS.scroll}

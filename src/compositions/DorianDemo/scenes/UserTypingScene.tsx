@@ -5,7 +5,12 @@ import {
   interpolate,
   useVideoConfig,
 } from 'remotion';
-import { COLORS, TEXT_CONTENT, HAND_PHYSICS } from '../constants';
+import {
+  COLORS,
+  TEXT_CONTENT,
+  HAND_PHYSICS,
+  handSizeForZoom,
+} from '../constants';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
@@ -241,7 +246,7 @@ export const UserTypingScene: React.FC = () => {
           path={sendHandPath}
           startFrame={savedTyping ? 0 : 70}
           animation="hand-click"
-          size={120}
+          size={handSizeForZoom(zoomScale)}
           dark={savedTyping?.dark ?? true}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"

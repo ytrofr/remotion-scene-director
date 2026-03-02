@@ -60,7 +60,15 @@ scripts/            # Capture and utility scripts
 1. Download from [LottieFiles](https://lottiefiles.com/free-animations)
 2. Save as JSON in `public/lottie/`
 3. Keep under 100KB for performance
-4. Use `delayRender()` + `continueRender()` pattern
+4. Register in `src/compositions/SceneDirector/panels/galleryData.ts`
+5. Use `delayRender()` + `continueRender()` pattern
+
+### Generating Cursor Animations
+
+```bash
+python3 scripts/generate-real-arrow-anims.py
+# Outputs 26 files to public/lottie/cursor-real-anim-*.json
+```
 
 ## License
 

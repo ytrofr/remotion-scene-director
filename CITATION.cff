@@ -7,7 +7,9 @@ authors:
 repository-code: "https://github.com/ytrofr/claude-remotion-editor"
 url: "https://github.com/ytrofr/claude-remotion-editor"
 license: MIT
-date-released: "2026-02-12"
+date-released: "2026-03-02"
+version: "1.1.0"
+abstract: "Programmatic video creation toolkit with 90+ Lottie animations, interactive hand-path editor (SceneDirector), and physics-based hand cursor system. Built on Remotion, React, and TypeScript for creating professional demo videos from code."
 keywords:
   - remotion
   - video
@@ -19,3 +21,8 @@ keywords:
   - typescript
   - programmatic-video
   - demo-video
+  - cursor-animation
+  - lottie-generation
+  - hand-gesture
+  - scene-director
+  - animation-gallery

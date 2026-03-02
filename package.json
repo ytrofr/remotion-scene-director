@@ -1,6 +1,6 @@
 {
   "name": "claude-remotion-editor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Interactive hand-path editor for Remotion video compositions with Lottie animations",
   "scripts": {
     "dev": "remotion studio --port 3000",
@@ -30,7 +30,14 @@
     "lottie",
     "hand-path",
     "scene-editor",
-    "react"
+    "react",
+    "cursor-animation",
+    "lottie-generation",
+    "hand-gesture",
+    "demo-video",
+    "programmatic-video",
+    "scene-director",
+    "animation-gallery"
   ],
   "author": "ytrofr",
   "license": "MIT",

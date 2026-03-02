@@ -24,6 +24,8 @@ import {
   DebugSectionPickerInteractive,
   VIDEO as DASHMOR_VIDEO,
 } from './compositions/DashmorDemo';
+import { HandGestureGallery } from './compositions/HandGestureGallery/HandGestureGallery';
+import { VIDEO as GALLERY_VIDEO } from './compositions/HandGestureGallery/constants';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -156,6 +158,16 @@ export const RemotionRoot: React.FC = () => {
         fps={DASHMOR_VIDEO.fps}
         width={DASHMOR_VIDEO.width}
         height={DASHMOR_VIDEO.height}
+      />
+      {/* ========== UTILITIES ========== */}
+      {/* Hand Gesture Gallery - Preview all Lottie animations */}
+      <Composition
+        id="HandGestureGallery"
+        component={HandGestureGallery}
+        durationInFrames={GALLERY_VIDEO.durationInFrames}
+        fps={GALLERY_VIDEO.fps}
+        width={GALLERY_VIDEO.width}
+        height={GALLERY_VIDEO.height}
       />
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}
     </>

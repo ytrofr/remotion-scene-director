@@ -17,7 +17,9 @@ import { HandStyleProps } from '../types';
  * Walks the layer tree and inverts all color values [r,g,b,a] → [1-r,1-g,1-b,a].
  * This replaces CSS invert(1) which caused rendering artifacts in headless Chrome.
  */
-function invertLottieColors(layers: Array<Record<string, unknown>>): void {
+export function invertLottieColors(
+  layers: Array<Record<string, unknown>>,
+): void {
   for (const layer of layers) {
     invertColorsInObject(layer);
   }

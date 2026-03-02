@@ -17,6 +17,188 @@ function savePathPlugin(): Plugin {
         next();
       });
 
+      // Save gallery feedback to disk (so Claude can read it)
+      server.middlewares.use('/__save-feedback', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: string) => (body += chunk));
+        req.on('end', () => {
+          try {
+            const feedbackPath = path.resolve(
+              __dirname,
+              'gallery-feedback.json',
+            );
+            fs.writeFileSync(feedbackPath, body);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+        });
+      });
+
+      // Bulk-delete gallery items: remove Lottie files + galleryData entries
+      server.middlewares.use('/__delete-gallery-items', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: string) => (body += chunk));
+        req.on('end', () => {
+          try {
+            const { ids } = JSON.parse(body) as { ids: string[] };
+            if (!Array.isArray(ids) || ids.length === 0) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'ids array required' }));
+              return;
+            }
+
+            // 1. Delete Lottie JSON files
+            const deleted: string[] = [];
+            for (const id of ids) {
+              const lottieFile = path.resolve(
+                __dirname,
+                `public/lottie/${id}.json`,
+              );
+              if (fs.existsSync(lottieFile)) {
+                fs.unlinkSync(lottieFile);
+                deleted.push(id);
+              }
+            }
+
+            // 2. Remove entries from galleryData.ts
+            const galleryPath = path.resolve(
+              __dirname,
+              'src/compositions/SceneDirector/panels/galleryData.ts',
+            );
+            let src = fs.readFileSync(galleryPath, 'utf8');
+            const idSet = new Set(ids);
+
+            // 2a. Rebuild POINTER_SHAPES: remove deleted variants, drop empty shapes
+            const shapesStart = src.indexOf('export const POINTER_SHAPES');
+            const shapesArrayStart = src.indexOf('[', shapesStart);
+            // Find matching '];\n' — count bracket depth
+            let depth = 0;
+            let shapesEnd = -1;
+            for (let i = shapesArrayStart; i < src.length; i++) {
+              if (src[i] === '[') depth++;
+              else if (src[i] === ']') {
+                depth--;
+                if (depth === 0) {
+                  shapesEnd = i + 1;
+                  break;
+                }
+              }
+            }
+
+            if (shapesStart !== -1 && shapesEnd !== -1) {
+              // Extract shape objects by matching { name: ... variants: [...] }
+              const shapesContent = src.slice(
+                shapesArrayStart + 1,
+                shapesEnd - 1,
+              );
+              // Parse each shape block: find top-level { } pairs (2-space indent)
+              const shapeBlocks: string[] = [];
+              let blockDepth = 0;
+              let blockStart = -1;
+              for (let i = 0; i < shapesContent.length; i++) {
+                if (shapesContent[i] === '{' && blockDepth === 0) {
+                  blockStart = i;
+                }
+                if (shapesContent[i] === '{') blockDepth++;
+                if (shapesContent[i] === '}') {
+                  blockDepth--;
+                  if (blockDepth === 0 && blockStart !== -1) {
+                    shapeBlocks.push(shapesContent.slice(blockStart, i + 1));
+                    blockStart = -1;
+                  }
+                }
+              }
+
+              // Filter variants within each shape, drop empty shapes
+              const keptShapes: string[] = [];
+              for (const block of shapeBlocks) {
+                // Check if any deleted ID is in this block
+                const hasDeleted = ids.some((id) => block.includes(`'${id}'`));
+                if (!hasDeleted) {
+                  keptShapes.push(block);
+                  continue;
+                }
+                // Extract name
+                const nameMatch = block.match(/name:\s*'([^']+)'/);
+                if (!nameMatch) continue;
+                // Extract variants array content
+                const varStart = block.indexOf('[');
+                const varEnd = block.lastIndexOf(']');
+                if (varStart === -1 || varEnd === -1) continue;
+                const varContent = block.slice(varStart + 1, varEnd);
+                // Parse individual variant objects
+                const variants: string[] = [];
+                let vDepth = 0;
+                let vStart = -1;
+                for (let i = 0; i < varContent.length; i++) {
+                  if (varContent[i] === '{' && vDepth === 0) vStart = i;
+                  if (varContent[i] === '{') vDepth++;
+                  if (varContent[i] === '}') {
+                    vDepth--;
+                    if (vDepth === 0 && vStart !== -1) {
+                      const v = varContent.slice(vStart, i + 1);
+                      // Keep variant only if its ID is not in the delete set
+                      const idMatch = v.match(/id:\s*'([^']+)'/);
+                      if (idMatch && !idSet.has(idMatch[1])) {
+                        variants.push(v.trim());
+                      }
+                      vStart = -1;
+                    }
+                  }
+                }
+                // Only keep shape if it still has variants
+                if (variants.length > 0) {
+                  const varLines = variants
+                    .map((v) => `      ${v},`)
+                    .join('\n');
+                  keptShapes.push(
+                    `{\n    name: '${nameMatch[1]}',\n    variants: [\n${varLines}\n    ],\n  }`,
+                  );
+                }
+              }
+
+              const newShapesArray =
+                keptShapes.length > 0
+                  ? `[\n  ${keptShapes.join(',\n  ')},\n]`
+                  : '[]';
+              src =
+                src.slice(0, shapesArrayStart) +
+                newShapesArray +
+                src.slice(shapesEnd);
+            }
+
+            // 2b. Remove from GESTURES array
+            for (const id of ids) {
+              // Single-line: { id: 'xxx', ... },\n
+              const singleLine = new RegExp(
+                `  \\{[^}]*id: '${id}'[^}]*\\},?\\n`,
+                'g',
+              );
+              // Multi-line: {\n    id: 'xxx', ...\n  },\n
+              const multiLine = new RegExp(
+                `  \\{\\n[\\s\\S]*?id: '${id}'[\\s\\S]*?\\},?\\n`,
+                'g',
+              );
+              src = src.replace(singleLine, '');
+              src = src.replace(multiLine, '');
+            }
+
+            fs.writeFileSync(galleryPath, src);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ deleted, removed: ids.length }));
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+        });
+      });
+
       server.middlewares.use('/api/save-path', (req, res, next) => {
         if (req.method !== 'POST') return next();
 

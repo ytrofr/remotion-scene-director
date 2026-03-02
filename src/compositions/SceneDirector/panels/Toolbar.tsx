@@ -349,6 +349,15 @@ export const Toolbar: React.FC = () => {
       >
         Export
       </button>
+
+      {/* Gallery */}
+      <button
+        onClick={() => dispatch({ type: 'SET_VIEW', view: 'gallery' })}
+        className="toolbar__btn toolbar__btn--gallery"
+        title="Hand gesture gallery (G)"
+      >
+        Gallery
+      </button>
     </div>
   );
 };

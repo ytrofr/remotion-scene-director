@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sunburst Center Picker</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a2e;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: system-ui;
+        color: #fff;
+      }
+      h2 {
+        margin-bottom: 16px;
+        font-size: 18px;
+        font-weight: 400;
+        opacity: 0.8;
+      }
+      .canvas-wrap {
+        position: relative;
+        width: 600px;
+        height: 600px;
+        background: #fff;
+        border-radius: 12px;
+        cursor: crosshair;
+        overflow: hidden;
+      }
+      .canvas-wrap svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .grid {
+        opacity: 0.08;
+      }
+      .crosshair {
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .canvas-wrap:hover .crosshair {
+        opacity: 1;
+      }
+      .marker {
+        fill: #ff3366;
+      }
+      .coords {
+        margin-top: 16px;
+        font-size: 22px;
+        font-family: monospace;
+        background: #16213e;
+        padding: 12px 24px;
+        border-radius: 8px;
+        min-width: 280px;
+        text-align: center;
+      }
+      .coords .label {
+        opacity: 0.5;
+        font-size: 14px;
+      }
+      .hint {
+        margin-top: 10px;
+        font-size: 13px;
+        opacity: 0.4;
+      }
+      #lottie-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Click where the sunburst center should be</h2>
+    <div class="canvas-wrap" id="wrap">
+      <div id="lottie-container"></div>
+      <svg viewBox="0 0 600 600">
+        <!-- Grid -->
+        <g class="grid">
+          <line
+            x1="150"
+            y1="0"
+            x2="150"
+            y2="600"
+            stroke="#000"
+            stroke-width="1"
+          />
+          <line
+            x1="300"
+            y1="0"
+            x2="300"
+            y2="600"
+            stroke="#000"
+            stroke-width="2"
+          />
+          <line
+            x1="450"
+            y1="0"
+            x2="450"
+            y2="600"
+            stroke="#000"
+            stroke-width="1"
+          />
+          <line
+            x1="0"
+            y1="150"
+            x2="600"
+            y2="150"
+            stroke="#000"
+            stroke-width="1"
+          />
+          <line
+            x1="0"
+            y1="300"
+            x2="600"
+            y2="300"
+            stroke="#000"
+            stroke-width="2"
+          />
+          <line
+            x1="0"
+            y1="450"
+            x2="600"
+            y2="450"
+            stroke="#000"
+            stroke-width="1"
+          />
+        </g>
+        <!-- Crosshair follows mouse -->
+        <g class="crosshair">
+          <line
+            id="ch-h"
+            x1="0"
+            y1="0"
+            x2="600"
+            y2="0"
+            stroke="#ff3366"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
+          <line
+            id="ch-v"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="600"
+            stroke="#ff3366"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
+        </g>
+        <!-- Click marker -->
+        <circle id="dot" class="marker" cx="-10" cy="-10" r="8" opacity="0" />
+        <circle
+          id="dot-ring"
+          cx="-10"
+          cy="-10"
+          r="16"
+          fill="none"
+          stroke="#ff3366"
+          stroke-width="2"
+          opacity="0"
+        />
+      </svg>
+    </div>
+    <div class="coords">
+      <span class="label">Lottie coords (200x200):</span><br />
+      <span id="result">click on the cursor...</span>
+    </div>
+    <div class="hint">
+      The cursor is rendered at 3x size (600px). Coordinates map to the 200x200
+      Lottie canvas.
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script>
+      // Load the black cursor (static, no animation)
+      const anim = lottie.loadAnimation({
+        container: document.getElementById('lottie-container'),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: '/lottie/cursor-real-anim-black-click-burst.json',
+      });
+
+      const wrap = document.getElementById('wrap');
+      const chH = document.getElementById('ch-h');
+      const chV = document.getElementById('ch-v');
+      const dot = document.getElementById('dot');
+      const dotRing = document.getElementById('dot-ring');
+      const result = document.getElementById('result');
+      const SCALE = 3; // 600px / 200 lottie units
+
+      wrap.addEventListener('mousemove', (e) => {
+        const r = wrap.getBoundingClientRect();
+        const x = e.clientX - r.left;
+        const y = e.clientY - r.top;
+        chH.setAttribute('y1', y);
+        chH.setAttribute('y2', y);
+        chV.setAttribute('x1', x);
+        chV.setAttribute('x2', x);
+      });
+
+      wrap.addEventListener('click', (e) => {
+        const r = wrap.getBoundingClientRect();
+        const px = e.clientX - r.left;
+        const py = e.clientY - r.top;
+        const lx = (px / SCALE).toFixed(1);
+        const ly = (py / SCALE).toFixed(1);
+
+        dot.setAttribute('cx', px);
+        dot.setAttribute('cy', py);
+        dot.setAttribute('opacity', '1');
+        dotRing.setAttribute('cx', px);
+        dotRing.setAttribute('cy', py);
+        dotRing.setAttribute('opacity', '0.5');
+        result.textContent = `x: ${lx}, y: ${ly}`;
+      });
+    </script>
+  </body>
+</html>

@@ -79,6 +79,7 @@ export interface DirectorState {
   savedSnapshots: Record<string, SceneSnapshot>;
   // Sidebar tab: editor or history
   sidebarTab: 'editor' | 'history';
+  currentView: 'editor' | 'gallery';
   // Version history (per scene, appended on each Save)
   versionHistory: Record<string, VersionEntry[]>;
 }
@@ -114,6 +115,7 @@ export type DirectorAction =
   | { type: 'REVERT_SCENE'; scene: string }
   | { type: 'MARK_SAVED'; scene: string }
   | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
+  | { type: 'SET_VIEW'; view: 'editor' | 'gallery' }
   | { type: 'RESTORE_VERSION'; scene: string; snapshot: SceneSnapshot }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
@@ -189,5 +191,6 @@ export const initialState: DirectorState = {
   activityLog: [],
   savedSnapshots: {},
   sidebarTab: 'editor',
+  currentView: 'editor',
   versionHistory: {},
 };

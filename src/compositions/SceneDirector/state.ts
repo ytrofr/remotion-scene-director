@@ -97,6 +97,8 @@ export function directorReducer(
       };
     case 'SET_SIDEBAR_TAB':
       return { ...state, sidebarTab: action.tab };
+    case 'SET_VIEW':
+      return { ...state, currentView: action.view };
 
     // ── Waypoint actions (delegated) ──────────────────────────────────────
     case 'ADD_WAYPOINT':

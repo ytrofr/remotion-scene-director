@@ -34,6 +34,7 @@ import { SceneList } from './panels/SceneList';
 import { Inspector } from './panels/Inspector';
 import { Timeline } from './panels/Timeline';
 import { ExportModal } from './panels/ExportModal';
+import { GalleryView } from './panels/GalleryView';
 import PlayerArea from './panels/PlayerArea';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
@@ -95,6 +96,29 @@ export const App: React.FC = () => {
     handlePanMove,
     handlePanEnd,
   } = usePlayerControls(state.compositionId);
+
+  // Sync currentView with URL query param (?view=gallery)
+  // 1. On mount: read URL and open gallery if ?view=gallery
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('view') === 'gallery' && state.currentView !== 'gallery') {
+      dispatch({ type: 'SET_VIEW', view: 'gallery' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount only
+
+  // 2. When currentView changes, update the URL to match
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (state.currentView === 'gallery') {
+      url.searchParams.set('view', 'gallery');
+    } else {
+      url.searchParams.delete('view');
+    }
+    if (url.href !== window.location.href) {
+      window.history.replaceState(null, '', url.toString());
+    }
+  }, [state.currentView]);
 
   // Seek to saved frame on mount
   const didRestore = useRef(false);
@@ -375,6 +399,17 @@ export const App: React.FC = () => {
     setZoom,
     setPan,
   });
+
+  // Full-page gallery view
+  if (state.currentView === 'gallery') {
+    return (
+      <DirectorProvider value={ctxValue}>
+        <GalleryView
+          onClose={() => dispatch({ type: 'SET_VIEW', view: 'editor' })}
+        />
+      </DirectorProvider>
+    );
+  }
 
   return (
     <DirectorProvider value={ctxValue}>

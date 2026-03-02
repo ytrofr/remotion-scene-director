@@ -27,8 +27,12 @@
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.toolbar__select:hover { border-color: var(--border-hover); }
-.toolbar__select:focus { border-color: var(--accent); }
+.toolbar__select:hover {
+  border-color: var(--border-hover);
+}
+.toolbar__select:focus {
+  border-color: var(--accent);
+}
 
 .toolbar__divider {
   width: 1px;
@@ -36,7 +40,9 @@
   background: var(--border);
   flex-shrink: 0;
 }
-.toolbar__spacer { flex: 1; }
+.toolbar__spacer {
+  flex: 1;
+}
 
 .toolbar__cursor-size {
   display: flex;
@@ -84,7 +90,7 @@
   border-radius: 0 0 var(--radius) var(--radius);
   padding: 8px;
   z-index: 100;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 .toolbar__dropdown-title {
   font-size: 10px;
@@ -158,7 +164,7 @@
   color: #fff;
   border-color: var(--accent);
   font-weight: 600;
-  box-shadow: 0 0 12px rgba(91,156,246,0.25);
+  box-shadow: 0 0 12px rgba(91, 156, 246, 0.25);
 }
 .toolbar__btn--active:hover {
   background: var(--accent-hover);
@@ -172,7 +178,7 @@
   color: #fff;
   border-color: var(--green);
   font-weight: 600;
-  box-shadow: 0 0 12px rgba(52,208,88,0.25);
+  box-shadow: 0 0 12px rgba(52, 208, 88, 0.25);
 }
 .toolbar__btn--preview-on:hover {
   background: #3be064;
@@ -183,7 +189,7 @@
   color: #fff;
   border-color: var(--accent);
   font-weight: 600;
-  box-shadow: 0 0 12px rgba(91,156,246,0.25);
+  box-shadow: 0 0 12px rgba(91, 156, 246, 0.25);
 }
 .toolbar__btn--trail-on:hover {
   background: var(--accent-hover);
@@ -208,7 +214,7 @@
   color: #fff;
   border-color: var(--green);
   font-weight: 600;
-  box-shadow: 0 0 12px rgba(52,208,88,0.25);
+  box-shadow: 0 0 12px rgba(52, 208, 88, 0.25);
 }
 .toolbar__btn--clear {
   color: var(--red);
@@ -216,7 +222,7 @@
   background: transparent;
 }
 .toolbar__btn--clear:hover {
-  background: rgba(240,80,80,0.1);
+  background: rgba(240, 80, 80, 0.1);
 }
 .toolbar__btn--export {
   background: var(--orange);
@@ -241,12 +247,21 @@
   background: #f0b33a;
   border-color: #f0b33a;
 }
+.toolbar__btn--gallery {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.toolbar__btn--gallery:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 .toolbar__kbd {
   font-size: 10px;
   opacity: 0.5;
   margin-left: 5px;
   font-family: var(--mono);
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   padding: 1px 4px;
   border-radius: 3px;
 }

@@ -10,8 +10,12 @@ import { COMPOSITIONS } from '../compositions';
 import {
   GESTURE_PRESETS,
   GESTURE_ANIMATIONS,
+  POINTER_ANIMATIONS,
+  CLICK_ANIMATIONS,
+  buildClickAnimationFile,
   type GestureTool,
 } from '../gestures';
+import { LottieThumbnail } from '../overlays/LottieThumbnail';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
   { id: 'click', key: '1' },
@@ -197,9 +201,51 @@ export const Toolbar: React.FC = () => {
                               }
                             }
                           }}
-                          className={`toolbar__dropdown-btn ${isActive ? 'toolbar__dropdown-btn--active' : ''}`}
+                          className={`toolbar__dropdown-btn toolbar__dropdown-btn--with-thumb ${isActive ? 'toolbar__dropdown-btn--active' : ''}`}
                         >
+                          <LottieThumbnail
+                            animationFile={anim.id}
+                            size={22}
+                            dark={currentDark}
+                          />
                           {anim.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="toolbar__dropdown-title toolbar__dropdown-separator">
+                    Pointer
+                  </div>
+                  <div className="toolbar__dropdown-anims">
+                    {POINTER_ANIMATIONS.map((ptr) => {
+                      const isActive = currentAnimation === ptr.id;
+                      return (
+                        <button
+                          key={ptr.id}
+                          onClick={() => {
+                            if (scene) {
+                              dispatch({
+                                type: 'SET_SCENE_ANIMATION',
+                                scene,
+                                animation: ptr.id,
+                              });
+                              if (!state.sceneGesture[scene]) {
+                                dispatch({
+                                  type: 'SET_SCENE_GESTURE',
+                                  scene,
+                                  gesture: t.id,
+                                });
+                              }
+                            }
+                          }}
+                          className={`toolbar__dropdown-btn toolbar__dropdown-btn--with-thumb ${isActive ? 'toolbar__dropdown-btn--active' : ''}`}
+                        >
+                          <LottieThumbnail
+                            animationFile={ptr.id}
+                            size={22}
+                            dark={currentDark}
+                          />
+                          {ptr.label}
                         </button>
                       );
                     })}
@@ -211,10 +257,10 @@ export const Toolbar: React.FC = () => {
                           dispatch({
                             type: 'SET_SCENE_DARK',
                             scene,
-                            dark: false,
+                            dark: true,
                           });
                       }}
-                      className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                      className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Light
                     </button>
@@ -224,13 +270,45 @@ export const Toolbar: React.FC = () => {
                           dispatch({
                             type: 'SET_SCENE_DARK',
                             scene,
-                            dark: true,
+                            dark: false,
                           });
                       }}
-                      className={`toolbar__dropdown-btn ${currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
+                      className={`toolbar__dropdown-btn ${!currentDark ? 'toolbar__dropdown-btn--active' : ''}`}
                     >
                       Dark
                     </button>
+                  </div>
+                  <div className="toolbar__dropdown-title toolbar__dropdown-separator">
+                    Click Effect
+                  </div>
+                  <div className="toolbar__dropdown-anims">
+                    {CLICK_ANIMATIONS.map((anim) => {
+                      const thumbFile = currentAnimation
+                        ? buildClickAnimationFile(currentAnimation, anim.id)
+                        : undefined;
+                      return (
+                        <button
+                          key={anim.id}
+                          onClick={() =>
+                            dispatch({
+                              type: 'SET_CLICK_ANIMATION',
+                              animation: anim.id,
+                            })
+                          }
+                          className={`toolbar__dropdown-btn toolbar__dropdown-btn--with-thumb ${state.clickAnimation === anim.id ? 'toolbar__dropdown-btn--active' : ''}`}
+                        >
+                          {thumbFile && (
+                            <LottieThumbnail
+                              animationFile={thumbFile}
+                              size={32}
+                              dark={currentDark}
+                              playOnHover
+                            />
+                          )}
+                          {anim.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

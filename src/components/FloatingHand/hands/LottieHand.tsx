@@ -113,38 +113,45 @@ interface LottieHandProps extends Omit<
   loop?: boolean;
   direction?: 'forward' | 'backward';
   dark?: boolean;
+  clickAnimationFile?: string;
+}
+
+/** Load and process a Lottie JSON (strip Lines layers, optionally invert colors) */
+function loadLottieFile(
+  file: string,
+  dark: boolean,
+): Promise<LottieAnimationData> {
+  return fetch(staticFile(`lottie/${file}.json`))
+    .then((r) => r.json())
+    .then((data: Record<string, unknown>) => {
+      if (Array.isArray(data.layers)) {
+        data.layers = (data.layers as Array<Record<string, unknown>>).filter(
+          (l) => !String(l.nm || '').includes('Lines'),
+        );
+      }
+      if (dark && Array.isArray(data.layers)) {
+        invertLottieColors(data.layers as Array<Record<string, unknown>>);
+      }
+      return data as unknown as LottieAnimationData;
+    });
 }
 
 export const LottieHand: React.FC<LottieHandProps> = ({
+  gesture,
   size = 64,
   animationFile = 'hand-click',
   dark = false,
+  clickAnimationFile,
 }) => {
-  const [animationData, setAnimationData] =
-    useState<LottieAnimationData | null>(null);
+  const [baseData, setBaseData] = useState<LottieAnimationData | null>(null);
+  const [clickData, setClickData] = useState<LottieAnimationData | null>(null);
   const [handle] = useState(() => delayRender('Loading Lottie animation'));
 
+  // Load base animation
   useEffect(() => {
-    fetch(staticFile(`lottie/${animationFile}.json`))
-      .then((r) => r.json())
-      .then((data: Record<string, unknown>) => {
-        // Strip decorative layers (click indicator lines, etc.) — keep only
-        // the "Hand" / shape layers. These decorative elements cause visual
-        // artifacts in Remotion's headless render.
-        if (Array.isArray(data.layers)) {
-          data.layers = (data.layers as Array<Record<string, unknown>>).filter(
-            (l) => {
-              const name = String(l.nm || '');
-              return !name.includes('Lines');
-            },
-          );
-        }
-        // Invert colors at JSON level for dark mode — avoids CSS invert(1)
-        // compositing artifacts with transparency in headless Chrome.
-        if (dark && Array.isArray(data.layers)) {
-          invertLottieColors(data.layers as Array<Record<string, unknown>>);
-        }
-        setAnimationData(data as unknown as LottieAnimationData);
+    loadLottieFile(animationFile, dark)
+      .then((data) => {
+        setBaseData(data);
         continueRender(handle);
       })
       .catch((error) => {
@@ -153,23 +160,58 @@ export const LottieHand: React.FC<LottieHandProps> = ({
       });
   }, [animationFile, dark, handle]);
 
-  if (!animationData) {
-    return null;
-  }
+  // Pre-load click animation
+  useEffect(() => {
+    if (!clickAnimationFile) {
+      setClickData(null);
+      return;
+    }
+    loadLottieFile(clickAnimationFile, dark)
+      .then(setClickData)
+      .catch(() => setClickData(null));
+  }, [clickAnimationFile, dark]);
+
+  const showClick = gesture === 'click' && !!clickData;
+
+  if (!baseData) return null;
 
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-      }}
-    >
-      <Lottie
-        animationData={animationData}
-        style={{ width: '100%', height: '100%' }}
-        playbackRate={0.001}
-        loop={false}
-      />
+    <div style={{ width: size, height: size, position: 'relative' }}>
+      {/* Base cursor (hidden during click) */}
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: showClick ? 'none' : 'block',
+        }}
+      >
+        <Lottie
+          animationData={baseData}
+          style={{ width: '100%', height: '100%' }}
+          playbackRate={0.001}
+          loop={false}
+        />
+      </div>
+      {/* Click animation (shown during click gesture) */}
+      {clickData && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: showClick ? 'block' : 'none',
+          }}
+        >
+          <Lottie
+            animationData={clickData}
+            style={{ width: '100%', height: '100%' }}
+            playbackRate={1}
+            loop={false}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -95,6 +95,8 @@ export function directorReducer(
         ...state,
         sceneDark: { ...state.sceneDark, [action.scene]: action.dark },
       };
+    case 'SET_CLICK_ANIMATION':
+      return { ...state, clickAnimation: action.animation };
     case 'SET_SIDEBAR_TAB':
       return { ...state, sidebarTab: action.tab };
     case 'SET_VIEW':

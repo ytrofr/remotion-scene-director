@@ -91,6 +91,9 @@ export interface FloatingHandProps {
   animation?: LottieAnimation;
   size?: number;
 
+  // Click animation file (swapped in on click gesture)
+  clickAnimation?: string;
+
   // Appearance
   dark?: boolean; // Use dark hand for light backgrounds
 

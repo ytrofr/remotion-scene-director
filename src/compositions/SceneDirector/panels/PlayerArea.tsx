@@ -181,19 +181,18 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
           <DrawingCanvas />
         )}
 
-        {/* FloatingHand: renders all visible hand layers */}
-        {state.selectedScene &&
-          currentScene &&
-          sceneLayers.some((l) => l.type === 'hand' && l.visible) && (
-            <FloatingHandOverlay
-              state={state}
-              sceneLayers={sceneLayers}
-              composition={composition}
-              frame={frame}
-              playerScale={playerScale}
-              currentScene={currentScene}
-            />
-          )}
+        {/* FloatingHand: renders all visible hand layers (+ bleed-over from other scenes) */}
+        {state.selectedScene && currentScene && (
+          <FloatingHandOverlay
+            state={state}
+            sceneLayers={sceneLayers}
+            composition={composition}
+            frame={frame}
+            playerScale={playerScale}
+            currentScene={currentScene}
+            allScenes={composition.scenes}
+          />
+        )}
 
         {/* Trail overlay: show markers only when playhead is within hand gesture frame range */}
         {state.selectedScene && currentScene && (

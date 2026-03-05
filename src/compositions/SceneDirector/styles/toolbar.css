@@ -84,6 +84,8 @@
   top: 100%;
   left: 0;
   min-width: 140px;
+  max-height: 360px;
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--accent);
   border-top: none;
@@ -91,6 +93,11 @@
   padding: 8px;
   z-index: 100;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.toolbar__dropdown-separator {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 4px;
 }
 .toolbar__dropdown-title {
   font-size: 10px;
@@ -122,6 +129,11 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
+}
+.toolbar__dropdown-btn--with-thumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .toolbar__dropdown-btn:hover {
   border-color: var(--border-hover);

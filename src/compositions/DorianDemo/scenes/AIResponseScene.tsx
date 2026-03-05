@@ -271,7 +271,7 @@ export const AIResponseScene: React.FC = () => {
         <FloatingHand
           path={handPath}
           startFrame={savedPath ? 0 : 70}
-          animation="hand-click"
+          animation={savedPath?.animation ?? 'cursor-real-black'}
           size={handSizeForZoom(zoomScale)}
           dark={savedPath?.dark ?? true}
           showRipple={true}

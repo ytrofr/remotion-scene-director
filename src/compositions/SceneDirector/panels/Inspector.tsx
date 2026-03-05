@@ -13,9 +13,12 @@ import { useDirector } from '../context';
 import {
   GESTURE_PRESETS,
   GESTURE_ANIMATIONS,
+  POINTER_ANIMATIONS,
+  CLICK_ANIM_DURATION,
   type GestureTool,
 } from '../gestures';
 import type { AudioLayer, ZoomLayer } from '../layers';
+import { LottieThumbnail } from '../overlays/LottieThumbnail';
 import { AudioInspector } from './AudioInspector';
 import { ActivityLog } from './ActivityLog';
 import { HistoryTab } from './HistoryTab';
@@ -147,10 +150,42 @@ export const Inspector: React.FC = () => {
                   animation: anim.id,
                 })
               }
-              className={`inspector__anim-btn ${active ? 'inspector__anim-btn--active' : ''}`}
+              className={`inspector__anim-btn inspector__anim-btn--with-thumb ${active ? 'inspector__anim-btn--active' : ''}`}
               title={anim.id}
             >
+              <LottieThumbnail
+                animationFile={anim.id}
+                size={20}
+                dark={currentDark}
+              />
               {anim.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="inspector__section-subtitle">Pointer</div>
+      <div className="inspector__anim-row">
+        {POINTER_ANIMATIONS.map((ptr) => {
+          const active = currentAnimation === ptr.id;
+          return (
+            <button
+              key={ptr.id}
+              onClick={() =>
+                dispatch({
+                  type: 'SET_SCENE_ANIMATION',
+                  scene,
+                  animation: ptr.id,
+                })
+              }
+              className={`inspector__anim-btn inspector__anim-btn--with-thumb ${active ? 'inspector__anim-btn--active' : ''}`}
+              title={ptr.id}
+            >
+              <LottieThumbnail
+                animationFile={ptr.id}
+                size={20}
+                dark={currentDark}
+              />
+              {ptr.label}
             </button>
           );
         })}
@@ -158,17 +193,17 @@ export const Inspector: React.FC = () => {
       <div className="inspector__dark-row">
         <button
           onClick={() =>
-            dispatch({ type: 'SET_SCENE_DARK', scene, dark: false })
+            dispatch({ type: 'SET_SCENE_DARK', scene, dark: true })
           }
-          className={`inspector__dark-btn ${!currentDark ? 'inspector__dark-btn--active' : ''}`}
+          className={`inspector__dark-btn ${currentDark ? 'inspector__dark-btn--active' : ''}`}
         >
           Light
         </button>
         <button
           onClick={() =>
-            dispatch({ type: 'SET_SCENE_DARK', scene, dark: true })
+            dispatch({ type: 'SET_SCENE_DARK', scene, dark: false })
           }
-          className={`inspector__dark-btn ${currentDark ? 'inspector__dark-btn--active' : ''}`}
+          className={`inspector__dark-btn ${!currentDark ? 'inspector__dark-btn--active' : ''}`}
         >
           Dark
         </button>
@@ -297,6 +332,35 @@ export const Inspector: React.FC = () => {
     dispatch({ type: 'UPDATE_WAYPOINT', scene, index: idx, point: partial });
   };
 
+  const isLastWaypoint = idx === sceneWaypoints.length - 1;
+  const hasClickEnd = waypoint.gesture === 'click';
+
+  // Add click end to movement-only bar: appends a click waypoint after the last wp
+  const handleAddClickEnd = () => {
+    const lastWp = sceneWaypoints[sceneWaypoints.length - 1];
+    const clickFrame = (lastWp.frame ?? 0) + 15; // 15f after last wp
+    dispatch({
+      type: 'ADD_WAYPOINT',
+      scene,
+      point: {
+        x: lastWp.x,
+        y: lastWp.y,
+        frame: clickFrame,
+        gesture: 'click',
+        scale: 1,
+        duration: CLICK_ANIM_DURATION,
+      },
+    });
+  };
+
+  const WP_GESTURE_OPTIONS: HandPathPoint['gesture'][] = [
+    'pointer',
+    'click',
+    'drag',
+    'scroll',
+    'open',
+  ];
+
   return (
     <div className="inspector">
       {tabSwitcher}
@@ -332,6 +396,31 @@ export const Inspector: React.FC = () => {
         onChange={(v) => update({ frame: v })}
         min={0}
       />
+
+      {/* Gesture selector per waypoint */}
+      <div className="inspector__field">
+        <span className="inspector__field-label">Gesture</span>
+        <select
+          className="inspector__gesture-select"
+          value={waypoint.gesture ?? 'pointer'}
+          onChange={(e) =>
+            update({
+              gesture: e.target.value as HandPathPoint['gesture'],
+              duration:
+                e.target.value === 'click'
+                  ? (waypoint.duration ?? CLICK_ANIM_DURATION)
+                  : waypoint.duration,
+            })
+          }
+        >
+          {WP_GESTURE_OPTIONS.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <NumField
         label="Duration"
         value={waypoint.duration ?? 0}
@@ -339,6 +428,17 @@ export const Inspector: React.FC = () => {
         min={0}
         step={5}
       />
+
+      {/* Add Click End — only on last non-click waypoint */}
+      {isLastWaypoint && !hasClickEnd && (
+        <button
+          onClick={handleAddClickEnd}
+          className="inspector__add-click-btn"
+          title="Append a click waypoint at the end of this path"
+        >
+          + Add Click End
+        </button>
+      )}
 
       {/* Delete button */}
       <button

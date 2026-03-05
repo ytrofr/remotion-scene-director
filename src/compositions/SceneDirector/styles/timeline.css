@@ -185,6 +185,22 @@
   flex-shrink: 0;
 }
 
+/* Separator handle between movement and click segments */
+.timeline__separator-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  transform: translateX(50%);
+  cursor: col-resize;
+  z-index: 3;
+  background: rgba(251, 191, 36, 0.6);
+  border-radius: 2px;
+}
+.timeline__separator-handle:hover {
+  background: rgba(251, 191, 36, 0.9);
+}
+
 /* Audio bars */
 .timeline__audio-bar {
   position: absolute;

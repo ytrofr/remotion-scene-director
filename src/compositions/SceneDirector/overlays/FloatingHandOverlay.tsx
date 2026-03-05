@@ -12,6 +12,7 @@ import {
   GESTURE_PRESETS,
   buildClickAnimationFile,
   CLICK_ANIM_DURATION,
+  MIN_CLICK_DURATION,
 } from '../gestures';
 import type { CompositionEntry, DirectorState, SceneInfo } from '../state';
 import type { Layer } from '../layers';
@@ -56,11 +57,11 @@ const SingleHandRenderer: React.FC<{
   const first = wps[0];
   const last = wps[wps.length - 1];
   const handStartGlobal = ownerScene.start + (first.frame ?? 0);
-  // Click waypoints always get at least CLICK_ANIM_DURATION so the hand stays
-  // visible for the full click animation, even if saved data has smaller values.
+  // Click waypoints stay visible for at least MIN_CLICK_DURATION (user may have
+  // shortened the duration below CLICK_ANIM_DURATION via timeline drag).
   const lastDuration =
     last.gesture === 'click'
-      ? Math.max(last.duration ?? 0, CLICK_ANIM_DURATION)
+      ? Math.max(last.duration ?? 0, MIN_CLICK_DURATION)
       : (last.duration ?? 0);
   const handEndGlobal = ownerScene.start + (last.frame ?? 0) + lastDuration;
 
@@ -82,6 +83,14 @@ const SingleHandRenderer: React.FC<{
     state.clickAnimation,
   );
 
+  // Compute click animation speed: scales proportionally to user-set duration
+  // speed = CLICK_ANIM_DURATION / actual_duration (normal=1.0 at 45f, faster when shorter)
+  const clickSpeed =
+    last.gesture === 'click'
+      ? CLICK_ANIM_DURATION /
+        Math.max(MIN_CLICK_DURATION, last.duration ?? CLICK_ANIM_DURATION)
+      : undefined;
+
   return (
     <FloatingHand
       frame={handFrame}
@@ -93,6 +102,7 @@ const SingleHandRenderer: React.FC<{
       dark={dark}
       physics={{ ...DEFAULT_PHYSICS, ...preset.physics }}
       clickAnimation={clickAnimFile}
+      clickSpeed={clickSpeed}
     />
   );
 };

@@ -44,7 +44,7 @@
   "DorianDemo": {
     "2-HomeScroll": {
       "gesture": "scroll",
-      "animation": "hand-scroll-clean",
+      "animation": "cursor-real-black",
       "path": [
         {
           "x": 1050,
@@ -110,46 +110,34 @@
           "scale": 1,
           "rotation": 0
         }
-      ]
+      ],
+      "dark": false
     },
     "3-TapBubble": {
       "gesture": "click",
-      "animation": "hand-click",
+      "animation": "cursor-real-black",
       "path": [
         {
-          "x": 780,
-          "y": 1200,
+          "x": 855,
+          "y": 1016,
           "frame": 0,
           "gesture": "pointer",
           "scale": 1
         },
         {
-          "x": 800,
-          "y": 1400,
-          "frame": 20,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 818,
-          "y": 1546,
-          "frame": 35,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 790,
-          "y": 1420,
-          "frame": 45,
+          "x": 959,
+          "y": 1482,
+          "frame": 65,
           "gesture": "click",
-          "scale": 1,
+          "scale": 1.5,
           "duration": 2
         }
-      ]
+      ],
+      "dark": false
     },
     "4-ChatOpen": {
       "gesture": "click",
-      "animation": "hand-click",
+      "animation": "cursor-real-black",
       "path": [
         {
           "x": 957,
@@ -170,7 +158,7 @@
     },
     "8-ProductPage": {
       "gesture": "scroll",
-      "animation": "hand-scroll-clean",
+      "animation": "cursor-real-black",
       "path": [
         {
           "x": 1050,
@@ -228,11 +216,12 @@
           "scale": 1,
           "rotation": 0
         }
-      ]
+      ],
+      "dark": false
     },
     "7-AIResponse": {
       "gesture": "click",
-      "animation": "hand-click",
+      "animation": "cursor-real-black",
       "path": [
         {
           "x": 540,
@@ -242,31 +231,24 @@
           "scale": 1
         },
         {
-          "x": 540,
-          "y": 1480,
-          "frame": 85,
-          "gesture": "pointer",
-          "scale": 1
-        },
-        {
-          "x": 540,
-          "y": 1450,
+          "x": 368,
+          "y": 1351,
           "frame": 95,
           "gesture": "click",
           "scale": 1,
           "duration": 10
         }
       ],
-      "dark": true
+      "dark": false
     },
     "5-UserTyping": {
       "gesture": "click",
-      "animation": "hand-click",
+      "animation": "cursor-real-black",
       "path": [
         {
           "x": 482,
           "y": 1666,
-          "frame": 76,
+          "frame": 71,
           "gesture": "pointer",
           "scale": 1
         },
@@ -276,9 +258,17 @@
           "frame": 106,
           "gesture": "pointer",
           "scale": 1
+        },
+        {
+          "x": 969,
+          "y": 1658,
+          "frame": 106,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 12
         }
       ],
-      "dark": true
+      "dark": false
     }
   }
 }

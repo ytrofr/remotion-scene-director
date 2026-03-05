@@ -210,7 +210,7 @@ export const ChatOpenScene: React.FC = () => {
         <FloatingHand
           path={handPath}
           startFrame={0}
-          animation="hand-click"
+          animation={savedChatOpen?.animation ?? 'cursor-real-black'}
           size={handSizeForZoom(zoomScale)}
           dark={savedChatOpen?.dark ?? true}
           showRipple={true}

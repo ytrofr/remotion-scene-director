@@ -208,25 +208,65 @@ export function handleLayerAction(
         }
       }
 
-      if (newLayers.length === 0) return state;
-
-      const layers = [...existing, ...newLayers];
-      const newState: DirectorState = {
-        ...state,
-        layers: { ...state.layers, [action.scene]: layers },
-        selectedLayerId: newLayers[0].id,
-      };
-      // Also adopt waypoints into flat state if they came from coded path
+      // ── Initialize gesture/animation/dark from codedPaths (always, even if layers exist) ──
       const coded = action.codedPath;
-      if ((!waypoints || waypoints.length === 0) && coded?.path?.length) {
-        newState.waypoints = { ...state.waypoints, [action.scene]: coded.path };
+      let newState: DirectorState = state;
+      let changed = false;
+
+      if (newLayers.length > 0) {
+        const layers = [...existing, ...newLayers];
+        newState = {
+          ...state,
+          layers: { ...state.layers, [action.scene]: layers },
+          selectedLayerId: newLayers[0].id,
+        };
+        changed = true;
+        // Also adopt waypoints into flat state if they came from coded path
+        if ((!waypoints || waypoints.length === 0) && coded?.path?.length) {
+          newState.waypoints = {
+            ...state.waypoints,
+            [action.scene]: coded.path,
+          };
+        }
       }
-      if (!state.sceneGesture[action.scene] && coded?.gesture) {
+
+      if (!newState.sceneGesture[action.scene] && coded?.gesture) {
+        newState = changed ? newState : { ...state };
+        changed = true;
         newState.sceneGesture = {
-          ...state.sceneGesture,
+          ...newState.sceneGesture,
           [action.scene]: coded.gesture as GestureTool,
         };
       }
+      if (newState.sceneDark[action.scene] === undefined && coded) {
+        newState = changed ? newState : { ...state };
+        changed = true;
+        const gesture2: GestureTool =
+          newState.sceneGesture[action.scene] ??
+          (coded.gesture as GestureTool) ??
+          'click';
+        const darkValue = coded.dark ?? GESTURE_PRESETS[gesture2].dark;
+        newState.sceneDark = {
+          ...newState.sceneDark,
+          [action.scene]: darkValue,
+        };
+      }
+      if (newState.sceneAnimation[action.scene] === undefined) {
+        newState = changed ? newState : { ...state };
+        changed = true;
+        const gesture3: GestureTool =
+          newState.sceneGesture[action.scene] ??
+          (coded?.gesture as GestureTool) ??
+          'click';
+        newState.sceneAnimation = {
+          ...newState.sceneAnimation,
+          [action.scene]:
+            coded?.animation ?? GESTURE_PRESETS[gesture3].animation,
+        };
+      }
+
+      if (!changed) return state;
+
       // Snapshot initial state for Revert (only if no saved snapshot exists yet)
       if (!state.savedSnapshots[action.scene]) {
         const snapGesture: GestureTool =
@@ -234,12 +274,11 @@ export function handleLayerAction(
           (coded?.gesture as GestureTool) ??
           'click';
         const snapAnim =
-          newState.sceneAnimation?.[action.scene] ??
-          state.sceneAnimation[action.scene] ??
+          newState.sceneAnimation[action.scene] ??
+          coded?.animation ??
           GESTURE_PRESETS[snapGesture].animation;
         const snapDark =
-          newState.sceneDark?.[action.scene] ??
-          state.sceneDark[action.scene] ??
+          newState.sceneDark[action.scene] ??
           coded?.dark ??
           GESTURE_PRESETS[snapGesture].dark;
         newState.savedSnapshots = {
@@ -254,28 +293,6 @@ export function handleLayerAction(
             animation: snapAnim,
             dark: snapDark,
           },
-        };
-      }
-      // Persist computed dark/animation fallbacks so they survive scene switches
-      if (state.sceneDark[action.scene] === undefined) {
-        const gesture2: GestureTool =
-          newState.sceneGesture[action.scene] ??
-          (coded?.gesture as GestureTool) ??
-          'click';
-        const darkValue = coded?.dark ?? GESTURE_PRESETS[gesture2].dark;
-        newState.sceneDark = {
-          ...(newState.sceneDark || state.sceneDark),
-          [action.scene]: darkValue,
-        };
-      }
-      if (state.sceneAnimation[action.scene] === undefined) {
-        const gesture3: GestureTool =
-          newState.sceneGesture[action.scene] ??
-          (coded?.gesture as GestureTool) ??
-          'click';
-        newState.sceneAnimation = {
-          ...(newState.sceneAnimation || state.sceneAnimation),
-          [action.scene]: GESTURE_PRESETS[gesture3].animation,
         };
       }
       return newState;

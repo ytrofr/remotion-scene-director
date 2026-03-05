@@ -245,7 +245,7 @@ export const UserTypingScene: React.FC = () => {
         <FloatingHand
           path={sendHandPath}
           startFrame={savedTyping ? 0 : 70}
-          animation="hand-click"
+          animation={savedTyping?.animation ?? 'cursor-real-black'}
           size={handSizeForZoom(zoomScale)}
           dark={savedTyping?.dark ?? true}
           showRipple={true}

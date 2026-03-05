@@ -328,6 +328,9 @@ export const POINTER_ANIMATIONS: { id: string; label: string }[] = [
 // Click animation duration in video frames (90 Lottie frames @ 60fps = 1.5s → 45 frames @ 30fps)
 export const CLICK_ANIM_DURATION = 45;
 
+// Minimum click duration when user resizes via timeline drag (frames)
+export const MIN_CLICK_DURATION = 10;
+
 // Click animation styles (for toolbar picker)
 export const CLICK_ANIMATIONS: { id: string; label: string }[] = [
   { id: 'click', label: 'Press' },

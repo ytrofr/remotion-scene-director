@@ -8,6 +8,7 @@ import {
   HandGesture,
   DEFAULT_PHYSICS,
 } from './types';
+import { MIN_CLICK_DURATION } from '../../compositions/SceneDirector/gestures';
 
 /**
  * Custom smooth easing - starts slow, accelerates, then decelerates smoothly
@@ -152,7 +153,9 @@ function computeHandStateInner(
     // predate the click animation feature.
     const rawDuration = point.duration ?? 0;
     const duration =
-      point.gesture === 'click' ? Math.max(rawDuration, 45) : rawDuration;
+      point.gesture === 'click'
+        ? Math.max(rawDuration, MIN_CLICK_DURATION)
+        : rawDuration;
     if (duration) {
       // Add a hold point at the end of the pause so the hand stays in place
       // with the same gesture during the entire pause window.

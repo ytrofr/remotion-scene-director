@@ -221,6 +221,11 @@ export const DrawingCanvas: React.FC = () => {
       // Drag → 2 waypoints: first + last position
       const first = rawScene[0];
       const last = rawScene[rawScene.length - 1];
+      // Last waypoint uses 'click' gesture for click tool (triggers ripple)
+      const lastGesture =
+        state.activeTool === 'click'
+          ? ('click' as const)
+          : ('pointer' as const);
       const newWaypoints: HandPathPoint[] = [
         {
           x: first.x,
@@ -233,7 +238,7 @@ export const DrawingCanvas: React.FC = () => {
           x: last.x,
           y: last.y,
           frame: Math.min(localFrame + 30, sceneDuration),
-          gesture: 'pointer' as const,
+          gesture: lastGesture,
           scale: 1,
         },
       ];

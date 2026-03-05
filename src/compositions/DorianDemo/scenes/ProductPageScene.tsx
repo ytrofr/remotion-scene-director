@@ -236,7 +236,7 @@ export const ProductPageScene: React.FC = () => {
         <FloatingHand
           path={scrollHandPath}
           startFrame={savedScroll ? 0 : 105}
-          animation="hand-scroll-clean"
+          animation={savedScroll?.animation ?? 'cursor-real-black'}
           size={handSizeForZoom(zoomScale)}
           dark={savedScroll?.dark ?? true}
           showRipple={false}

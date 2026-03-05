@@ -1,13 +1,21 @@
 /**
- * AudioLayerRenderer - Injects <Audio> elements from SceneDirector audio layers.
- * Used as a wrapper around composition components so audio layers actually play.
+ * AudioLayerRenderer - Injects <Audio> elements from SceneDirector user-added audio layers.
+ *
+ * Architecture: AudioEntriesContext is provided ABOVE the Remotion Player in PlayerArea.
+ * AudioFromLayers is rendered INSIDE each composition (e.g. DorianDemo).
+ * This avoids HOC wrappers that change the Player's component prop and cause remounts.
+ *
+ * Coded audio (baseline SFX) is handled by DorianAudio directly — not through this context.
+ * This context only carries user-added audio layers from SceneDirector.
+ *
+ * - SceneDirector: context has user audio layer entries → AudioFromLayers plays them
+ * - Remotion Studio: no provider → default [] → AudioFromLayers renders nothing
  */
 
 import React, { createContext, useContext } from 'react';
 import { Audio, Sequence, staticFile } from 'remotion';
-import type { AudioLayer } from './layers';
 
-interface AudioEntry {
+export interface AudioEntry {
   id: string;
   file: string;
   globalFrom: number;
@@ -15,39 +23,25 @@ interface AudioEntry {
   volume: number;
 }
 
-const AudioEntriesContext = createContext<AudioEntry[]>([]);
+export const AudioEntriesContext = createContext<AudioEntry[]>([]);
 
 /**
  * Renders Audio elements from context. Place inside a Remotion composition.
+ * When no AudioEntriesContext provider exists (e.g. Remotion Studio), renders nothing.
  */
 export const AudioFromLayers: React.FC = () => {
   const entries = useContext(AudioEntriesContext);
   return (
     <>
-      {entries.map(e => (
-        <Sequence key={e.id} from={e.globalFrom} durationInFrames={e.durationInFrames || 60}>
+      {entries.map((e) => (
+        <Sequence
+          key={e.id}
+          from={e.globalFrom}
+          durationInFrames={e.durationInFrames || 60}
+        >
           <Audio src={staticFile(e.file)} volume={e.volume} />
         </Sequence>
       ))}
     </>
   );
 };
-
-/**
- * Creates a wrapped component that renders the original + audio layers.
- */
-export function withAudioLayers(
-  Component: React.FC,
-  audioEntries: AudioEntry[],
-): React.FC {
-  const Wrapped: React.FC = () => (
-    <AudioEntriesContext.Provider value={audioEntries}>
-      <Component />
-      <AudioFromLayers />
-    </AudioEntriesContext.Provider>
-  );
-  Wrapped.displayName = `WithAudio(${Component.displayName || Component.name})`;
-  return Wrapped;
-}
-
-export type { AudioEntry };

@@ -97,12 +97,32 @@ const DORIAN_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
 };
 
+const AUDIO_TEST_AUDIO: Record<string, CodedAudioEntry[]> = {
+  '1-Blue': [
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 30,
+      durationInFrames: 15,
+      volume: 0.8,
+    },
+  ],
+  '2-Green': [
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 45,
+      durationInFrames: 15,
+      volume: 0.8,
+    },
+  ],
+};
+
 const CODED_AUDIO_REGISTRY: Record<
   string,
   Record<string, CodedAudioEntry[]>
 > = {
   MobileChatDemoCombined: COMBINED_AUDIO,
   DorianDemo: DORIAN_AUDIO,
+  AudioTest: AUDIO_TEST_AUDIO,
 };
 
 export function getCodedAudio(

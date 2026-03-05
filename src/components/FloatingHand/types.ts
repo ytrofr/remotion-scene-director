@@ -94,6 +94,9 @@ export interface FloatingHandProps {
   // Click animation file (swapped in on click gesture)
   clickAnimation?: string;
 
+  // Click animation speed (scales with user-set duration: 45/duration)
+  clickSpeed?: number;
+
   // Appearance
   dark?: boolean; // Use dark hand for light backgrounds
 

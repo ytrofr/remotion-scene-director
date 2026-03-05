@@ -12,10 +12,11 @@ import {
 } from 'react';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { DirectorState, DirectorAction } from '../state.types';
+import { MIN_CLICK_DURATION } from '../gestures';
 
 // ─── Shared types ───────────────────────────────────────────────
 
-type DragEdge = 'left' | 'right' | 'move';
+type DragEdge = 'left' | 'right' | 'move' | 'separator';
 
 interface AudioDragState {
   layerId: string;
@@ -275,57 +276,158 @@ export function useHandDrag({
           });
         }
       } else {
-        // Multi-waypoint: proportionally scale all waypoint frames
+        // Multi-waypoint: click-aware proportional scaling
         const firstFrame = wps[0].frame ?? 0;
-        const lastFrame = wps[wps.length - 1].frame ?? 0;
-        const origSpan = lastFrame - firstFrame;
-        if (origSpan <= 0) return;
+        const lastWp = wps[wps.length - 1];
+        const lastFrame = lastWp.frame ?? 0;
+        const hasClickEnd = lastWp.gesture === 'click';
+        const moveWps = hasClickEnd ? wps.slice(0, -1) : wps;
+        const origMoveSpan =
+          moveWps.length > 1
+            ? (moveWps[moveWps.length - 1].frame ?? 0) - firstFrame
+            : lastFrame - firstFrame;
 
-        let newFirstFrame = firstFrame;
-        let newLastFrame = lastFrame;
-        if (handDrag.edge === 'left') {
-          newFirstFrame = Math.max(0, firstFrame + deltaFrames);
-          // Don't let left edge pass right edge
+        if (
+          handDrag.edge === 'separator' &&
+          hasClickEnd &&
+          moveWps.length > 0
+        ) {
+          // ── Separator: move click boundary, scale movement proportionally ──
+          const newClickFrame = Math.max(
+            firstFrame + 1,
+            lastFrame + deltaFrames,
+          );
+          const newMoveSpan = newClickFrame - firstFrame;
+          const scaled = wps.map((wp, i) => {
+            if (i === wps.length - 1) {
+              // Click waypoint: change frame, keep duration
+              return { ...wp, frame: newClickFrame };
+            }
+            // Movement waypoints: scale proportionally
+            if (origMoveSpan <= 0) return wp;
+            const f = wp.frame ?? 0;
+            const relativePos = (f - firstFrame) / origMoveSpan;
+            return {
+              ...wp,
+              frame: Math.round(firstFrame + relativePos * newMoveSpan),
+            };
+          });
+          if (handDrag.layerId) {
+            dispatch({
+              type: 'UPDATE_LAYER_DATA',
+              scene: handDrag.scene,
+              layerId: handDrag.layerId,
+              data: { waypoints: scaled },
+            });
+          } else {
+            dispatch({
+              type: 'SET_WAYPOINTS',
+              scene: handDrag.scene,
+              waypoints: scaled,
+            });
+          }
+        } else if (handDrag.edge === 'right' && hasClickEnd) {
+          // ── Right edge on click bar: only change click duration ──
+          const newDuration = Math.max(
+            MIN_CLICK_DURATION,
+            (lastWp.duration ?? 0) + deltaFrames,
+          );
+          if (handDrag.layerId) {
+            const updated = wps.map((wp, i) =>
+              i === wps.length - 1 ? { ...wp, duration: newDuration } : wp,
+            );
+            dispatch({
+              type: 'UPDATE_LAYER_DATA',
+              scene: handDrag.scene,
+              layerId: handDrag.layerId,
+              data: { waypoints: updated },
+            });
+          } else {
+            dispatch({
+              type: 'UPDATE_WAYPOINT',
+              scene: handDrag.scene,
+              index: wps.length - 1,
+              point: { duration: newDuration },
+            });
+          }
+        } else if (handDrag.edge === 'left' && hasClickEnd && wps.length > 1) {
+          // ── Left edge on click bar: scale movement only, click untouched ──
+          const origSpan = lastFrame - firstFrame;
+          if (origSpan <= 0) return;
+          let newFirstFrame = Math.max(0, firstFrame + deltaFrames);
           if (newFirstFrame >= lastFrame) newFirstFrame = lastFrame - 1;
-        } else {
-          newLastFrame = Math.max(firstFrame + 1, lastFrame + deltaFrames);
-        }
-        const newSpan = newLastFrame - newFirstFrame;
-
-        const scaled = wps.map((wp) => {
-          const f = wp.frame ?? 0;
-          const relativePos = (f - firstFrame) / origSpan;
-          return {
-            ...wp,
-            frame: Math.round(newFirstFrame + relativePos * newSpan),
-          };
-        });
-        if (handDrag.layerId) {
-          dispatch({
-            type: 'UPDATE_LAYER_DATA',
-            scene: handDrag.scene,
-            layerId: handDrag.layerId,
-            data: { waypoints: scaled },
+          const newSpan = lastFrame - newFirstFrame;
+          const scaled = wps.map((wp, i) => {
+            if (i === wps.length - 1) return wp; // Click wp untouched
+            const f = wp.frame ?? 0;
+            const relativePos = (f - firstFrame) / origSpan;
+            return {
+              ...wp,
+              frame: Math.round(newFirstFrame + relativePos * newSpan),
+            };
           });
+          if (handDrag.layerId) {
+            dispatch({
+              type: 'UPDATE_LAYER_DATA',
+              scene: handDrag.scene,
+              layerId: handDrag.layerId,
+              data: { waypoints: scaled },
+            });
+          } else {
+            dispatch({
+              type: 'SET_WAYPOINTS',
+              scene: handDrag.scene,
+              waypoints: scaled,
+            });
+          }
         } else {
-          dispatch({
-            type: 'SET_WAYPOINTS',
-            scene: handDrag.scene,
-            waypoints: scaled,
+          // ── Default: proportionally scale ALL waypoint frames (non-click bars) ──
+          const origSpan = lastFrame - firstFrame;
+          if (origSpan <= 0) return;
+          let newFirstFrame = firstFrame;
+          let newLastFrame = lastFrame;
+          if (handDrag.edge === 'left') {
+            newFirstFrame = Math.max(0, firstFrame + deltaFrames);
+            if (newFirstFrame >= lastFrame) newFirstFrame = lastFrame - 1;
+          } else {
+            newLastFrame = Math.max(firstFrame + 1, lastFrame + deltaFrames);
+          }
+          const newSpan = newLastFrame - newFirstFrame;
+          const scaled = wps.map((wp) => {
+            const f = wp.frame ?? 0;
+            const relativePos = (f - firstFrame) / origSpan;
+            return {
+              ...wp,
+              frame: Math.round(newFirstFrame + relativePos * newSpan),
+            };
           });
+          if (handDrag.layerId) {
+            dispatch({
+              type: 'UPDATE_LAYER_DATA',
+              scene: handDrag.scene,
+              layerId: handDrag.layerId,
+              data: { waypoints: scaled },
+            });
+          } else {
+            dispatch({
+              type: 'SET_WAYPOINTS',
+              scene: handDrag.scene,
+              waypoints: scaled,
+            });
+          }
         }
       }
     };
     const handleUp = () => {
-      const label =
-        handDrag.edge === 'move'
-          ? 'Move'
-          : handDrag.edge === 'left'
-            ? 'Trim start'
-            : 'Trim end';
+      const labelMap: Record<DragEdge, string> = {
+        move: 'Move',
+        left: 'Trim start',
+        right: 'Trim end',
+        separator: 'Move separator',
+      };
       dispatch({
         type: 'LOG_ACTIVITY',
-        action: `${label} hand`,
+        action: `${labelMap[handDrag.edge]} hand`,
         scene: handDrag.scene,
         snapshot: handDrag.preDragState,
       });

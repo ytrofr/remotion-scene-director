@@ -17,6 +17,7 @@ interface Props {
   animationFile?: LottieAnimation;
   dark?: boolean;
   clickAnimationFile?: string;
+  clickSpeed?: number;
 }
 
 export const LottieHandStandalone: React.FC<Props> = memo(
@@ -26,6 +27,7 @@ export const LottieHandStandalone: React.FC<Props> = memo(
     animationFile = 'hand-click',
     dark = false,
     clickAnimationFile,
+    clickSpeed,
   }) => {
     const baseRef = useRef<HTMLDivElement>(null);
     const clickRef = useRef<HTMLDivElement>(null);
@@ -135,7 +137,7 @@ export const LottieHandStandalone: React.FC<Props> = memo(
         !clickPlaying
       ) {
         setClickPlaying(true);
-        clickAnimRef.current.setSpeed(1);
+        clickAnimRef.current.setSpeed(clickSpeed ?? 1);
         clickAnimRef.current.goToAndPlay(0, true);
       }
     }, [gesture, clickLoaded, clickPlaying]);

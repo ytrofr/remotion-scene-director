@@ -156,7 +156,7 @@ const COMBINED_PATHS: Record<string, CodedPath> = {
 const DORIAN_PATHS: Record<string, CodedPath> = {
   '2-HomeScroll': {
     gesture: 'scroll',
-    animation: 'hand-scroll-clean',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       { x: 1050, y: 960, frame: 0, gesture: 'pointer', scale: 1, rotation: 0 },
@@ -171,7 +171,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
   '3-TapBubble': {
     gesture: 'click',
-    animation: 'hand-click',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 },
@@ -182,7 +182,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
   '4-ChatOpen': {
     gesture: 'click',
-    animation: 'hand-click',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 },
@@ -194,7 +194,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
   '5-UserTyping': {
     gesture: 'click',
-    animation: 'hand-click',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       { x: 750, y: 1520, frame: 70, gesture: 'pointer', scale: 1 },
@@ -205,7 +205,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
   '7-AIResponse': {
     gesture: 'click',
-    animation: 'hand-click',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       { x: 540, y: 1600, frame: 70, gesture: 'pointer', scale: 1 },
@@ -215,7 +215,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
   '8-ProductPage': {
     gesture: 'scroll',
-    animation: 'hand-scroll-clean',
+    animation: 'cursor-real-black',
     dark: true,
     path: [
       {

@@ -160,6 +160,7 @@ const FloatingHandStandalone: React.FC<
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   physics: physicsOverrides,
   clickAnimation,
+  clickSpeed,
 }) => {
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
@@ -242,6 +243,7 @@ const FloatingHandStandalone: React.FC<
           animationFile={animation}
           dark={dark}
           clickAnimationFile={clickAnimation}
+          clickSpeed={clickSpeed}
         />
       </div>
     </div>

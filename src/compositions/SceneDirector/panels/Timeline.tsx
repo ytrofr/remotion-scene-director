@@ -10,7 +10,7 @@ import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDirector } from '../context';
 import { useAudioDrag, useHandDrag } from './useTimelineDrag';
 import { useHandLayers, useAudioRows } from './useTimelineData';
-import { CLICK_ANIM_DURATION } from '../gestures';
+import { MIN_CLICK_DURATION } from '../gestures';
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2];
 const ROW_HEIGHT = 22;
@@ -278,14 +278,14 @@ export const Timeline: React.FC = () => {
                   wps && wps.length > 0 ? wps[wps.length - 1] : null;
                 const hasClickEnd = lastWp?.gesture === 'click';
                 const clickDuration = hasClickEnd
-                  ? Math.max(lastWp.duration ?? 0, CLICK_ANIM_DURATION)
+                  ? Math.max(lastWp.duration ?? 0, MIN_CLICK_DURATION)
                   : 0;
                 if (wps && wps.length > 0) {
                   const firstFrame = wps[0].frame ?? 0;
                   const lastFrame = wps[wps.length - 1].frame ?? 0;
-                  // Click waypoints always get at least CLICK_ANIM_DURATION
+                  // Click waypoints get at least MIN_CLICK_DURATION
                   const duration = hasClickEnd
-                    ? Math.max(lastWp!.duration ?? 0, CLICK_ANIM_DURATION)
+                    ? Math.max(lastWp!.duration ?? 0, MIN_CLICK_DURATION)
                     : (lastWp!.duration ?? 0);
                   wpFrame = firstFrame;
                   wpDuration = duration;
@@ -358,6 +358,35 @@ export const Timeline: React.FC = () => {
                             e,
                             sceneName,
                             'left',
+                            wpFrame,
+                            wpDuration,
+                            wps || [],
+                            isSecondary ? layer.id : null,
+                          );
+                        }}
+                      />
+                    )}
+                    {/* Separator handle between movement and click */}
+                    {isSelected && hasClickEnd && wps && wps.length > 1 && (
+                      <div
+                        className="timeline__separator-handle"
+                        style={{
+                          right: `${(clickDuration / (globalEnd - globalStart)) * 100}%`,
+                        }}
+                        onMouseDown={(e) => {
+                          const sceneLayers = state.layers[sceneName] || [];
+                          const primaryIdx = sceneLayers.findIndex(
+                            (l) => l.type === 'hand',
+                          );
+                          const selIdx = sceneLayers.findIndex(
+                            (l) => l.id === layer.id,
+                          );
+                          const isSecondary =
+                            selIdx >= 0 && selIdx !== primaryIdx;
+                          handleHandEdgeDown(
+                            e,
+                            sceneName,
+                            'separator',
                             wpFrame,
                             wpDuration,
                             wps || [],

@@ -25,8 +25,14 @@ export const HandCursorPreview: React.FC<Props> = ({ x, y, preset }) => {
   // Scale hand to match the player viewport size, then apply user multiplier
   const scaledSize = Math.round(preset.size * playerScale * cursorScale);
 
-  // Use scene-level dark override if set, otherwise fall back to preset default
-  const isDark = (state.selectedScene ? state.sceneDark[state.selectedScene] : undefined) ?? preset.dark;
+  // Use scene-level overrides if set, otherwise fall back to preset defaults
+  const isDark =
+    (state.selectedScene ? state.sceneDark[state.selectedScene] : undefined) ??
+    preset.dark;
+  const animationFile =
+    (state.selectedScene
+      ? state.sceneAnimation[state.selectedScene]
+      : undefined) ?? preset.animation;
 
   return (
     <>
@@ -45,7 +51,7 @@ export const HandCursorPreview: React.FC<Props> = ({ x, y, preset }) => {
         <LottieHandStandalone
           gesture="pointer"
           size={scaledSize}
-          animationFile={preset.animation}
+          animationFile={animationFile}
           dark={isDark}
         />
       </div>
@@ -55,18 +61,31 @@ export const HandCursorPreview: React.FC<Props> = ({ x, y, preset }) => {
         <svg
           style={{
             position: 'absolute',
-            top: 0, left: 0,
-            width: '100%', height: '100%',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
             pointerEvents: 'none',
             zIndex: 14,
           }}
           viewBox={`0 0 ${compWidth} ${compHeight}`}
           preserveAspectRatio="none"
         >
-          <rect x={x! + 14} y={y! - 24} width={80} height={20}
-            rx={3} fill="rgba(0,0,0,0.8)" />
-          <text x={x! + 18} y={y! - 10}
-            fill="#58a6ff" fontSize={12} fontFamily="monospace">
+          <rect
+            x={x! + 14}
+            y={y! - 24}
+            width={80}
+            height={20}
+            rx={3}
+            fill="rgba(0,0,0,0.8)"
+          />
+          <text
+            x={x! + 18}
+            y={y! - 10}
+            fill="#58a6ff"
+            fontSize={12}
+            fontFamily="monospace"
+          >
             {x},{y}
           </text>
         </svg>

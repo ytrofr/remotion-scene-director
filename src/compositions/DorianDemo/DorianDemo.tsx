@@ -21,6 +21,8 @@ import {
 import { GESTURE_PRESETS } from '../SceneDirector/gestures';
 import { FloatingHand } from '../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
+import { useSceneDirectorMode } from '../../components/FloatingHand/SceneDirectorMode';
+import { AudioFromLayers } from '../SceneDirector/AudioLayerRenderer';
 
 // ============ CENTRALIZED AUDIO ============
 // All audio is driven from the coded audio registry (layers.ts).
@@ -80,10 +82,9 @@ const SCENE_ENTRIES = [
 ];
 
 const DorianAudio: React.FC = () => {
-  // In SceneDirector, audio is injected via withAudioLayers() HOC — skip to avoid double playback
-  const isSceneDirector =
-    typeof window !== 'undefined' &&
-    window.location.pathname.includes('scene-director');
+  // In SceneDirector, audio is played through audio LAYERS (bars in timeline).
+  // DorianAudio only renders in Remotion Studio where there are no layers.
+  const isSceneDirector = useSceneDirectorMode();
   if (isSceneDirector) return null;
 
   const audioElements: React.ReactElement[] = [];
@@ -110,9 +111,7 @@ const DorianAudio: React.FC = () => {
 // from the coded paths registry. Same skip-in-SceneDirector pattern as DorianAudio.
 
 const DorianSecondaryHands: React.FC = () => {
-  const isSceneDirector =
-    typeof window !== 'undefined' &&
-    window.location.pathname.includes('scene-director');
+  const isSceneDirector = useSceneDirectorMode();
   if (isSceneDirector) return null;
 
   const elements: React.ReactElement[] = [];
@@ -132,7 +131,7 @@ const DorianSecondaryHands: React.FC = () => {
           <FloatingHand
             path={layer.path}
             startFrame={0}
-            animation={preset.animation}
+            animation={codedPath?.animation ?? preset.animation}
             size={preset.size}
             showRipple={preset.showRipple}
             dark={dark}
@@ -150,8 +149,9 @@ const DorianSecondaryHands: React.FC = () => {
 export const DorianDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>
-      {/* Audio layer — single source of truth */}
+      {/* Audio: DorianAudio renders coded SFX (always). AudioFromLayers renders user-added audio from SceneDirector context. */}
       <DorianAudio />
+      <AudioFromLayers />
       {/* Secondary hand layers from SceneDirector */}
       <DorianSecondaryHands />
 
@@ -252,7 +252,7 @@ export const DORIAN_SCENE_INFO = [
     name: '2-HomeScroll',
     start: SCENES.homeScroll.start,
     end: SCENES.homeScroll.start + SCENES.homeScroll.duration,
-    hand: 'hand-scroll-clean',
+    hand: 'cursor-real-black',
     gesture: 'drag (scroll)',
     zoom: 1.8,
   },
@@ -260,7 +260,7 @@ export const DORIAN_SCENE_INFO = [
     name: '3-TapBubble',
     start: SCENES.tapBubble.start,
     end: SCENES.tapBubble.start + SCENES.tapBubble.duration,
-    hand: 'hand-click',
+    hand: 'cursor-real-black',
     gesture: 'pointer → click',
     zoom: 2.75,
   },
@@ -268,7 +268,7 @@ export const DORIAN_SCENE_INFO = [
     name: '4-ChatOpen',
     start: SCENES.chatOpen.start,
     end: SCENES.chatOpen.start + SCENES.chatOpen.duration,
-    hand: 'hand-click',
+    hand: 'cursor-real-black',
     gesture: 'pointer → click (input box) → hide',
     zoom: 2.75,
   },
@@ -276,7 +276,7 @@ export const DORIAN_SCENE_INFO = [
     name: '5-UserTyping',
     start: SCENES.userTyping.start,
     end: SCENES.userTyping.start + SCENES.userTyping.duration,
-    hand: 'hand-click',
+    hand: 'cursor-real-black',
     gesture: 'pointer → click (send btn)',
     zoom: 2.75,
   },
@@ -292,7 +292,7 @@ export const DORIAN_SCENE_INFO = [
     name: '7-AIResponse',
     start: SCENES.aiResponse.start,
     end: SCENES.aiResponse.start + SCENES.aiResponse.duration,
-    hand: 'hand-click',
+    hand: 'cursor-real-black',
     gesture: 'pointer → click (View Products)',
     zoom: 2.75,
   },
@@ -300,7 +300,7 @@ export const DORIAN_SCENE_INFO = [
     name: '8-ProductPage',
     start: SCENES.productPage.start,
     end: SCENES.productPage.start + SCENES.productPage.duration,
-    hand: 'hand-scroll-clean',
+    hand: 'cursor-real-black',
     gesture: 'drag (scroll listing)',
     zoom: 1.8,
   },

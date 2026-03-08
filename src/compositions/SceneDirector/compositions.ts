@@ -22,6 +22,11 @@ import {
   DASHMOR_SCENE_TIMINGS,
   VIDEO as DASHMOR_VIDEO,
 } from '../DashmorDemo';
+import {
+  AudioTest,
+  AUDIO_TEST_VIDEO,
+  AUDIO_TEST_SCENES,
+} from '../AudioTest/AudioTest';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -78,6 +83,21 @@ export const COMPOSITIONS: CompositionEntry[] = [
     },
     scenes: dashmorSceneInfo(),
   },
+  {
+    id: 'AudioTest',
+    label: 'Audio Test (2 scenes)',
+    video: {
+      width: AUDIO_TEST_VIDEO.width,
+      height: AUDIO_TEST_VIDEO.height,
+      fps: AUDIO_TEST_VIDEO.fps,
+      frames: AUDIO_TEST_VIDEO.durationInFrames,
+    },
+    scenes: AUDIO_TEST_SCENES.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
 ];
 
 // Component map for rendering
@@ -85,4 +105,5 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   MobileChatDemoCombined,
   DorianDemo,
   DashmorDemo,
+  AudioTest,
 };

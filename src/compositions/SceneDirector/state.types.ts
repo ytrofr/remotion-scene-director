@@ -82,6 +82,8 @@ export interface DirectorState {
   currentView: 'editor' | 'gallery';
   // Version history (per scene, appended on each Save)
   versionHistory: Record<string, VersionEntry[]>;
+  // Global click animation style (e.g. 'click-burst', 'click-burst-soft', 'click')
+  clickAnimation: string;
 }
 
 // Actions
@@ -112,6 +114,7 @@ export type DirectorAction =
     }
   | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
   | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
+  | { type: 'SET_CLICK_ANIMATION'; animation: string }
   | { type: 'REVERT_SCENE'; scene: string }
   | { type: 'MARK_SAVED'; scene: string }
   | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
@@ -193,4 +196,5 @@ export const initialState: DirectorState = {
   sidebarTab: 'editor',
   currentView: 'editor',
   versionHistory: {},
+  clickAnimation: 'click-burst',
 };

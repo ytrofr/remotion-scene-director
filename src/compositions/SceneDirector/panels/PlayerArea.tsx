@@ -6,6 +6,7 @@
 import React from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
 import { SceneDirectorModeProvider } from '../../../components/FloatingHand/SceneDirectorMode';
+import { AudioEntriesContext, type AudioEntry } from '../AudioLayerRenderer';
 import type { CompositionEntry, SceneInfo } from '../state';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { Layer } from '../layers';
@@ -39,6 +40,8 @@ interface PlayerAreaProps {
   zoomTransform: { zoom: number; centerX: number; centerY: number } | null;
   /** Whether SceneDirector mode is active (has scene + waypoints) */
   sceneDirectorActive: boolean;
+  /** Audio entries to inject via context (coded + user audio) */
+  audioEntries: AudioEntry[];
   /** Playback rate */
   playbackRate: number;
   /** Current state */
@@ -114,6 +117,7 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
   setPan,
   zoomTransform,
   sceneDirectorActive,
+  audioEntries,
   playbackRate,
   state,
   frame,
@@ -157,23 +161,25 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
               : { width: '100%', height: '100%' }
           }
         >
-          <SceneDirectorModeProvider value={sceneDirectorActive}>
-            <Player
-              ref={playerRef as React.RefObject<PlayerRef>}
-              component={VideoComponent}
-              compositionWidth={composition.video.width}
-              compositionHeight={composition.video.height}
-              fps={composition.video.fps}
-              durationInFrames={composition.video.frames}
-              playbackRate={playbackRate}
-              numberOfSharedAudioTags={15}
-              controls={false}
-              style={{
-                width: '100%',
-                height: '100%',
-              }}
-            />
-          </SceneDirectorModeProvider>
+          <AudioEntriesContext.Provider value={audioEntries}>
+            <SceneDirectorModeProvider value={sceneDirectorActive}>
+              <Player
+                ref={playerRef as React.RefObject<PlayerRef>}
+                component={VideoComponent}
+                compositionWidth={composition.video.width}
+                compositionHeight={composition.video.height}
+                fps={composition.video.fps}
+                durationInFrames={composition.video.frames}
+                playbackRate={playbackRate}
+                numberOfSharedAudioTags={15}
+                controls={false}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </SceneDirectorModeProvider>
+          </AudioEntriesContext.Provider>
         </div>
 
         {/* Drawing canvas overlays the player */}
@@ -181,19 +187,18 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
           <DrawingCanvas />
         )}
 
-        {/* FloatingHand: renders all visible hand layers */}
-        {state.selectedScene &&
-          currentScene &&
-          sceneLayers.some((l) => l.type === 'hand' && l.visible) && (
-            <FloatingHandOverlay
-              state={state}
-              sceneLayers={sceneLayers}
-              composition={composition}
-              frame={frame}
-              playerScale={playerScale}
-              currentScene={currentScene}
-            />
-          )}
+        {/* FloatingHand: renders all visible hand layers (+ bleed-over from other scenes) */}
+        {state.selectedScene && currentScene && (
+          <FloatingHandOverlay
+            state={state}
+            sceneLayers={sceneLayers}
+            composition={composition}
+            frame={frame}
+            playerScale={playerScale}
+            currentScene={currentScene}
+            allScenes={composition.scenes}
+          />
+        )}
 
         {/* Trail overlay: show markers only when playhead is within hand gesture frame range */}
         {state.selectedScene && currentScene && (

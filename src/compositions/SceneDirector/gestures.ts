@@ -79,7 +79,7 @@ function clamp(v: number, min: number, max: number): number {
  */
 const clickPreset: GesturePreset = {
   label: 'Click',
-  animation: 'hand-click',
+  animation: 'cursor-real-black',
   physics: PHYSICS_PRESETS.snappy,
   size: 120,
   showRipple: true,
@@ -89,7 +89,14 @@ const clickPreset: GesturePreset = {
     if (!target) return [];
     const { x, y } = target;
     return [
-      { x, y, frame: startFrame, gesture: 'click' as HandGesture, scale: 1 },
+      {
+        x,
+        y,
+        frame: startFrame,
+        gesture: 'click' as HandGesture,
+        scale: 1,
+        duration: CLICK_ANIM_DURATION,
+      },
     ];
   },
 };
@@ -101,7 +108,7 @@ const clickPreset: GesturePreset = {
  */
 const scrollPreset: GesturePreset = {
   label: 'Scroll',
-  animation: 'hand-scroll-clean',
+  animation: 'cursor-real-black',
   physics: PHYSICS_PRESETS.professional,
   size: 140,
   showRipple: false,
@@ -130,7 +137,7 @@ const scrollPreset: GesturePreset = {
  */
 const dragPreset: GesturePreset = {
   label: 'Drag',
-  animation: 'hand-drag',
+  animation: 'cursor-real-black',
   physics: PHYSICS_PRESETS.professional,
   size: 120,
   showRipple: false,
@@ -207,7 +214,7 @@ const dragPreset: GesturePreset = {
  */
 const swipePreset: GesturePreset = {
   label: 'Swipe',
-  animation: 'hand-swipe-up',
+  animation: 'cursor-real-black',
   physics: PHYSICS_PRESETS.snappy,
   size: 120,
   showRipple: false,
@@ -266,7 +273,7 @@ const swipePreset: GesturePreset = {
  */
 const pointPreset: GesturePreset = {
   label: 'Point',
-  animation: 'hand-point',
+  animation: 'cursor-real-black',
   physics: PHYSICS_PRESETS.floaty,
   size: 100,
   showRipple: false,
@@ -308,6 +315,47 @@ export const GESTURE_ANIMATIONS: Record<
   swipe: [{ id: 'hand-swipe-up', label: 'Swipe Up' }],
   point: [{ id: 'hand-point', label: 'Point' }],
 };
+
+// Curated pointer cursor animations (Real Arrow variants)
+export const POINTER_ANIMATIONS: { id: string; label: string }[] = [
+  { id: 'cursor-real-black', label: 'Arrow Black' },
+  { id: 'cursor-real-charcoal', label: 'Arrow Charcoal' },
+  { id: 'cursor-real-outline-5px', label: 'Arrow Outline' },
+  { id: 'cursor-real-teal', label: 'Arrow Teal' },
+  { id: 'cursor-exp-resized-real', label: 'Arrow Dark Gray' },
+];
+
+// Click animation duration in video frames (90 Lottie frames @ 60fps = 1.5s → 45 frames @ 30fps)
+export const CLICK_ANIM_DURATION = 45;
+
+// Minimum click duration when user resizes via timeline drag (frames)
+export const MIN_CLICK_DURATION = 10;
+
+// Click animation styles (for toolbar picker)
+export const CLICK_ANIMATIONS: { id: string; label: string }[] = [
+  { id: 'click', label: 'Press' },
+  { id: 'click-burst', label: 'Burst' },
+  { id: 'click-burst-soft', label: 'Soft Burst' },
+];
+
+// Map pointer IDs to their animation base name
+const POINTER_TO_ANIM_BASE: Record<string, string> = {
+  'cursor-real-black': 'black',
+  'cursor-real-charcoal': 'black',
+  'cursor-real-outline-5px': 'outline',
+  'cursor-real-teal': 'black',
+  'cursor-exp-resized-real': 'black',
+};
+
+/** Build click animation Lottie file name from pointer ID + click style */
+export function buildClickAnimationFile(
+  pointerId: string,
+  clickStyle: string,
+): string | undefined {
+  const base = POINTER_TO_ANIM_BASE[pointerId];
+  if (!base) return undefined;
+  return `cursor-real-anim-${base}-${clickStyle}`;
+}
 
 // Keyboard shortcut mapping
 export const GESTURE_KEYS: Record<string, GestureTool> = {

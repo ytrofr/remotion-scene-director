@@ -109,6 +109,15 @@
   letter-spacing: 0.08em;
   margin-bottom: 8px;
 }
+.inspector__section-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 8px 0 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
 .inspector__header {
   display: flex;
   align-items: center;
@@ -231,6 +240,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
+}
+.inspector__anim-btn--with-thumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .inspector__anim-btn:hover {
   border-color: var(--border-hover);
@@ -391,6 +405,39 @@
 }
 
 /* Delete button */
+/* Gesture select per waypoint */
+.inspector__gesture-select {
+  flex: 1;
+  padding: 3px 6px;
+  font-size: 11px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--mono);
+}
+.inspector__gesture-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Add Click End button */
+.inspector__add-click-btn {
+  width: 100%;
+  padding: 6px;
+  font-size: 12px;
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: var(--radius);
+  margin-top: 6px;
+  cursor: pointer;
+}
+.inspector__add-click-btn:hover {
+  background: rgba(251, 191, 36, 0.22);
+  border-color: #fbbf24;
+}
+
 .inspector__delete-btn {
   width: 100%;
   padding: 7px;

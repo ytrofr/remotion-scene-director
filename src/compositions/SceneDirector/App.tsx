@@ -20,7 +20,7 @@ import { GESTURE_PRESETS } from './gestures';
 import { getCodedPath } from './codedPaths';
 import type { HandPathPoint } from '../../components/FloatingHand/types';
 import { computeZoomAtFrame, type ZoomLayer } from './layers';
-import { withAudioLayers } from './AudioLayerRenderer';
+
 import { useSessionPersistence } from './hooks/useSessionPersistence';
 import { useRestoredInitialState } from './hooks/useRestoredInitialState';
 import { useAudioEntries } from './hooks/useAudioEntries';
@@ -161,17 +161,17 @@ export const App: React.FC = () => {
 
   const BaseVideoComponent = COMPOSITION_COMPONENTS[composition.id];
 
-  // Collect audio entries from user-edited audio layers
-  const audioEntries = useAudioEntries(state.layers, composition.scenes);
-
-  // Wrap composition with audio layers
-  const VideoComponent = useMemo(
-    () =>
-      audioEntries.length > 0
-        ? withAudioLayers(BaseVideoComponent, audioEntries)
-        : BaseVideoComponent,
-    [BaseVideoComponent, audioEntries],
+  // Collect audio entries: coded audio (baseline SFX) + user-edited audio layers.
+  // Provided via AudioEntriesContext above the Player (no HOC wrapper = stable component ref).
+  const audioEntries = useAudioEntries(
+    composition.id,
+    state.layers,
+    composition.scenes,
   );
+
+  // Stable component ref — never changes, so Player never re-mounts.
+  // Audio is injected via context, not HOC wrapping.
+  const VideoComponent = BaseVideoComponent;
 
   // Current scene
   const currentScene = useMemo(
@@ -439,9 +439,8 @@ export const App: React.FC = () => {
           pan={pan}
           setPan={setPan}
           zoomTransform={zoomTransform}
-          sceneDirectorActive={
-            !!(state.selectedScene && effectiveWaypoints.length > 0)
-          }
+          sceneDirectorActive={true}
+          audioEntries={audioEntries}
           playbackRate={playbackRate}
           state={state}
           frame={frame}

@@ -156,7 +156,11 @@ const FloatingHandStandalone: React.FC<
   animation = 'hand-click',
   size = 120,
   dark = false,
+  showRipple = false,
+  rippleColor = 'rgba(0, 217, 255, 0.5)',
   physics: physicsOverrides,
+  clickAnimation,
+  clickSpeed,
 }) => {
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
@@ -177,6 +181,20 @@ const FloatingHandStandalone: React.FC<
   const finalX = handState.x;
   const finalY = handState.y + floatEffect.offsetY;
 
+  // Ripple effect for click gestures (mirrors Remotion wrapper logic)
+  const isClickGesture = handState.gesture === 'click';
+  const rippleCycle = (frame - startFrame) % 30;
+  const rippleScale = isClickGesture
+    ? rippleCycle < 15
+      ? 0.5 + (rippleCycle / 15) * 1.0
+      : 1.5 - ((rippleCycle - 15) / 15) * 1.0
+    : 0;
+  const rippleOpacity = isClickGesture
+    ? rippleCycle < 15
+      ? 0.8 - (rippleCycle / 15) * 0.8
+      : 0
+    : 0;
+
   return (
     <div
       style={{
@@ -189,6 +207,22 @@ const FloatingHandStandalone: React.FC<
         zIndex: 1000,
       }}
     >
+      {showRipple && isClickGesture && (
+        <div
+          style={{
+            position: 'absolute',
+            left: finalX,
+            top: finalY,
+            width: size,
+            height: size,
+            borderRadius: '50%',
+            border: `3px solid ${rippleColor}`,
+            transform: `translate(-50%, -50%) scale(${rippleScale})`,
+            opacity: rippleOpacity,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
       <div
         style={{
           position: 'absolute',
@@ -208,6 +242,8 @@ const FloatingHandStandalone: React.FC<
           size={size}
           animationFile={animation}
           dark={dark}
+          clickAnimationFile={clickAnimation}
+          clickSpeed={clickSpeed}
         />
       </div>
     </div>
@@ -227,6 +263,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   physics: physicsOverrides,
   showRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
+  clickAnimation,
 }) => {
   const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
@@ -313,6 +350,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
           size={size}
           animationFile={animation}
           dark={dark}
+          clickAnimationFile={clickAnimation}
         />
       </div>
     </div>

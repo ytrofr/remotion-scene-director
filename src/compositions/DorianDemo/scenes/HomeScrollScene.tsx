@@ -79,7 +79,7 @@ export const HomeScrollScene: React.FC = () => {
       <FloatingHand
         path={scrollHandPath}
         startFrame={0}
-        animation="hand-scroll-clean"
+        animation={savedScroll?.animation ?? 'cursor-real-black'}
         size={handSizeForZoom(PHONE.displayScale)}
         dark={savedScroll?.dark ?? true}
         showRipple={false}

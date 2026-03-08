@@ -98,7 +98,7 @@ export const TapAIBubbleScene: React.FC = () => {
       <FloatingHand
         path={handPath}
         startFrame={0}
-        animation="hand-click"
+        animation={savedTap?.animation ?? 'cursor-real-black'}
         size={handSize}
         dark={savedTap?.dark ?? true}
         showRipple={true}

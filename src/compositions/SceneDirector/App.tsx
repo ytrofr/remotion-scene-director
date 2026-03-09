@@ -400,20 +400,18 @@ export const App: React.FC = () => {
     setPan,
   });
 
-  // Full-page gallery view
-  if (state.currentView === 'gallery') {
-    return (
-      <DirectorProvider value={ctxValue}>
-        <GalleryView
-          onClose={() => dispatch({ type: 'SET_VIEW', view: 'editor' })}
-        />
-      </DirectorProvider>
-    );
-  }
+  const isGallery = state.currentView === 'gallery';
 
   return (
     <DirectorProvider value={ctxValue}>
-      <div className="app">
+      {/* Gallery overlays the editor — editor stays mounted to preserve refs & listeners */}
+      {isGallery && (
+        <GalleryView
+          onClose={() => dispatch({ type: 'SET_VIEW', view: 'editor' })}
+        />
+      )}
+
+      <div className="app" style={isGallery ? { display: 'none' } : undefined}>
         {/* Toolbar */}
         <div style={{ gridArea: 'toolbar' }}>
           <Toolbar />

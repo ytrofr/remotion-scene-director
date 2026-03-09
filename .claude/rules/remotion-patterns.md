@@ -128,3 +128,15 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     exactly as-is. `codedPaths.data.json` is only a default for scenes with NO
     saved data (via `ENSURE_SCENE_LAYERS`). Any code that mutates saved state on
     load is a bug.
+
+29. **Gallery is single source of truth for pickers**: All hand animations, pointers,
+    and click effects are defined in `galleryData.ts` with a `pickerSlot` field.
+    `galleryActive.ts` derives picker lists using `getBySlot()`. Never add hardcoded
+    animation arrays to `gestures.ts` — add a gallery entry with the correct
+    `pickerSlot` instead. Gallery activation (star buttons) controls what appears
+    in Inspector and Toolbar pickers.
+
+30. **Gallery renders as overlay, never unmounts editor**: `GalleryView` renders
+    alongside the editor with `display: none` on the editor div. Never use
+    conditional returns that unmount the editor tree — it destroys Player refs,
+    event listeners (frameupdate, wheel zoom), and component state.

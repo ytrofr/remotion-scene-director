@@ -17,7 +17,7 @@ src/compositions/SceneDirector/
 ├── state.ts                    # directorReducer + all action types
 ├── undoReducer.ts              # Undo/redo wrapper (past/present/future stacks)
 ├── context.tsx                 # DirectorContextValue interface + useDirector()
-├── gestures.ts                 # GESTURE_PRESETS (click/scroll/drag/swipe/point)
+├── gestures.ts                 # GESTURE_PRESETS (click/scroll/drag/swipe/point) — NO hardcoded arrays
 ├── layers.ts                   # Layer types: HandLayer, AudioLayer, ZoomLayer
 ├── codedPaths.ts               # getCodedPath() — source-of-truth paths per scene
 ├── compositions.ts             # COMPOSITIONS registry + COMPOSITION_COMPONENTS
@@ -25,7 +25,10 @@ src/compositions/SceneDirector/
 │   ├── Toolbar.tsx             # Top bar: tool buttons, dark toggle, save
 │   ├── SceneList.tsx           # Left: scene list + layer stack per scene
 │   ├── Inspector.tsx           # Right: waypoint/layer editor tabs
-│   └── Timeline.tsx            # Bottom: multi-row timeline (scenes/hand/audio)
+│   ├── Timeline.tsx            # Bottom: multi-row timeline (scenes/hand/audio)
+│   ├── GalleryView.tsx         # Animation gallery (overlays editor, doesn't unmount it)
+│   ├── galleryData.ts          # SINGLE SOURCE OF TRUTH: all animations + pickerSlot tags
+│   └── PointerShapeCard.tsx    # Pointer variant cards with star/activate buttons
 ├── overlays/
 │   ├── DrawingCanvas.tsx       # Click/drag interaction layer (zIndex 10)
 │   ├── FloatingHandOverlay.tsx # Renders ALL visible hand layers (zIndex 11)
@@ -36,7 +39,9 @@ src/compositions/SceneDirector/
     ├── useKeyboardShortcuts.ts # 1-5 gesture keys, Ctrl+Z/Y, space, arrows
     ├── usePlayerControls.ts    # Zoom-to-cursor + Alt-drag pan
     ├── useSessionPersistence.ts# localStorage save/restore
-    └── useToComp.ts            # Screen → composition coordinate mapping
+    ├── useToComp.ts            # Screen → composition coordinate mapping
+    ├── useGallerySelection.ts  # Gallery active set + localStorage persistence
+    └── galleryActive.ts        # Derives picker lists from galleryData pickerSlot
 ```
 
 ### Layer System
@@ -99,3 +104,21 @@ dispatch({ type: 'ADD_HAND_GESTURE', scene, points: [wp], gesture: 'click' });
 - **Alt+drag** or **middle-click drag**: pan
 - **`0` key**: reset zoom and pan
 - CSS transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)` on `.player-frame`
+
+### Gallery — Single Source of Truth for Pickers
+
+The animation gallery (`GalleryView.tsx`) controls which hand animations, pointers, and click effects appear in the Inspector and Toolbar pickers.
+
+**Architecture**:
+
+```
+galleryData.ts (113 entries + pickerSlot) ──→ galleryActive.ts (derive + filter) ──→ Inspector/Toolbar
+                                          ──→ GalleryView.tsx (display + activate)
+```
+
+- **pickerSlot field**: Each gallery entry declares which picker it belongs to (e.g., `hand:click`, `pointer`, `click-effect`)
+- **galleryActive.ts**: Derives picker lists from `GESTURES` array using `getBySlot()`. No hardcoded arrays.
+- **Star buttons**: All gallery cards (including pointer shape cards) have activate/deactivate star buttons
+- **Auto-seed**: First load activates all `pickerSlot` items (20 defaults). Persisted to `localStorage['gallery-active-items']`.
+- **Strict filtering**: Only activated items appear in pickers. No fallback to "show all".
+- **Overlay pattern**: Gallery renders as overlay with `display: none` on editor — editor stays mounted to preserve Player refs and event listeners.

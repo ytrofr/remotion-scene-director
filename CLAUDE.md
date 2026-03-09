@@ -181,13 +181,14 @@ const playbackRate = isScrolling ? 2 : 0.001;
 
 Read these files when working on the relevant area:
 
-| Topic                               | File                                 |
-| ----------------------------------- | ------------------------------------ |
-| Composition tables, debug tools     | `docs/compositions.md`               |
-| FloatingHand, Lottie, hand gestures | `docs/floating-hand.md`              |
-| Screenshot capture, Playwright      | `docs/capture-workflow.md`           |
-| SceneDirector editor architecture   | `docs/scene-director.md`             |
-| Shared debug component library      | `docs/debug-tools.md`                |
-| Enforced coding rules (27 rules)    | `.claude/rules/remotion-patterns.md` |
-| Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`  |
-| Remotion framework docs             | https://www.remotion.dev/docs        |
+| Topic                               | File                                       |
+| ----------------------------------- | ------------------------------------------ |
+| Composition tables, debug tools     | `docs/compositions.md`                     |
+| FloatingHand, Lottie, hand gestures | `docs/floating-hand.md`                    |
+| Screenshot capture, Playwright      | `docs/capture-workflow.md`                 |
+| SceneDirector editor architecture   | `docs/scene-director.md`                   |
+| Gallery & picker architecture       | `docs/scene-director.md` (Gallery section) |
+| Shared debug component library      | `docs/debug-tools.md`                      |
+| Enforced coding rules (30 rules)    | `.claude/rules/remotion-patterns.md`       |
+| Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`        |
+| Remotion framework docs             | https://www.remotion.dev/docs              |

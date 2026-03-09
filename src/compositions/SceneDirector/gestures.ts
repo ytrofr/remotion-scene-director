@@ -297,46 +297,11 @@ export const GESTURE_PRESETS: Record<GestureTool, GesturePreset> = {
   point: pointPreset,
 };
 
-// Compatible animations for each gesture type (for the hand style picker)
-export const GESTURE_ANIMATIONS: Record<
-  GestureTool,
-  { id: LottieAnimation; label: string }[]
-> = {
-  click: [
-    { id: 'hand-click', label: 'Click' },
-    { id: 'hand-tap', label: 'Tap' },
-    { id: 'hand-tap-alt', label: 'Tap Alt' },
-  ],
-  scroll: [{ id: 'hand-scroll-clean', label: 'Scroll' }],
-  drag: [
-    { id: 'hand-drag', label: 'Drag' },
-    { id: 'hand-pinch', label: 'Pinch' },
-  ],
-  swipe: [{ id: 'hand-swipe-up', label: 'Swipe Up' }],
-  point: [{ id: 'hand-point', label: 'Point' }],
-};
-
-// Curated pointer cursor animations (Real Arrow variants)
-export const POINTER_ANIMATIONS: { id: string; label: string }[] = [
-  { id: 'cursor-real-black', label: 'Arrow Black' },
-  { id: 'cursor-real-charcoal', label: 'Arrow Charcoal' },
-  { id: 'cursor-real-outline-5px', label: 'Arrow Outline' },
-  { id: 'cursor-real-teal', label: 'Arrow Teal' },
-  { id: 'cursor-exp-resized-real', label: 'Arrow Dark Gray' },
-];
-
 // Click animation duration in video frames (90 Lottie frames @ 60fps = 1.5s → 45 frames @ 30fps)
 export const CLICK_ANIM_DURATION = 45;
 
 // Minimum click duration when user resizes via timeline drag (frames)
 export const MIN_CLICK_DURATION = 10;
-
-// Click animation styles (for toolbar picker)
-export const CLICK_ANIMATIONS: { id: string; label: string }[] = [
-  { id: 'click', label: 'Press' },
-  { id: 'click-burst', label: 'Burst' },
-  { id: 'click-burst-soft', label: 'Soft Burst' },
-];
 
 // Map pointer IDs to their animation base name
 const POINTER_TO_ANIM_BASE: Record<string, string> = {

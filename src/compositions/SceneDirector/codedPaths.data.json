@@ -142,19 +142,27 @@
         {
           "x": 957,
           "y": 1465,
-          "frame": 0,
+          "frame": 10,
           "gesture": "pointer",
           "scale": 1.5
         },
         {
           "x": 494,
           "y": 1652,
-          "frame": 90,
+          "frame": 74,
           "gesture": "pointer",
           "scale": 1.5
+        },
+        {
+          "x": 494,
+          "y": 1652,
+          "frame": 74,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 12
         }
       ],
-      "dark": true
+      "dark": false
     },
     "8-ProductPage": {
       "gesture": "scroll",
@@ -248,24 +256,16 @@
         {
           "x": 482,
           "y": 1666,
-          "frame": 71,
+          "frame": 61,
           "gesture": "pointer",
           "scale": 1
         },
         {
           "x": 969,
           "y": 1658,
-          "frame": 106,
+          "frame": 118,
           "gesture": "pointer",
           "scale": 1
-        },
-        {
-          "x": 969,
-          "y": 1658,
-          "frame": 106,
-          "gesture": "click",
-          "scale": 1,
-          "duration": 12
         }
       ],
       "dark": false

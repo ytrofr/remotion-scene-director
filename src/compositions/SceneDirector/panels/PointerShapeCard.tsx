@@ -15,7 +15,9 @@ interface PointerShapeCardProps {
   showHidden: boolean;
   selectMode: boolean;
   selected: Set<string>;
+  active: Set<string>;
   onToggleSelectMany: (ids: string[]) => void;
+  onToggleActive: (id: string) => void;
   getFeedback: () => Record<string, 'good' | 'bad'>;
   setFeedback: (id: string, vote: 'good' | 'bad' | null) => void;
 }
@@ -26,7 +28,9 @@ export const PointerShapeCard: React.FC<PointerShapeCardProps> = ({
   showHidden,
   selectMode,
   selected,
+  active,
   onToggleSelectMany,
+  onToggleActive,
   getFeedback,
   setFeedback,
 }) => {
@@ -152,11 +156,14 @@ export const PointerShapeCard: React.FC<PointerShapeCardProps> = ({
         ? '#ef4444'
         : 'var(--border)';
 
+  const isActive = active.has(variant.id);
+
   const cardClass = [
     'gallery-view__card',
     'gallery-view__card--installed',
     hidden.has(variant.id) && 'gallery-view__card--hidden',
     isSelected && 'gallery-view__card--selected',
+    isActive && 'gallery-view__card--active',
   ]
     .filter(Boolean)
     .join(' ');
@@ -309,6 +316,30 @@ export const PointerShapeCard: React.FC<PointerShapeCardProps> = ({
             </svg>
           </button>
         </div>
+      )}
+
+      {/* Activate button */}
+      {!selectMode && (
+        <button
+          className={`gallery-view__card-activate ${active.has(variant.id) ? 'gallery-view__card-activate--active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleActive(variant.id);
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill={active.has(variant.id) ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {active.has(variant.id) ? 'Active' : 'Activate'}
+        </button>
       )}
 
       <div className="gallery-view__card-meta">{variant.id}</div>

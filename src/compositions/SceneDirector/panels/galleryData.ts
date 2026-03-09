@@ -20,6 +20,8 @@ export interface GalleryGesture {
   installed: boolean;
   source?: string;
   url?: string;
+  /** Which picker this entry belongs to (e.g., 'hand:click', 'pointer', 'click-effect') */
+  pickerSlot?: string;
 }
 
 export const CATEGORIES: { id: Category; label: string }[] = [
@@ -155,9 +157,27 @@ export const GESTURES: GalleryGesture[] = [
   // ═══════════════════════════════════════════
   //  Tap Gestures (6)
   // ═══════════════════════════════════════════
-  { id: 'hand-click', label: 'Click', category: 'tap', installed: true },
-  { id: 'hand-tap', label: 'Tap', category: 'tap', installed: true },
-  { id: 'hand-tap-alt', label: 'Tap Alt', category: 'tap', installed: true },
+  {
+    id: 'hand-click',
+    label: 'Click',
+    category: 'tap',
+    installed: true,
+    pickerSlot: 'hand:click',
+  },
+  {
+    id: 'hand-tap',
+    label: 'Tap',
+    category: 'tap',
+    installed: true,
+    pickerSlot: 'hand:click',
+  },
+  {
+    id: 'hand-tap-alt',
+    label: 'Tap Alt',
+    category: 'tap',
+    installed: true,
+    pickerSlot: 'hand:click',
+  },
   {
     id: 'hand-double-tap',
     label: 'Double Tap',
@@ -188,12 +208,14 @@ export const GESTURES: GalleryGesture[] = [
     label: 'Swipe Up',
     category: 'swipe-scroll',
     installed: true,
+    pickerSlot: 'hand:swipe',
   },
   {
     id: 'hand-scroll-clean',
     label: 'Scroll',
     category: 'swipe-scroll',
     installed: true,
+    pickerSlot: 'hand:scroll',
   },
   {
     id: 'hand-swipe-right',
@@ -235,10 +257,25 @@ export const GESTURES: GalleryGesture[] = [
   //  Touch & Drag (5)
   // ═══════════════════════════════════════════
   {
+    id: 'hand-drag',
+    label: 'Drag',
+    category: 'touch-drag',
+    installed: true,
+    pickerSlot: 'hand:drag',
+  },
+  {
     id: 'hand-pinch',
     label: 'Pinch',
     category: 'touch-drag',
     installed: true,
+    pickerSlot: 'hand:drag',
+  },
+  {
+    id: 'hand-point',
+    label: 'Point',
+    category: 'touch-drag',
+    installed: true,
+    pickerSlot: 'hand:point',
   },
   {
     id: 'hand-click-gesture',
@@ -249,8 +286,59 @@ export const GESTURES: GalleryGesture[] = [
   },
 
   // ═══════════════════════════════════════════
-  //  Click Effects (7)
+  //  Click Effects — Picker Styles (7) + Standalone (11)
   // ═══════════════════════════════════════════
+  // Click styles for toolbar picker (composed via buildClickAnimationFile)
+  {
+    id: 'click',
+    label: 'Press',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst',
+    label: 'Burst',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst-soft',
+    label: 'Soft Burst',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst-soft-sm',
+    label: 'Soft Small',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst-soft-xs',
+    label: 'Soft Tiny',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst-soft-4',
+    label: '4-Ray',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  {
+    id: 'click-burst-soft-4-sm',
+    label: '4-Ray Small',
+    category: 'click-effects',
+    installed: true,
+    pickerSlot: 'click-effect',
+  },
+  // Standalone sunburst Lotties
   {
     id: 'click-sunburst',
     label: 'Sunburst',
@@ -264,6 +352,34 @@ export const GESTURES: GalleryGesture[] = [
     category: 'click-effects',
     installed: true,
     source: 'Generated (8-ray soft)',
+  },
+  {
+    id: 'click-sunburst-soft-sm',
+    label: 'Sunburst Soft Sm',
+    category: 'click-effects',
+    installed: true,
+    source: 'Generated (8-ray 50%)',
+  },
+  {
+    id: 'click-sunburst-soft-xs',
+    label: 'Sunburst Soft Xs',
+    category: 'click-effects',
+    installed: true,
+    source: 'Generated (8-ray 30%)',
+  },
+  {
+    id: 'click-sunburst-soft-4',
+    label: 'Sunburst 4-Ray',
+    category: 'click-effects',
+    installed: true,
+    source: 'Generated (4-ray cardinal)',
+  },
+  {
+    id: 'click-sunburst-soft-4-sm',
+    label: 'Sunburst 4-Ray Sm',
+    category: 'click-effects',
+    installed: true,
+    source: 'Generated (4-ray 50%)',
   },
   {
     id: 'cursor-click-effect',
@@ -379,6 +495,7 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointers',
     installed: true,
     source: 'cursor-arrow.json -> 200x200',
+    pickerSlot: 'pointer',
   },
   {
     id: 'cursor-exp-resized-anim',
@@ -393,6 +510,7 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointers',
     installed: true,
     source: 'Resized (filled)',
+    pickerSlot: 'pointer',
   },
   {
     id: 'cursor-real-charcoal',
@@ -400,6 +518,7 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointers',
     installed: true,
     source: 'Resized (filled)',
+    pickerSlot: 'pointer',
   },
   {
     id: 'cursor-real-slate',
@@ -421,6 +540,7 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointers',
     installed: true,
     source: 'Resized (filled)',
+    pickerSlot: 'pointer',
   },
   {
     id: 'cursor-real-black-click',
@@ -471,6 +591,7 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointers',
     installed: true,
     source: 'Resized (outline)',
+    pickerSlot: 'pointer',
   },
   {
     id: 'cursor-real-outline-7px',
@@ -721,7 +842,35 @@ export const GESTURES: GalleryGesture[] = [
     installed: true,
     source: 'Generated (black+sunburst-soft)',
   },
-  // Real Arrow — Outline base (13)
+  {
+    id: 'cursor-real-anim-black-click-burst-soft-sm',
+    label: 'RA Black Burst Soft Sm',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (black+sunburst-soft 50%)',
+  },
+  {
+    id: 'cursor-real-anim-black-click-burst-soft-xs',
+    label: 'RA Black Burst Soft Xs',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (black+sunburst-soft 30%)',
+  },
+  {
+    id: 'cursor-real-anim-black-click-burst-soft-4',
+    label: 'RA Black Burst 4-Ray',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (black+4-ray cardinal)',
+  },
+  {
+    id: 'cursor-real-anim-black-click-burst-soft-4-sm',
+    label: 'RA Black Burst 4-Ray Sm',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (black+4-ray 50%)',
+  },
+  // Real Arrow — Outline base (13 + 4 burst variants)
   {
     id: 'cursor-real-anim-outline-click',
     label: 'RA Outline Click',
@@ -812,5 +961,33 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointer-animations',
     installed: true,
     source: 'Generated (outline+sunburst-soft)',
+  },
+  {
+    id: 'cursor-real-anim-outline-click-burst-soft-sm',
+    label: 'RA Outline Burst Soft Sm',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (outline+sunburst-soft 50%)',
+  },
+  {
+    id: 'cursor-real-anim-outline-click-burst-soft-xs',
+    label: 'RA Outline Burst Soft Xs',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (outline+sunburst-soft 30%)',
+  },
+  {
+    id: 'cursor-real-anim-outline-click-burst-soft-4',
+    label: 'RA Outline Burst 4-Ray',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (outline+4-ray cardinal)',
+  },
+  {
+    id: 'cursor-real-anim-outline-click-burst-soft-4-sm',
+    label: 'RA Outline Burst 4-Ray Sm',
+    category: 'pointer-animations',
+    installed: true,
+    source: 'Generated (outline+4-ray 50%)',
   },
 ];

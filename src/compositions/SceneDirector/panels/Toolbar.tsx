@@ -9,12 +9,10 @@ import { useDirector } from '../context';
 import { COMPOSITIONS } from '../compositions';
 import {
   GESTURE_PRESETS,
-  GESTURE_ANIMATIONS,
-  POINTER_ANIMATIONS,
-  CLICK_ANIMATIONS,
   buildClickAnimationFile,
   type GestureTool,
 } from '../gestures';
+import { useGalleryActive } from '../hooks/galleryActive';
 import { LottieThumbnail } from '../overlays/LottieThumbnail';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
@@ -28,6 +26,7 @@ const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
 export const Toolbar: React.FC = () => {
   const { state, dispatch, canUndo, cursorScale, setCursorScale, saveSession } =
     useDirector();
+  const gallery = useGalleryActive();
   const [saveState, setSaveState] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle');
@@ -148,7 +147,7 @@ export const Toolbar: React.FC = () => {
           const preset = GESTURE_PRESETS[t.id];
           const active = state.activeTool === t.id;
           const dropdownOpen = openDropdown === t.id;
-          const animations = GESTURE_ANIMATIONS[t.id];
+          const animations = gallery.filterHandAnims(t.id);
 
           return (
             <div key={t.id} className="toolbar__gesture-wrapper">
@@ -217,7 +216,7 @@ export const Toolbar: React.FC = () => {
                     Pointer
                   </div>
                   <div className="toolbar__dropdown-anims">
-                    {POINTER_ANIMATIONS.map((ptr) => {
+                    {gallery.filterPointers().map((ptr) => {
                       const isActive = currentAnimation === ptr.id;
                       return (
                         <button
@@ -282,7 +281,7 @@ export const Toolbar: React.FC = () => {
                     Click Effect
                   </div>
                   <div className="toolbar__dropdown-anims">
-                    {CLICK_ANIMATIONS.map((anim) => {
+                    {gallery.filterClickAnims().map((anim) => {
                       const thumbFile = currentAnimation
                         ? buildClickAnimationFile(currentAnimation, anim.id)
                         : undefined;

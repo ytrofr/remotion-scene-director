@@ -428,8 +428,12 @@ ANIMATION_TYPES = {
     "swish-dash": anim_slide,       # Uses slide position + dash trail
     "swish-slide": anim_swish_slide,
     "hover-pulse": anim_hover_pulse,
-    "click-burst": anim_click,       # Uses click scale + sunburst
-    "click-burst-soft": anim_click,  # Uses click scale + soft sunburst
+    "click-burst": anim_click,              # Uses click scale + sunburst
+    "click-burst-soft": anim_click,         # Uses click scale + soft sunburst (8 rays)
+    "click-burst-soft-sm": anim_click,      # Soft sunburst, 50% ray length
+    "click-burst-soft-xs": anim_click,      # Soft sunburst, 30% ray length
+    "click-burst-soft-4": anim_click,       # 4 cardinal rays, full length
+    "click-burst-soft-4-sm": anim_click,    # 4 cardinal rays, 50% length
 }
 
 
@@ -460,8 +464,12 @@ def generate_all():
                 create_dash_trail(data)
             elif anim_type == "click-burst":
                 merge_sunburst(data, sunburst_path)
-            elif anim_type == "click-burst-soft":
-                merge_sunburst(data, sunburst_soft_path)
+            elif anim_type.startswith("click-burst-soft"):
+                # Map to the correct sunburst source variant
+                suffix = anim_type.replace("click-burst-soft", "")
+                sb_file = f"click-sunburst-soft{suffix}.json"
+                sb_path = os.path.join(LOTTIE_DIR, sb_file)
+                merge_sunburst(data, sb_path)
 
             # Update layer op to match animation
             for layer in data["layers"]:

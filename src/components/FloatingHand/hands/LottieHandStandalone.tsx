@@ -82,6 +82,8 @@ export const LottieHandStandalone: React.FC<Props> = memo(
         clickAnimRef.current = null;
         setClickLoaded(false);
       }
+      // Reset sticky flag so the new animation triggers when loaded
+      setClickPlaying(false);
 
       const anim = lottie.loadAnimation({
         container: clickRef.current,

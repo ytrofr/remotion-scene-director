@@ -196,5 +196,5 @@ export const initialState: DirectorState = {
   sidebarTab: 'editor',
   currentView: 'editor',
   versionHistory: {},
-  clickAnimation: 'click-burst',
+  clickAnimation: 'click-burst-soft-xs',
 };

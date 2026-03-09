@@ -12,14 +12,14 @@ import type {
 import { useDirector } from '../context';
 import {
   GESTURE_PRESETS,
-  GESTURE_ANIMATIONS,
-  POINTER_ANIMATIONS,
   CLICK_ANIM_DURATION,
+  buildClickAnimationFile,
   type GestureTool,
 } from '../gestures';
 import type { AudioLayer, ZoomLayer } from '../layers';
 import { LottieThumbnail } from '../overlays/LottieThumbnail';
 import { AudioInspector } from './AudioInspector';
+import { useGalleryActive } from '../hooks/galleryActive';
 import { ActivityLog } from './ActivityLog';
 import { HistoryTab } from './HistoryTab';
 import { LayerPanel } from './LayerPanel';
@@ -132,8 +132,10 @@ export const Inspector: React.FC = () => {
     </div>
   );
 
+  // Gallery active filtering
+  const gallery = useGalleryActive();
   // Hand Style section (animation picker + dark/light toggle) - always visible
-  const animations = GESTURE_ANIMATIONS[effectiveGesture];
+  const animations = gallery.filterHandAnims(effectiveGesture);
   const handStyleSection = (
     <div className="inspector__hand-style">
       <div className="inspector__section-title">Hand Style</div>
@@ -165,7 +167,7 @@ export const Inspector: React.FC = () => {
       </div>
       <div className="inspector__section-subtitle">Pointer</div>
       <div className="inspector__anim-row">
-        {POINTER_ANIMATIONS.map((ptr) => {
+        {gallery.filterPointers().map((ptr) => {
           const active = currentAnimation === ptr.id;
           return (
             <button
@@ -208,6 +210,44 @@ export const Inspector: React.FC = () => {
           Dark
         </button>
       </div>
+      {/* Click Effect picker — only for pointer-based animations */}
+      {currentAnimation &&
+        buildClickAnimationFile(currentAnimation, 'click') && (
+          <>
+            <div className="inspector__section-subtitle">Click Effect</div>
+            <div className="inspector__anim-row">
+              {gallery.filterClickAnims().map((ca) => {
+                const active = state.clickAnimation === ca.id;
+                const previewFile = buildClickAnimationFile(
+                  currentAnimation,
+                  ca.id,
+                );
+                return (
+                  <button
+                    key={ca.id}
+                    onClick={() =>
+                      dispatch({
+                        type: 'SET_CLICK_ANIMATION',
+                        animation: ca.id,
+                      })
+                    }
+                    className={`inspector__anim-btn inspector__anim-btn--with-thumb ${active ? 'inspector__anim-btn--active' : ''}`}
+                    title={previewFile ?? ca.id}
+                  >
+                    {previewFile && (
+                      <LottieThumbnail
+                        animationFile={previewFile}
+                        size={20}
+                        dark={currentDark}
+                      />
+                    )}
+                    {ca.label}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       {selectedHandLayer && (
         <div className="inspector__size-row">
           <label className="inspector__size-label">Size</label>

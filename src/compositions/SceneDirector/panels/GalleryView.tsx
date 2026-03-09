@@ -70,6 +70,10 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
 
   const installed = GESTURES.filter((g) => g.installed).length;
   const hiddenCount = sel.hidden.size;
+  const activeCount = sel.active.size;
+
+  // Active items section: collect gestures that are in the active set
+  const activeGestures = GESTURES.filter((g) => sel.active.has(g.id));
 
   return (
     <div className="gallery-view">
@@ -79,6 +83,7 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
           Hand Gesture Gallery
           <span className="gallery-view__count">
             {installed} installed
+            {activeCount > 0 && ` / ${activeCount} active`}
             {hiddenCount > 0 && ` / ${hiddenCount} hidden`}
           </span>
         </div>
@@ -117,6 +122,13 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
               <span className="gallery-view__sel-count">
                 {sel.selected.size} selected
               </span>
+              <button
+                className="gallery-view__header-btn gallery-view__header-btn--activate"
+                onClick={sel.activateSelected}
+                disabled={sel.selected.size === 0}
+              >
+                Activate
+              </button>
               <button
                 className="gallery-view__header-btn gallery-view__header-btn--danger"
                 onClick={sel.hideSelected}
@@ -168,12 +180,39 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
         {/* Feedback bar */}
         <FeedbackSummary />
 
+        {/* Active Items section */}
+        {activeGestures.length > 0 && (
+          <div className="gallery-view__section gallery-view__section--active">
+            <div className="gallery-view__section-label gallery-view__section-label--active">
+              Active Items
+              <span className="gallery-view__section-count">
+                ({activeGestures.length})
+              </span>
+            </div>
+            <div className="gallery-view__grid">
+              {activeGestures.map((g) => (
+                <InstalledCard
+                  key={`active-${g.id}`}
+                  gesture={g}
+                  isHidden={false}
+                  isActive={true}
+                  selectMode={sel.selectMode}
+                  isSelected={sel.selected.has(g.id)}
+                  onToggleSelect={() => sel.toggleSelect(g.id)}
+                  onUnhide={() => {}}
+                  onToggleActive={() => sel.toggleActive(g.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* How to add */}
         <div className="gallery-view__instructions">
           <strong>To add a new gesture:</strong> Download .json from LottieFiles
           &rarr; save to <code>public/lottie/hand-name.json</code> &rarr; add to{' '}
-          <code>GESTURES</code> in galleryData.ts +{' '}
-          <code>GESTURE_ANIMATIONS</code> in gestures.ts
+          <code>GESTURES</code> in galleryData.ts (with <code>pickerSlot</code>{' '}
+          to control which pickers show it)
         </div>
 
         {/* Categories */}
@@ -238,7 +277,9 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
                       showHidden={sel.showHidden}
                       selectMode={sel.selectMode}
                       selected={sel.selected}
+                      active={sel.active}
                       onToggleSelectMany={sel.toggleSelectMany}
+                      onToggleActive={sel.toggleActive}
                       getFeedback={getFeedback}
                       setFeedback={setFeedback}
                     />
@@ -254,10 +295,12 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
                         key={g.id}
                         gesture={g}
                         isHidden={isHidden}
+                        isActive={sel.active.has(g.id)}
                         selectMode={sel.selectMode}
                         isSelected={sel.selected.has(g.id)}
                         onToggleSelect={() => sel.toggleSelect(g.id)}
                         onUnhide={() => sel.unhide(g.id)}
+                        onToggleActive={() => sel.toggleActive(g.id)}
                       />
                     ) : (
                       <AvailableCard key={g.id} gesture={g} />
@@ -399,21 +442,25 @@ const FeedbackSummary: React.FC = () => {
   );
 };
 
-/** Card with live Lottie preview + light/dark toggle + feedback + selection */
+/** Card with live Lottie preview + light/dark toggle + feedback + selection + activate */
 const InstalledCard: React.FC<{
   gesture: GalleryGesture;
   isHidden: boolean;
+  isActive?: boolean;
   selectMode: boolean;
   isSelected: boolean;
   onToggleSelect: () => void;
   onUnhide: () => void;
+  onToggleActive?: () => void;
 }> = ({
   gesture,
   isHidden,
+  isActive = false,
   selectMode,
   isSelected,
   onToggleSelect,
   onUnhide,
+  onToggleActive,
 }) => {
   const lightRef = useRef<HTMLDivElement>(null);
   const darkRef = useRef<HTMLDivElement>(null);
@@ -496,6 +543,7 @@ const InstalledCard: React.FC<{
     'gallery-view__card--installed',
     isHidden && 'gallery-view__card--hidden',
     isSelected && 'gallery-view__card--selected',
+    isActive && 'gallery-view__card--active',
   ]
     .filter(Boolean)
     .join(' ');
@@ -608,6 +656,28 @@ const InstalledCard: React.FC<{
             </svg>
           </button>
         </div>
+      )}
+      {!selectMode && onToggleActive && (
+        <button
+          className={`gallery-view__card-activate ${isActive ? 'gallery-view__card-activate--active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleActive();
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill={isActive ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {isActive ? 'Active' : 'Activate'}
+        </button>
       )}
       <div className="gallery-view__card-meta">
         {gesture.source || gesture.id}

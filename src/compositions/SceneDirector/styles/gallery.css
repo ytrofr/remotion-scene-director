@@ -59,6 +59,13 @@
   color: #fff;
   border-color: var(--accent);
 }
+.gallery-view__header-btn--activate {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+.gallery-view__header-btn--activate:hover {
+  background: rgba(245, 158, 11, 0.15);
+}
 .gallery-view__header-btn--danger {
   color: #ef4444;
   border-color: #ef4444;
@@ -188,13 +195,60 @@
   color: var(--text);
 }
 
-/* ── Selection mode + hidden cards ── */
+/* ── Selection mode + hidden + active cards ── */
 .gallery-view__card--selected {
   background: rgba(91, 156, 246, 0.08);
 }
 .gallery-view__card--hidden {
   opacity: 0.4;
   filter: grayscale(0.6);
+}
+.gallery-view__card--active {
+  border-color: #f59e0b !important;
+  border-width: 2px !important;
+  background: rgba(245, 158, 11, 0.06);
+}
+/* ── Activate button (full-width in card) ── */
+.gallery-view__card-activate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gallery-view__card-activate:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+.gallery-view__card-activate--active {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1.5px solid #f59e0b;
+}
+.gallery-view__card-activate--active:hover {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* ── Active section ── */
+.gallery-view__section--active {
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.gallery-view__section-label--active {
+  color: #f59e0b;
 }
 .gallery-view__card-checkbox {
   position: absolute;

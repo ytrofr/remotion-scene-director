@@ -15,6 +15,33 @@
       "env": {
         "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
       }
+    },
+    "image-gen": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic/image-gen-mcp"],
+      "env": {
+        "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
+      },
+      "_comment": "Gemini image generation — get key at https://aistudio.google.com/apikey"
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "${FIGMA_API_KEY}"
+      },
+      "_comment": "Figma design extraction — get token at https://www.figma.com/developers/api#access-tokens"
+    },
+    "fal-ai": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "fal-mcp"],
+      "env": {
+        "FAL_KEY": "${FAL_KEY}"
+      },
+      "_comment": "600+ AI models (FLUX image gen, video gen) — get key at https://fal.ai/dashboard/keys"
     }
   }
 }

@@ -116,14 +116,17 @@ Read these files ONLY when working on the relevant area:
 | SceneDirector editor architecture   | `docs/scene-director.md`                   |
 | Gallery & picker architecture       | `docs/scene-director.md` (Gallery section) |
 | Shared debug component library      | `docs/debug-tools.md`                      |
+| Video learnings (feedback loop)     | `docs/video-learnings.md`                  |
 | Enforced coding rules (33 rules)    | `.claude/rules/remotion-patterns.md`       |
 | Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`        |
 
 ## Skills (auto-loaded when relevant)
 
-| Skill                     | Trigger                                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------ |
-| `ai-video-toolkit`        | Adding voiceover, captions, light leaks, SFX, noise, shapes, motion blur, emoji, audio viz |
-| `voiceover-pipeline`      | End-to-end narrated video (script → TTS → captions → render)                               |
-| `video-storyboard`        | Planning new compositions (art direction, scene breakdown, assets)                         |
-| `remotion-best-practices` | Remotion framework patterns (37 official rules from remotion-dev)                          |
+| Skill                      | Trigger                                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `video-production-methods` | Planning any new video — 6 methods: phone demo, motion graphics, narrated, reference, batch, feedback loop |
+| `ai-video-toolkit`         | Adding voiceover, captions, light leaks, SFX, noise, shapes, motion blur, emoji, audio viz                 |
+| `voiceover-pipeline`       | End-to-end narrated video (script → TTS → captions → render)                                               |
+| `video-storyboard`         | Planning compositions (art direction, scene breakdown, assets)                                             |
+| `video-feedback-loop`      | Post-render review → capture learnings → improve next video                                                |
+| `remotion-best-practices`  | Remotion framework patterns (37 official rules from remotion-dev)                                          |

@@ -13,6 +13,18 @@ Use this skills whenever you are dealing with Remotion code to obtain the domain
 
 When dealing with captions or subtitles, load the [./rules/subtitles.md](./rules/subtitles.md) file for more information.
 
+## Using FFmpeg
+
+For some video operations, such as trimming videos or detecting silence, FFmpeg should be used. Load the [./rules/ffmpeg.md](./rules/ffmpeg.md) file for more information.
+
+## Audio visualization
+
+When needing to visualize audio (spectrum bars, waveforms, bass-reactive effects), load the [./rules/audio-visualization.md](./rules/audio-visualization.md) file for more information.
+
+## Sound effects
+
+When needing to use sound effects, load the [./rules/sound-effects.md](./rules/sound-effects.md) file for more information.
+
 ## How to use
 
 Read individual rule files for detailed explanations and code examples:
@@ -46,3 +58,4 @@ Read individual rule files for detailed explanations and code examples:
 - [rules/videos.md](rules/videos.md) - Embedding videos in Remotion - trimming, volume, speed, looping, pitch
 - [rules/parameters.md](rules/parameters.md) - Make a video parametrizable by adding a Zod schema
 - [rules/maps.md](rules/maps.md) - Add a map using Mapbox and animate it
+- [rules/voiceover.md](rules/voiceover.md) - Adding AI-generated voiceover to Remotion compositions using ElevenLabs TTS

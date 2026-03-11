@@ -19,6 +19,10 @@ public/dashmor/
 public/screenshots/
 *.png
 
+# Generated audio (voiceover, SFX downloads)
+public/voiceover/
+public/audio/sfx/
+
 # Internal docs
 SESSION-HANDOFF.md
 FEEDBACK.md

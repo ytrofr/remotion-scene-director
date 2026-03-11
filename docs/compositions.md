@@ -280,6 +280,84 @@ export const COORDINATES = {
 
 ---
 
+## Key Animation Patterns
+
+### Sticky Header Pattern
+
+For scrolling demos where the app header should stay fixed:
+
+```tsx
+const STICKY_HEADER_HEIGHT = 56;
+
+{
+  /* Scrolling content */
+}
+<div style={{ transform: `translateY(${-scrollY * scale}px)` }}>
+  <Img src={fullPageImage} />
+</div>;
+
+{
+  /* Sticky header overlay - stays at top */
+}
+<div
+  style={{
+    position: 'absolute',
+    top: 0,
+    height: STICKY_HEADER_HEIGHT * scale,
+    overflow: 'hidden',
+    zIndex: 10,
+    boxShadow: scrollY > 10 ? '0 2px 10px rgba(0,0,0,0.3)' : 'none',
+  }}
+>
+  <Img src={fullPageImage} />
+</div>;
+```
+
+### Scroll-Synced Hand Pattern
+
+Hand gestures that ONLY animate during active scrolling:
+
+```tsx
+const playbackRate = isScrolling ? 2 : 0.001;
+
+<ScrollSyncedHand
+  x={700}
+  y={960}
+  isScrolling={isScrolling}
+  scrollProgress={progress}
+  enterFrame={0}
+  exitFrame={outroStart}
+  totalFrames={totalFrames}
+  tilt={-20}
+/>;
+```
+
+### Scene Screenshot Mapping (MobileChatDemo)
+
+| Scene           | Screenshot                                | Overlay/Effect                       |
+| --------------- | ----------------------------------------- | ------------------------------------ |
+| 3 - Typing      | `mobile-chat-type-XX.png`                 | Finger tap at start (frames 0-8)     |
+| 4 - Send        | `mobile-chat-3-ready.png`                 | Finger tap on send button            |
+| 5 - UserMessage | `mobile-chat-user-message.png`            | Crossfade from input state           |
+| 6 - Thinking    | `mobile-chat-user-message.png`            | Animated thinking dots (bottom: 210) |
+| 7 - Response    | Crossfade to `mobile-chat-5-response.png` | Glow effect fades in                 |
+
+### Finger Visibility Pattern
+
+| Scene      | Finger Behavior                                              |
+| ---------- | ------------------------------------------------------------ |
+| 3 - Typing | Tap input (frames 0-8) → disappears during typing            |
+| 4 - Send   | No finger during pan → appears at send button (frames 12-25) |
+| 5-7        | No finger                                                    |
+
+### Zoom & Pan (MobileChatDemo)
+
+- **TypingScene**: Zooms in + shifts to center input (zoomOffsetX: -120)
+- **SendScene**: Pans from input (right) to send button (left)
+- **Global offset**: 120px down (`translateY(120px)`) in main composition
+
+---
+
 ## Audio Setup
 
 ### Audio Files (public/audio/)

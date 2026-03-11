@@ -140,3 +140,20 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     alongside the editor with `display: none` on the editor div. Never use
     conditional returns that unmount the editor tree — it destroys Player refs,
     event listeners (frameupdate, wheel zoom), and component state.
+
+31. **Noise over Math.random()**: For animated backgrounds, particle effects,
+    or any per-frame variation, use `noise2D/3D('seed', x, y)` from
+    `@remotion/noise`. Returns deterministic values in [-1, 1]. Use the z
+    parameter of `noise3D` for time/frame animation. Never use `Math.random()`
+    (rule 26 still applies — this extends it with the preferred alternative).
+
+32. **SFX from local staticFile**: Sound effects live in `public/audio/sfx/`.
+    Always use `staticFile('audio/sfx/whoosh.wav')`, never CDN URLs like
+    `https://remotion.media/...`. Local files are faster, work offline, and
+    don't break if the CDN changes. Available: whoosh, whip, page-turn,
+    switch, mouse-click, shutter-modern, shutter-old.
+
+33. **Voiceover files to public/voiceover/**: ElevenLabs TTS output goes in
+    `public/voiceover/{scene-name}.mp3`. Use `getAudioDurationInSeconds()`
+    from `@remotion/media-utils` + `calculateMetadata` to set composition
+    duration from audio length. Never hardcode voiceover durations.

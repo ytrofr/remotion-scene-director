@@ -4,7 +4,7 @@
 **Framework**: React + Remotion 4.0.419 + Vite
 **Purpose**: Demo videos, mobile app mockups, marketing content
 **Ports**: 3000 (Remotion Studio), 3001 (Scene Director UI)
-**MCP**: Perplexity (web search), ElevenLabs (TTS/voice) — configured in `.mcp.json`
+**MCP**: 5 servers in `.mcp.json` (Perplexity, ElevenLabs, Gemini, Figma, FAL AI)
 
 ---
 
@@ -76,12 +76,15 @@ public/
 | `@remotion/animated-emoji`           | 411 Google Fonts animated emojis                  |
 | `@remotion/layout-utils`             | Layout measurement                                |
 
-## MCP Servers
+## MCP Servers (`.mcp.json`)
 
-| Server         | Tools                                         | API Key Location                    |
-| -------------- | --------------------------------------------- | ----------------------------------- |
-| **Perplexity** | `perplexity_ask`, `perplexity_search`         | `PERPLEXITY_API_KEY` in `~/.bashrc` |
-| **ElevenLabs** | TTS (21 voices), voice cloning, transcription | `ELEVENLABS_API_KEY` in `~/.bashrc` |
+| Server         | Tools                                         | API Key Env Var      | Status           |
+| -------------- | --------------------------------------------- | -------------------- | ---------------- |
+| **Perplexity** | `perplexity_ask`, `perplexity_search`         | `PERPLEXITY_API_KEY` | Active           |
+| **ElevenLabs** | TTS (21 voices), voice cloning, transcription | `ELEVENLABS_API_KEY` | Active           |
+| **Gemini**     | Image gen, text gen, video analysis           | `GOOGLE_API_KEY`     | Text only (free) |
+| **Figma**      | Design extraction → Remotion components       | `FIGMA_API_KEY`      | Configured       |
+| **FAL AI**     | 600+ AI models (FLUX, video gen, music)       | `FAL_KEY`            | Configured       |
 
 ## Audio Assets
 

@@ -27,6 +27,11 @@ import {
   AUDIO_TEST_VIDEO,
   AUDIO_TEST_SCENES,
 } from '../AudioTest/AudioTest';
+import {
+  CapabilitiesDemo,
+  CAPABILITIES_VIDEO,
+  CAPABILITIES_SCENES,
+} from '../CapabilitiesDemo';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -98,6 +103,21 @@ export const COMPOSITIONS: CompositionEntry[] = [
       end: s.end,
     })),
   },
+  {
+    id: 'CapabilitiesDemo',
+    label: 'Capabilities Demo (7 scenes)',
+    video: {
+      width: CAPABILITIES_VIDEO.width,
+      height: CAPABILITIES_VIDEO.height,
+      fps: CAPABILITIES_VIDEO.fps,
+      frames: CAPABILITIES_VIDEO.durationInFrames,
+    },
+    scenes: CAPABILITIES_SCENES.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
 ];
 
 // Component map for rendering
@@ -106,4 +126,5 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DorianDemo,
   DashmorDemo,
   AudioTest,
+  CapabilitiesDemo,
 };

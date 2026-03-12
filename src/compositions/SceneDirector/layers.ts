@@ -194,6 +194,13 @@ export const AUDIO_FILES = [
   { id: 'audio/send-click.wav', label: 'Click' },
   { id: 'audio/typing-soft.wav', label: 'Typing' },
   { id: 'audio/u_nharq4usid-swipe-255512.mp3', label: 'Swipe' },
+  { id: 'audio/sfx/whoosh.wav', label: 'Whoosh' },
+  { id: 'audio/sfx/whip.wav', label: 'Whip' },
+  { id: 'audio/sfx/page-turn.wav', label: 'Page Turn' },
+  { id: 'audio/sfx/switch.wav', label: 'Switch' },
+  { id: 'audio/sfx/mouse-click.wav', label: 'Mouse Click' },
+  { id: 'audio/sfx/shutter-modern.wav', label: 'Shutter Modern' },
+  { id: 'audio/sfx/shutter-old.wav', label: 'Shutter Old' },
 ];
 
 export type Layer = HandLayer | ZoomLayer | AudioLayer;

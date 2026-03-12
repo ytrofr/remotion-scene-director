@@ -11,7 +11,8 @@ export type Category =
   | 'click-effects'
   | 'cursor-states'
   | 'pointers'
-  | 'pointer-animations';
+  | 'pointer-animations'
+  | 'sfx';
 
 export interface GalleryGesture {
   id: string;
@@ -32,6 +33,7 @@ export const CATEGORIES: { id: Category; label: string }[] = [
   { id: 'cursor-states', label: 'Cursor States' },
   { id: 'pointers', label: 'Pointers' },
   { id: 'pointer-animations', label: 'Pointer Animations' },
+  { id: 'sfx', label: 'Sound Effects' },
 ];
 
 // ═══════════════════════════════════════════
@@ -989,5 +991,65 @@ export const GESTURES: GalleryGesture[] = [
     category: 'pointer-animations',
     installed: true,
     source: 'Generated (outline+4-ray 50%)',
+  },
+
+  // ═══════════════════════════════════════════
+  //  Sound Effects (7)
+  // ═══════════════════════════════════════════
+  {
+    id: 'sfx-whoosh',
+    label: 'Whoosh',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-whip',
+    label: 'Whip',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-page-turn',
+    label: 'Page Turn',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-switch',
+    label: 'Switch',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-mouse-click',
+    label: 'Mouse Click',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-shutter-modern',
+    label: 'Shutter Modern',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
+  },
+  {
+    id: 'sfx-shutter-old',
+    label: 'Shutter Old',
+    category: 'sfx',
+    installed: true,
+    source: 'Remotion SFX Library',
+    pickerSlot: 'sfx',
   },
 ];

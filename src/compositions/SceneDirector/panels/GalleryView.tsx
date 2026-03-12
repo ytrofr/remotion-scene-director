@@ -16,6 +16,16 @@ import {
 import { useGallerySelection } from '../hooks/useGallerySelection';
 import { PointerShapeCard } from './PointerShapeCard';
 
+const SFX_FILE_MAP: Record<string, string> = {
+  'sfx-whoosh': 'audio/sfx/whoosh.wav',
+  'sfx-whip': 'audio/sfx/whip.wav',
+  'sfx-page-turn': 'audio/sfx/page-turn.wav',
+  'sfx-switch': 'audio/sfx/switch.wav',
+  'sfx-mouse-click': 'audio/sfx/mouse-click.wav',
+  'sfx-shutter-modern': 'audio/sfx/shutter-modern.wav',
+  'sfx-shutter-old': 'audio/sfx/shutter-old.wav',
+};
+
 interface GalleryViewProps {
   onClose: () => void;
 }
@@ -290,6 +300,21 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onClose }) => {
                 <div className="gallery-view__grid">
                   {visible.map((g) => {
                     const isHidden = sel.hidden.has(g.id);
+                    if (cat.id === 'sfx' && g.installed) {
+                      return (
+                        <SfxCard
+                          key={g.id}
+                          gesture={g}
+                          isHidden={isHidden}
+                          isActive={sel.active.has(g.id)}
+                          selectMode={sel.selectMode}
+                          isSelected={sel.selected.has(g.id)}
+                          onToggleSelect={() => sel.toggleSelect(g.id)}
+                          onUnhide={() => sel.unhide(g.id)}
+                          onToggleActive={() => sel.toggleActive(g.id)}
+                        />
+                      );
+                    }
                     return g.installed ? (
                       <InstalledCard
                         key={g.id}
@@ -657,6 +682,176 @@ const InstalledCard: React.FC<{
           </button>
         </div>
       )}
+      {!selectMode && onToggleActive && (
+        <button
+          className={`gallery-view__card-activate ${isActive ? 'gallery-view__card-activate--active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleActive();
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill={isActive ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {isActive ? 'Active' : 'Activate'}
+        </button>
+      )}
+      <div className="gallery-view__card-meta">
+        {gesture.source || gesture.id}
+      </div>
+    </div>
+  );
+};
+
+/** Card for sound effect with play button */
+const SfxCard: React.FC<{
+  gesture: GalleryGesture;
+  isHidden: boolean;
+  isActive?: boolean;
+  selectMode: boolean;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  onUnhide: () => void;
+  onToggleActive?: () => void;
+}> = ({
+  gesture,
+  isHidden,
+  isActive = false,
+  selectMode,
+  isSelected,
+  onToggleSelect,
+  onUnhide,
+  onToggleActive,
+}) => {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handlePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    const filePath = SFX_FILE_MAP[gesture.id];
+    if (!filePath) return;
+    const audio = new Audio(`/${filePath}`);
+    audioRef.current = audio;
+    setPlaying(true);
+    audio.play().catch(() => setPlaying(false));
+    audio.onended = () => setPlaying(false);
+  };
+
+  const cardClass = [
+    'gallery-view__card',
+    'gallery-view__card--installed',
+    isHidden && 'gallery-view__card--hidden',
+    isSelected && 'gallery-view__card--selected',
+    isActive && 'gallery-view__card--active',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div
+      className={cardClass}
+      style={{
+        borderColor: isSelected ? 'var(--accent)' : 'var(--border)',
+        borderWidth: isSelected ? 2 : 1,
+      }}
+      onClick={selectMode ? onToggleSelect : undefined}
+    >
+      {selectMode && (
+        <div className="gallery-view__card-checkbox">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill={isSelected ? 'var(--accent)' : 'none'}
+            stroke={isSelected ? 'var(--accent)' : 'var(--text-dim)'}
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            {isSelected && (
+              <polyline
+                points="7 12 10 15 17 9"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.5"
+              />
+            )}
+          </svg>
+        </div>
+      )}
+      {isHidden && !selectMode && (
+        <button className="gallery-view__card-unhide" onClick={onUnhide}>
+          Unhide
+        </button>
+      )}
+      <div className="gallery-view__card-label">{gesture.label}</div>
+      <div
+        className="gallery-view__preview-single gallery-view__preview-single--light"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+        }}
+      >
+        {/* Speaker icon */}
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#2DD4BF"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-label="Sound effect"
+          role="img"
+        >
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+        {/* Play button */}
+        <button
+          onClick={handlePlay}
+          style={{
+            background: playing ? '#14B8A6' : '#2DD4BF',
+            border: 'none',
+            borderRadius: 6,
+            color: '#fff',
+            padding: '4px 14px',
+            cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="none"
+          >
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          {playing ? 'Playing...' : 'Play'}
+        </button>
+      </div>
       {!selectMode && onToggleActive && (
         <button
           className={`gallery-view__card-activate ${isActive ? 'gallery-view__card-activate--active' : ''}`}

@@ -26,6 +26,10 @@ import {
 } from './compositions/DashmorDemo';
 import { HandGestureGallery } from './compositions/HandGestureGallery/HandGestureGallery';
 import { VIDEO as GALLERY_VIDEO } from './compositions/HandGestureGallery/constants';
+import {
+  CapabilitiesDemo,
+  CAPABILITIES_VIDEO,
+} from './compositions/CapabilitiesDemo';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -168,6 +172,15 @@ export const RemotionRoot: React.FC = () => {
         fps={GALLERY_VIDEO.fps}
         width={GALLERY_VIDEO.width}
         height={GALLERY_VIDEO.height}
+      />
+      {/* ========== CAPABILITIES DEMO ========== */}
+      <Composition
+        id="CapabilitiesDemo"
+        component={CapabilitiesDemo}
+        durationInFrames={CAPABILITIES_VIDEO.durationInFrames}
+        fps={CAPABILITIES_VIDEO.fps}
+        width={CAPABILITIES_VIDEO.width}
+        height={CAPABILITIES_VIDEO.height}
       />
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}
     </>

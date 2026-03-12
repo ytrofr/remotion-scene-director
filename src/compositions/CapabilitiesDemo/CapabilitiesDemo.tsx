@@ -14,13 +14,10 @@
  */
 
 import React from 'react';
-import {
-  AbsoluteFill,
-  Sequence,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Audio, Sequence, staticFile } from 'remotion';
 import { AudioFromLayers } from '../SceneDirector/AudioLayerRenderer';
+import { getCodedAudio } from '../SceneDirector/layers';
+import { useSceneDirectorMode } from '../../components/FloatingHand/SceneDirectorMode';
 import { NoiseScene } from './scenes/NoiseScene';
 import { ShapesScene } from './scenes/ShapesScene';
 import { LightLeakScene } from './scenes/LightLeakScene';
@@ -46,9 +43,34 @@ export const CAPABILITIES_SCENES = [
   { name: '7-Captions', start: 540, end: 630 },
 ];
 
+/** Renders coded audio — skips in SceneDirector (audio layers handle it there) */
+const CapabilitiesAudio: React.FC = () => {
+  const isSceneDirector = useSceneDirectorMode();
+  if (isSceneDirector) return null;
+
+  const audioElements: React.ReactElement[] = [];
+  for (const scene of CAPABILITIES_SCENES) {
+    const entries = getCodedAudio('CapabilitiesDemo', scene.name);
+    for (const entry of entries) {
+      const globalFrom = scene.start + entry.startFrame;
+      audioElements.push(
+        <Sequence
+          key={`${scene.name}-${entry.file}-${entry.startFrame}`}
+          from={globalFrom}
+          durationInFrames={entry.durationInFrames}
+        >
+          <Audio src={staticFile(entry.file)} volume={entry.volume} />
+        </Sequence>,
+      );
+    }
+  }
+  return <>{audioElements}</>;
+};
+
 export const CapabilitiesDemo: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: '#0a0a0a' }}>
+      <CapabilitiesAudio />
       <AudioFromLayers />
 
       <Sequence from={0} durationInFrames={90} name="1-NoiseBackground">

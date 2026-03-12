@@ -116,6 +116,29 @@ const AUDIO_TEST_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
 };
 
+const CAPABILITIES_AUDIO: Record<string, CodedAudioEntry[]> = {
+  '6-SFXClick': [
+    {
+      file: 'audio/sfx/mouse-click.wav',
+      startFrame: 10,
+      durationInFrames: 20,
+      volume: 0.8,
+    },
+    {
+      file: 'audio/sfx/whoosh.wav',
+      startFrame: 30,
+      durationInFrames: 30,
+      volume: 0.6,
+    },
+    {
+      file: 'audio/sfx/switch.wav',
+      startFrame: 55,
+      durationInFrames: 20,
+      volume: 0.7,
+    },
+  ],
+};
+
 const CODED_AUDIO_REGISTRY: Record<
   string,
   Record<string, CodedAudioEntry[]>
@@ -123,6 +146,7 @@ const CODED_AUDIO_REGISTRY: Record<
   MobileChatDemoCombined: COMBINED_AUDIO,
   DorianDemo: DORIAN_AUDIO,
   AudioTest: AUDIO_TEST_AUDIO,
+  CapabilitiesDemo: CAPABILITIES_AUDIO,
 };
 
 export function getCodedAudio(

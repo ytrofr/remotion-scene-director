@@ -14,7 +14,8 @@
       "args": ["elevenlabs-mcp"],
       "env": {
         "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
-      }
+      },
+      "disabled": true
     },
     "image-gen": {
       "type": "stdio",

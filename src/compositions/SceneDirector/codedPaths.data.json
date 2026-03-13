@@ -270,5 +270,50 @@
       ],
       "dark": false
     }
+  },
+  "DorianStores": {
+    "1-StoreDashboard": {
+      "gesture": "scroll",
+      "animation": "cursor-real-black",
+      "path": [
+        {
+          "x": 540,
+          "y": 1300,
+          "frame": 20,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1100,
+          "frame": 60,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 900,
+          "frame": 100,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 360,
+          "y": 780,
+          "frame": 130,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 360,
+          "y": 780,
+          "frame": 145,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 15
+        }
+      ],
+      "dark": false
+    }
   }
 }

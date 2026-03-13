@@ -236,6 +236,61 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   },
 };
 
+// ── DorianStores paths ──
+
+const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
+  '1-StoreDashboard': {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: true,
+    path: [
+      { x: 750, y: 1500, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 680, y: 1550, frame: 40, gesture: 'pointer', scale: 1 },
+      { x: 680, y: 1550, frame: 55, gesture: 'click', scale: 1, duration: 10 },
+      { x: 500, y: 1480, frame: 95, gesture: 'pointer', scale: 1 },
+      { x: 500, y: 1480, frame: 100, gesture: 'click', scale: 1, duration: 5 },
+      { x: 680, y: 1480, frame: 168, gesture: 'pointer', scale: 1 },
+      { x: 680, y: 1480, frame: 173, gesture: 'click', scale: 1, duration: 10 },
+      { x: 750, y: 1600, frame: 200, gesture: 'pointer', scale: 1 },
+    ],
+    secondaryLayers: [
+      {
+        gesture: 'scroll',
+        animation: 'cursor-real-black',
+        dark: true,
+        path: [
+          { x: 540, y: 1200, frame: 350, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 1000, frame: 390, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 850, frame: 430, gesture: 'pointer', scale: 1 },
+        ],
+      },
+    ],
+  },
+  '2-MapSearch': {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: true,
+    path: [
+      { x: 540, y: 880, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 860, frame: 18, gesture: 'click', scale: 1, duration: 8 },
+      { x: 540, y: 860, frame: 75, gesture: 'pointer', scale: 1 },
+      { x: 460, y: 1050, frame: 130, gesture: 'pointer', scale: 1 },
+      { x: 460, y: 1050, frame: 150, gesture: 'click', scale: 1, duration: 15 },
+    ],
+  },
+  '3-AIProducts': {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: true,
+    path: [
+      { x: 540, y: 1500, frame: 5, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 1480, frame: 12, gesture: 'click', scale: 1, duration: 8 },
+      { x: 700, y: 1480, frame: 60, gesture: 'pointer', scale: 1 },
+      { x: 700, y: 1480, frame: 68, gesture: 'click', scale: 1, duration: 10 },
+    ],
+  },
+};
+
 // ── Registry ──
 
 const saved = savedData as Record<string, Record<string, CodedPath>>;
@@ -260,6 +315,7 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   ),
   DorianDemo: mergePaths(DORIAN_PATHS, saved.DorianDemo),
   DashmorDemo: { ...saved.DashmorDemo },
+  DorianStores: mergePaths(DORIAN_STORES_PATHS, saved.DorianStores),
 };
 
 /**

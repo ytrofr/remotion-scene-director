@@ -140,6 +140,183 @@ const CAPABILITIES_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
 };
 
+const DORIAN_STORES_AUDIO: Record<string, CodedAudioEntry[]> = {
+  '1-StoreDashboard': [
+    // AI bubble tap
+    {
+      file: 'audio/sfx/mouse-click.wav',
+      startFrame: 55,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
+    // Chat panel slide up
+    {
+      file: 'audio/sfx/slide.wav',
+      startFrame: 65,
+      durationInFrames: 30,
+      volume: 0.4,
+    },
+    // Input tap
+    {
+      file: 'audio/sfx/soft-click.wav',
+      startFrame: 100,
+      durationInFrames: 10,
+      volume: 0.5,
+    },
+    // Typing sound
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 105,
+      durationInFrames: 65,
+      volume: 0.3,
+    },
+    // Send tap
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 173,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
+    // AI response swoosh
+    {
+      file: 'audio/sfx/whoosh.wav',
+      startFrame: 215,
+      durationInFrames: 25,
+      volume: 0.5,
+    },
+    // Dashboard morph / transition
+    {
+      file: 'audio/sfx/swoosh-transition.wav',
+      startFrame: 260,
+      durationInFrames: 45,
+      volume: 0.4,
+    },
+    // Chat dismiss slide
+    {
+      file: 'audio/sfx/slide.wav',
+      startFrame: 280,
+      durationInFrames: 30,
+      volume: 0.3,
+    },
+    // Best sellers appear
+    {
+      file: 'audio/sfx/chime.wav',
+      startFrame: 330,
+      durationInFrames: 30,
+      volume: 0.3,
+    },
+  ],
+  '2-MapSearch': [
+    // Search bar tap
+    {
+      file: 'audio/sfx/mouse-click.wav',
+      startFrame: 18,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
+    // Typing
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 22,
+      durationInFrames: 50,
+      volume: 0.3,
+    },
+    // Map pins appear (staggered pops)
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 80,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 88,
+      durationInFrames: 15,
+      volume: 0.4,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 96,
+      durationInFrames: 15,
+      volume: 0.35,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 104,
+      durationInFrames: 15,
+      volume: 0.3,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 112,
+      durationInFrames: 15,
+      volume: 0.3,
+    },
+    // Pin click
+    {
+      file: 'audio/sfx/mouse-click.wav',
+      startFrame: 150,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
+  ],
+  '3-AIProducts': [
+    // Input tap
+    {
+      file: 'audio/sfx/soft-click.wav',
+      startFrame: 12,
+      durationInFrames: 10,
+      volume: 0.5,
+    },
+    // Typing
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 16,
+      durationInFrames: 45,
+      volume: 0.3,
+    },
+    // Send tap
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 68,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
+    // AI thinking
+    {
+      file: 'audio/sfx/notification.wav',
+      startFrame: 110,
+      durationInFrames: 20,
+      volume: 0.3,
+    },
+    // Product cards appear (staggered)
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 145,
+      durationInFrames: 15,
+      volume: 0.5,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 160,
+      durationInFrames: 15,
+      volume: 0.45,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 175,
+      durationInFrames: 15,
+      volume: 0.4,
+    },
+    {
+      file: 'audio/sfx/pop-up.wav',
+      startFrame: 190,
+      durationInFrames: 15,
+      volume: 0.35,
+    },
+  ],
+};
+
 const CODED_AUDIO_REGISTRY: Record<
   string,
   Record<string, CodedAudioEntry[]>
@@ -148,6 +325,7 @@ const CODED_AUDIO_REGISTRY: Record<
   DorianDemo: DORIAN_AUDIO,
   AudioTest: AUDIO_TEST_AUDIO,
   CapabilitiesDemo: CAPABILITIES_AUDIO,
+  DorianStores: DORIAN_STORES_AUDIO,
 };
 
 export function getCodedAudio(

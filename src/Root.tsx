@@ -38,6 +38,10 @@ import {
   DorianDemoEnhanced,
   ENHANCED_VIDEO,
 } from './compositions/DorianDemoEnhanced';
+import {
+  DorianStores,
+  VIDEO as STORES_VIDEO,
+} from './compositions/DorianStores/DorianStores';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -207,6 +211,15 @@ export const RemotionRoot: React.FC = () => {
         fps={ENHANCED_VIDEO.fps}
         width={ENHANCED_VIDEO.width}
         height={ENHANCED_VIDEO.height}
+      />
+      {/* ========== DORIAN STORES ========== */}
+      <Composition
+        id="DorianStores"
+        component={DorianStores}
+        durationInFrames={STORES_VIDEO.durationInFrames}
+        fps={STORES_VIDEO.fps}
+        width={STORES_VIDEO.width}
+        height={STORES_VIDEO.height}
       />
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}
     </>

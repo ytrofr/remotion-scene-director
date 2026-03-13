@@ -43,6 +43,11 @@ import {
   ENHANCED_SCENE_INFO,
   CAPTIONS_SRT,
 } from '../DorianDemoEnhanced';
+import {
+  DorianStores,
+  VIDEO as STORES_VIDEO,
+  STORES_SCENE_INFO,
+} from '../DorianStores/DorianStores';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -160,6 +165,21 @@ export const COMPOSITIONS: CompositionEntry[] = [
     })),
     captionsSrt: CAPTIONS_SRT,
   },
+  {
+    id: 'DorianStores',
+    label: 'Dorian Stores (Dashboard + Map + AI)',
+    video: {
+      width: STORES_VIDEO.width,
+      height: STORES_VIDEO.height,
+      fps: STORES_VIDEO.fps,
+      frames: STORES_VIDEO.durationInFrames,
+    },
+    scenes: STORES_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
 ];
 
 // Component map for rendering
@@ -171,4 +191,5 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   CapabilitiesDemo,
   SharedComponentsDemo,
   DorianDemoEnhanced,
+  DorianStores,
 };

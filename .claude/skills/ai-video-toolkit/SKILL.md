@@ -398,6 +398,32 @@ const emojis = getAvailableEmojis();
 
 ---
 
+## 10. Shared Video Components
+
+Reusable components in `src/components/` and utilities in `src/lib/`:
+
+### Libraries (`src/lib/`)
+
+- **springs.ts** — `SPRING_CONFIG` (9 presets) + `springConfig()` helper
+- **easings.ts** — `applyNamedEasing()` with 7 named easings
+- **audioEnvelope.ts** — `computeVolumeAtFrame()` + `MIXING_LEVELS` + ducking
+- **pointers.ts** — `POINTER_PRESETS` + `isPointerAnimation()` + `getRotationOffset()`
+
+### Components (`src/components/`)
+
+- **ZoomTransition** — Zoom-in → hold → zoom-out wrapper
+- **BackgroundMusic** — Looping music with fade envelope + ducking
+- **CrossfadeTransition** — `crossfadeTiming()` + `CROSSFADE` presets for TransitionSeries
+- **SequenceCrossfade** — Opacity crossfade for Sequence layouts
+- **CaptionOverlay** — SRT caption display (full-sentence / word-highlight)
+
+### FloatingHand Enhancements
+
+- **autoRotate**: `physics.autoRotate: true` for direction-based cursor rotation
+- **Pointer cursors**: Pass any `cursor-*` gallery ID as `animation` prop
+
+---
+
 ## Pipeline: Full Narrated Video with Captions
 
 1. Write script text per scene

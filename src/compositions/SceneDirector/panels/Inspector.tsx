@@ -16,9 +16,10 @@ import {
   buildClickAnimationFile,
   type GestureTool,
 } from '../gestures';
-import type { AudioLayer, ZoomLayer } from '../layers';
+import type { AudioLayer, CaptionLayer, ZoomLayer } from '../layers';
 import { LottieThumbnail } from '../overlays/LottieThumbnail';
 import { AudioInspector } from './AudioInspector';
+import { CaptionInspector } from './CaptionInspector';
 import { useGalleryActive } from '../hooks/galleryActive';
 import { ActivityLog } from './ActivityLog';
 import { HistoryTab } from './HistoryTab';
@@ -317,6 +318,15 @@ export const Inspector: React.FC = () => {
       <AudioInspector layer={selectedLayer as AudioLayer} scene={scene} />
     ) : null;
 
+  // Caption layer inspector (when a caption layer is selected)
+  const captionInspectorSection =
+    selectedLayer?.type === 'caption' ? (
+      <CaptionInspector
+        layer={selectedLayer as CaptionLayer}
+        scene="__captions__"
+      />
+    ) : null;
+
   const sidebarTab = state.sidebarTab;
 
   // Tab switcher (always visible)
@@ -347,18 +357,23 @@ export const Inspector: React.FC = () => {
     );
   }
 
+  // Determine which section to show based on selected layer type
+  const selectedType = selectedLayer?.type ?? null;
+  const showHand = !selectedType || selectedType === 'hand';
+
   // Editor tab content
   if (idx === null || !waypoint) {
     return (
       <div className="inspector">
         {tabSwitcher}
         <LayerPanel />
-        {gestureHeader}
-        {handStyleSection}
-        {zoomInspectorSection}
-        {audioInspectorSection}
-        {waypointList}
-        {!waypointList && !zoomInspectorSection && !audioInspectorSection && (
+        {showHand && gestureHeader}
+        {showHand && handStyleSection}
+        {selectedType === 'zoom' && zoomInspectorSection}
+        {selectedType === 'audio' && audioInspectorSection}
+        {selectedType === 'caption' && captionInspectorSection}
+        {showHand && waypointList}
+        {showHand && !waypointList && (
           <div className="inspector__empty-text">
             Pick a gesture tool and click on the video
           </div>
@@ -405,89 +420,96 @@ export const Inspector: React.FC = () => {
     <div className="inspector">
       {tabSwitcher}
       <LayerPanel />
-      {gestureHeader}
-      {handStyleSection}
-      {zoomInspectorSection}
-      {audioInspectorSection}
-      {waypointList}
+      {showHand && gestureHeader}
+      {showHand && handStyleSection}
+      {selectedType === 'zoom' && zoomInspectorSection}
+      {selectedType === 'audio' && audioInspectorSection}
+      {selectedType === 'caption' && captionInspectorSection}
+      {showHand && waypointList}
 
-      <div className="inspector__header">
-        <span className="inspector__header-title">Waypoint #{idx + 1}</span>
-        <span className="inspector__header-meta">
-          of {sceneWaypoints.length}
-        </span>
-      </div>
+      {showHand && (
+        <>
+          <div className="inspector__header">
+            <span className="inspector__header-title">Waypoint #{idx + 1}</span>
+            <span className="inspector__header-meta">
+              of {sceneWaypoints.length}
+            </span>
+          </div>
 
-      <NumField
-        label="X"
-        value={waypoint.x}
-        onChange={(v) => update({ x: v })}
-        step={5}
-      />
-      <NumField
-        label="Y"
-        value={waypoint.y}
-        onChange={(v) => update({ y: v })}
-        step={5}
-      />
-      <NumField
-        label="Frame"
-        value={waypoint.frame ?? 0}
-        onChange={(v) => update({ frame: v })}
-        min={0}
-      />
+          <NumField
+            label="X"
+            value={waypoint.x}
+            onChange={(v) => update({ x: v })}
+            step={5}
+          />
+          <NumField
+            label="Y"
+            value={waypoint.y}
+            onChange={(v) => update({ y: v })}
+            step={5}
+          />
+          <NumField
+            label="Frame"
+            value={waypoint.frame ?? 0}
+            onChange={(v) => update({ frame: v })}
+            min={0}
+          />
 
-      {/* Gesture selector per waypoint */}
-      <div className="inspector__field">
-        <span className="inspector__field-label">Gesture</span>
-        <select
-          className="inspector__gesture-select"
-          value={waypoint.gesture ?? 'pointer'}
-          onChange={(e) =>
-            update({
-              gesture: e.target.value as HandPathPoint['gesture'],
-              duration:
-                e.target.value === 'click'
-                  ? (waypoint.duration ?? CLICK_ANIM_DURATION)
-                  : waypoint.duration,
-            })
-          }
-        >
-          {WP_GESTURE_OPTIONS.map((g) => (
-            <option key={g} value={g}>
-              {g}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Gesture selector per waypoint */}
+          <div className="inspector__field">
+            <span className="inspector__field-label">Gesture</span>
+            <select
+              className="inspector__gesture-select"
+              value={waypoint.gesture ?? 'pointer'}
+              onChange={(e) =>
+                update({
+                  gesture: e.target.value as HandPathPoint['gesture'],
+                  duration:
+                    e.target.value === 'click'
+                      ? (waypoint.duration ?? CLICK_ANIM_DURATION)
+                      : waypoint.duration,
+                })
+              }
+            >
+              {WP_GESTURE_OPTIONS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <NumField
-        label="Duration"
-        value={waypoint.duration ?? 0}
-        onChange={(v) => update({ duration: v })}
-        min={0}
-        step={5}
-      />
+          <NumField
+            label="Duration"
+            value={waypoint.duration ?? 0}
+            onChange={(v) => update({ duration: v })}
+            min={0}
+            step={5}
+          />
 
-      {/* Add Click End — only on last non-click waypoint */}
-      {isLastWaypoint && !hasClickEnd && (
-        <button
-          onClick={handleAddClickEnd}
-          className="inspector__add-click-btn"
-          title="Append a click waypoint at the end of this path"
-        >
-          + Add Click End
-        </button>
+          {/* Add Click End — only on last non-click waypoint */}
+          {isLastWaypoint && !hasClickEnd && (
+            <button
+              onClick={handleAddClickEnd}
+              className="inspector__add-click-btn"
+              title="Append a click waypoint at the end of this path"
+            >
+              + Add Click End
+            </button>
+          )}
+
+          {/* Delete button */}
+          <button
+            onClick={() =>
+              dispatch({ type: 'DELETE_WAYPOINT', scene, index: idx })
+            }
+            className="inspector__delete-btn"
+            title="Delete waypoint (Delete key)"
+          >
+            Delete Waypoint
+          </button>
+        </>
       )}
-
-      {/* Delete button */}
-      <button
-        onClick={() => dispatch({ type: 'DELETE_WAYPOINT', scene, index: idx })}
-        className="inspector__delete-btn"
-        title="Delete waypoint (Delete key)"
-      >
-        Delete Waypoint
-      </button>
       <ActivityLog />
     </div>
   );

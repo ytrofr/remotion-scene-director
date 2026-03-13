@@ -8,10 +8,12 @@ import { GESTURE_PRESETS, type GestureTool } from './gestures';
 import {
   createHandLayer,
   createAudioLayer,
+  createCaptionLayer,
   getCodedAudio,
   AUDIO_FILES,
   type Layer,
 } from './layers';
+import { parseSrt } from '@remotion/captions';
 import type { DirectorAction, DirectorState } from './state.types';
 import { updateLayer } from './state.helpers';
 
@@ -28,6 +30,7 @@ type LayerAction = Extract<
   | { type: 'TOGGLE_LAYER_VISIBILITY' }
   | { type: 'TOGGLE_LAYER_LOCK' }
   | { type: 'ENSURE_SCENE_LAYERS' }
+  | { type: 'LOAD_CAPTIONS_FROM_SRT' }
 >;
 
 export function handleLayerAction(
@@ -296,6 +299,39 @@ export function handleLayerAction(
         };
       }
       return newState;
+    }
+    case 'LOAD_CAPTIONS_FROM_SRT': {
+      // Skip if caption layers already exist anywhere
+      const hasCaptions = Object.values(state.layers).some((sceneLayers) =>
+        sceneLayers.some((l) => l.type === 'caption'),
+      );
+      if (hasCaptions) return state;
+
+      const { captions } = parseSrt({ input: action.srt });
+      const captionLayers: Layer[] = captions.map((cap, i) => {
+        const startFrame = Math.round((cap.startMs / 1000) * action.fps);
+        const durationInFrames = Math.round(
+          ((cap.endMs - cap.startMs) / 1000) * action.fps,
+        );
+        return createCaptionLayer(
+          '__captions__',
+          cap.text,
+          startFrame,
+          durationInFrames,
+          i,
+        );
+      });
+
+      return {
+        ...state,
+        layers: {
+          ...state.layers,
+          __captions__: [
+            ...(state.layers['__captions__'] || []),
+            ...captionLayers,
+          ],
+        },
+      };
     }
     default:
       return state;

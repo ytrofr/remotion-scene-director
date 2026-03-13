@@ -14,6 +14,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { Audio, Sequence, staticFile } from 'remotion';
+import { computeVolumeAtFrame } from '../../lib/audioEnvelope';
 
 export interface AudioEntry {
   id: string;
@@ -21,6 +22,8 @@ export interface AudioEntry {
   globalFrom: number;
   durationInFrames: number;
   volume: number;
+  fadeInFrames?: number;
+  fadeOutFrames?: number;
 }
 
 export const AudioEntriesContext = createContext<AudioEntry[]>([]);
@@ -39,7 +42,20 @@ export const AudioFromLayers: React.FC = () => {
           from={e.globalFrom}
           durationInFrames={e.durationInFrames || 60}
         >
-          <Audio src={staticFile(e.file)} volume={e.volume} />
+          <Audio
+            src={staticFile(e.file)}
+            volume={
+              e.fadeInFrames || e.fadeOutFrames
+                ? (f) =>
+                    computeVolumeAtFrame(f, {
+                      baseVolume: e.volume,
+                      fadeInFrames: e.fadeInFrames,
+                      fadeOutFrames: e.fadeOutFrames,
+                      totalFrames: e.durationInFrames || 60,
+                    })
+                : e.volume
+            }
+          />
         </Sequence>
       ))}
     </>

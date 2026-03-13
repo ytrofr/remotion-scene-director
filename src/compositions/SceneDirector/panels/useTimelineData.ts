@@ -1,11 +1,11 @@
 /**
  * Timeline data hooks - extracted from Timeline.tsx
- * Collects and organizes hand/audio layers for timeline display.
+ * Collects and organizes hand/audio/caption layers for timeline display.
  */
 
 import { useMemo } from 'react';
 import type { DirectorState, SceneInfo } from '../state.types';
-import type { AudioLayer, HandLayer } from '../layers';
+import type { AudioLayer, CaptionLayer, HandLayer } from '../layers';
 
 // ─── Hand layers ─────────────────────────────────────────────
 
@@ -92,4 +92,35 @@ export function useAudioRows(
     }
     return rows;
   }, [layers, scenes]);
+}
+
+// ─── Caption layers ──────────────────────────────────────────
+
+export interface CaptionBarEntry {
+  layer: CaptionLayer;
+  sceneName: string;
+  globalStart: number;
+  globalEnd: number;
+}
+
+export function useCaptionBars(
+  layers: DirectorState['layers'],
+): CaptionBarEntry[] {
+  return useMemo(() => {
+    const result: CaptionBarEntry[] = [];
+    for (const [sceneName, sceneLayers] of Object.entries(layers)) {
+      for (const l of sceneLayers) {
+        if (l.type === 'caption' && l.visible) {
+          const c = l as CaptionLayer;
+          result.push({
+            layer: c,
+            sceneName,
+            globalStart: c.data.startFrame,
+            globalEnd: c.data.startFrame + c.data.durationInFrames,
+          });
+        }
+      }
+    }
+    return result.sort((a, b) => a.globalStart - b.globalStart);
+  }, [layers]);
 }

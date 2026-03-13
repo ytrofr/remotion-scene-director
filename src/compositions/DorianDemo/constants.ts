@@ -1,3 +1,6 @@
+// Re-export shared springs for backward compatibility
+export { SPRING_CONFIG as SHARED_SPRING_CONFIG } from '../../lib/springs';
+
 // Dorian Demo Video - Constants and Configuration
 
 // Video specs

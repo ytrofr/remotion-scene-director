@@ -28,13 +28,26 @@ export function useRestoredInitialState(initialState: DirectorState) {
       : undefined;
     const layers = savedSession.layers ? { ...savedSession.layers } : undefined;
 
+    // Playhead localStorage has the latest scene/comp (auto-saved, not dependent on Save button)
+    let playheadScene: string | null = null;
+    let playheadComp: string | null = null;
+    try {
+      const playhead = JSON.parse(
+        localStorage.getItem('scene-director-playhead') || '{}',
+      );
+      if (typeof playhead.scene === 'string') playheadScene = playhead.scene;
+      if (typeof playhead.comp === 'string') playheadComp = playhead.comp;
+    } catch {
+      /* ignore */
+    }
+
     return {
       ...initialState,
-      ...(savedSession.compositionId
-        ? { compositionId: savedSession.compositionId }
+      ...(playheadComp || savedSession.compositionId
+        ? { compositionId: playheadComp || savedSession.compositionId }
         : {}),
-      ...(savedSession.selectedScene
-        ? { selectedScene: savedSession.selectedScene }
+      ...(playheadScene || savedSession.selectedScene
+        ? { selectedScene: playheadScene || savedSession.selectedScene }
         : {}),
       ...(savedSession.sceneGesture
         ? { sceneGesture: savedSession.sceneGesture }

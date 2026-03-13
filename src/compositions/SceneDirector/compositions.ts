@@ -32,6 +32,17 @@ import {
   CAPABILITIES_VIDEO,
   CAPABILITIES_SCENES,
 } from '../CapabilitiesDemo';
+import {
+  SharedComponentsDemo,
+  DEMO_VIDEO,
+  DEMO_SCENES,
+} from '../SharedComponentsDemo';
+import {
+  DorianDemoEnhanced,
+  ENHANCED_VIDEO,
+  ENHANCED_SCENE_INFO,
+  CAPTIONS_SRT,
+} from '../DorianDemoEnhanced';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -118,6 +129,37 @@ export const COMPOSITIONS: CompositionEntry[] = [
       end: s.end,
     })),
   },
+  {
+    id: 'SharedComponentsDemo',
+    label: 'Shared Components Demo (6 scenes)',
+    video: {
+      width: DEMO_VIDEO.width,
+      height: DEMO_VIDEO.height,
+      fps: DEMO_VIDEO.fps,
+      frames: DEMO_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_SCENES.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianDemoEnhanced',
+    label: 'Dorian Enhanced (captions + audio envelopes)',
+    video: {
+      width: ENHANCED_VIDEO.width,
+      height: ENHANCED_VIDEO.height,
+      fps: ENHANCED_VIDEO.fps,
+      frames: ENHANCED_VIDEO.durationInFrames,
+    },
+    scenes: ENHANCED_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+    captionsSrt: CAPTIONS_SRT,
+  },
 ];
 
 // Component map for rendering
@@ -127,4 +169,6 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DashmorDemo,
   AudioTest,
   CapabilitiesDemo,
+  SharedComponentsDemo,
+  DorianDemoEnhanced,
 };

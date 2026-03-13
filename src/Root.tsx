@@ -30,6 +30,14 @@ import {
   CapabilitiesDemo,
   CAPABILITIES_VIDEO,
 } from './compositions/CapabilitiesDemo';
+import {
+  SharedComponentsDemo,
+  DEMO_VIDEO,
+} from './compositions/SharedComponentsDemo';
+import {
+  DorianDemoEnhanced,
+  ENHANCED_VIDEO,
+} from './compositions/DorianDemoEnhanced';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -181,6 +189,24 @@ export const RemotionRoot: React.FC = () => {
         fps={CAPABILITIES_VIDEO.fps}
         width={CAPABILITIES_VIDEO.width}
         height={CAPABILITIES_VIDEO.height}
+      />
+      {/* ========== SHARED COMPONENTS DEMO ========== */}
+      <Composition
+        id="SharedComponentsDemo"
+        component={SharedComponentsDemo}
+        durationInFrames={DEMO_VIDEO.durationInFrames}
+        fps={DEMO_VIDEO.fps}
+        width={DEMO_VIDEO.width}
+        height={DEMO_VIDEO.height}
+      />
+      {/* ========== DORIAN DEMO ENHANCED ========== */}
+      <Composition
+        id="DorianDemoEnhanced"
+        component={DorianDemoEnhanced}
+        durationInFrames={ENHANCED_VIDEO.durationInFrames}
+        fps={ENHANCED_VIDEO.fps}
+        width={ENHANCED_VIDEO.width}
+        height={ENHANCED_VIDEO.height}
       />
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}
     </>

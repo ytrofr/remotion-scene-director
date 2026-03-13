@@ -5,6 +5,7 @@
 
 import type { HandPathPoint } from '../../components/FloatingHand/types';
 import type { GestureTool } from './gestures';
+import { applyNamedEasing, type EasingName } from '../../lib/easings';
 
 // ── Coded Audio: scenes that already have inline <Audio> in source code ──
 
@@ -157,7 +158,7 @@ export function getCodedAudio(
 }
 
 // Layer types
-export type LayerType = 'hand' | 'zoom' | 'audio';
+export type LayerType = 'hand' | 'zoom' | 'audio' | 'caption';
 
 // Base layer properties shared by all layer types
 export interface LayerBase {
@@ -207,11 +208,25 @@ export interface AudioLayerData {
   startFrame: number; // local frame within scene
   durationInFrames: number; // how many frames the audio plays
   volume: number; // 0-1
+  fadeInFrames?: number; // optional fade-in duration
+  fadeOutFrames?: number; // optional fade-out duration
 }
 
 export interface AudioLayer extends LayerBase {
   type: 'audio';
   data: AudioLayerData;
+}
+
+// Caption layer
+export interface CaptionLayerData {
+  text: string;
+  startFrame: number; // global frame
+  durationInFrames: number;
+}
+
+export interface CaptionLayer extends LayerBase {
+  type: 'caption';
+  data: CaptionLayerData;
 }
 
 export const AUDIO_FILES = [
@@ -225,12 +240,26 @@ export const AUDIO_FILES = [
   { id: 'audio/sfx/mouse-click.wav', label: 'Mouse Click' },
   { id: 'audio/sfx/shutter-modern.wav', label: 'Shutter Modern' },
   { id: 'audio/sfx/shutter-old.wav', label: 'Shutter Old' },
+  { id: 'audio/sfx/pop-up.wav', label: 'Pop Up' },
+  { id: 'audio/sfx/notification.wav', label: 'Notification' },
+  { id: 'audio/sfx/soft-click.wav', label: 'Soft Click' },
+  { id: 'audio/sfx/success-ding.mp3', label: 'Success Ding' },
+  { id: 'audio/sfx/swoosh-transition.wav', label: 'Swoosh Transition' },
+  { id: 'audio/sfx/chime.wav', label: 'Chime' },
+  { id: 'audio/sfx/slide.wav', label: 'Slide' },
+  { id: 'audio/sfx/bass-impact.wav', label: 'Bass Impact' },
+  { id: 'audio/sfx/sparkle.wav', label: 'Sparkle' },
+  { id: 'audio/sfx/riser.wav', label: 'Riser' },
 ];
 
-export type Layer = HandLayer | ZoomLayer | AudioLayer;
+export type Layer = HandLayer | ZoomLayer | AudioLayer | CaptionLayer;
 
 // Discriminated union of all layer data types
-export type LayerData = HandLayerData | ZoomLayerData | AudioLayerData;
+export type LayerData =
+  | HandLayerData
+  | ZoomLayerData
+  | AudioLayerData
+  | CaptionLayerData;
 
 // Generate unique layer ID
 let layerCounter = 0;
@@ -292,6 +321,26 @@ export function createAudioLayer(scene: string, order: number = 2): AudioLayer {
   };
 }
 
+// Create a caption layer from parsed SRT cue
+export function createCaptionLayer(
+  scene: string,
+  text: string,
+  startFrame: number,
+  durationInFrames: number,
+  order: number = 3,
+): CaptionLayer {
+  return {
+    id: generateLayerId('caption'),
+    type: 'caption',
+    scene,
+    name: text.length > 20 ? text.slice(0, 20) + '...' : text,
+    visible: true,
+    locked: false,
+    order,
+    data: { text, startFrame, durationInFrames },
+  };
+}
+
 // Compute zoom transform at a given local frame from zoom layers
 export function computeZoomAtFrame(
   zoomLayers: ZoomLayer[],
@@ -336,14 +385,5 @@ export function computeZoomAtFrame(
 }
 
 function applyEasing(t: number, easing: ZoomKeyframe['easing']): number {
-  switch (easing) {
-    case 'ease-in':
-      return t * t;
-    case 'ease-out':
-      return 1 - (1 - t) * (1 - t);
-    case 'ease-in-out':
-      return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
-    default:
-      return t; // linear
-  }
+  return applyNamedEasing(t, easing as EasingName);
 }

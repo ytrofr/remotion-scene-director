@@ -157,3 +157,43 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     `public/voiceover/{scene-name}.mp3`. Use `getAudioDurationInSeconds()`
     from `@remotion/media-utils` + `calculateMetadata` to set composition
     duration from audio length. Never hardcode voiceover durations.
+
+34. **Shared spring configs**: Import `SPRING_CONFIG` from `src/lib/springs.ts`.
+    DorianDemo re-exports as `SHARED_SPRING_CONFIG` for new code. Never define
+    inline spring configs like `{ damping: 18, mass: 1, stiffness: 80 }` — use
+    a named preset from `springs.ts` or add one if none fits.
+
+35. **Named easing only**: Use `applyNamedEasing(t, name)` from `src/lib/easings.ts`.
+    Available: linear, ease-in, ease-out, ease-in-out, spring, bounce, elastic.
+    Never inline easing math in scene or layer files.
+
+36. **Pointer via animation prop**: Pass any pointer gallery ID (e.g.,
+    `"cursor-real-black"`) as the `animation` prop to FloatingHand. No special
+    component needed — FloatingHand renders any Lottie file. Use
+    `isPointerAnimation()` from `src/lib/pointers.ts` to detect pointer cursors.
+
+37. **Cursor autoRotate**: Enable `physics.autoRotate: true` for pointer cursors.
+    This uses `atan2` direction-based rotation instead of velocity tilt. Set
+    `rotationOffset: -45` for standard arrow cursors so the tip follows the
+    movement arc. Hand gestures should NOT use autoRotate (velocity tilt is better
+    for organic hand movement).
+
+38. **BackgroundMusic volume**: Music at `volume: 0.15`. SFX at `0.5-0.8`.
+    Voiceover at `0.85`. Always add `fadeInFrames`/`fadeOutFrames`. Use
+    `MIXING_LEVELS` from `src/lib/audioEnvelope.ts` for standard values.
+    Use `duckTriggers` to reduce music during voiceover sections.
+
+39. **Volume envelope on audio layers**: Set `fadeInFrames`/`fadeOutFrames` on
+    `AudioLayerData` for smooth volume ramps. `AudioLayerRenderer` automatically
+    uses `computeVolumeAtFrame()` when fade fields are present. Flat volume is
+    preserved when no fade fields are set (backward compatible).
+
+40. **Crossfade between scenes**: Use `crossfadeTiming()` from
+    `src/components/CrossfadeTransition.tsx` with TransitionSeries. Use presets:
+    `CROSSFADE.quick` (10f), `CROSSFADE.standard` (20f), `CROSSFADE.slow` (45f).
+    For Sequence-based layouts, use `SequenceCrossfade` wrapper instead.
+
+41. **CaptionOverlay for subtitles**: Use `CaptionOverlay` from
+    `src/components/CaptionOverlay.tsx`. Pass SRT content as string. Supports
+    `full-sentence` and `word-highlight` styles. Position: top/center/bottom.
+    Source `.srt` files from `public/captions/` directory.

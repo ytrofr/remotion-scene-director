@@ -165,6 +165,122 @@ export function useAudioDrag({
   return { audioDrag, handleAudioEdgeDown };
 }
 
+// ─── useCaptionDrag ─────────────────────────────────────────────
+
+export interface CaptionDragResult {
+  captionDrag: AudioDragState | null;
+  handleCaptionEdgeDown: (
+    e: React.MouseEvent,
+    layerId: string,
+    sceneName: string,
+    edge: DragEdge,
+    currentStart: number,
+    currentDuration: number,
+  ) => void;
+}
+
+export function useCaptionDrag({
+  state,
+  dispatch,
+  tracksRef,
+  totalFrames,
+}: UseAudioDragParams): CaptionDragResult {
+  const [captionDrag, setCaptionDrag] = useState<AudioDragState | null>(null);
+
+  const handleCaptionEdgeDown = useCallback(
+    (
+      e: React.MouseEvent,
+      layerId: string,
+      sceneName: string,
+      edge: DragEdge,
+      currentStart: number,
+      currentDuration: number,
+    ) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setCaptionDrag({
+        layerId,
+        scene: sceneName,
+        edge,
+        startX: e.clientX,
+        originalStart: currentStart,
+        originalDuration: currentDuration,
+        preDragState: state,
+      });
+    },
+    [state],
+  );
+
+  useEffect(() => {
+    if (!captionDrag) return;
+    const handleMove = (e: MouseEvent) => {
+      const el = tracksRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const pxPerFrame = rect.width / totalFrames;
+      const deltaPx = e.clientX - captionDrag.startX;
+      const deltaFrames = Math.round(deltaPx / pxPerFrame);
+      if (captionDrag.edge === 'move') {
+        const newStart = Math.max(0, captionDrag.originalStart + deltaFrames);
+        dispatch({
+          type: 'UPDATE_LAYER_DATA',
+          scene: captionDrag.scene,
+          layerId: captionDrag.layerId,
+          data: { startFrame: newStart },
+        });
+      } else if (captionDrag.edge === 'left') {
+        const newStart = Math.max(0, captionDrag.originalStart + deltaFrames);
+        const endFrame =
+          captionDrag.originalStart + captionDrag.originalDuration;
+        const newDuration = Math.max(1, endFrame - newStart);
+        dispatch({
+          type: 'UPDATE_LAYER_DATA',
+          scene: captionDrag.scene,
+          layerId: captionDrag.layerId,
+          data: { startFrame: newStart, durationInFrames: newDuration },
+        });
+      } else {
+        const newDuration = Math.max(
+          1,
+          captionDrag.originalDuration + deltaFrames,
+        );
+        dispatch({
+          type: 'UPDATE_LAYER_DATA',
+          scene: captionDrag.scene,
+          layerId: captionDrag.layerId,
+          data: { durationInFrames: newDuration },
+        });
+      }
+    };
+    const handleUp = () => {
+      const label =
+        captionDrag.edge === 'move'
+          ? 'Move'
+          : captionDrag.edge === 'left'
+            ? 'Trim start'
+            : 'Trim end';
+      dispatch({
+        type: 'LOG_ACTIVITY',
+        action: `${label} caption`,
+        scene: captionDrag.scene,
+        snapshot: captionDrag.preDragState,
+      });
+      setCaptionDrag(null);
+    };
+    const handleBlur = () => setCaptionDrag(null);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [captionDrag, totalFrames, dispatch, tracksRef]);
+
+  return { captionDrag, handleCaptionEdgeDown };
+}
+
 // ─── useHandDrag ────────────────────────────────────────────────
 
 interface UseHandDragParams {

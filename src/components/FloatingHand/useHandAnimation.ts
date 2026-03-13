@@ -250,6 +250,18 @@ function computeHandStateInner(
       [0, 1],
       [current.rotation, next.rotation || current.rotation],
     );
+  } else if (physics.autoRotate) {
+    // Direction-based rotation: cursor tip follows movement arc
+    const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+    if (speed > 0.1) {
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      rotation = angle + (physics.rotationOffset ?? 0);
+    }
+    // Smooth rotation back to neutral when stopped
+    if (segmentProgress > 0.85) {
+      const returnProgress = (segmentProgress - 0.85) / 0.15;
+      rotation *= 1 - Easing.out(Easing.cubic)(returnProgress);
+    }
   } else {
     // Physics-based rotation: tilt toward movement direction
     const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);

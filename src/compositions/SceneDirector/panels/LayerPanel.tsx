@@ -3,71 +3,138 @@
  * Renders inside the Inspector for the selected scene.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDirector } from '../context';
-import { createHandLayer, createZoomLayer, createAudioLayer, type Layer, type LayerType, type ZoomLayer } from '../layers';
+import {
+  createHandLayer,
+  createZoomLayer,
+  createAudioLayer,
+  createCaptionLayer,
+  type CaptionLayer,
+  type Layer,
+  type LayerType,
+  type ZoomLayer,
+} from '../layers';
 import type { GestureTool } from '../gestures';
 
 export const LayerPanel: React.FC = () => {
-  const { state, dispatch } = useDirector();
+  const { state, dispatch, frame } = useDirector();
   const scene = state.selectedScene;
   const [showAddMenu, setShowAddMenu] = useState(false);
 
-  const sceneLayers = scene ? (state.layers[scene] || []) : [];
+  const sceneLayers = scene ? state.layers[scene] || [] : [];
+  const allCaptionLayers = state.layers['__captions__'] || [];
 
-  const handleAddLayer = useCallback((type: LayerType) => {
-    if (!scene) return;
-    const order = sceneLayers.length;
-    if (type === 'hand') {
-      const gesture: GestureTool = state.sceneGesture[scene] ?? (state.activeTool !== 'select' ? state.activeTool : 'click');
-      const layer = createHandLayer(scene, [], gesture, order);
-      dispatch({ type: 'ADD_LAYER', scene, layer });
-    } else if (type === 'zoom') {
-      const layer = createZoomLayer(scene, order);
-      dispatch({ type: 'ADD_LAYER', scene, layer });
-    } else if (type === 'audio') {
-      const layer = createAudioLayer(scene, order);
-      dispatch({ type: 'ADD_LAYER', scene, layer });
+  // Only show the caption under the current playhead (or the selected one)
+  const activeCaptions = useMemo(() => {
+    const selected = state.selectedLayerId
+      ? allCaptionLayers.find((l) => l.id === state.selectedLayerId)
+      : null;
+    const underPlayhead = allCaptionLayers.filter((l) => {
+      if (l.type !== 'caption') return false;
+      const c = l as CaptionLayer;
+      return (
+        frame >= c.data.startFrame &&
+        frame < c.data.startFrame + c.data.durationInFrames
+      );
+    });
+    // Show selected caption (even if playhead isn't on it) + captions under playhead
+    const result = selected ? [selected] : [];
+    for (const l of underPlayhead) {
+      if (!result.some((r) => r.id === l.id)) result.push(l);
     }
-    setShowAddMenu(false);
-  }, [scene, sceneLayers.length, state.sceneGesture, state.activeTool, dispatch]);
+    return result;
+  }, [allCaptionLayers, frame, state.selectedLayerId]);
 
-  const handleSelect = useCallback((layerId: string) => {
-    dispatch({ type: 'SELECT_LAYER', layerId });
-  }, [dispatch]);
+  const handleAddLayer = useCallback(
+    (type: LayerType) => {
+      if (!scene) return;
+      const order = sceneLayers.length;
+      if (type === 'hand') {
+        const gesture: GestureTool =
+          state.sceneGesture[scene] ??
+          (state.activeTool !== 'select' ? state.activeTool : 'click');
+        const layer = createHandLayer(scene, [], gesture, order);
+        dispatch({ type: 'ADD_LAYER', scene, layer });
+      } else if (type === 'zoom') {
+        const layer = createZoomLayer(scene, order);
+        dispatch({ type: 'ADD_LAYER', scene, layer });
+      } else if (type === 'audio') {
+        const layer = createAudioLayer(scene, order);
+        dispatch({ type: 'ADD_LAYER', scene, layer });
+      } else if (type === 'caption') {
+        const layer = createCaptionLayer(
+          '__captions__',
+          'New caption',
+          0,
+          60,
+          order,
+        );
+        dispatch({ type: 'ADD_LAYER', scene: '__captions__', layer });
+      }
+      setShowAddMenu(false);
+    },
+    [scene, sceneLayers.length, state.sceneGesture, state.activeTool, dispatch],
+  );
 
-  const handleToggleVisibility = useCallback((e: React.MouseEvent, layerId: string) => {
-    e.stopPropagation();
-    if (!scene) return;
-    dispatch({ type: 'TOGGLE_LAYER_VISIBILITY', scene, layerId });
-  }, [scene, dispatch]);
+  const handleSelect = useCallback(
+    (layerId: string) => {
+      dispatch({ type: 'SELECT_LAYER', layerId });
+    },
+    [dispatch],
+  );
 
-  const handleToggleLock = useCallback((e: React.MouseEvent, layerId: string) => {
-    e.stopPropagation();
-    if (!scene) return;
-    dispatch({ type: 'TOGGLE_LAYER_LOCK', scene, layerId });
-  }, [scene, dispatch]);
+  const handleToggleVisibility = useCallback(
+    (e: React.MouseEvent, layerId: string) => {
+      e.stopPropagation();
+      if (!scene) return;
+      dispatch({ type: 'TOGGLE_LAYER_VISIBILITY', scene, layerId });
+    },
+    [scene, dispatch],
+  );
 
-  const handleRemove = useCallback((e: React.MouseEvent, layerId: string) => {
-    e.stopPropagation();
-    if (!scene) return;
-    dispatch({ type: 'REMOVE_LAYER', scene, layerId });
-  }, [scene, dispatch]);
+  const handleToggleLock = useCallback(
+    (e: React.MouseEvent, layerId: string) => {
+      e.stopPropagation();
+      if (!scene) return;
+      dispatch({ type: 'TOGGLE_LAYER_LOCK', scene, layerId });
+    },
+    [scene, dispatch],
+  );
 
-  const handleMoveLayer = useCallback((layerId: string, direction: 'up' | 'down') => {
-    if (!scene) return;
-    const ids = sceneLayers.map(l => l.id);
-    const idx = ids.indexOf(layerId);
-    if (idx < 0) return;
-    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= ids.length) return;
-    [ids[idx], ids[newIdx]] = [ids[newIdx], ids[idx]];
-    dispatch({ type: 'REORDER_LAYERS', scene, layerIds: ids });
-  }, [scene, sceneLayers, dispatch]);
+  const handleRemove = useCallback(
+    (e: React.MouseEvent, layerId: string) => {
+      e.stopPropagation();
+      if (!scene) return;
+      dispatch({ type: 'REMOVE_LAYER', scene, layerId });
+    },
+    [scene, dispatch],
+  );
+
+  const handleMoveLayer = useCallback(
+    (layerId: string, direction: 'up' | 'down') => {
+      if (!scene) return;
+      const ids = sceneLayers.map((l) => l.id);
+      const idx = ids.indexOf(layerId);
+      if (idx < 0) return;
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= ids.length) return;
+      [ids[idx], ids[newIdx]] = [ids[newIdx], ids[idx]];
+      dispatch({ type: 'REORDER_LAYERS', scene, layerIds: ids });
+    },
+    [scene, sceneLayers, dispatch],
+  );
 
   if (!scene) return null;
 
-  const typeIcon = (type: LayerType) => type === 'hand' ? '\u{1F590}' : type === 'zoom' ? '\u{1F50D}' : '\u{266B}';
+  const typeIcon = (type: LayerType) =>
+    type === 'hand'
+      ? '\u{1F590}'
+      : type === 'zoom'
+        ? '\u{1F50D}'
+        : type === 'caption'
+          ? '\u{1F4AC}'
+          : '\u{266B}';
 
   return (
     <div className="layer-panel">
@@ -83,14 +150,29 @@ export const LayerPanel: React.FC = () => {
           </button>
           {showAddMenu && (
             <div className="layer-panel__add-menu">
-              <button className="layer-panel__add-menu-item" onClick={() => handleAddLayer('hand')}>
+              <button
+                className="layer-panel__add-menu-item"
+                onClick={() => handleAddLayer('hand')}
+              >
                 Hand Gesture
               </button>
-              <button className="layer-panel__add-menu-item" onClick={() => handleAddLayer('zoom')}>
+              <button
+                className="layer-panel__add-menu-item"
+                onClick={() => handleAddLayer('zoom')}
+              >
                 Zoom
               </button>
-              <button className="layer-panel__add-menu-item" onClick={() => handleAddLayer('audio')}>
+              <button
+                className="layer-panel__add-menu-item"
+                onClick={() => handleAddLayer('audio')}
+              >
                 Audio
+              </button>
+              <button
+                className="layer-panel__add-menu-item"
+                onClick={() => handleAddLayer('caption')}
+              >
+                Caption
               </button>
             </div>
           )}
@@ -98,9 +180,7 @@ export const LayerPanel: React.FC = () => {
       </div>
 
       {sceneLayers.length === 0 ? (
-        <div className="layer-panel__empty">
-          No layers. Use [+] to add.
-        </div>
+        <div className="layer-panel__empty">No layers. Use [+] to add.</div>
       ) : (
         <div className="layer-panel__list">
           {sceneLayers.map((layer, i) => {
@@ -125,33 +205,108 @@ export const LayerPanel: React.FC = () => {
                 >
                   {layer.locked ? '\u{1F512}' : '\u{1F513}'}
                 </button>
-                <span className="layer-panel__type-icon">{typeIcon(layer.type)}</span>
+                <span className="layer-panel__type-icon">
+                  {typeIcon(layer.type)}
+                </span>
                 <span className="layer-panel__name">{layer.name}</span>
                 <div className="layer-panel__actions">
                   {i > 0 && (
                     <button
                       className="layer-panel__icon-btn layer-panel__icon-btn--small"
-                      onClick={(e) => { e.stopPropagation(); handleMoveLayer(layer.id, 'up'); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveLayer(layer.id, 'up');
+                      }}
                       title="Move up"
-                    >^</button>
+                    >
+                      ^
+                    </button>
                   )}
                   {i < sceneLayers.length - 1 && (
                     <button
                       className="layer-panel__icon-btn layer-panel__icon-btn--small"
-                      onClick={(e) => { e.stopPropagation(); handleMoveLayer(layer.id, 'down'); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveLayer(layer.id, 'down');
+                      }}
                       title="Move down"
-                    >v</button>
+                    >
+                      v
+                    </button>
                   )}
                   <button
                     className="layer-panel__icon-btn layer-panel__icon-btn--delete"
                     onClick={(e) => handleRemove(e, layer.id)}
                     title="Remove layer"
-                  >x</button>
+                  >
+                    x
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Caption layer at playhead (global, stored under __captions__) */}
+      {activeCaptions.length > 0 && (
+        <>
+          <div className="layer-panel__header" style={{ marginTop: 6 }}>
+            <span
+              className="inspector__section-title"
+              style={{ fontSize: 10, color: '#a78bfa' }}
+            >
+              Caption
+            </span>
+          </div>
+          <div className="layer-panel__list">
+            {activeCaptions.map((layer) => {
+              const isSelected = layer.id === state.selectedLayerId;
+              return (
+                <div
+                  key={layer.id}
+                  className={`layer-panel__item ${isSelected ? 'layer-panel__item--selected' : ''}`}
+                  onClick={() => handleSelect(layer.id)}
+                >
+                  <button
+                    className={`layer-panel__icon-btn ${layer.visible ? '' : 'layer-panel__icon-btn--off'}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch({
+                        type: 'TOGGLE_LAYER_VISIBILITY',
+                        scene: '__captions__',
+                        layerId: layer.id,
+                      });
+                    }}
+                    title={layer.visible ? 'Hide' : 'Show'}
+                  >
+                    {layer.visible ? '\u{1F441}' : '\u{1F441}\u{200D}\u{1F5E8}'}
+                  </button>
+                  <span className="layer-panel__type-icon">
+                    {typeIcon(layer.type)}
+                  </span>
+                  <span className="layer-panel__name">{layer.name}</span>
+                  <div className="layer-panel__actions">
+                    <button
+                      className="layer-panel__icon-btn layer-panel__icon-btn--delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch({
+                          type: 'REMOVE_LAYER',
+                          scene: '__captions__',
+                          layerId: layer.id,
+                        });
+                      }}
+                      title="Remove caption"
+                    >
+                      x
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

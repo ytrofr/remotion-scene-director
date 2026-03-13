@@ -122,6 +122,7 @@ export function directorReducer(
     case 'TOGGLE_LAYER_VISIBILITY':
     case 'TOGGLE_LAYER_LOCK':
     case 'ENSURE_SCENE_LAYERS':
+    case 'LOAD_CAPTIONS_FROM_SRT':
       return handleLayerAction(state, action);
 
     // ── Scene management actions (delegated) ──────────────────────────────

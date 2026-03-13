@@ -8,8 +8,8 @@
 
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDirector } from '../context';
-import { useAudioDrag, useHandDrag } from './useTimelineDrag';
-import { useHandLayers, useAudioRows } from './useTimelineData';
+import { useAudioDrag, useHandDrag, useCaptionDrag } from './useTimelineDrag';
+import { useHandLayers, useAudioRows, useCaptionBars } from './useTimelineData';
 import { MIN_CLICK_DURATION } from '../gestures';
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2];
@@ -41,6 +41,12 @@ export const Timeline: React.FC = () => {
     totalFrames,
   });
   const { handDrag, handleHandEdgeDown } = useHandDrag({
+    state,
+    dispatch,
+    tracksRef,
+    totalFrames,
+  });
+  const { captionDrag, handleCaptionEdgeDown } = useCaptionDrag({
     state,
     dispatch,
     tracksRef,
@@ -79,7 +85,7 @@ export const Timeline: React.FC = () => {
   // Start scrubbing on mousedown (only if not dragging audio/hand)
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (audioDrag || handDrag) return;
+      if (audioDrag || handDrag || captionDrag) return;
       e.preventDefault();
       setIsScrubbing(true);
       wasPlayingRef.current = playerRef.current?.isPlaying() ?? false;
@@ -89,7 +95,14 @@ export const Timeline: React.FC = () => {
       const targetFrame = clientXToFrame(e.clientX);
       seekAndSelect(targetFrame);
     },
-    [clientXToFrame, seekAndSelect, playerRef, audioDrag, handDrag],
+    [
+      clientXToFrame,
+      seekAndSelect,
+      playerRef,
+      audioDrag,
+      handDrag,
+      captionDrag,
+    ],
   );
 
   // Global mousemove/mouseup while scrubbing
@@ -114,13 +127,16 @@ export const Timeline: React.FC = () => {
   // Collect hand/audio layers across all scenes (extracted to useTimelineData.ts)
   const handLayers = useHandLayers(state.layers, scenes);
   const audioRows = useAudioRows(state.layers, scenes);
+  const captionBars = useCaptionBars(state.layers);
 
   const hasHand = handLayers.length > 0;
+  const hasCaptions = captionBars.length > 0;
   const audioRowCount = Math.max(1, audioRows.length);
   const totalHeight =
     ROW_HEIGHT +
     (hasHand ? ROW_HEIGHT + ROW_GAP : 0) +
-    audioRowCount * (ROW_HEIGHT + ROW_GAP);
+    audioRowCount * (ROW_HEIGHT + ROW_GAP) +
+    (hasCaptions ? ROW_HEIGHT + ROW_GAP : 0);
 
   return (
     <div className="timeline">
@@ -216,6 +232,14 @@ export const Timeline: React.FC = () => {
               {i === 0 ? 'Audio' : ''}
             </div>
           ))}
+          {hasCaptions && (
+            <div
+              className="timeline__row-label timeline__row-label--caption"
+              style={{ height: ROW_HEIGHT, marginTop: ROW_GAP }}
+            >
+              Caps
+            </div>
+          )}
         </div>
 
         {/* Track area (right side, holds all bars + playhead) */}
@@ -524,6 +548,85 @@ export const Timeline: React.FC = () => {
               className="timeline__row"
               style={{ height: ROW_HEIGHT, marginTop: ROW_GAP }}
             />
+          )}
+
+          {/* Caption bars row */}
+          {hasCaptions && (
+            <div
+              className="timeline__row"
+              style={{ height: ROW_HEIGHT, marginTop: ROW_GAP }}
+            >
+              {captionBars.map((cap) => {
+                const left = (cap.globalStart / totalFrames) * 100;
+                const width =
+                  ((cap.globalEnd - cap.globalStart) / totalFrames) * 100;
+                const isSelected = state.selectedLayerId === cap.layer.id;
+                return (
+                  <div
+                    key={cap.layer.id}
+                    className={`timeline__caption-bar ${isSelected ? 'timeline__caption-bar--selected' : ''}`}
+                    style={{ left: `${left}%`, width: `${width}%` }}
+                    title={cap.layer.data.text}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      dispatch({
+                        type: 'SELECT_LAYER',
+                        layerId: cap.layer.id,
+                      });
+                      dispatch({
+                        type: 'SET_SIDEBAR_TAB',
+                        tab: 'editor',
+                      });
+                      if (!isSelected) return;
+                      handleCaptionEdgeDown(
+                        e,
+                        cap.layer.id,
+                        cap.sceneName,
+                        'move',
+                        cap.layer.data.startFrame,
+                        cap.layer.data.durationInFrames,
+                      );
+                    }}
+                  >
+                    {isSelected && (
+                      <div
+                        className="timeline__resize-handle timeline__resize-handle--left"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleCaptionEdgeDown(
+                            e,
+                            cap.layer.id,
+                            cap.sceneName,
+                            'left',
+                            cap.layer.data.startFrame,
+                            cap.layer.data.durationInFrames,
+                          );
+                        }}
+                      />
+                    )}
+                    <span className="timeline__caption-label">
+                      {cap.layer.data.text}
+                    </span>
+                    {isSelected && (
+                      <div
+                        className="timeline__resize-handle timeline__resize-handle--right"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleCaptionEdgeDown(
+                            e,
+                            cap.layer.id,
+                            cap.sceneName,
+                            'right',
+                            cap.layer.data.startFrame,
+                            cap.layer.data.durationInFrames,
+                          );
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
 
           {/* Playhead (spans all rows) */}

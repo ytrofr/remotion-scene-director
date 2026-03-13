@@ -39,6 +39,10 @@ export interface HandPhysicsConfig {
   shadowEnabled: boolean;
   shadowDistance: number; // Base shadow offset
   shadowBlur: number; // Shadow blur amount
+
+  // Auto-rotation (cursor follows movement direction)
+  autoRotate?: boolean;
+  rotationOffset?: number; // Degrees offset (e.g., -45 for arrow cursors)
 }
 
 // Default physics config

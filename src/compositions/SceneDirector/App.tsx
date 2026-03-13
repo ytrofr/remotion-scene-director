@@ -39,6 +39,7 @@ import PlayerArea from './panels/PlayerArea';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
 const PLAYBACK_RATE_KEY = 'scene-director-playback-rate';
+const PLAYHEAD_KEY = 'scene-director-playhead';
 
 export const App: React.FC = () => {
   // Restore session from localStorage
@@ -55,7 +56,17 @@ export const App: React.FC = () => {
   const canRedo = undoState.future.length > 0;
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
-  const [frame, setFrame] = useState(savedSession.frame ?? 0);
+
+  // Read playhead position: playhead localStorage > savedSession > 0
+  const [frame, setFrame] = useState(() => {
+    try {
+      const playhead = JSON.parse(localStorage.getItem(PLAYHEAD_KEY) || '{}');
+      if (typeof playhead.frame === 'number') return playhead.frame;
+    } catch {
+      /* ignore */
+    }
+    return savedSession.frame ?? 0;
+  });
   const [playbackRate, setPlaybackRateRaw] = useState(() => {
     try {
       return parseFloat(localStorage.getItem(PLAYBACK_RATE_KEY) || '1') || 1;
@@ -97,37 +108,105 @@ export const App: React.FC = () => {
     handlePanEnd,
   } = usePlayerControls(state.compositionId);
 
-  // Sync currentView with URL query param (?view=gallery)
-  // 1. On mount: read URL and open gallery if ?view=gallery
+  // Sync URL query params (?comp=, ?scene=, ?frame=, ?view=gallery)
+  // 1. On mount: read URL and apply overrides (URL takes priority over localStorage)
+  const urlFrameRef = useRef<number | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // ?view=gallery
     if (params.get('view') === 'gallery' && state.currentView !== 'gallery') {
       dispatch({ type: 'SET_VIEW', view: 'gallery' });
+    }
+
+    // ?comp= — select composition if it exists
+    const compParam = params.get('comp');
+    if (compParam && COMPOSITIONS.some((c) => c.id === compParam)) {
+      if (compParam !== state.compositionId) {
+        dispatch({ type: 'SET_COMPOSITION', id: compParam });
+      }
+
+      // ?scene= — select scene if it exists in the matched composition
+      const sceneParam = params.get('scene');
+      if (sceneParam) {
+        const comp =
+          COMPOSITIONS.find((c) => c.id === compParam) || COMPOSITIONS[0];
+        if (comp.scenes.some((s) => s.name === sceneParam)) {
+          dispatch({ type: 'SELECT_SCENE', name: sceneParam });
+        }
+      }
+    }
+
+    // ?frame= — remember URL frame for restore (takes priority over savedSession)
+    const frameParam = params.get('frame');
+    if (frameParam) {
+      urlFrameRef.current = parseInt(frameParam, 10);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount only
 
-  // 2. When currentView changes, update the URL to match
+  // 2. When currentView / composition / scene changes, update URL immediately
   useEffect(() => {
     const url = new URL(window.location.href);
+
     if (state.currentView === 'gallery') {
       url.searchParams.set('view', 'gallery');
     } else {
       url.searchParams.delete('view');
     }
+
+    url.searchParams.set('comp', state.compositionId);
+
+    if (state.selectedScene) {
+      url.searchParams.set('scene', state.selectedScene);
+    } else {
+      url.searchParams.delete('scene');
+    }
+
+    // Don't touch ?frame= here — the debounced frame effect handles it
+    // Writing frame=0 on mount would overwrite the correct value from before refresh
+
     if (url.href !== window.location.href) {
       window.history.replaceState(null, '', url.toString());
     }
-  }, [state.currentView]);
+  }, [state.currentView, state.compositionId, state.selectedScene]);
 
-  // Seek to saved frame on mount
+  // Seek to correct frame on mount: URL ?frame= > playhead localStorage > savedSession
   const didRestore = useRef(false);
   useEffect(() => {
-    if (!didRestore.current && savedSession.frame && playerRef.current) {
-      playerRef.current.seekTo(savedSession.frame);
+    if (!didRestore.current && playerRef.current) {
+      const targetFrame = urlFrameRef.current ?? frame; // frame already initialized from playhead localStorage
+      playerRef.current.seekTo(targetFrame);
       didRestore.current = true;
     }
   });
+
+  // 2b. Persist playhead position to localStorage (debounced, survives refresh)
+  // Only write AFTER the initial seek restore to avoid overwriting with stale data
+  useEffect(() => {
+    if (!didRestore.current) return; // don't write until seek is done
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          PLAYHEAD_KEY,
+          JSON.stringify({
+            frame,
+            scene: state.selectedScene,
+            comp: state.compositionId,
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+      // Also update URL frame param
+      const url = new URL(window.location.href);
+      url.searchParams.set('frame', String(frame));
+      if (url.href !== window.location.href) {
+        window.history.replaceState(null, '', url.toString());
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [frame, state.selectedScene, state.compositionId]);
 
   // Session persistence (manual save only)
   const { saveSession } = useSessionPersistence(state, frame);
@@ -269,6 +348,18 @@ export const App: React.FC = () => {
     }
   }, [composition.scenes, state.compositionId, dispatch]);
 
+  // Load caption layers from SRT on composition change
+  useEffect(() => {
+    const entry = COMPOSITIONS.find((c) => c.id === state.compositionId);
+    if (entry?.captionsSrt) {
+      dispatch({
+        type: 'LOAD_CAPTIONS_FROM_SRT',
+        srt: entry.captionsSrt,
+        fps: composition.video.fps,
+      });
+    }
+  }, [state.compositionId, composition.video.fps, dispatch]);
+
   // Active gesture preset (null when tool is 'select')
   const activePreset = useMemo(
     () =>
@@ -299,13 +390,14 @@ export const App: React.FC = () => {
     () => (state.selectedScene ? state.layers[state.selectedScene] || [] : []),
     [state.selectedScene, state.layers],
   );
-  const selectedLayer = useMemo(
-    () =>
-      state.selectedLayerId
-        ? (sceneLayers.find((l) => l.id === state.selectedLayerId) ?? null)
-        : null,
-    [state.selectedLayerId, sceneLayers],
-  );
+  const selectedLayer = useMemo(() => {
+    if (!state.selectedLayerId) return null;
+    // Search current scene layers first, then caption layers
+    const found = sceneLayers.find((l) => l.id === state.selectedLayerId);
+    if (found) return found;
+    const captionLayers = state.layers['__captions__'] || [];
+    return captionLayers.find((l) => l.id === state.selectedLayerId) ?? null;
+  }, [state.selectedLayerId, sceneLayers, state.layers]);
 
   // Compute zoom transform from visible zoom layers (clamped to scene bounds)
   const zoomTransform = useMemo(() => {

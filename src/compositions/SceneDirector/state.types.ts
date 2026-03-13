@@ -29,6 +29,8 @@ export interface CompositionEntry {
   scenes: SceneInfo[];
   /** Global Y offset applied by the composition (e.g. translateY(120px) in Combined) */
   globalOffsetY?: number;
+  /** Optional SRT caption content for the captions timeline row */
+  captionsSrt?: string;
 }
 
 // Activity log entry
@@ -172,6 +174,11 @@ export type DirectorAction =
       compositionId: string;
       codedPath: CodedPath | null;
       sceneZoom?: number; // scene's zoom level for default hand size
+    }
+  | {
+      type: 'LOAD_CAPTIONS_FROM_SRT';
+      srt: string;
+      fps: number;
     };
 
 export const initialState: DirectorState = {

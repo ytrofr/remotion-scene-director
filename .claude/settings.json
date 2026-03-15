@@ -33,6 +33,17 @@
           }
         ]
       }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-compact.sh",
+            "statusMessage": "🔄 Reloading critical context..."
+          }
+        ]
+      }
     ]
   }
 }

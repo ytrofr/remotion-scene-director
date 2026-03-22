@@ -5,6 +5,7 @@
 **Purpose**: Demo videos, mobile app mockups, marketing content
 **Ports**: 3000 (Remotion Studio), 3001 (Scene Director UI)
 **MCP**: 5 servers in `.mcp.json` (Perplexity, ElevenLabs, Gemini, Figma, FAL AI)
+**Sandbox**: Use `/sandbox` for isolated dev tasks — reduces permission prompts by 84%.
 
 ---
 

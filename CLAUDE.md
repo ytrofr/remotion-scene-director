@@ -4,7 +4,7 @@
 **Framework**: React + Remotion 4.0.419 + Vite
 **Purpose**: Demo videos, mobile app mockups, marketing content
 **Ports**: 3000 (Remotion Studio), 3001 (Scene Director UI)
-**MCP**: 5 servers in `.mcp.json` (Perplexity, ElevenLabs, Gemini, Figma, FAL AI)
+**MCP**: 2 servers in `.mcp.json` (Perplexity, ElevenLabs)
 **Sandbox**: Use `/sandbox` for isolated dev tasks — reduces permission prompts by 84%.
 
 ---
@@ -82,10 +82,7 @@ public/
 | Server         | Tools                                         | API Key Env Var      | Status           |
 | -------------- | --------------------------------------------- | -------------------- | ---------------- |
 | **Perplexity** | `perplexity_ask`, `perplexity_search`         | `PERPLEXITY_API_KEY` | Active           |
-| **ElevenLabs** | TTS (21 voices), voice cloning, transcription | `ELEVENLABS_API_KEY` | Active           |
-| **Gemini**     | Image gen, text gen, video analysis           | `GOOGLE_API_KEY`     | Text only (free) |
-| **Figma**      | Design extraction → Remotion components       | `FIGMA_API_KEY`      | Configured       |
-| **FAL AI**     | 600+ AI models (FLUX, video gen, music)       | `FAL_KEY`            | Configured       |
+| **ElevenLabs** | TTS (21 voices), voice cloning, transcription | `ELEVENLABS_API_KEY` | Disabled         |
 
 ## Audio Assets
 

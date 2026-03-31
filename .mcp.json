@@ -16,6 +16,11 @@
         "ELEVENLABS_API_KEY": "${ELEVENLABS_API_KEY}"
       },
       "disabled": true
+    },
+    "remotion-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@remotion/mcp@4.0.443"]
     }
   }
 }

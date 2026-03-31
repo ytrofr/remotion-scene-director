@@ -42,6 +42,22 @@ import {
   DorianStores,
   VIDEO as STORES_VIDEO,
 } from './compositions/DorianStores/DorianStores';
+import {
+  DorianStoresDebug,
+  STORES_DEBUG_DURATION,
+} from './compositions/DorianStores/DorianStoresDebug';
+import {
+  DorianFull,
+  FULL_VIDEO,
+} from './compositions/DorianFull/DorianFull';
+import {
+  SigmaInvestorDemo,
+  SIGMA_VIDEO,
+} from './compositions/SigmaInvestorDemo';
+import {
+  SigmaAppDemo,
+  SIGMA_APP_VIDEO,
+} from './compositions/SigmaAppDemo';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -220,6 +236,42 @@ export const RemotionRoot: React.FC = () => {
         fps={STORES_VIDEO.fps}
         width={STORES_VIDEO.width}
         height={STORES_VIDEO.height}
+      />
+      {/* ========== DORIAN FULL (Demo + Stores combined) ========== */}
+      <Composition
+        id="DorianFull"
+        component={DorianFull}
+        durationInFrames={FULL_VIDEO.durationInFrames}
+        fps={FULL_VIDEO.fps}
+        width={FULL_VIDEO.width}
+        height={FULL_VIDEO.height}
+      />
+      {/* Debug: Scene 1 only */}
+      <Composition
+        id="DorianStoresDebug"
+        component={DorianStoresDebug}
+        durationInFrames={STORES_DEBUG_DURATION}
+        fps={STORES_VIDEO.fps}
+        width={STORES_VIDEO.width}
+        height={STORES_VIDEO.height}
+      />
+      {/* ========== SIGMA INVESTOR DEMO ========== */}
+      <Composition
+        id="SigmaInvestorDemo"
+        component={SigmaInvestorDemo}
+        durationInFrames={SIGMA_VIDEO.durationInFrames}
+        fps={SIGMA_VIDEO.fps}
+        width={SIGMA_VIDEO.width}
+        height={SIGMA_VIDEO.height}
+      />
+      {/* ========== SIGMA APP DEMO (Product Demo) ========== */}
+      <Composition
+        id="SigmaAppDemo"
+        component={SigmaAppDemo}
+        durationInFrames={SIGMA_APP_VIDEO.durationInFrames}
+        fps={SIGMA_APP_VIDEO.fps}
+        width={SIGMA_APP_VIDEO.width}
+        height={SIGMA_APP_VIDEO.height}
       />
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}
     </>

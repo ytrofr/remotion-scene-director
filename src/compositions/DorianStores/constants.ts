@@ -7,7 +7,7 @@ export const VIDEO = {
   width: 1080,
   height: 1920,
   fps: 30,
-  durationInFrames: 900, // ~30 seconds
+  durationInFrames: 1290, // ~43 seconds
 };
 
 // Colors (from Dorian branding)
@@ -28,9 +28,9 @@ export const COLORS = {
 
 // Scene timings (frames at 30fps)
 export const SCENES = {
-  dashboard: { start: 0, duration: 450 }, // 15s - Dashboard + AI chat + best sellers morph
-  mapSearch: { start: 450, duration: 210 }, // 7s - Search stores on map
-  aiProducts: { start: 660, duration: 240 }, // 8s - AI creates products
+  dashboard: { start: 0, duration: 660 }, // 22s - Dashboard + AI chat + best sellers + confirm price change
+  mapSearch: { start: 660, duration: 240 }, // 8s - Search stores on map (with zoom)
+  aiProducts: { start: 900, duration: 390 }, // 13s - AI creates products (with zoom + store view)
 };
 
 // Phone mockup dimensions

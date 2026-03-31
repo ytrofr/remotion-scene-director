@@ -242,26 +242,40 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
   '1-StoreDashboard': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
-      { x: 750, y: 1500, frame: 10, gesture: 'pointer', scale: 1 },
-      { x: 680, y: 1550, frame: 40, gesture: 'pointer', scale: 1 },
-      { x: 680, y: 1550, frame: 55, gesture: 'click', scale: 1, duration: 10 },
-      { x: 500, y: 1480, frame: 95, gesture: 'pointer', scale: 1 },
-      { x: 500, y: 1480, frame: 100, gesture: 'click', scale: 1, duration: 5 },
-      { x: 680, y: 1480, frame: 168, gesture: 'pointer', scale: 1 },
-      { x: 680, y: 1480, frame: 173, gesture: 'click', scale: 1, duration: 10 },
-      { x: 750, y: 1600, frame: 200, gesture: 'pointer', scale: 1 },
+      // Bubble click (pre-zoom S=1.8): bubble at phone (359,758) → comp (814,1543)
+      { x: 900, y: 1600, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 830, y: 1560, frame: 40, gesture: 'pointer', scale: 1 },
+      { x: 814, y: 1543, frame: 48, gesture: 'pointer', scale: 1 },
+      { x: 814, y: 1543, frame: 50, gesture: 'click', scale: 1, duration: 8 },
+      // Input click (zoomed S=2.75, O=-374): input at phone (207,826) → comp (540,1664)
+      { x: 700, y: 1700, frame: 85, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 1664, frame: 95, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 1664, frame: 100, gesture: 'click', scale: 1, duration: 5 },
+      // Send click: send btn at phone (365,826) → comp (975,1664)
+      { x: 540, y: 1664, frame: 190, gesture: 'pointer', scale: 1 },
+      { x: 800, y: 1664, frame: 198, gesture: 'pointer', scale: 1 },
+      { x: 975, y: 1664, frame: 205, gesture: 'pointer', scale: 1 },
+      { x: 975, y: 1664, frame: 208, gesture: 'click', scale: 1, duration: 10 },
+      { x: 850, y: 1700, frame: 225, gesture: 'pointer', scale: 1 },
     ],
     secondaryLayers: [
       {
-        gesture: 'scroll',
-        animation: 'cursor-real-black',
-        dark: true,
+        // Confirm button click (zoom S=2.4, O=-200): btn at phone (207,805) → comp (540,1650)
+        gesture: 'click',
         path: [
-          { x: 540, y: 1200, frame: 350, gesture: 'pointer', scale: 1 },
-          { x: 540, y: 1000, frame: 390, gesture: 'pointer', scale: 1 },
-          { x: 540, y: 850, frame: 430, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 1300, frame: 480, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 1500, frame: 495, gesture: 'pointer', scale: 1 },
+          {
+            x: 540,
+            y: 1650,
+            frame: 500,
+            gesture: 'click',
+            scale: 1,
+            duration: 10,
+          },
+          { x: 600, y: 1500, frame: 520, gesture: 'pointer', scale: 1 },
         ],
       },
     ],
@@ -269,24 +283,53 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
   '2-MapSearch': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
-      { x: 540, y: 880, frame: 10, gesture: 'pointer', scale: 1 },
-      { x: 540, y: 860, frame: 18, gesture: 'click', scale: 1, duration: 8 },
-      { x: 540, y: 860, frame: 75, gesture: 'pointer', scale: 1 },
-      { x: 460, y: 1050, frame: 130, gesture: 'pointer', scale: 1 },
-      { x: 460, y: 1050, frame: 150, gesture: 'click', scale: 1, duration: 15 },
+      // Search bar click (pre-zoom S=1.8): search at phone (207,190) → comp (540,521)
+      { x: 540, y: 700, frame: 5, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 550, frame: 14, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 550, frame: 18, gesture: 'click', scale: 1, duration: 8 },
+      { x: 540, y: 550, frame: 70, gesture: 'pointer', scale: 1 },
+      // Pin click (post-zoom S=1.8): pin at phone (208,328) → comp (542,769)
+      { x: 540, y: 750, frame: 120, gesture: 'pointer', scale: 1 },
+      { x: 542, y: 769, frame: 140, gesture: 'pointer', scale: 1 },
+      { x: 542, y: 769, frame: 150, gesture: 'click', scale: 1, duration: 15 },
     ],
   },
   '3-AIProducts': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
-      { x: 540, y: 1500, frame: 5, gesture: 'pointer', scale: 1 },
-      { x: 540, y: 1480, frame: 12, gesture: 'click', scale: 1, duration: 8 },
-      { x: 700, y: 1480, frame: 60, gesture: 'pointer', scale: 1 },
-      { x: 700, y: 1480, frame: 68, gesture: 'click', scale: 1, duration: 10 },
+      // Input click (zoomed S=2.6, O=-350): input at phone (207,826) → comp (540,1630)
+      { x: 540, y: 1700, frame: 5, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 1630, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 540, y: 1630, frame: 12, gesture: 'click', scale: 1, duration: 8 },
+      { x: 540, y: 1630, frame: 55, gesture: 'pointer', scale: 1 },
+      // Send click: send btn at phone (365,826) → comp (951,1630)
+      { x: 750, y: 1630, frame: 62, gesture: 'pointer', scale: 1 },
+      { x: 951, y: 1630, frame: 68, gesture: 'pointer', scale: 1 },
+      { x: 951, y: 1630, frame: 70, gesture: 'click', scale: 1, duration: 10 },
+      { x: 850, y: 1700, frame: 85, gesture: 'pointer', scale: 1 },
+    ],
+    secondaryLayers: [
+      {
+        // "Add Products to Store" button (post-zoom S=1.8): btn at phone (207,760) → comp (540,1547)
+        gesture: 'click',
+        path: [
+          { x: 540, y: 1400, frame: 210, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 1500, frame: 218, gesture: 'pointer', scale: 1 },
+          { x: 540, y: 1547, frame: 225, gesture: 'pointer', scale: 1 },
+          {
+            x: 540,
+            y: 1547,
+            frame: 228,
+            gesture: 'click',
+            scale: 1,
+            duration: 10,
+          },
+        ],
+      },
     ],
   },
 };
@@ -308,6 +351,223 @@ function mergePaths(
   return result;
 }
 
+// ── SIGMA App Demo paths ──────────────────────────────────────
+// Canvas: 1920x1080. Chat panel: right:40, width:640 → x range 1240-1880
+// Input bar bottom: ~y:1010. Send button: ~x:1820, y:1010
+// Chat area center: x:1560, y:540
+const SIGMA_INPUT = { x: 1500, y: 1010 };
+const SIGMA_SEND = { x: 1820, y: 1010 };
+const SIGMA_CHAT_CENTER = { x: 1560, y: 500 };
+const SIGMA_LINK_AREA = { x: 1450, y: 780 };
+
+const SIGMA_APP_PATHS: Record<string, CodedPath> = {
+  HubChatOpen: {
+    gesture: 'point',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Cursor enters from bottom right, moves toward chat
+      { x: 1920, y: 900, frame: 50, gesture: 'pointer', scale: 1 },
+      { x: 1700, y: 700, frame: 80, gesture: 'pointer', scale: 1 },
+      // Hover over chat welcome area
+      {
+        x: SIGMA_CHAT_CENTER.x,
+        y: SIGMA_CHAT_CENTER.y,
+        frame: 120,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      // Move down toward input
+      {
+        x: SIGMA_INPUT.x,
+        y: SIGMA_INPUT.y,
+        frame: 160,
+        gesture: 'pointer',
+        scale: 1,
+      },
+    ],
+  },
+  WebsiteRequest: {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Click into input field
+      {
+        x: SIGMA_INPUT.x,
+        y: SIGMA_INPUT.y,
+        frame: 25,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_INPUT.x,
+        y: SIGMA_INPUT.y,
+        frame: 30,
+        gesture: 'click',
+        scale: 1,
+        duration: 8,
+      },
+      // Stay near input during typing
+      {
+        x: SIGMA_INPUT.x + 50,
+        y: SIGMA_INPUT.y - 20,
+        frame: 60,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_INPUT.x + 100,
+        y: SIGMA_INPUT.y - 10,
+        frame: 100,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      // Move to send button and click
+      {
+        x: SIGMA_SEND.x - 20,
+        y: SIGMA_SEND.y,
+        frame: 118,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_SEND.x,
+        y: SIGMA_SEND.y,
+        frame: 123,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_SEND.x,
+        y: SIGMA_SEND.y,
+        frame: 125,
+        gesture: 'click',
+        scale: 1,
+        duration: 10,
+      },
+      // Move up to watch response
+      {
+        x: SIGMA_CHAT_CENTER.x,
+        y: 600,
+        frame: 160,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      // Hover over result link when it appears
+      {
+        x: SIGMA_LINK_AREA.x,
+        y: SIGMA_LINK_AREA.y,
+        frame: 290,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_LINK_AREA.x,
+        y: SIGMA_LINK_AREA.y,
+        frame: 300,
+        gesture: 'click',
+        scale: 1,
+        duration: 10,
+      },
+      // Move cursor off to side
+      { x: 1100, y: 600, frame: 340, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  PageReveal: {
+    gesture: 'point',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Cursor observes the page scroll
+      { x: 700, y: 400, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 600, y: 500, frame: 80, gesture: 'pointer', scale: 1 },
+      { x: 500, y: 600, frame: 160, gesture: 'pointer', scale: 1 },
+      { x: 600, y: 400, frame: 240, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  CreativeRequest: {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Click into input
+      {
+        x: SIGMA_INPUT.x,
+        y: SIGMA_INPUT.y,
+        frame: 1,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_INPUT.x,
+        y: SIGMA_INPUT.y,
+        frame: 3,
+        gesture: 'click',
+        scale: 1,
+        duration: 5,
+      },
+      // Typing hover
+      {
+        x: SIGMA_INPUT.x + 30,
+        y: SIGMA_INPUT.y - 15,
+        frame: 30,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      // Move to send
+      {
+        x: SIGMA_SEND.x,
+        y: SIGMA_SEND.y,
+        frame: 58,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: SIGMA_SEND.x,
+        y: SIGMA_SEND.y,
+        frame: 63,
+        gesture: 'click',
+        scale: 1,
+        duration: 10,
+      },
+      // Watch response
+      {
+        x: SIGMA_CHAT_CENTER.x,
+        y: 600,
+        frame: 100,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      // Hover over banner image
+      { x: 1400, y: 850, frame: 210, gesture: 'pointer', scale: 1 },
+      { x: 1400, y: 850, frame: 250, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  CreativeReveal: {
+    gesture: 'point',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Cursor explores the creative studio page
+      { x: 960, y: 400, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: 800, y: 500, frame: 60, gesture: 'pointer', scale: 1 },
+      { x: 700, y: 600, frame: 120, gesture: 'pointer', scale: 1 },
+      { x: 960, y: 500, frame: 180, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  Closing: {
+    gesture: 'point',
+    animation: 'cursor-real-black',
+    dark: true,
+    path: [
+      // Cursor rests center during closing
+      { x: 960, y: 540, frame: 200, gesture: 'pointer', scale: 1 },
+      { x: 960, y: 540, frame: 400, gesture: 'pointer', scale: 1 },
+    ],
+  },
+};
+
 const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   MobileChatDemoCombined: mergePaths(
     COMBINED_PATHS,
@@ -316,6 +576,9 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   DorianDemo: mergePaths(DORIAN_PATHS, saved.DorianDemo),
   DashmorDemo: { ...saved.DashmorDemo },
   DorianStores: mergePaths(DORIAN_STORES_PATHS, saved.DorianStores),
+  DorianStoresDebug: mergePaths(DORIAN_STORES_PATHS, saved.DorianStoresDebug),
+  SigmaAppDemo: mergePaths(SIGMA_APP_PATHS, saved.SigmaAppDemo),
+  SigmaInvestorDemo: { ...saved.SigmaInvestorDemo },
 };
 
 /**

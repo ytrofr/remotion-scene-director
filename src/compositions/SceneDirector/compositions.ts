@@ -48,6 +48,25 @@ import {
   VIDEO as STORES_VIDEO,
   STORES_SCENE_INFO,
 } from '../DorianStores/DorianStores';
+import {
+  DorianStoresDebug,
+  STORES_DEBUG_DURATION,
+} from '../DorianStores/DorianStoresDebug';
+import {
+  DorianFull,
+  FULL_VIDEO,
+  FULL_SCENE_INFO,
+} from '../DorianFull/DorianFull';
+import {
+  SigmaAppDemo,
+  SIGMA_APP_VIDEO,
+  SCENE_INFO as SIGMA_APP_SCENE_INFO,
+} from '../SigmaAppDemo';
+import {
+  SigmaInvestorDemo,
+  SIGMA_VIDEO as SIGMA_INV_VIDEO,
+  SCENE_INFO as SIGMA_INV_SCENE_INFO,
+} from '../SigmaInvestorDemo';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -180,6 +199,68 @@ export const COMPOSITIONS: CompositionEntry[] = [
       end: s.end,
     })),
   },
+  {
+    id: 'DorianFull',
+    label: 'Dorian Full (Demo + Stores)',
+    video: {
+      width: FULL_VIDEO.width,
+      height: FULL_VIDEO.height,
+      fps: FULL_VIDEO.fps,
+      frames: FULL_VIDEO.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianStoresDebug',
+    label: 'Stores Debug (Scene 1 only)',
+    video: {
+      width: STORES_VIDEO.width,
+      height: STORES_VIDEO.height,
+      fps: STORES_VIDEO.fps,
+      frames: STORES_DEBUG_DURATION,
+    },
+    scenes: [
+      {
+        name: '1-StoreDashboard',
+        start: 0,
+        end: STORES_DEBUG_DURATION,
+      },
+    ],
+  },
+  {
+    id: 'SigmaAppDemo',
+    label: 'SIGMA App Demo (Product Walkthrough)',
+    video: {
+      width: SIGMA_APP_VIDEO.width,
+      height: SIGMA_APP_VIDEO.height,
+      fps: SIGMA_APP_VIDEO.fps,
+      frames: SIGMA_APP_VIDEO.durationInFrames,
+    },
+    scenes: SIGMA_APP_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'SigmaInvestorDemo',
+    label: 'SIGMA Investor Demo (Pitch Deck)',
+    video: {
+      width: SIGMA_INV_VIDEO.width,
+      height: SIGMA_INV_VIDEO.height,
+      fps: SIGMA_INV_VIDEO.fps,
+      frames: SIGMA_INV_VIDEO.durationInFrames,
+    },
+    scenes: SIGMA_INV_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
 ];
 
 // Component map for rendering
@@ -192,4 +273,8 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   SharedComponentsDemo,
   DorianDemoEnhanced,
   DorianStores,
+  DorianStoresDebug,
+  DorianFull,
+  SigmaAppDemo,
+  SigmaInvestorDemo,
 };

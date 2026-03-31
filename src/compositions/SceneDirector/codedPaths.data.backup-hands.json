@@ -44,7 +44,7 @@
   "DorianDemo": {
     "2-HomeScroll": {
       "gesture": "scroll",
-      "animation": "cursor-real-black",
+      "animation": "hand-scroll-clean",
       "path": [
         {
           "x": 1050,
@@ -110,63 +110,67 @@
           "scale": 1,
           "rotation": 0
         }
-      ],
-      "dark": false
+      ]
     },
     "3-TapBubble": {
       "gesture": "click",
-      "animation": "cursor-real-black",
+      "animation": "hand-click",
       "path": [
         {
-          "x": 855,
-          "y": 1016,
+          "x": 780,
+          "y": 1200,
           "frame": 0,
           "gesture": "pointer",
           "scale": 1
         },
         {
-          "x": 959,
-          "y": 1482,
-          "frame": 65,
+          "x": 800,
+          "y": 1400,
+          "frame": 20,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 818,
+          "y": 1546,
+          "frame": 35,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 790,
+          "y": 1420,
+          "frame": 45,
           "gesture": "click",
-          "scale": 1.5,
+          "scale": 1,
           "duration": 2
         }
-      ],
-      "dark": false
+      ]
     },
     "4-ChatOpen": {
       "gesture": "click",
-      "animation": "cursor-real-black",
+      "animation": "hand-click",
       "path": [
         {
           "x": 957,
           "y": 1465,
-          "frame": 10,
+          "frame": 0,
           "gesture": "pointer",
           "scale": 1.5
         },
         {
           "x": 494,
           "y": 1652,
-          "frame": 74,
+          "frame": 90,
           "gesture": "pointer",
           "scale": 1.5
-        },
-        {
-          "x": 494,
-          "y": 1652,
-          "frame": 74,
-          "gesture": "click",
-          "scale": 1,
-          "duration": 12
         }
       ],
-      "dark": false
+      "dark": true
     },
     "8-ProductPage": {
       "gesture": "scroll",
-      "animation": "cursor-real-black",
+      "animation": "hand-scroll-clean",
       "path": [
         {
           "x": 1050,
@@ -224,12 +228,11 @@
           "scale": 1,
           "rotation": 0
         }
-      ],
-      "dark": false
+      ]
     },
     "7-AIResponse": {
       "gesture": "click",
-      "animation": "cursor-real-black",
+      "animation": "hand-click",
       "path": [
         {
           "x": 540,
@@ -239,36 +242,43 @@
           "scale": 1
         },
         {
-          "x": 368,
-          "y": 1351,
+          "x": 540,
+          "y": 1480,
+          "frame": 85,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1450,
           "frame": 95,
           "gesture": "click",
           "scale": 1,
           "duration": 10
         }
       ],
-      "dark": false
+      "dark": true
     },
     "5-UserTyping": {
       "gesture": "click",
-      "animation": "cursor-real-black",
+      "animation": "hand-click",
       "path": [
         {
           "x": 482,
           "y": 1666,
-          "frame": 61,
+          "frame": 76,
           "gesture": "pointer",
           "scale": 1
         },
         {
           "x": 969,
           "y": 1658,
-          "frame": 118,
+          "frame": 106,
           "gesture": "pointer",
           "scale": 1
         }
       ],
-      "dark": false
+      "dark": true
     }
   }
 }

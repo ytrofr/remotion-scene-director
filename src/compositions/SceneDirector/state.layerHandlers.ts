@@ -190,6 +190,22 @@ export function handleLayerAction(
               defaultSize,
             ),
           );
+
+          // ── Secondary hand layers from codedPaths ──
+          if (coded?.secondaryLayers) {
+            for (const sec of coded.secondaryLayers) {
+              if (sec.path.length > 0) {
+                const secLayer = createHandLayer(
+                  action.scene,
+                  sec.path,
+                  sec.gesture as GestureTool,
+                  order++,
+                  defaultSize,
+                );
+                newLayers.push(secLayer);
+              }
+            }
+          }
         }
       }
 

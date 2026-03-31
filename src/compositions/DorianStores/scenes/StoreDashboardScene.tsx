@@ -27,16 +27,20 @@ import { fontFamily } from '../../../lib/fonts';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { getSavedPath } from '../../SceneDirector/codedPaths';
 
-// ── Timeline (frames at 30fps, 450 total) ──
-// Phase 1: 0-50    Dashboard static, hand appears and moves to AI bubble
-// Phase 2: 50-65   Hand taps AI bubble, zoom begins
-// Phase 3: 65-100  Chat panel slides up (zoomed in)
-// Phase 4: 100-170 User types "Show me best sellers in my store"
-// Phase 5: 170-185 Hand taps send
-// Phase 6: 185-215 AI thinking dots
-// Phase 7: 215-280 AI responds + dashboard crossfades to best sellers
-// Phase 8: 280-330 Chat panel dismisses + zoom out
-// Phase 9: 330-450 Best sellers view visible, hand scrolls
+// ── Timeline (frames at 30fps, 660 total) ──
+// Phase 1:  0-50     Dashboard static, hand moves to AI bubble
+// Phase 2:  50-65    Hand taps AI bubble, zoom begins
+// Phase 3:  65-100   Chat panel slides up (zoomed in)
+// Phase 4:  100-195  User types full message
+// Phase 5:  195-210  Hand taps send
+// Phase 6:  210-240  AI thinking dots
+// Phase 7:  240-310  AI responds + dashboard crossfades to best sellers
+// Phase 8:  310-360  Chat panel dismisses + zoom out
+// Phase 9:  360-440  Best sellers visible, hand scrolls through
+// Phase 10: 440-480  AI confirmation bubble appears
+// Phase 11: 480-510  Hand moves to and clicks Confirm button
+// Phase 12: 510-600  Price loading animation + new prices
+// Phase 13: 600-660  Settled state, zoom back out
 
 // ── Sub-components ──
 
@@ -245,6 +249,64 @@ const OrderRow: React.FC<{
   );
 };
 
+// ── Price change helpers ──
+
+const PriceSpinner: React.FC<{ frame: number; startFrame: number }> = ({
+  frame,
+  startFrame,
+}) => {
+  const rotation = (frame - startFrame) * 18; // 18deg per frame = smooth spin
+  return (
+    <div
+      style={{
+        width: 14,
+        height: 14,
+        border: `2px solid ${COLORS.border}`,
+        borderTop: `2px solid ${COLORS.primary}`,
+        borderRadius: '50%',
+        transform: `rotate(${rotation}deg)`,
+        display: 'inline-block',
+        verticalAlign: 'middle',
+      }}
+    />
+  );
+};
+
+const GreenCheckmark: React.FC<{
+  frame: number;
+  fps: number;
+  delay: number;
+}> = ({ frame, fps, delay }) => {
+  const pop = spring({
+    frame: frame - delay,
+    fps,
+    config: SPRING_CONFIG.bouncy,
+  });
+  return (
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{
+        transform: `scale(${pop})`,
+        flexShrink: 0,
+        verticalAlign: 'middle',
+        marginLeft: 4,
+      }}
+    >
+      <circle cx="12" cy="12" r="12" fill={COLORS.success} />
+      <path
+        d="M7 12l3 3 7-7"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
 const BestSellerCard: React.FC<{
   rank: number;
   name: string;
@@ -254,12 +316,33 @@ const BestSellerCard: React.FC<{
   delay: number;
   frame: number;
   fps: number;
-}> = ({ rank, name, sales, revenue, image, delay, frame, fps }) => {
+  priceChangeFrame?: number;
+  newPrice?: string;
+}> = ({
+  rank,
+  name,
+  sales,
+  revenue,
+  image,
+  delay,
+  frame,
+  fps,
+  priceChangeFrame,
+  newPrice,
+}) => {
   const appear = spring({
     frame: frame - delay,
     fps,
     config: SPRING_CONFIG.bouncy,
   });
+
+  // Price change states
+  const isLoading =
+    priceChangeFrame != null &&
+    frame >= priceChangeFrame &&
+    frame < priceChangeFrame + 20;
+  const isChanged = priceChangeFrame != null && frame >= priceChangeFrame + 20;
+
   return (
     <div
       style={{
@@ -320,14 +403,57 @@ const BestSellerCard: React.FC<{
       </div>
       <div
         style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: COLORS.primary,
-          fontFamily,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
           flexShrink: 0,
         }}
       >
-        {revenue}
+        {isLoading ? (
+          <PriceSpinner frame={frame} startFrame={priceChangeFrame!} />
+        ) : isChanged && newPrice ? (
+          <>
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 500,
+                color: COLORS.textLight,
+                fontFamily,
+                textDecoration: 'line-through',
+                opacity: 0.5,
+                marginRight: 4,
+              }}
+            >
+              {revenue}
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: COLORS.success,
+                fontFamily,
+              }}
+            >
+              {newPrice}
+            </span>
+            <GreenCheckmark
+              frame={frame}
+              fps={fps}
+              delay={priceChangeFrame! + 20}
+            />
+          </>
+        ) : (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: COLORS.primary,
+              fontFamily,
+            }}
+          >
+            {revenue}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -348,17 +474,47 @@ export const StoreDashboardScene: React.FC = () => {
   const zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 2.75]);
   const zoomOffsetY = interpolate(zoomProgress, [0, 1], [0, -374]);
 
-  // ── Zoom back out when best sellers appear (frame 330) ──
+  // ── Zoom back out when best sellers appear (frame 310) ──
   const zoomOutProgress = spring({
-    frame: frame - 330,
+    frame: frame - 310,
     fps,
     config: SPRING_CONFIG.zoom,
   });
-  const finalZoomScale = interpolate(zoomOutProgress, [0, 1], [zoomScale, 1.8]);
-  const finalZoomOffsetY = interpolate(
-    zoomOutProgress,
+  const midZoomScale = interpolate(zoomOutProgress, [0, 1], [zoomScale, 1.8]);
+  const midZoomOffsetY = interpolate(zoomOutProgress, [0, 1], [zoomOffsetY, 0]);
+
+  // ── Zoom in for confirm (frame 480) ──
+  const zoomConfirmProgress = spring({
+    frame: frame - 480,
+    fps,
+    config: SPRING_CONFIG.zoom,
+  });
+  const confirmZoomScale = interpolate(
+    zoomConfirmProgress,
     [0, 1],
-    [zoomOffsetY, 0],
+    [midZoomScale, 2.4],
+  );
+  const confirmZoomOffsetY = interpolate(
+    zoomConfirmProgress,
+    [0, 1],
+    [midZoomOffsetY, -200],
+  );
+
+  // ── Final zoom out (frame 600) ──
+  const zoomFinalOutProgress = spring({
+    frame: frame - 600,
+    fps,
+    config: SPRING_CONFIG.zoom,
+  });
+  const finalZoomScale = interpolate(
+    zoomFinalOutProgress,
+    [0, 1],
+    [confirmZoomScale, 1.8],
+  );
+  const finalZoomOffsetY = interpolate(
+    zoomFinalOutProgress,
+    [0, 1],
+    [confirmZoomOffsetY, 0],
   );
 
   // Hand size tracks current zoom
@@ -372,78 +528,94 @@ export const StoreDashboardScene: React.FC = () => {
     config: SPRING_CONFIG.slide,
   });
   const chatDismiss = spring({
-    frame: frame - 280,
+    frame: frame - 310,
     fps,
     config: SPRING_CONFIG.slide,
   });
-  const chatVisible = chatOpen && frame < 330;
+  const chatVisible = chatOpen && frame < 360;
   const chatHeight = 320;
   const chatY = chatVisible
     ? (1 - chatSlide + chatDismiss) * chatHeight
     : chatHeight;
 
-  // ── User typing (phase 4: 100-170) ──
-  const userMessage = 'Show me best sellers in my store';
+  // ── User typing (phase 4: 100-195) ──
+  const userMessage =
+    'Show me best sellers in my store and suggest price changes based on competition';
   const typedChars = Math.floor(
-    interpolate(frame, [105, 165], [0, userMessage.length], {
+    interpolate(frame, [105, 195], [0, userMessage.length], {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
     }),
   );
   const typedText = userMessage.slice(0, typedChars);
-  const messageSent = frame >= 185;
+  const messageSent = frame >= 210;
 
-  // ── AI thinking (phase 6: 185-215) ──
-  const thinking = frame >= 190 && frame < 215;
+  // ── AI thinking (phase 6: 210-240) ──
+  const thinking = frame >= 215 && frame < 240;
   const thinkingDots = thinking
     ? Array.from(
         { length: 3 },
-        (_, i) => Math.sin((frame - 190) * 0.25 - i * 1.2) * 3,
+        (_, i) => Math.sin((frame - 215) * 0.25 - i * 1.2) * 3,
       )
     : [];
 
-  // ── AI response (phase 7: 215-280) ──
+  // ── AI response (phase 7: 240-310) ──
   const aiResponseText = 'Here are your top-selling products this month:';
   const aiAppear = spring({
-    frame: frame - 215,
+    frame: frame - 240,
     fps,
     config: SPRING_CONFIG.gentle,
   });
   const aiChars = Math.floor(
-    interpolate(frame, [217, 260], [0, aiResponseText.length], {
+    interpolate(frame, [242, 285], [0, aiResponseText.length], {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
     }),
   );
 
   // ── Dashboard crossfade to best sellers ──
-  const dashboardOpacity = interpolate(frame, [220, 260], [1, 0], {
+  const dashboardOpacity = interpolate(frame, [245, 285], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const bestSellersOpacity = interpolate(frame, [250, 290], [0, 1], {
+  const bestSellersOpacity = interpolate(frame, [275, 310], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
 
   // ── Hand paths ──
+  // Coordinates are in composition space (1080x1920).
+  // Phone center = (540, 960). Formula: compX = 540 + S*(phoneFrameX - 207),
+  // compY = 960 + offsetY + S*(phoneFrameY - 434)
+  // Phase 1-2: S=1.8, O=0 → AI bubble at phone (359,758) → comp (814, 1543)
+  // Phase 3-5: S=2.75, O=-374 → input at phone (207,826) → comp (540, 1664)
+  //            send btn at phone (365,826) → comp (975, 1664)
   const savedPath = getSavedPath('DorianStores', '1-StoreDashboard');
   const handPath: HandPathPoint[] = savedPath?.path ?? [
-    { x: 750, y: 1500, frame: 10, gesture: 'pointer' as const },
-    { x: 680, y: 1550, frame: 40, gesture: 'pointer' as const },
-    { x: 680, y: 1550, frame: 55, gesture: 'click' as const, duration: 10 },
-    { x: 500, y: 1480, frame: 95, gesture: 'pointer' as const },
-    { x: 500, y: 1480, frame: 100, gesture: 'click' as const, duration: 5 },
-    { x: 680, y: 1480, frame: 168, gesture: 'pointer' as const },
-    { x: 680, y: 1480, frame: 173, gesture: 'click' as const, duration: 10 },
-    { x: 750, y: 1600, frame: 200, gesture: 'pointer' as const },
+    // Move to AI bubble (pre-zoom: S=1.8, O=0)
+    { x: 900, y: 1600, frame: 10, gesture: 'pointer' as const, scale: 1 },
+    { x: 830, y: 1560, frame: 40, gesture: 'pointer' as const, scale: 1 },
+    { x: 814, y: 1543, frame: 48, gesture: 'pointer' as const, scale: 1 },
+    { x: 814, y: 1543, frame: 50, gesture: 'click' as const, scale: 1, duration: 8 },
+    // Transition to zoomed input (S=2.75, O=-374)
+    { x: 700, y: 1700, frame: 85, gesture: 'pointer' as const, scale: 1 },
+    { x: 540, y: 1664, frame: 95, gesture: 'pointer' as const, scale: 1 },
+    { x: 540, y: 1664, frame: 100, gesture: 'click' as const, scale: 1, duration: 5 },
+    // Stay near input during typing, then move to send button
+    { x: 540, y: 1664, frame: 190, gesture: 'pointer' as const, scale: 1 },
+    { x: 800, y: 1664, frame: 198, gesture: 'pointer' as const, scale: 1 },
+    { x: 975, y: 1664, frame: 205, gesture: 'pointer' as const, scale: 1 },
+    { x: 975, y: 1664, frame: 208, gesture: 'click' as const, scale: 1, duration: 10 },
+    { x: 850, y: 1700, frame: 225, gesture: 'pointer' as const, scale: 1 },
   ];
 
-  // Phase 9: second hand for browsing best sellers
-  const handPath2: HandPathPoint[] = [
-    { x: 540, y: 1200, frame: 350, gesture: 'pointer' as const },
-    { x: 540, y: 1000, frame: 390, gesture: 'pointer' as const },
-    { x: 540, y: 850, frame: 430, gesture: 'pointer' as const },
+  // Phase 11: hand for confirm button click
+  // Zoom: S=2.4, O=-200. Confirm btn at phone (207,805) → comp ~(540, 1650)
+  const handPath3: HandPathPoint[] = [
+    { x: 540, y: 1300, frame: 480, gesture: 'pointer' as const, scale: 1 },
+    { x: 540, y: 1500, frame: 495, gesture: 'pointer' as const, scale: 1 },
+    { x: 540, y: 1650, frame: 500, gesture: 'click' as const, scale: 1, duration: 10 },
+    { x: 600, y: 1500, frame: 520, gesture: 'pointer' as const, scale: 1 },
   ];
 
   const bestSellers = [
@@ -452,6 +624,8 @@ export const StoreDashboardScene: React.FC = () => {
       name: 'Wireless Earbuds Pro',
       sales: '142',
       revenue: '$4,260',
+      newPrice: '$4,473',
+      priceChangeFrame: 516,
       image: 'dorian/stores/product-linen-top.jpg',
     },
     {
@@ -459,6 +633,8 @@ export const StoreDashboardScene: React.FC = () => {
       name: 'Organic Face Cream',
       sales: '98',
       revenue: '$2,940',
+      newPrice: '$3,087',
+      priceChangeFrame: 522,
       image: 'dorian/stores/product-maxi-dress.jpg',
     },
     {
@@ -466,6 +642,8 @@ export const StoreDashboardScene: React.FC = () => {
       name: 'Canvas Tote Bag',
       sales: '87',
       revenue: '$2,175',
+      newPrice: '$2,284',
+      priceChangeFrame: 528,
       image: 'dorian/stores/product-tote-bag.jpg',
     },
     {
@@ -473,6 +651,8 @@ export const StoreDashboardScene: React.FC = () => {
       name: 'Summer Linen Shorts',
       sales: '76',
       revenue: '$1,520',
+      newPrice: '$1,596',
+      priceChangeFrame: 534,
       image: 'dorian/stores/product-ocean-shorts.jpg',
     },
     {
@@ -480,15 +660,76 @@ export const StoreDashboardScene: React.FC = () => {
       name: 'Bamboo Water Bottle',
       sales: '65',
       revenue: '$1,300',
+      newPrice: '$1,365',
+      priceChangeFrame: 540,
       image: 'dorian/stores/product-linen-top.jpg',
+    },
+    {
+      rank: 6,
+      name: 'Leather Crossbody Bag',
+      sales: '58',
+      revenue: '$1,160',
+      newPrice: '$1,218',
+      priceChangeFrame: 546,
+      image: 'dorian/stores/product-tote-bag.jpg',
+    },
+    {
+      rank: 7,
+      name: 'Ceramic Plant Pot',
+      sales: '52',
+      revenue: '$936',
+      newPrice: '$983',
+      priceChangeFrame: 552,
+      image: 'dorian/stores/product-maxi-dress.jpg',
+    },
+    {
+      rank: 8,
+      name: 'Silk Scarf Set',
+      sales: '45',
+      revenue: '$810',
+      newPrice: '$851',
+      priceChangeFrame: 558,
+      image: 'dorian/stores/product-linen-top.jpg',
+    },
+    {
+      rank: 9,
+      name: 'Yoga Mat Premium',
+      sales: '41',
+      revenue: '$738',
+      newPrice: '$775',
+      priceChangeFrame: 564,
+      image: 'dorian/stores/product-ocean-shorts.jpg',
+    },
+    {
+      rank: 10,
+      name: 'Aromatherapy Candle',
+      sales: '38',
+      revenue: '$570',
+      newPrice: '$599',
+      priceChangeFrame: 570,
+      image: 'dorian/stores/product-maxi-dress.jpg',
     },
   ];
 
   // Best sellers scroll (phase 9)
-  const bestSellerScroll = interpolate(frame, [350, 430], [0, 80], {
+  const bestSellerScroll = interpolate(frame, [370, 440], [0, 200], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
+
+  // ── Confirmation bar (phase 10: appears at 440) ──
+  const confirmSlide = spring({
+    frame: frame - 440,
+    fps,
+    config: SPRING_CONFIG.slide,
+  });
+  const confirmClicked = frame >= 505;
+  const confirmDismiss = spring({
+    frame: frame - 560,
+    fps,
+    config: SPRING_CONFIG.slide,
+  });
+  const confirmVisible = frame >= 440;
 
   const categories = ['Electronics', 'Fashion', 'Home', 'Beauty'];
   const activities = [
@@ -836,7 +1077,7 @@ export const StoreDashboardScene: React.FC = () => {
               </div>
 
               {/* ── Best Sellers view (fades in during morph) ── */}
-              {frame >= 220 && (
+              {frame >= 245 && (
                 <div
                   style={{
                     position: 'absolute',
@@ -943,11 +1184,105 @@ export const StoreDashboardScene: React.FC = () => {
                         sales={p.sales}
                         revenue={p.revenue}
                         image={p.image}
-                        delay={255 + i * 8}
+                        delay={280 + i * 8}
                         frame={frame}
                         fps={fps}
+                        priceChangeFrame={p.priceChangeFrame}
+                        newPrice={p.newPrice}
                       />
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Confirmation bar (phase 10-11) ── */}
+              {confirmVisible && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    left: 12,
+                    right: 12,
+                    zIndex: 30,
+                    transform: `translateY(${(1 - confirmSlide + confirmDismiss) * 200}px)`,
+                  }}
+                >
+                  <div
+                    style={{
+                      background: COLORS.white,
+                      borderRadius: 16,
+                      padding: '14px 16px',
+                      boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 10,
+                        marginBottom: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          background: COLORS.primary,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="white"
+                        >
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: COLORS.text,
+                          fontFamily,
+                          lineHeight: 1.4,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Should we raise prices by 5% based on competition?
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 200,
+                          padding: '10px 0',
+                          background: confirmClicked
+                            ? COLORS.primaryDark
+                            : COLORS.primary,
+                          color: 'white',
+                          borderRadius: 20,
+                          textAlign: 'center',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          fontFamily,
+                          transform: confirmClicked
+                            ? 'scale(0.95)'
+                            : 'scale(1)',
+                        }}
+                      >
+                        {confirmClicked ? 'Updating...' : 'Confirm'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1092,7 +1427,7 @@ export const StoreDashboardScene: React.FC = () => {
                   )}
 
                   {/* AI response */}
-                  {frame >= 215 && (
+                  {frame >= 240 && (
                     <div
                       style={{
                         background: '#f0f0f0',
@@ -1126,23 +1461,23 @@ export const StoreDashboardScene: React.FC = () => {
                       borderRadius: 18,
                       padding: '8px 12px',
                       display: 'flex',
-                      alignItems: 'center',
+                      flexDirection: 'row',
+                      alignItems: 'flex-end',
                       justifyContent: 'space-between',
+                      minHeight: 36,
                       border:
                         !messageSent && frame >= 100
                           ? `2px solid ${COLORS.primary}`
                           : '2px solid transparent',
                     }}
                   >
-                    <span
+                    <div
                       style={{
                         color:
                           !messageSent && typedChars > 0 ? COLORS.text : '#999',
                         fontSize: 11,
                         flex: 1,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        wordWrap: 'break-word',
                       }}
                     >
                       {!messageSent
@@ -1160,7 +1495,7 @@ export const StoreDashboardScene: React.FC = () => {
                           |
                         </span>
                       )}
-                    </span>
+                    </div>
                     <div
                       style={{
                         width: 26,
@@ -1204,28 +1539,30 @@ export const StoreDashboardScene: React.FC = () => {
       </div>
 
       {/* Hand cursor - phase 1-5 */}
-      {frame >= 10 && frame < 210 && (
+      {frame >= 10 && frame < 230 && (
         <FloatingHand
           path={handPath}
           startFrame={0}
           animation={savedPath?.animation ?? 'cursor-real-black'}
           size={handSize}
-          dark={savedPath?.dark ?? true}
+          dark={savedPath?.dark ?? false}
           showRipple={true}
           rippleColor="rgba(45, 212, 191, 0.5)"
           physics={HAND_PHYSICS.tapGentle}
         />
       )}
 
-      {/* Hand cursor - phase 9 (browse best sellers) */}
-      {frame >= 350 && (
+      {/* Hand cursor - phase 11 (confirm button click) */}
+      {frame >= 480 && frame < 540 && (
         <FloatingHand
-          path={handPath2}
+          path={handPath3}
           startFrame={0}
           animation="cursor-real-black"
-          size={handSizeForZoom(1.8)}
-          dark={true}
-          physics={HAND_PHYSICS.scroll}
+          size={handSizeForZoom(finalZoomScale)}
+          dark={false}
+          showRipple={true}
+          rippleColor="rgba(45, 212, 191, 0.5)"
+          physics={HAND_PHYSICS.tapGentle}
         />
       )}
     </AbsoluteFill>

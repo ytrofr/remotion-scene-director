@@ -197,3 +197,29 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     `src/components/CaptionOverlay.tsx`. Pass SRT content as string. Supports
     `full-sentence` and `word-highlight` styles. Position: top/center/bottom.
     Source `.srt` files from `public/captions/` directory.
+
+42. **Hand coordinates are composition-space, zoom-aware**: FloatingHand
+    renders OUTSIDE zoom wrappers. Coordinates must be in composition space
+    (1080x1920). Use formula: `compX = 540 + S*(phoneFrameX - 207)`,
+    `compY = 960 + offsetY + S*(phoneFrameY - 434)`. Phone frame center
+    = (207, 434), composition center = (540, 960). Calculate coordinates
+    for each interaction point at the zoom level active at that frame.
+
+43. **`dark={false}` for dark cursor**: The `dark` prop is INVERTED.
+    `dark={true}` applies CSS `invert(1)` = WHITE cursor. Always use
+    `dark: false` in codedPaths.ts and scene files for a dark/black cursor.
+
+44. **secondaryLayers in codedPaths.ts**: Multi-phase interactions need
+    `secondaryLayers` in `codedPaths.ts`. `ENSURE_SCENE_LAYERS` creates
+    both primary and secondary hand layers in SceneDirector. Each secondary
+    layer appears as its own editable hand block in the timeline. Without
+    `secondaryLayers`, only the primary hand appears — later clicks are
+    invisible in SceneDirector.
+
+45. **Three data override layers for hand paths**: Priority order:
+    (1) `localStorage['scene-director-session']` (browser cache, highest)
+    (2) `codedPaths.data.json` (saved via SceneDirector Save button)
+    (3) `codedPaths.ts` (hardcoded TypeScript, lowest priority).
+    When debugging missing/wrong gestures, clear localStorage first, then
+    check JSON, then check .ts. `mergePaths()` spreads saved JSON OVER
+    hardcoded — saved data wins at the property level.

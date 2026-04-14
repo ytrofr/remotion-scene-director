@@ -25,6 +25,8 @@ export interface SceneInfo {
 export interface CompositionEntry {
   id: string;
   label: string;
+  /** Group name for dropdown optgroup (e.g. 'Sigma Demos', 'Dorian') */
+  group?: string;
   video: { width: number; height: number; fps: number; frames: number };
   scenes: SceneInfo[];
   /** Global Y offset applied by the composition (e.g. translateY(120px) in Combined) */

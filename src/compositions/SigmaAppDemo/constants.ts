@@ -77,6 +77,13 @@ export const SCENE_INFO = SCENES.map((s) => ({
   end: s.start + s.duration,
 }));
 
+// ─── Demo composition video configs ────────────────────────
+export const DEMO_CREATIVE_VIDEO = { width: 1920, height: 1080, fps: 30, durationInFrames: 600 };
+export const DEMO_CONTEXT_VIDEO = { width: 1920, height: 1080, fps: 30, durationInFrames: 390 };
+export const DEMO_EDIT_VIDEO = { width: 1920, height: 1080, fps: 30, durationInFrames: 450 };
+export const DEMO_SEO_VIDEO = { width: 1920, height: 1080, fps: 30, durationInFrames: 450 };
+export const DEMO_CAMPAIGN_VIDEO = { width: 1920, height: 1080, fps: 30, durationInFrames: 450 };
+
 export const COLORS = {
   bg: '#09090b',
   text: '#fafafa',

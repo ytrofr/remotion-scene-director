@@ -155,8 +155,9 @@ Read these files ONLY when working on the relevant area:
 | Shared debug component library      | `docs/debug-tools.md`                      |
 | Video learnings (feedback loop)     | `docs/video-learnings.md`                  |
 | Shared components (transitions etc) | `docs/shared-components.md`                |
-| Enforced coding rules (45 rules)    | `.claude/rules/remotion-patterns.md`       |
+| Enforced coding rules (46 rules)    | `.claude/rules/remotion-patterns.md`       |
 | Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`        |
+| UI element coordinates per scene    | `docs/coordinate-map.md`                   |
 
 ## Skills (auto-loaded when relevant)
 

@@ -124,7 +124,7 @@ export const Toolbar: React.FC = () => {
       {/* Title */}
       <span className="toolbar__logo">SD</span>
 
-      {/* Composition dropdown */}
+      {/* Composition dropdown — grouped by optgroup */}
       <select
         className="toolbar__select"
         value={state.compositionId}
@@ -132,11 +132,25 @@ export const Toolbar: React.FC = () => {
           dispatch({ type: 'SET_COMPOSITION', id: e.target.value })
         }
       >
-        {COMPOSITIONS.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.label}
-          </option>
-        ))}
+        {(() => {
+          const groups: Record<string, typeof COMPOSITIONS> = {};
+          for (const c of COMPOSITIONS) {
+            const g = c.group ?? 'Other';
+            (groups[g] ??= []).push(c);
+          }
+          const order = ['Sigma Demos', 'Sigma Full', 'Dorian', 'Mobile Chat', 'Dashmor', 'Utilities', 'Other'];
+          return order
+            .filter((g) => groups[g]?.length)
+            .map((g) => (
+              <optgroup key={g} label={g}>
+                {groups[g].map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+              </optgroup>
+            ));
+        })()}
       </select>
 
       <div className="toolbar__divider" />

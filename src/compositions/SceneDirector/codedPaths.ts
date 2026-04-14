@@ -568,6 +568,69 @@ const SIGMA_APP_PATHS: Record<string, CodedPath> = {
   },
 };
 
+// Demo clip paths — empty for now, will be assigned per-demo later
+const DEMO_EMPTY_PATHS: Record<string, CodedPath> = {};
+
+// ── DemoCreative paths ───────────────────────────────────────
+// Canvas: 1920x1080. Chat panel right side during Chat scene.
+// PageReveal: video of Creative Studio (sidebar ~224px, content centered)
+// Content center x: ~960. Gallery image col2: ~926. Lightbox next: ~1892.
+const DEMO_CREATIVE_INPUT = { x: 1500, y: 1010 };
+const DEMO_CREATIVE_SEND = { x: 1820, y: 1010 };
+
+const DEMO_CREATIVE_PATHS: Record<string, CodedPath> = {
+  Chat: {
+    gesture: 'click',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Enter from bottom-right toward chat input
+      { x: 1920, y: 1080, frame: 10, gesture: 'pointer', scale: 1 },
+      { x: DEMO_CREATIVE_INPUT.x, y: DEMO_CREATIVE_INPUT.y, frame: 25, gesture: 'pointer', scale: 1 },
+      // Click input field
+      { x: DEMO_CREATIVE_INPUT.x, y: DEMO_CREATIVE_INPUT.y, frame: 30, gesture: 'click', scale: 1, duration: 8 },
+      // Hover near input during typing
+      { x: DEMO_CREATIVE_INPUT.x + 40, y: DEMO_CREATIVE_INPUT.y - 15, frame: 60, gesture: 'pointer', scale: 1 },
+      { x: DEMO_CREATIVE_INPUT.x + 80, y: DEMO_CREATIVE_INPUT.y - 10, frame: 100, gesture: 'pointer', scale: 1 },
+      // Move to send button
+      { x: DEMO_CREATIVE_SEND.x, y: DEMO_CREATIVE_SEND.y, frame: 118, gesture: 'pointer', scale: 1 },
+      // Click send
+      { x: DEMO_CREATIVE_SEND.x, y: DEMO_CREATIVE_SEND.y, frame: 123, gesture: 'click', scale: 1, duration: 10 },
+      // Watch response appear
+      { x: 1560, y: 600, frame: 165, gesture: 'pointer', scale: 1 },
+      // Hover over result card
+      { x: 1450, y: 750, frame: 210, gesture: 'pointer', scale: 1 },
+    ],
+  },
+  PageReveal: {
+    gesture: 'scroll',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      // Video starts from 20s (pageRevealVideoStartSec=20).
+      // 0-4s (local 0-120): Static page visible while DemoFlow chat slides away.
+      // Cursor enters from right edge during transition
+      { x: 1920, y: 540, frame: 80, gesture: 'pointer', scale: 1 },
+      { x: 960, y: 540, frame: 110, gesture: 'pointer', scale: 1 },
+      // 4-8s (local 120-240): Scroll down through gallery
+      { x: 960, y: 540, frame: 125, gesture: 'scroll', scale: 1 },
+      { x: 950, y: 520, frame: 175, gesture: 'scroll', scale: 1 },
+      { x: 940, y: 500, frame: 220, gesture: 'scroll', scale: 1 },
+      // 8-9s (local 240-270): Pause on gallery
+      { x: 940, y: 480, frame: 250, gesture: 'pointer', scale: 1 },
+      // 9-10.5s (local 270-315): Scroll back up
+      { x: 940, y: 500, frame: 270, gesture: 'scroll', scale: 1 },
+      { x: 950, y: 520, frame: 305, gesture: 'pointer', scale: 1 },
+      // 10.5-11s (local 315-330): Move toward gallery image
+      { x: 926, y: 500, frame: 315, gesture: 'pointer', scale: 1 },
+      // 11s (local 330): Click gallery image
+      { x: 926, y: 500, frame: 330, gesture: 'click', scale: 1, duration: 8 },
+      // 11.3-11.8s (local 338-355): Lightbox opens — cursor rests
+      { x: 960, y: 500, frame: 345, gesture: 'pointer', scale: 1 },
+    ],
+  },
+};
+
 const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   MobileChatDemoCombined: mergePaths(
     COMBINED_PATHS,
@@ -579,6 +642,11 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   DorianStoresDebug: mergePaths(DORIAN_STORES_PATHS, saved.DorianStoresDebug),
   SigmaAppDemo: mergePaths(SIGMA_APP_PATHS, saved.SigmaAppDemo),
   SigmaInvestorDemo: { ...saved.SigmaInvestorDemo },
+  DemoCreative: mergePaths(DEMO_CREATIVE_PATHS, saved.DemoCreative),
+  DemoContext: DEMO_EMPTY_PATHS,
+  DemoEditWebsite: DEMO_EMPTY_PATHS,
+  DemoSEO: DEMO_EMPTY_PATHS,
+  DemoCampaign: DEMO_EMPTY_PATHS,
 };
 
 /**

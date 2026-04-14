@@ -21,6 +21,17 @@
             "statusMessage": "Formatting..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-hand-paths.sh",
+            "statusMessage": "Validating hand paths..."
+          }
+        ],
+        "if": "Edit(*/codedPaths.ts) || Edit(*/layers.ts) || Write(*/codedPaths.ts) || Write(*/layers.ts)"
       }
     ],
     "PreCompact": [

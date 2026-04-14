@@ -67,6 +67,19 @@ import {
   SIGMA_VIDEO as SIGMA_INV_VIDEO,
   SCENE_INFO as SIGMA_INV_SCENE_INFO,
 } from '../SigmaInvestorDemo';
+import { DemoCreative, DEMO_CREATIVE_SCENE_INFO } from '../SigmaAppDemo/demos/DemoCreative';
+import { DemoContext, DEMO_CONTEXT_SCENE_INFO } from '../SigmaAppDemo/demos/DemoContext';
+import { DemoEditWebsite, DEMO_EDIT_SCENE_INFO } from '../SigmaAppDemo/demos/DemoEditWebsite';
+import { DemoSEO, DEMO_SEO_SCENE_INFO } from '../SigmaAppDemo/demos/DemoSEO';
+import { DemoCampaign, DEMO_CAMPAIGN_SCENE_INFO } from '../SigmaAppDemo/demos/DemoCampaign';
+import { TransitionShowcase } from '../SigmaAppDemo/TransitionShowcase';
+import {
+  DEMO_CREATIVE_VIDEO,
+  DEMO_CONTEXT_VIDEO,
+  DEMO_EDIT_VIDEO,
+  DEMO_SEO_VIDEO,
+  DEMO_CAMPAIGN_VIDEO,
+} from '../SigmaAppDemo/constants';
 
 function dashmorSceneInfo(): SceneInfo[] {
   return DASHMOR_SCENE_TIMINGS.map((t, i) => ({
@@ -80,6 +93,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'MobileChatDemoCombined',
     label: 'Combined (V2+V4)',
+    group: 'Mobile Chat',
     video: {
       width: 1080,
       height: 1920,
@@ -98,6 +112,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DorianDemo',
     label: 'Dorian (Marketplace)',
+    group: 'Dorian',
     video: {
       width: 1080,
       height: 1920,
@@ -115,6 +130,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DashmorDemo',
     label: 'Dashmor (Dashboard)',
+    group: 'Dashmor',
     video: {
       width: 1080,
       height: 1920,
@@ -126,6 +142,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'AudioTest',
     label: 'Audio Test (2 scenes)',
+    group: 'Utilities',
     video: {
       width: AUDIO_TEST_VIDEO.width,
       height: AUDIO_TEST_VIDEO.height,
@@ -141,6 +158,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'CapabilitiesDemo',
     label: 'Capabilities Demo (7 scenes)',
+    group: 'Utilities',
     video: {
       width: CAPABILITIES_VIDEO.width,
       height: CAPABILITIES_VIDEO.height,
@@ -156,6 +174,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'SharedComponentsDemo',
     label: 'Shared Components Demo (6 scenes)',
+    group: 'Utilities',
     video: {
       width: DEMO_VIDEO.width,
       height: DEMO_VIDEO.height,
@@ -171,6 +190,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DorianDemoEnhanced',
     label: 'Dorian Enhanced (captions + audio envelopes)',
+    group: 'Dorian',
     video: {
       width: ENHANCED_VIDEO.width,
       height: ENHANCED_VIDEO.height,
@@ -187,6 +207,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DorianStores',
     label: 'Dorian Stores (Dashboard + Map + AI)',
+    group: 'Dorian',
     video: {
       width: STORES_VIDEO.width,
       height: STORES_VIDEO.height,
@@ -202,6 +223,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DorianFull',
     label: 'Dorian Full (Demo + Stores)',
+    group: 'Dorian',
     video: {
       width: FULL_VIDEO.width,
       height: FULL_VIDEO.height,
@@ -217,6 +239,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'DorianStoresDebug',
     label: 'Stores Debug (Scene 1 only)',
+    group: 'Dorian',
     video: {
       width: STORES_VIDEO.width,
       height: STORES_VIDEO.height,
@@ -234,6 +257,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'SigmaAppDemo',
     label: 'SIGMA App Demo (Product Walkthrough)',
+    group: 'Sigma Full',
     video: {
       width: SIGMA_APP_VIDEO.width,
       height: SIGMA_APP_VIDEO.height,
@@ -249,6 +273,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
   {
     id: 'SigmaInvestorDemo',
     label: 'SIGMA Investor Demo (Pitch Deck)',
+    group: 'Sigma Full',
     video: {
       width: SIGMA_INV_VIDEO.width,
       height: SIGMA_INV_VIDEO.height,
@@ -260,6 +285,55 @@ export const COMPOSITIONS: CompositionEntry[] = [
       start: s.start,
       end: s.end,
     })),
+  },
+  // ── Agent Demo Clips (Investor Pitch) ──
+  {
+    id: 'DemoCreative',
+    label: 'Creative (nano_banana)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CREATIVE_VIDEO.durationInFrames },
+    scenes: DEMO_CREATIVE_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+  },
+  {
+    id: 'DemoContext',
+    label: 'Context Save (orchestrator)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CONTEXT_VIDEO.durationInFrames },
+    scenes: DEMO_CONTEXT_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+  },
+  {
+    id: 'DemoEditWebsite',
+    label: 'Edit Website (websites)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_EDIT_VIDEO.durationInFrames },
+    scenes: DEMO_EDIT_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+  },
+  {
+    id: 'DemoSEO',
+    label: 'SEO Analysis (reach)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_SEO_VIDEO.durationInFrames },
+    scenes: DEMO_SEO_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+  },
+  {
+    id: 'DemoCampaign',
+    label: 'Campaign (google_ads)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CAMPAIGN_VIDEO.durationInFrames },
+    scenes: DEMO_CAMPAIGN_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+  },
+  {
+    id: 'TransitionShowcase',
+    label: 'Transition Showcase (5 effects)',
+    group: 'Sigma Demos',
+    video: { width: 1920, height: 1080, fps: 30, frames: 750 },
+    scenes: [
+      { name: 'SlideUpPush', start: 0, end: 150 },
+      { name: 'ScaleBlurReveal', start: 150, end: 300 },
+      { name: 'WipeReveal', start: 300, end: 450 },
+      { name: 'MorphZoom', start: 450, end: 600 },
+      { name: 'SplitSlide', start: 600, end: 750 },
+    ],
   },
 ];
 
@@ -277,4 +351,10 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DorianFull,
   SigmaAppDemo,
   SigmaInvestorDemo,
+  DemoCreative,
+  DemoContext,
+  DemoEditWebsite,
+  DemoSEO,
+  DemoCampaign,
+  TransitionShowcase,
 };

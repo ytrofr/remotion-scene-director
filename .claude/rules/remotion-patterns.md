@@ -223,3 +223,22 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     When debugging missing/wrong gestures, clear localStorage first, then
     check JSON, then check .ts. `mergePaths()` spreads saved JSON OVER
     hardcoded — saved data wins at the property level.
+
+46. **Gesture spec before code**: Before writing ANY entry in `codedPaths.ts`
+    or `CODED_AUDIO_REGISTRY`, fill out the Gesture Spec Template and present
+    it to the user for approval. The spec MUST include for each interaction:
+    (1) action type (click/scroll/drag/swipe/point), (2) target element with
+    comp-space coordinates from `docs/coordinate-map.md`, (3) local frame
+    number, (4) audio SFX file + frame + volume. MUST include audio for every
+    click (mouse-click/soft-click/send-click). Last waypoint MUST be the final
+    meaningful gesture — never add a trailing `pointer` waypoint after the last
+    click. Always add BOTH codedPaths AND audio entries together. Run
+    `npm run validate:hands` after writing code. Template:
+    ```
+    ## Gesture Spec: [Composition] / [Scene]
+    Dimensions: [1080x1920 | 1920x1080]  Scene frames: [start]-[end]
+    ### Interactions:
+    1. ACTION: [type]  TARGET: [element] ([x], [y])  FRAME: [N]  AUDIO: [file] @[N] vol=[V]
+    ### Secondary layers needed: [yes/no]
+    ### Exit: [hand disappears at last click | exits frame]
+    ```

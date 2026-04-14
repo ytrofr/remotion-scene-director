@@ -427,6 +427,37 @@ const SIGMA_APP_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
 };
 
+// Demo clip audio — empty for now, will be assigned per-demo later
+const DEMO_EMPTY_AUDIO: Record<string, CodedAudioEntry[]> = {};
+
+// ── DemoCreative audio ──────────────────────────────────────
+const DEMO_CREATIVE_AUDIO: Record<string, CodedAudioEntry[]> = {
+  Chat: [
+    // Click into input (frame 30)
+    { file: 'audio/sfx/soft-click.wav', startFrame: 30, durationInFrames: 10, volume: 0.5 },
+    // Typing (frames 35-100)
+    { file: 'audio/typing-soft.wav', startFrame: 35, durationInFrames: 65, volume: 0.3 },
+    // Send click (frame 123)
+    { file: 'audio/send-click.wav', startFrame: 123, durationInFrames: 15, volume: 0.6 },
+    // Routing whoosh to nano_banana
+    { file: 'audio/sfx/whoosh.wav', startFrame: 136, durationInFrames: 25, volume: 0.45 },
+    // Cost badge notification
+    { file: 'audio/sfx/notification.wav', startFrame: 178, durationInFrames: 20, volume: 0.3 },
+    // Image result card reveal
+    { file: 'audio/sfx/sparkle.wav', startFrame: 200, durationInFrames: 30, volume: 0.35 },
+  ],
+  PageReveal: [
+    // Crossfade transition into page reveal
+    { file: 'audio/sfx/swoosh-transition.wav', startFrame: 0, durationInFrames: 40, volume: 0.4 },
+    // Scroll starts — subtle slide (local frame 125)
+    { file: 'audio/sfx/slide.wav', startFrame: 125, durationInFrames: 95, volume: 0.2 },
+    // Click on gallery image (local frame 330)
+    { file: 'audio/sfx/mouse-click.wav', startFrame: 330, durationInFrames: 10, volume: 0.55 },
+    // Lightbox opens — pop up sound
+    { file: 'audio/sfx/pop-up.wav', startFrame: 338, durationInFrames: 20, volume: 0.4 },
+  ],
+};
+
 const CODED_AUDIO_REGISTRY: Record<
   string,
   Record<string, CodedAudioEntry[]>
@@ -437,6 +468,11 @@ const CODED_AUDIO_REGISTRY: Record<
   CapabilitiesDemo: CAPABILITIES_AUDIO,
   DorianStores: DORIAN_STORES_AUDIO,
   SigmaAppDemo: SIGMA_APP_AUDIO,
+  DemoCreative: DEMO_CREATIVE_AUDIO,
+  DemoContext: DEMO_EMPTY_AUDIO,
+  DemoEditWebsite: DEMO_EMPTY_AUDIO,
+  DemoSEO: DEMO_EMPTY_AUDIO,
+  DemoCampaign: DEMO_EMPTY_AUDIO,
 };
 
 export function getCodedAudio(

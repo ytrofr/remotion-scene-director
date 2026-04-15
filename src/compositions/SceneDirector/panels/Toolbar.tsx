@@ -14,6 +14,13 @@ import {
 } from '../gestures';
 import { useGalleryActive } from '../hooks/galleryActive';
 import { LottieThumbnail } from '../overlays/LottieThumbnail';
+import { getCodedPath } from '../codedPaths';
+import {
+  createReloadBackup,
+  getReloadBackup,
+  restoreReloadBackup,
+  clearReloadBackup,
+} from '../hooks/useSessionPersistence';
 
 const GESTURE_TOOLS: { id: GestureTool; key: string }[] = [
   { id: 'click', key: '1' },
@@ -32,6 +39,16 @@ export const Toolbar: React.FC = () => {
   >('idle');
   const [openDropdown, setOpenDropdown] = useState<GestureTool | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Track whether a reload backup is available (for Undo Reload button).
+  // Poll every 5s to handle TTL expiry and cross-tab changes.
+  const [hasBackup, setHasBackup] = useState<boolean>(
+    () => !!getReloadBackup(),
+  );
+  useEffect(() => {
+    const id = setInterval(() => setHasBackup(!!getReloadBackup()), 5000);
+    return () => clearInterval(id);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -138,7 +155,15 @@ export const Toolbar: React.FC = () => {
             const g = c.group ?? 'Other';
             (groups[g] ??= []).push(c);
           }
-          const order = ['Sigma Demos', 'Sigma Full', 'Dorian', 'Mobile Chat', 'Dashmor', 'Utilities', 'Other'];
+          const order = [
+            'Sigma Demos',
+            'Sigma Full',
+            'Dorian',
+            'Mobile Chat',
+            'Dashmor',
+            'Utilities',
+            'Other',
+          ];
           return order
             .filter((g) => groups[g]?.length)
             .map((g) => (
@@ -379,14 +404,6 @@ export const Toolbar: React.FC = () => {
 
       <div className="toolbar__spacer" />
 
-      {/* Preview toggle */}
-      <button
-        onClick={() => dispatch({ type: 'TOGGLE_PREVIEW' })}
-        className={`toolbar__btn ${state.preview ? 'toolbar__btn--preview-on' : 'toolbar__btn--preview'}`}
-      >
-        Preview
-      </button>
-
       {/* Trail toggle */}
       <button
         onClick={() => dispatch({ type: 'TOGGLE_TRAIL' })}
@@ -429,6 +446,76 @@ export const Toolbar: React.FC = () => {
           title="Revert to last saved state"
         >
           Revert
+        </button>
+      )}
+
+      {/* Reload — wipes localStorage session for ALL scenes in current composition and re-seeds from codedPaths.data.json. Snapshots current state first so Undo Reload can restore it within 10 minutes. */}
+      <button
+        onClick={() => {
+          const comp = COMPOSITIONS.find((c) => c.id === state.compositionId);
+          if (!comp) return;
+          if (
+            !confirm(
+              `Reload all ${comp.scenes.length} scenes in "${comp.label}" from codedPaths.data.json?\n\nThis discards unsaved edits — but we'll keep a 10-minute rollback. Click "Undo Reload" to get your work back.`,
+            )
+          ) {
+            return;
+          }
+          // Stash current session BEFORE dispatching any destructive action
+          createReloadBackup();
+          for (const s of comp.scenes) {
+            const coded = getCodedPath(state.compositionId, s.name);
+            dispatch({ type: 'RELOAD_SCENE_FROM_DISK', scene: s.name });
+            dispatch({
+              type: 'ENSURE_SCENE_LAYERS',
+              scene: s.name,
+              compositionId: state.compositionId,
+              codedPath: coded,
+              sceneZoom: s.zoom,
+            });
+          }
+          saveSession();
+          setHasBackup(true);
+        }}
+        className="toolbar__btn toolbar__btn--clear"
+        title="Reload all scenes in this composition from codedPaths.data.json (rollback available via Undo Reload)"
+      >
+        Reload
+      </button>
+
+      {/* Undo Reload — restores the pre-Reload snapshot (available for 10 min after Reload) */}
+      {hasBackup && (
+        <button
+          onClick={() => {
+            const backup = getReloadBackup();
+            if (!backup) {
+              setHasBackup(false);
+              return;
+            }
+            const ageMin = Math.round((Date.now() - backup.timestamp) / 60000);
+            if (
+              !confirm(
+                `Restore session from ${ageMin}m ago? The page will reload to apply the restore.`,
+              )
+            ) {
+              return;
+            }
+            if (restoreReloadBackup()) {
+              window.location.reload();
+            }
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            if (confirm('Discard the reload backup?')) {
+              clearReloadBackup();
+              setHasBackup(false);
+            }
+          }}
+          className="toolbar__btn toolbar__btn--clear"
+          style={{ background: '#7c3aed', color: '#fff' }}
+          title="Restore pre-Reload session (right-click to discard the backup)"
+        >
+          Undo Reload
         </button>
       )}
 

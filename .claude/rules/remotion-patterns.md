@@ -234,6 +234,7 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     meaningful gesture — never add a trailing `pointer` waypoint after the last
     click. Always add BOTH codedPaths AND audio entries together. Run
     `npm run validate:hands` after writing code. Template:
+
     ```
     ## Gesture Spec: [Composition] / [Scene]
     Dimensions: [1080x1920 | 1920x1080]  Scene frames: [start]-[end]
@@ -242,3 +243,45 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     ### Secondary layers needed: [yes/no]
     ### Exit: [hand disappears at last click | exits frame]
     ```
+
+47. **interpolate() clamp direction gotcha**: `extrapolateLeft: 'clamp'` clamps
+    to `outputRange[0]`, NOT to zero. With a DESCENDING range like `[1, 0]`,
+    left-clamp freezes the output at 1 for every frame BEFORE the input range
+    — which usually means "fully opaque overlay blocking the video for the
+    entire video". For symmetric pulses (fade in + hold + fade out), use a
+    single 3-point `interpolate(frame, [A, B, C], [0, 1, 0], { clamp both })`
+    instead of combining two `[0,1]` and `[1,0]` interpolations with `Math.max`.
+    Evidence: `DorianFull.tsx` TransitionOverlay — white flash at frame 960 was
+    pinned at opacity 1 for frames 0-944, blanking the entire Dorian half.
+
+48. **Meta-composition registration**: When a composition aggregates other
+    comps (e.g. `DorianFull = DorianDemo + DorianStores`), it MUST have its
+    own entry in BOTH `codedPaths.ts` (`CODED_PATHS_REGISTRY`) and
+    `layers.ts` (`CODED_AUDIO_REGISTRY`) — children's entries do NOT inherit.
+    Scene-name keys must match the meta's own scene info (e.g. `FULL_SCENE_INFO`),
+    so remap children's keys when spreading: `'10-StoreDashboard': DORIAN_STORES_PATHS['1-StoreDashboard']`.
+    Without registration, SceneDirector shows zero hand/audio layers ("blank").
+
+49. **Audio/overlays in aggregator comps live at TOP level**: Time-based
+    components (`<Audio>`, `<AudioFromLayers>`, overlays) rendered INSIDE a
+    child composition's `<Sequence from=X durationInFrames=Y>` unmount outside
+    that window. Example: `DorianDemo` renders `<AudioFromLayers />` internally;
+    when embedded in `DorianFull` inside `<Sequence from={0} durationInFrames={960}>`,
+    it only plays audio for frames 0-960 — scenes 10+ go silent. Fix: render
+    audio/overlay components at the PARENT composition's top level (outside all
+    child Sequences). When the child ALSO renders audio internally, use a filtered
+    variant at the parent (e.g. `entries.filter(e => e.globalFrom >= CUT)`) to
+    prevent double-playback during the child's window. Evidence: `DorianFull.tsx`
+    `DorianFullStoresAudio` + `StoresAudioFromLayers`.
+
+50. **Asset removal is a 4-part cleanup**: Deleting an audio/SFX/animation file
+    requires updates in 4 locations — missing any leaves orphan references or
+    dead picker entries:
+    (1) `layers.ts` `CODED_AUDIO_REGISTRY` — remove every cue entry referencing
+    the file (use a Python script for 10+ refs).
+    (2) `layers.ts` `AUDIO_FILES` picker list.
+    (3) Gallery — `panels/galleryData.ts` entry + `panels/GalleryView.tsx`
+    `SFX_FILE_MAP` row.
+    (4) The physical file: `rm public/audio/sfx/{name}.wav`.
+    Verify with: `grep -rn "{filename}\|sfx-{id}" src/` returns 0. Then
+    `npx tsc --noEmit` to confirm no broken imports.

@@ -157,7 +157,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '2-HomeScroll': {
     gesture: 'scroll',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       { x: 1050, y: 960, frame: 0, gesture: 'pointer', scale: 1, rotation: 0 },
       { x: 780, y: 960, frame: 20, gesture: 'pointer', scale: 1, rotation: 0 },
@@ -172,7 +172,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '3-TapBubble': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       { x: 780, y: 1200, frame: 0, gesture: 'pointer', scale: 1 },
       { x: 800, y: 1400, frame: 30, gesture: 'pointer', scale: 1 },
@@ -183,7 +183,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '4-ChatOpen': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       { x: 518, y: 992, frame: 0, gesture: 'pointer', scale: 2.2 },
       { x: 500, y: 1200, frame: 20, gesture: 'pointer', scale: 1.5 },
@@ -195,7 +195,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '5-UserTyping': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       { x: 750, y: 1520, frame: 70, gesture: 'pointer', scale: 1 },
       { x: 730, y: 1500, frame: 85, gesture: 'pointer', scale: 1 },
@@ -206,7 +206,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '7-AIResponse': {
     gesture: 'click',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       { x: 540, y: 1600, frame: 70, gesture: 'pointer', scale: 1 },
       { x: 540, y: 1480, frame: 85, gesture: 'pointer', scale: 1 },
@@ -216,7 +216,7 @@ const DORIAN_PATHS: Record<string, CodedPath> = {
   '8-ProductPage': {
     gesture: 'scroll',
     animation: 'cursor-real-black',
-    dark: true,
+    dark: false,
     path: [
       {
         x: 1050,
@@ -253,14 +253,26 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
       { x: 700, y: 1700, frame: 85, gesture: 'pointer', scale: 1 },
       { x: 540, y: 1664, frame: 95, gesture: 'pointer', scale: 1 },
       { x: 540, y: 1664, frame: 100, gesture: 'click', scale: 1, duration: 5 },
-      // Send click: send btn at phone (365,826) → comp (975,1664)
-      { x: 540, y: 1664, frame: 190, gesture: 'pointer', scale: 1 },
-      { x: 800, y: 1664, frame: 198, gesture: 'pointer', scale: 1 },
-      { x: 975, y: 1664, frame: 205, gesture: 'pointer', scale: 1 },
-      { x: 975, y: 1664, frame: 208, gesture: 'click', scale: 1, duration: 10 },
-      { x: 850, y: 1700, frame: 225, gesture: 'pointer', scale: 1 },
     ],
     secondaryLayers: [
+      {
+        // Send click: hand re-enters after typing idle, clicks send btn at comp (975,1664)
+        gesture: 'click',
+        path: [
+          { x: 540, y: 1664, frame: 190, gesture: 'pointer', scale: 1 },
+          { x: 800, y: 1664, frame: 198, gesture: 'pointer', scale: 1 },
+          { x: 975, y: 1664, frame: 205, gesture: 'pointer', scale: 1 },
+          {
+            x: 975,
+            y: 1664,
+            frame: 208,
+            gesture: 'click',
+            scale: 1,
+            duration: 10,
+          },
+          { x: 850, y: 1700, frame: 225, gesture: 'pointer', scale: 1 },
+        ],
+      },
       {
         // Confirm button click (zoom S=2.4, O=-200): btn at phone (207,805) → comp (540,1650)
         gesture: 'click',
@@ -586,16 +598,54 @@ const DEMO_CREATIVE_PATHS: Record<string, CodedPath> = {
     path: [
       // Enter from bottom-right toward chat input
       { x: 1920, y: 1080, frame: 10, gesture: 'pointer', scale: 1 },
-      { x: DEMO_CREATIVE_INPUT.x, y: DEMO_CREATIVE_INPUT.y, frame: 25, gesture: 'pointer', scale: 1 },
+      {
+        x: DEMO_CREATIVE_INPUT.x,
+        y: DEMO_CREATIVE_INPUT.y,
+        frame: 25,
+        gesture: 'pointer',
+        scale: 1,
+      },
       // Click input field
-      { x: DEMO_CREATIVE_INPUT.x, y: DEMO_CREATIVE_INPUT.y, frame: 30, gesture: 'click', scale: 1, duration: 8 },
+      {
+        x: DEMO_CREATIVE_INPUT.x,
+        y: DEMO_CREATIVE_INPUT.y,
+        frame: 30,
+        gesture: 'click',
+        scale: 1,
+        duration: 8,
+      },
       // Hover near input during typing
-      { x: DEMO_CREATIVE_INPUT.x + 40, y: DEMO_CREATIVE_INPUT.y - 15, frame: 60, gesture: 'pointer', scale: 1 },
-      { x: DEMO_CREATIVE_INPUT.x + 80, y: DEMO_CREATIVE_INPUT.y - 10, frame: 100, gesture: 'pointer', scale: 1 },
+      {
+        x: DEMO_CREATIVE_INPUT.x + 40,
+        y: DEMO_CREATIVE_INPUT.y - 15,
+        frame: 60,
+        gesture: 'pointer',
+        scale: 1,
+      },
+      {
+        x: DEMO_CREATIVE_INPUT.x + 80,
+        y: DEMO_CREATIVE_INPUT.y - 10,
+        frame: 100,
+        gesture: 'pointer',
+        scale: 1,
+      },
       // Move to send button
-      { x: DEMO_CREATIVE_SEND.x, y: DEMO_CREATIVE_SEND.y, frame: 118, gesture: 'pointer', scale: 1 },
+      {
+        x: DEMO_CREATIVE_SEND.x,
+        y: DEMO_CREATIVE_SEND.y,
+        frame: 118,
+        gesture: 'pointer',
+        scale: 1,
+      },
       // Click send
-      { x: DEMO_CREATIVE_SEND.x, y: DEMO_CREATIVE_SEND.y, frame: 123, gesture: 'click', scale: 1, duration: 10 },
+      {
+        x: DEMO_CREATIVE_SEND.x,
+        y: DEMO_CREATIVE_SEND.y,
+        frame: 123,
+        gesture: 'click',
+        scale: 1,
+        duration: 10,
+      },
       // Watch response appear
       { x: 1560, y: 600, frame: 165, gesture: 'pointer', scale: 1 },
       // Hover over result card
@@ -640,6 +690,15 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   DashmorDemo: { ...saved.DashmorDemo },
   DorianStores: mergePaths(DORIAN_STORES_PATHS, saved.DorianStores),
   DorianStoresDebug: mergePaths(DORIAN_STORES_PATHS, saved.DorianStoresDebug),
+  DorianFull: mergePaths(
+    {
+      ...DORIAN_PATHS,
+      '10-StoreDashboard': DORIAN_STORES_PATHS['1-StoreDashboard'],
+      '11-MapSearch': DORIAN_STORES_PATHS['2-MapSearch'],
+      '12-AIProducts': DORIAN_STORES_PATHS['3-AIProducts'],
+    },
+    saved.DorianFull,
+  ),
   SigmaAppDemo: mergePaths(SIGMA_APP_PATHS, saved.SigmaAppDemo),
   SigmaInvestorDemo: { ...saved.SigmaInvestorDemo },
   DemoCreative: mergePaths(DEMO_CREATIVE_PATHS, saved.DemoCreative),

@@ -270,5 +270,236 @@
       ],
       "dark": false
     }
+  },
+  "DorianFull": {
+    "5-UserTyping": {
+      "gesture": "click",
+      "animation": "cursor-real-black",
+      "path": [
+        {
+          "x": 610,
+          "y": 1654,
+          "frame": 70,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 971,
+          "y": 1644,
+          "frame": 105,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 10
+        }
+      ],
+      "dark": false
+    },
+    "8-ProductPage": {
+      "gesture": "scroll",
+      "animation": "cursor-real-black",
+      "path": [
+        {
+          "x": 1050,
+          "y": 960,
+          "frame": 105,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 115,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 118,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 130,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 140,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 145,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 150,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        }
+      ],
+      "dark": false
+    },
+    "11-MapSearch": {
+      "gesture": "click",
+      "animation": "cursor-real-black",
+      "path": [
+        {
+          "x": 540,
+          "y": 700,
+          "frame": 5,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 550,
+          "frame": 14,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 550,
+          "frame": 18,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 8
+        },
+        {
+          "x": 540,
+          "y": 550,
+          "frame": 70,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 750,
+          "frame": 120,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 542,
+          "y": 769,
+          "frame": 140,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 542,
+          "y": 769,
+          "frame": 150,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 15
+        }
+      ],
+      "dark": false
+    },
+    "10-StoreDashboard": {
+      "gesture": "click",
+      "animation": "cursor-real-black",
+      "path": [
+        {
+          "x": 900,
+          "y": 1600,
+          "frame": 2,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 814,
+          "y": 1543,
+          "frame": 42,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 8
+        },
+        {
+          "x": 540,
+          "y": 1664,
+          "frame": 92,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 5
+        }
+      ],
+      "dark": false,
+      "secondaryLayers": [
+        {
+          "gesture": "click",
+          "path": [
+            {
+              "x": 540,
+              "y": 1664,
+              "frame": 182,
+              "gesture": "pointer",
+              "scale": 1
+            },
+            {
+              "x": 969,
+              "y": 1644,
+              "frame": 200,
+              "gesture": "click",
+              "scale": 1,
+              "duration": 10
+            }
+          ]
+        },
+        {
+          "gesture": "click",
+          "path": [
+            {
+              "x": 540,
+              "y": 1300,
+              "frame": 480,
+              "gesture": "pointer",
+              "scale": 1
+            },
+            {
+              "x": 540,
+              "y": 1500,
+              "frame": 495,
+              "gesture": "pointer",
+              "scale": 1
+            },
+            {
+              "x": 540,
+              "y": 1650,
+              "frame": 500,
+              "gesture": "click",
+              "scale": 1,
+              "duration": 10
+            },
+            {
+              "x": 600,
+              "y": 1500,
+              "frame": 520,
+              "gesture": "pointer",
+              "scale": 1
+            }
+          ]
+        }
+      ]
+    }
   }
 }

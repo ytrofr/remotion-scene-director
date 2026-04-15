@@ -69,7 +69,6 @@ export interface DirectorState {
   draggingIndex: number | null; // waypoint index being dragged (for hand snap)
   sceneAnimation: Record<string, LottieAnimation>; // per-scene animation override
   sceneDark: Record<string, boolean>; // per-scene dark mode override
-  preview: boolean;
   showTrail: boolean;
   exportOpen: boolean;
   importOpen: boolean;
@@ -106,7 +105,6 @@ export type DirectorAction =
   | { type: 'DELETE_WAYPOINT'; scene: string; index: number }
   | { type: 'SET_WAYPOINTS'; scene: string; waypoints: HandPathPoint[] }
   | { type: 'SELECT_WAYPOINT'; index: number | null }
-  | { type: 'TOGGLE_PREVIEW' }
   | { type: 'TOGGLE_TRAIL' }
   | { type: 'TOGGLE_EXPORT' }
   | { type: 'TOGGLE_IMPORT' }
@@ -120,6 +118,7 @@ export type DirectorAction =
   | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
   | { type: 'SET_CLICK_ANIMATION'; animation: string }
   | { type: 'REVERT_SCENE'; scene: string }
+  | { type: 'RELOAD_SCENE_FROM_DISK'; scene: string }
   | { type: 'MARK_SAVED'; scene: string }
   | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
   | { type: 'SET_VIEW'; view: 'editor' | 'gallery' }
@@ -193,7 +192,6 @@ export const initialState: DirectorState = {
   draggingIndex: null,
   sceneAnimation: {},
   sceneDark: {},
-  preview: false,
   showTrail: false,
   exportOpen: false,
   importOpen: false,

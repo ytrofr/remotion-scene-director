@@ -3,7 +3,14 @@
  * then slow scroll down through the page.
  */
 import React from 'react';
-import { AbsoluteFill, Img, interpolate, useCurrentFrame, staticFile } from 'remotion';
+import {
+  AbsoluteFill,
+  Easing,
+  Img,
+  interpolate,
+  useCurrentFrame,
+  staticFile,
+} from 'remotion';
 import { FONTS } from '../constants';
 
 export const PageRevealScene: React.FC = () => {
@@ -19,6 +26,7 @@ export const PageRevealScene: React.FC = () => {
   const scrollProgress = interpolate(frame, [30, 220], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
   // We stack hero + services images and scroll through them

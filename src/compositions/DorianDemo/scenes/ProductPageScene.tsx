@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   Img,
   staticFile,
   useCurrentFrame,
@@ -71,6 +72,7 @@ export const ProductPageScene: React.FC = () => {
   const scrollProgress = interpolate(frame, [110, 140], [0, 300], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
   // Hand for scrolling
@@ -86,9 +88,9 @@ export const ProductPageScene: React.FC = () => {
       gesture: 'pointer' as const,
       rotation: 0,
     },
-    { x: handX, y: handY, frame: 118, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 130, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 140, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 118, gesture: 'drag' as const, rotation: -22 },
+    { x: handX, y: handY, frame: 130, gesture: 'drag' as const, rotation: -22 },
+    { x: handX, y: handY, frame: 140, gesture: 'drag' as const, rotation: -22 },
     {
       x: handX,
       y: handY,

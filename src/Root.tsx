@@ -46,18 +46,12 @@ import {
   DorianStoresDebug,
   STORES_DEBUG_DURATION,
 } from './compositions/DorianStores/DorianStoresDebug';
-import {
-  DorianFull,
-  FULL_VIDEO,
-} from './compositions/DorianFull/DorianFull';
+import { DorianFull, FULL_VIDEO } from './compositions/DorianFull/DorianFull';
 import {
   SigmaInvestorDemo,
   SIGMA_VIDEO,
 } from './compositions/SigmaInvestorDemo';
-import {
-  SigmaAppDemo,
-  SIGMA_APP_VIDEO,
-} from './compositions/SigmaAppDemo';
+import { SigmaAppDemo, SIGMA_APP_VIDEO } from './compositions/SigmaAppDemo';
 import { DemoCreative } from './compositions/SigmaAppDemo/demos/DemoCreative';
 import { DemoContext } from './compositions/SigmaAppDemo/demos/DemoContext';
 import { DemoEditWebsite } from './compositions/SigmaAppDemo/demos/DemoEditWebsite';
@@ -71,6 +65,10 @@ import {
   DEMO_CAMPAIGN_VIDEO,
 } from './compositions/SigmaAppDemo/constants';
 import { TransitionShowcase } from './compositions/SigmaAppDemo/TransitionShowcase';
+import {
+  ScrollStyleDemo,
+  SCROLL_DEMO_VIDEO,
+} from './compositions/ScrollStyleDemo';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -264,6 +262,14 @@ export const RemotionRoot: React.FC = () => {
           fps={DEMO_VIDEO.fps}
           width={DEMO_VIDEO.width}
           height={DEMO_VIDEO.height}
+        />
+        <Composition
+          id="ScrollStyleDemo"
+          component={ScrollStyleDemo}
+          durationInFrames={SCROLL_DEMO_VIDEO.durationInFrames}
+          fps={SCROLL_DEMO_VIDEO.fps}
+          width={SCROLL_DEMO_VIDEO.width}
+          height={SCROLL_DEMO_VIDEO.height}
         />
       </Folder>
 

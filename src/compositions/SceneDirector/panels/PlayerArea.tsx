@@ -26,6 +26,10 @@ interface PlayerAreaProps {
   handlePanStart: React.MouseEventHandler;
   handlePanMove: React.MouseEventHandler;
   handlePanEnd: React.MouseEventHandler;
+  /** Suppresses browser context menu so right-drag can pan */
+  handleContextMenu: React.MouseEventHandler;
+  /** True while the user is actively panning (for cursor feedback) */
+  isPanning: boolean;
   /** Current composition config */
   composition: CompositionEntry;
   /** The video component to render */
@@ -73,7 +77,6 @@ const ActiveWaypointMarkers: React.FC<{
   sceneWaypoints: HandPathPoint[];
 }> = ({
   containerRef,
-  state,
   currentScene,
   frame,
   showTrail,
@@ -91,14 +94,10 @@ const ActiveWaypointMarkers: React.FC<{
 
   // Only show when playhead is within range (or in trail mode always show)
   const inRange = showTrail || (frame >= handStart && frame <= handEnd);
-  if (state.preview || !inRange) return null;
+  if (!inRange) return null;
 
   return (
-    <WaypointMarkers
-      containerRef={containerRef}
-      editable={!state.preview}
-      waypoints={wps}
-    />
+    <WaypointMarkers containerRef={containerRef} editable waypoints={wps} />
   );
 };
 
@@ -109,6 +108,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
   handlePanStart,
   handlePanMove,
   handlePanEnd,
+  handleContextMenu,
+  isPanning,
   composition,
   VideoComponent,
   zoom,
@@ -135,7 +136,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
       onMouseDown={handlePanStart}
       onMouseMove={handlePanMove}
       onMouseUp={handlePanEnd}
-      onMouseLeave={handlePanEnd}
+      onContextMenu={handleContextMenu}
+      style={{ cursor: isPanning ? 'grabbing' : undefined }}
     >
       {/* Aspect-ratio container - keeps 9:16 centered */}
       <div
@@ -143,8 +145,11 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
         className="player-frame"
         style={{
           aspectRatio: `${composition.video.width} / ${composition.video.height}`,
-          transform:
-            zoom > 1
+          // While panning, the hook writes transform directly to this element's DOM
+          // for 60fps smoothness. Don't let React fight it with stale pan state.
+          transform: isPanning
+            ? undefined
+            : zoom > 1
               ? `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`
               : undefined,
         }}
@@ -183,9 +188,7 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
         </div>
 
         {/* Drawing canvas overlays the player */}
-        {state.selectedScene && !state.preview && !state.exportOpen && (
-          <DrawingCanvas />
-        )}
+        {state.selectedScene && !state.exportOpen && <DrawingCanvas />}
 
         {/* FloatingHand: renders all visible hand layers (+ bleed-over from other scenes) */}
         {state.selectedScene && currentScene && (
@@ -225,7 +228,6 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             {state.selectedWaypoint !== null &&
               ` | sel:#${state.selectedWaypoint + 1}`}
             {state.showTrail && ' | TRAIL'}
-            {state.preview && ' | PREVIEW'}
           </div>
         )}
       </div>
@@ -239,7 +241,7 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             setPan({ x: 0, y: 0 });
           }}
         >
-          {Math.round(zoom * 100)}% — Alt+drag to pan, 0 to reset
+          {Math.round(zoom * 100)}% — right-click drag to pan, 0 to reset
         </div>
       )}
     </div>

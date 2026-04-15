@@ -66,8 +66,6 @@ export function directorReducer(
     }
     case 'SELECT_WAYPOINT':
       return { ...state, selectedWaypoint: action.index };
-    case 'TOGGLE_PREVIEW':
-      return { ...state, preview: !state.preview };
     case 'TOGGLE_TRAIL':
       return { ...state, showTrail: !state.showTrail };
     case 'TOGGLE_EXPORT':
@@ -127,6 +125,7 @@ export function directorReducer(
 
     // ── Scene management actions (delegated) ──────────────────────────────
     case 'REVERT_SCENE':
+    case 'RELOAD_SCENE_FROM_DISK':
     case 'MARK_SAVED':
     case 'RESTORE_VERSION':
     case 'LOG_ACTIVITY':

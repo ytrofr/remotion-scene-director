@@ -1,6 +1,6 @@
 /**
  * Scene 6: Sound Effects Demo
- * Demonstrates SFX library — hand cursor clicks with mouse-click.wav
+ * Demonstrates SFX library — hand cursor clicks with send-click.wav
  * Audio is handled via SceneDirector audio layers or coded audio registry.
  */
 

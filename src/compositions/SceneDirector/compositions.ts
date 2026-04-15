@@ -67,12 +67,25 @@ import {
   SIGMA_VIDEO as SIGMA_INV_VIDEO,
   SCENE_INFO as SIGMA_INV_SCENE_INFO,
 } from '../SigmaInvestorDemo';
-import { DemoCreative, DEMO_CREATIVE_SCENE_INFO } from '../SigmaAppDemo/demos/DemoCreative';
-import { DemoContext, DEMO_CONTEXT_SCENE_INFO } from '../SigmaAppDemo/demos/DemoContext';
-import { DemoEditWebsite, DEMO_EDIT_SCENE_INFO } from '../SigmaAppDemo/demos/DemoEditWebsite';
+import {
+  DemoCreative,
+  DEMO_CREATIVE_SCENE_INFO,
+} from '../SigmaAppDemo/demos/DemoCreative';
+import {
+  DemoContext,
+  DEMO_CONTEXT_SCENE_INFO,
+} from '../SigmaAppDemo/demos/DemoContext';
+import {
+  DemoEditWebsite,
+  DEMO_EDIT_SCENE_INFO,
+} from '../SigmaAppDemo/demos/DemoEditWebsite';
 import { DemoSEO, DEMO_SEO_SCENE_INFO } from '../SigmaAppDemo/demos/DemoSEO';
-import { DemoCampaign, DEMO_CAMPAIGN_SCENE_INFO } from '../SigmaAppDemo/demos/DemoCampaign';
+import {
+  DemoCampaign,
+  DEMO_CAMPAIGN_SCENE_INFO,
+} from '../SigmaAppDemo/demos/DemoCampaign';
 import { TransitionShowcase } from '../SigmaAppDemo/TransitionShowcase';
+import { ScrollStyleDemo, SCROLL_DEMO_VIDEO } from '../ScrollStyleDemo';
 import {
   DEMO_CREATIVE_VIDEO,
   DEMO_CONTEXT_VIDEO,
@@ -291,36 +304,99 @@ export const COMPOSITIONS: CompositionEntry[] = [
     id: 'DemoCreative',
     label: 'Creative (nano_banana)',
     group: 'Sigma Demos',
-    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CREATIVE_VIDEO.durationInFrames },
-    scenes: DEMO_CREATIVE_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+    video: {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      frames: DEMO_CREATIVE_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_CREATIVE_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
   },
   {
     id: 'DemoContext',
     label: 'Context Save (orchestrator)',
     group: 'Sigma Demos',
-    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CONTEXT_VIDEO.durationInFrames },
-    scenes: DEMO_CONTEXT_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+    video: {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      frames: DEMO_CONTEXT_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_CONTEXT_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
   },
   {
     id: 'DemoEditWebsite',
     label: 'Edit Website (websites)',
     group: 'Sigma Demos',
-    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_EDIT_VIDEO.durationInFrames },
-    scenes: DEMO_EDIT_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+    video: {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      frames: DEMO_EDIT_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_EDIT_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
   },
   {
     id: 'DemoSEO',
     label: 'SEO Analysis (reach)',
     group: 'Sigma Demos',
-    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_SEO_VIDEO.durationInFrames },
-    scenes: DEMO_SEO_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+    video: {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      frames: DEMO_SEO_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_SEO_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
   },
   {
     id: 'DemoCampaign',
     label: 'Campaign (google_ads)',
     group: 'Sigma Demos',
-    video: { width: 1920, height: 1080, fps: 30, frames: DEMO_CAMPAIGN_VIDEO.durationInFrames },
-    scenes: DEMO_CAMPAIGN_SCENE_INFO.map((s) => ({ name: s.name, start: s.start, end: s.end })),
+    video: {
+      width: 1920,
+      height: 1080,
+      fps: 30,
+      frames: DEMO_CAMPAIGN_VIDEO.durationInFrames,
+    },
+    scenes: DEMO_CAMPAIGN_SCENE_INFO.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'ScrollStyleDemo',
+    label: 'Scroll Style Comparison (6 variants)',
+    group: 'Utilities',
+    video: {
+      width: SCROLL_DEMO_VIDEO.width,
+      height: SCROLL_DEMO_VIDEO.height,
+      fps: SCROLL_DEMO_VIDEO.fps,
+      frames: SCROLL_DEMO_VIDEO.durationInFrames,
+    },
+    scenes: [
+      {
+        name: 'ScrollComparison',
+        start: 0,
+        end: SCROLL_DEMO_VIDEO.durationInFrames,
+      },
+    ],
   },
   {
     id: 'TransitionShowcase',
@@ -357,4 +433,5 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DemoSEO,
   DemoCampaign,
   TransitionShowcase,
+  ScrollStyleDemo,
 };

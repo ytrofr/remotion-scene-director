@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   useCurrentFrame,
   interpolate,
   useVideoConfig,
@@ -23,6 +24,7 @@ export const HomeScrollScene: React.FC = () => {
   const scrollProgress = interpolate(frame, [30, 120], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
   // Hand position - FIXED on right side, middle of screen
@@ -35,10 +37,10 @@ export const HomeScrollScene: React.FC = () => {
   const scrollHandPath: HandPathPoint[] = savedScroll?.path ?? [
     { x: 1050, y: handY, frame: 0, gesture: 'pointer', rotation: 0 }, // Enter from right
     { x: handX, y: handY, frame: 20, gesture: 'pointer', rotation: 0 }, // Arrive at position
-    { x: handX, y: handY, frame: 28, gesture: 'drag', rotation: -30 }, // Start scroll - tilt left 30deg
-    { x: handX, y: handY, frame: 60, gesture: 'drag', rotation: -30 }, // Scrolling... (STATIC)
-    { x: handX, y: handY, frame: 90, gesture: 'drag', rotation: -30 }, // Scrolling... (STATIC)
-    { x: handX, y: handY, frame: 118, gesture: 'drag', rotation: -30 }, // End scroll (STATIC)
+    { x: handX, y: handY, frame: 28, gesture: 'drag', rotation: -22 }, // Start scroll - tilt left 30deg
+    { x: handX, y: handY, frame: 60, gesture: 'drag', rotation: -22 }, // Scrolling... (STATIC)
+    { x: handX, y: handY, frame: 90, gesture: 'drag', rotation: -22 }, // Scrolling... (STATIC)
+    { x: handX, y: handY, frame: 118, gesture: 'drag', rotation: -22 }, // End scroll (STATIC)
     { x: handX, y: handY, frame: 125, gesture: 'pointer', rotation: 0 }, // Release - back to normal
     { x: handX, y: handY, frame: 150, gesture: 'pointer', rotation: 0 }, // STAY in place (no exit)
   ];

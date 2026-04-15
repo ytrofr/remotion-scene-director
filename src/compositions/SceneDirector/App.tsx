@@ -102,11 +102,13 @@ export const App: React.FC = () => {
     setZoom,
     pan,
     setPan,
+    isPanning,
     playerAreaRef,
     handlePanStart,
     handlePanMove,
     handlePanEnd,
-  } = usePlayerControls(state.compositionId);
+    handleContextMenu,
+  } = usePlayerControls(state.compositionId, playerFrameRef);
 
   // Sync URL query params (?comp=, ?scene=, ?frame=, ?view=gallery)
   // 1. On mount: read URL and apply overrides (URL takes priority over localStorage)
@@ -522,6 +524,8 @@ export const App: React.FC = () => {
           handlePanStart={handlePanStart}
           handlePanMove={handlePanMove}
           handlePanEnd={handlePanEnd}
+          handleContextMenu={handleContextMenu}
+          isPanning={isPanning}
           composition={composition}
           VideoComponent={VideoComponent}
           zoom={zoom}

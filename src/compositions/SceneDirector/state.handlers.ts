@@ -211,6 +211,7 @@ export function handleWaypointAction(
 type SceneManagementAction = Extract<
   DirectorAction,
   | { type: 'REVERT_SCENE' }
+  | { type: 'RELOAD_SCENE_FROM_DISK' }
   | { type: 'MARK_SAVED' }
   | { type: 'RESTORE_VERSION' }
   | { type: 'LOG_ACTIVITY' }
@@ -222,6 +223,37 @@ export function handleSceneManagementAction(
   action: SceneManagementAction,
 ): DirectorState {
   switch (action.type) {
+    case 'RELOAD_SCENE_FROM_DISK': {
+      // Wipe all in-memory state for this scene so ENSURE_SCENE_LAYERS re-seeds
+      // from codedPaths.data.json / codedPaths.ts on the next dispatch.
+      const scene = action.scene;
+      const { [scene]: _wp, ...waypointsRest } = state.waypoints;
+      const { [scene]: _ly, ...layersRest } = state.layers;
+      const { [scene]: _cl, ...clearedRest } = state.clearedSceneLayers;
+      const { [scene]: _sg, ...gestureRest } = state.sceneGesture;
+      const { [scene]: _sa, ...animRest } = state.sceneAnimation;
+      const { [scene]: _sd, ...darkRest } = state.sceneDark;
+      const { [scene]: _ss, ...snapRest } = state.savedSnapshots;
+      void _wp;
+      void _ly;
+      void _cl;
+      void _sg;
+      void _sa;
+      void _sd;
+      void _ss;
+      return {
+        ...state,
+        waypoints: waypointsRest,
+        layers: layersRest,
+        clearedSceneLayers: clearedRest,
+        sceneGesture: gestureRest,
+        sceneAnimation: animRest,
+        sceneDark: darkRest,
+        savedSnapshots: snapRest,
+        selectedWaypoint: null,
+        selectedLayerId: null,
+      };
+    }
     case 'REVERT_SCENE': {
       const snap = state.savedSnapshots[action.scene];
       if (!snap) return state; // No saved state to revert to

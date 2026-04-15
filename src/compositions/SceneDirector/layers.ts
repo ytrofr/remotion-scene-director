@@ -120,7 +120,7 @@ const AUDIO_TEST_AUDIO: Record<string, CodedAudioEntry[]> = {
 const CAPABILITIES_AUDIO: Record<string, CodedAudioEntry[]> = {
   '6-SFXClick': [
     {
-      file: 'audio/sfx/mouse-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 10,
       durationInFrames: 20,
       volume: 0.8,
@@ -142,102 +142,46 @@ const CAPABILITIES_AUDIO: Record<string, CodedAudioEntry[]> = {
 
 const DORIAN_STORES_AUDIO: Record<string, CodedAudioEntry[]> = {
   '1-StoreDashboard': [
-    // AI bubble tap
+    // Bubble click (WP @ f42)
     {
-      file: 'audio/sfx/mouse-click.wav',
-      startFrame: 55,
+      file: 'audio/send-click.wav',
+      startFrame: 42,
       durationInFrames: 15,
       volume: 0.6,
     },
-    // Chat panel slide up
+    // Input click (WP @ f92)
     {
-      file: 'audio/sfx/slide.wav',
-      startFrame: 65,
-      durationInFrames: 30,
-      volume: 0.4,
+      file: 'audio/send-click.wav',
+      startFrame: 92,
+      durationInFrames: 15,
+      volume: 0.6,
     },
-    // Input tap
-    {
-      file: 'audio/sfx/soft-click.wav',
-      startFrame: 100,
-      durationInFrames: 10,
-      volume: 0.5,
-    },
-    // Typing sound (longer message now)
+    // Typing
     {
       file: 'audio/typing-soft.wav',
       startFrame: 105,
       durationInFrames: 95,
       volume: 0.3,
     },
-    // Send tap
+    // Send click (WP @ f200)
     {
       file: 'audio/send-click.wav',
-      startFrame: 205,
+      startFrame: 200,
       durationInFrames: 15,
       volume: 0.6,
     },
-    // AI response swoosh
+    // Confirm click (WP @ f500)
     {
-      file: 'audio/sfx/whoosh.wav',
-      startFrame: 240,
-      durationInFrames: 25,
-      volume: 0.5,
-    },
-    // Dashboard morph / transition
-    {
-      file: 'audio/sfx/swoosh-transition.wav',
-      startFrame: 280,
-      durationInFrames: 45,
-      volume: 0.4,
-    },
-    // Chat dismiss slide
-    {
-      file: 'audio/sfx/slide.wav',
-      startFrame: 310,
-      durationInFrames: 30,
-      volume: 0.3,
-    },
-    // Best sellers appear
-    {
-      file: 'audio/sfx/chime.wav',
-      startFrame: 360,
-      durationInFrames: 30,
-      volume: 0.3,
-    },
-    // Confirmation panel slide up
-    {
-      file: 'audio/sfx/slide.wav',
-      startFrame: 440,
-      durationInFrames: 25,
-      volume: 0.4,
-    },
-    // Confirm button click
-    {
-      file: 'audio/sfx/mouse-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 500,
       durationInFrames: 15,
       volume: 0.6,
     },
-    // Price update whoosh
-    {
-      file: 'audio/sfx/whoosh.wav',
-      startFrame: 516,
-      durationInFrames: 30,
-      volume: 0.4,
-    },
-    // Price change success chime
-    {
-      file: 'audio/sfx/chime.wav',
-      startFrame: 545,
-      durationInFrames: 25,
-      volume: 0.35,
-    },
   ],
   '2-MapSearch': [
-    // Search bar tap
+    // Search bar click (WP @ f18)
     {
-      file: 'audio/sfx/mouse-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 18,
       durationInFrames: 15,
       volume: 0.6,
@@ -249,52 +193,21 @@ const DORIAN_STORES_AUDIO: Record<string, CodedAudioEntry[]> = {
       durationInFrames: 50,
       volume: 0.3,
     },
-    // Map pins appear (staggered pops)
+    // Pin click (WP @ f150)
     {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 80,
-      durationInFrames: 15,
-      volume: 0.5,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 88,
-      durationInFrames: 15,
-      volume: 0.4,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 96,
-      durationInFrames: 15,
-      volume: 0.35,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 104,
-      durationInFrames: 15,
-      volume: 0.3,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 112,
-      durationInFrames: 15,
-      volume: 0.3,
-    },
-    // Pin click
-    {
-      file: 'audio/sfx/mouse-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 150,
       durationInFrames: 15,
       volume: 0.6,
     },
   ],
   '3-AIProducts': [
-    // Input tap
+    // Input click (WP @ f12)
     {
-      file: 'audio/sfx/soft-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 12,
-      durationInFrames: 10,
-      volume: 0.5,
+      durationInFrames: 15,
+      volume: 0.6,
     },
     // Typing
     {
@@ -303,65 +216,19 @@ const DORIAN_STORES_AUDIO: Record<string, CodedAudioEntry[]> = {
       durationInFrames: 45,
       volume: 0.3,
     },
-    // Send tap
+    // Send click (WP @ f70)
     {
       file: 'audio/send-click.wav',
       startFrame: 68,
       durationInFrames: 15,
       volume: 0.6,
     },
-    // AI thinking
+    // Add Products button click (WP @ f228)
     {
-      file: 'audio/sfx/notification.wav',
-      startFrame: 110,
-      durationInFrames: 20,
-      volume: 0.3,
-    },
-    // Product cards appear (staggered)
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 145,
-      durationInFrames: 15,
-      volume: 0.5,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 160,
-      durationInFrames: 15,
-      volume: 0.45,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 175,
-      durationInFrames: 15,
-      volume: 0.4,
-    },
-    {
-      file: 'audio/sfx/pop-up.wav',
-      startFrame: 190,
-      durationInFrames: 15,
-      volume: 0.35,
-    },
-    // "Add Products to Store" button click
-    {
-      file: 'audio/sfx/mouse-click.wav',
+      file: 'audio/send-click.wav',
       startFrame: 225,
       durationInFrames: 15,
       volume: 0.6,
-    },
-    // Store page transition
-    {
-      file: 'audio/sfx/swoosh-transition.wav',
-      startFrame: 235,
-      durationInFrames: 30,
-      volume: 0.4,
-    },
-    // New products added chime
-    {
-      file: 'audio/sfx/chime.wav',
-      startFrame: 250,
-      durationInFrames: 25,
-      volume: 0.35,
     },
   ],
 };
@@ -369,62 +236,56 @@ const DORIAN_STORES_AUDIO: Record<string, CodedAudioEntry[]> = {
 // ── SIGMA App Demo Audio ──────────────────────────────────────
 // Scene timings reference constants.ts CHAT_SCENES
 const SIGMA_APP_AUDIO: Record<string, CodedAudioEntry[]> = {
-  HubChatOpen: [
-    // Chat panel slides in at frame 70
-    { file: 'audio/sfx/slide.wav', startFrame: 68, durationInFrames: 30, volume: 0.4 },
-    // Subtle chime when chat fully opens
-    { file: 'audio/sfx/chime.wav', startFrame: 90, durationInFrames: 25, volume: 0.25 },
-  ],
+  HubChatOpen: [],
   WebsiteRequest: [
-    // Click into input field (frame 30)
-    { file: 'audio/sfx/soft-click.wav', startFrame: 28, durationInFrames: 10, volume: 0.5 },
     // Typing sound (frames 35-115)
-    { file: 'audio/typing-soft.wav', startFrame: 35, durationInFrames: 80, volume: 0.3 },
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 35,
+      durationInFrames: 80,
+      volume: 0.3,
+    },
     // Send button click (frame 125)
-    { file: 'audio/send-click.wav', startFrame: 123, durationInFrames: 15, volume: 0.6 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 123,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
     // Routing whoosh (frame 138)
-    { file: 'audio/sfx/whoosh.wav', startFrame: 136, durationInFrames: 25, volume: 0.45 },
-    // Cost badge appear
-    { file: 'audio/sfx/notification.wav', startFrame: 228, durationInFrames: 20, volume: 0.3 },
-    // Result link appears — chime
-    { file: 'audio/sfx/chime.wav', startFrame: 278, durationInFrames: 30, volume: 0.35 },
+    {
+      file: 'audio/sfx/whoosh.wav',
+      startFrame: 136,
+      durationInFrames: 25,
+      volume: 0.45,
+    },
   ],
-  PageReveal: [
-    // Crossfade transition swoosh
-    { file: 'audio/sfx/swoosh-transition.wav', startFrame: 0, durationInFrames: 40, volume: 0.4 },
-    // Grade A badge appear
-    { file: 'audio/sfx/sparkle.wav', startFrame: 38, durationInFrames: 25, volume: 0.3 },
-  ],
+  PageReveal: [],
   CreativeRequest: [
-    // Click into input
-    { file: 'audio/sfx/soft-click.wav', startFrame: 3, durationInFrames: 10, volume: 0.5 },
     // Typing (frames 5-55)
-    { file: 'audio/typing-soft.wav', startFrame: 5, durationInFrames: 50, volume: 0.3 },
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 5,
+      durationInFrames: 50,
+      volume: 0.3,
+    },
     // Send click (frame 65)
-    { file: 'audio/send-click.wav', startFrame: 63, durationInFrames: 15, volume: 0.6 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 63,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
     // Routing whoosh to nano_banana
-    { file: 'audio/sfx/whoosh.wav', startFrame: 76, durationInFrames: 25, volume: 0.45 },
-    // Cost badge
-    { file: 'audio/sfx/notification.wav', startFrame: 168, durationInFrames: 20, volume: 0.3 },
-    // Banner image reveal
-    { file: 'audio/sfx/sparkle.wav', startFrame: 193, durationInFrames: 30, volume: 0.35 },
+    {
+      file: 'audio/sfx/whoosh.wav',
+      startFrame: 76,
+      durationInFrames: 25,
+      volume: 0.45,
+    },
   ],
-  CreativeReveal: [
-    // Crossfade transition
-    { file: 'audio/sfx/swoosh-transition.wav', startFrame: 0, durationInFrames: 40, volume: 0.4 },
-    // Agent badge appear
-    { file: 'audio/sfx/sparkle.wav', startFrame: 28, durationInFrames: 25, volume: 0.3 },
-    // Callout text appear
-    { file: 'audio/sfx/notification.wav', startFrame: 78, durationInFrames: 20, volume: 0.25 },
-  ],
-  Closing: [
-    // Fade to dark
-    { file: 'audio/sfx/swoosh-transition.wav', startFrame: 178, durationInFrames: 45, volume: 0.4 },
-    // Logo reveal
-    { file: 'audio/sfx/bass-impact.wav', startFrame: 240, durationInFrames: 40, volume: 0.35 },
-    // Tagline chime
-    { file: 'audio/sfx/chime.wav', startFrame: 360, durationInFrames: 30, volume: 0.3 },
-  ],
+  CreativeReveal: [],
+  Closing: [],
 };
 
 // Demo clip audio — empty for now, will be assigned per-demo later
@@ -433,28 +294,36 @@ const DEMO_EMPTY_AUDIO: Record<string, CodedAudioEntry[]> = {};
 // ── DemoCreative audio ──────────────────────────────────────
 const DEMO_CREATIVE_AUDIO: Record<string, CodedAudioEntry[]> = {
   Chat: [
-    // Click into input (frame 30)
-    { file: 'audio/sfx/soft-click.wav', startFrame: 30, durationInFrames: 10, volume: 0.5 },
     // Typing (frames 35-100)
-    { file: 'audio/typing-soft.wav', startFrame: 35, durationInFrames: 65, volume: 0.3 },
+    {
+      file: 'audio/typing-soft.wav',
+      startFrame: 35,
+      durationInFrames: 65,
+      volume: 0.3,
+    },
     // Send click (frame 123)
-    { file: 'audio/send-click.wav', startFrame: 123, durationInFrames: 15, volume: 0.6 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 123,
+      durationInFrames: 15,
+      volume: 0.6,
+    },
     // Routing whoosh to nano_banana
-    { file: 'audio/sfx/whoosh.wav', startFrame: 136, durationInFrames: 25, volume: 0.45 },
-    // Cost badge notification
-    { file: 'audio/sfx/notification.wav', startFrame: 178, durationInFrames: 20, volume: 0.3 },
-    // Image result card reveal
-    { file: 'audio/sfx/sparkle.wav', startFrame: 200, durationInFrames: 30, volume: 0.35 },
+    {
+      file: 'audio/sfx/whoosh.wav',
+      startFrame: 136,
+      durationInFrames: 25,
+      volume: 0.45,
+    },
   ],
   PageReveal: [
-    // Crossfade transition into page reveal
-    { file: 'audio/sfx/swoosh-transition.wav', startFrame: 0, durationInFrames: 40, volume: 0.4 },
-    // Scroll starts — subtle slide (local frame 125)
-    { file: 'audio/sfx/slide.wav', startFrame: 125, durationInFrames: 95, volume: 0.2 },
     // Click on gallery image (local frame 330)
-    { file: 'audio/sfx/mouse-click.wav', startFrame: 330, durationInFrames: 10, volume: 0.55 },
-    // Lightbox opens — pop up sound
-    { file: 'audio/sfx/pop-up.wav', startFrame: 338, durationInFrames: 20, volume: 0.4 },
+    {
+      file: 'audio/send-click.wav',
+      startFrame: 330,
+      durationInFrames: 10,
+      volume: 0.55,
+    },
   ],
 };
 
@@ -467,6 +336,12 @@ const CODED_AUDIO_REGISTRY: Record<
   AudioTest: AUDIO_TEST_AUDIO,
   CapabilitiesDemo: CAPABILITIES_AUDIO,
   DorianStores: DORIAN_STORES_AUDIO,
+  DorianFull: {
+    ...DORIAN_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
   SigmaAppDemo: SIGMA_APP_AUDIO,
   DemoCreative: DEMO_CREATIVE_AUDIO,
   DemoContext: DEMO_EMPTY_AUDIO,
@@ -560,21 +435,8 @@ export const AUDIO_FILES = [
   { id: 'audio/u_nharq4usid-swipe-255512.mp3', label: 'Swipe' },
   { id: 'audio/sfx/whoosh.wav', label: 'Whoosh' },
   { id: 'audio/sfx/whip.wav', label: 'Whip' },
-  { id: 'audio/sfx/page-turn.wav', label: 'Page Turn' },
   { id: 'audio/sfx/switch.wav', label: 'Switch' },
-  { id: 'audio/sfx/mouse-click.wav', label: 'Mouse Click' },
-  { id: 'audio/sfx/shutter-modern.wav', label: 'Shutter Modern' },
-  { id: 'audio/sfx/shutter-old.wav', label: 'Shutter Old' },
   { id: 'audio/sfx/pop-up.wav', label: 'Pop Up' },
-  { id: 'audio/sfx/notification.wav', label: 'Notification' },
-  { id: 'audio/sfx/soft-click.wav', label: 'Soft Click' },
-  { id: 'audio/sfx/success-ding.mp3', label: 'Success Ding' },
-  { id: 'audio/sfx/swoosh-transition.wav', label: 'Swoosh Transition' },
-  { id: 'audio/sfx/chime.wav', label: 'Chime' },
-  { id: 'audio/sfx/slide.wav', label: 'Slide' },
-  { id: 'audio/sfx/bass-impact.wav', label: 'Bass Impact' },
-  { id: 'audio/sfx/sparkle.wav', label: 'Sparkle' },
-  { id: 'audio/sfx/riser.wav', label: 'Riser' },
 ];
 
 export type Layer = HandLayer | ZoomLayer | AudioLayer | CaptionLayer;

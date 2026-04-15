@@ -152,6 +152,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             : zoom > 1
               ? `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`
               : undefined,
+          // Disable the 0.18s smoothing during pan — that transition IS the lag.
+          transition: isPanning ? 'none' : undefined,
         }}
       >
         <div

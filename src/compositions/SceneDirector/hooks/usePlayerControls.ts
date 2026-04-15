@@ -84,8 +84,15 @@ export function usePlayerControls(
       // Any context menu that fires on mouseup (right-click) must be swallowed
       if (e.button === 2) suppressNextContextMenu.current = true;
 
+      // Kill the CSS transform transition immediately so pan is 1:1 with cursor.
+      // React's isPanning flag lags one render behind; this writes synchronously.
+      const targetEl = panTargetRef?.current;
+      if (targetEl) targetEl.style.transition = 'none';
+
       // Write transform directly to the DOM during drag — bypasses React so
       // every mousemove paints at 60fps (no reconciliation in the hot path).
+      // Synchronous write (no rAF) because the transition is off and
+      // transform-only changes are composited — no layout, no paint.
       const writeTransform = (x: number, y: number) => {
         const el = panTargetRef?.current;
         if (!el) return;
@@ -95,21 +102,12 @@ export function usePlayerControls(
         }
       };
 
-      const flush = () => {
-        rafId.current = null;
-        if (pendingPan.current) {
-          writeTransform(pendingPan.current.x, pendingPan.current.y);
-        }
-      };
-
       const onMove = (ev: MouseEvent) => {
         if (!isPanningRef.current) return;
-        pendingPan.current = {
-          x: ev.clientX - panStart.current.x,
-          y: ev.clientY - panStart.current.y,
-        };
-        if (rafId.current === null)
-          rafId.current = requestAnimationFrame(flush);
+        const x = ev.clientX - panStart.current.x;
+        const y = ev.clientY - panStart.current.y;
+        pendingPan.current = { x, y };
+        writeTransform(x, y);
       };
 
       const onUp = () => {
@@ -119,6 +117,8 @@ export function usePlayerControls(
           cancelAnimationFrame(rafId.current);
           rafId.current = null;
         }
+        // Restore the smooth transition for subsequent zoom animations.
+        if (targetEl) targetEl.style.transition = '';
         // Commit final pan to React state so other consumers (zoom reset, etc.) stay in sync.
         if (pendingPan.current) {
           setPan(pendingPan.current);

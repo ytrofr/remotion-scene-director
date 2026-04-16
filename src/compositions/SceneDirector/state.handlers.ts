@@ -16,6 +16,10 @@ import type {
 } from './state.types';
 import { syncHandLayer, MAX_LOG } from './state.helpers';
 
+// Keep per-scene version history lean — 20 saves is ~20KB/scene, cheap for
+// localStorage while giving plenty of rollback depth for active editing.
+const MAX_VERSIONS_PER_SCENE = 20;
+
 // Re-export layer handlers so state.ts can import from a single module
 export { handleLayerAction } from './state.layerHandlers';
 
@@ -290,10 +294,15 @@ export function handleSceneManagementAction(
         timestamp: Date.now(),
         snapshot: { ...snap },
       });
+      // Trim oldest entries beyond the cap — keeps localStorage lean.
+      const trimmed =
+        sceneVersions.length > MAX_VERSIONS_PER_SCENE
+          ? sceneVersions.slice(-MAX_VERSIONS_PER_SCENE)
+          : sceneVersions;
       return {
         ...state,
         savedSnapshots: { ...state.savedSnapshots, [scene]: snap },
-        versionHistory: { ...state.versionHistory, [scene]: sceneVersions },
+        versionHistory: { ...state.versionHistory, [scene]: trimmed },
       };
     }
     case 'RESTORE_VERSION': {

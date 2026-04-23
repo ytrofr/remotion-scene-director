@@ -318,3 +318,19 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     4 (ChatOpen), 5 (UserTyping), 11 (MapSearch) all showed 1-2-frame black
     rectangle artifacts at click moments; clean after preset fix. Hand-shape
     Lotties (`hand-click.json` etc) are unaffected — this is cursor-specific.
+
+54. **Studio preview ≠ render for visual bugs**: Remotion Studio uses live
+    Chrome (fast, forgiving). `remotion render` uses headless Chrome with
+    stricter SVG/Canvas behavior — complex Lotties, some filters, and
+    rotation edge cases can fail ONLY in render (rule 53 cursor bug was
+    invisible in Studio). When debugging a render artifact, always reproduce
+    in actual render, never trust Studio alone. Verification funnel
+    (fastest → slowest, escalate tier only if prior tier looks clean):
+    (1) **Still frame** — `npx remotion still src/index.ts <Comp> out.png --frame=N`
+    (~30s, ideal for click-moment artifacts)
+    (2) **Scoped range** — `npx remotion render src/index.ts <Comp> out.mp4 --frames=START-END`
+    (~2-3min for ~500 frames, ideal for scene-range bugs)
+    (3) **Full render** — 10-15min, only after tiers 1-2 confirm the fix
+    Evidence 2026-04-23: cursor black rectangle invisible in Studio, obvious
+    at frame 348 still; fix verified via `--frames=0-540` in 3 min instead of
+    full re-render. Same funnel works for any Remotion render artifact.

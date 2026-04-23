@@ -45,12 +45,33 @@ echo "=== Slicing Remotion scenes 2-12 (2.5s - 75.0s) ==="
   "$REMOTION_SLICE" 2>&1 | tail -3
 
 echo ""
+echo "=== Normalize HF clips: add silent audio if missing ==="
+# Concat demuxer drops audio if ANY input lacks an audio stream.
+# HF scenes 01-intro and 13-closing have no <audio> → no AAC track → concat
+# silently produces video-only hybrid → 2x post-process fails with
+# "Stream specifier ':a' matches no streams".
+INTRO_NORM="$WORK_DIR/01-intro-with-silence.mp4"
+CLOSING_NORM="$WORK_DIR/13-closing-with-silence.mp4"
+for pair in "$INTRO:$INTRO_NORM" "$CLOSING:$CLOSING_NORM"; do
+  src="${pair%%:*}"
+  dst="${pair##*:}"
+  if "$FFMPEG" -i "$src" 2>&1 | grep -q "Stream.*Audio"; then
+    cp "$src" "$dst"
+  else
+    "$FFMPEG" -y -i "$src" \
+      -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=48000" \
+      -shortest -c:v copy -c:a aac -b:a 160k \
+      "$dst" 2>&1 | tail -2
+  fi
+done
+
+echo ""
 echo "=== Concat: HF intro + Remotion slice + HF closing ==="
 CONCAT_LIST="$WORK_DIR/concat-hybrid.txt"
 cat > "$CONCAT_LIST" <<EOF
-file '$(pwd)/$INTRO'
+file '$(pwd)/$INTRO_NORM'
 file '$(pwd)/$REMOTION_SLICE'
-file '$(pwd)/$CLOSING'
+file '$(pwd)/$CLOSING_NORM'
 EOF
 
 "$FFMPEG" -y -f concat -safe 0 -i "$CONCAT_LIST" \

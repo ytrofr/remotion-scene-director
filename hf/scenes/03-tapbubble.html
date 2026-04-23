@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 3 TapBubble (HF Pilot)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: "Rubik", sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 48px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      #phone-stage {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+      }
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      #cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.6);
+        transform-origin: center center;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="2.5"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <audio
+        id="sfx-click"
+        src="audio/send-click.wav"
+        data-start="2.433"
+        data-duration="0.5"
+        data-volume="0.5"
+        preload="auto"
+      ></audio>
+
+      <div class="title" id="title">Meet Your AI Assistant</div>
+
+      <div id="phone-stage">
+        <div id="phone-mount"></div>
+      </div>
+
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    <!-- Phone content: end-of-scene-2 state (categories visible + AI bubble) -->
+    <template id="phone-content">
+      <div style="margin-left: -5px; margin-top: -70px; position: relative">
+        <img
+          src="public/dorian/woodmart/categories-mobile-2.png"
+          style="width: 402px; height: auto; display: block"
+          alt=""
+        />
+        <div
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #fff;
+          "
+        ></div>
+      </div>
+    </template>
+
+    <script>
+      const phone = buildDorianPhone({
+        mountId: "phone-mount",
+        contentTemplateId: "phone-content",
+        zoom: 1.8,
+        showAiBubble: true,
+        aiBubbleIcon: "smiley",
+        hideSearch: true,
+        initialScrollY: 0,
+      });
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Title fade in
+      tl.to("#title", { opacity: 1, duration: 0.3, ease: "power2.out" }, 0);
+
+      // Phone zoom 1.8 -> 2.75 + pan y 0 -> -374, over ~1.5s (spring-like)
+      // Remotion SPRING_CONFIG.zoom (damping 15, stiffness 80) => power3.out approx
+      tl.fromTo(
+        "#phone-stage",
+        { scale: 1, y: 0 },
+        { scale: 1.528, y: -374, duration: 1.5, ease: "power3.out" },
+        0,
+      );
+      // scale 1.528 applied to already-zoomed-1.8 phone = 2.75 final
+
+      // Cursor path (comp-space coords; set x/y = comp_coord - tip_offset)
+      // Tip offset = (45, 55). So container x = cx - 45, y = cy - 55
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      gsap.set("#cursor", { opacity: 0, rotation: 0, ...setC(780, 1200) });
+
+      // f0-f20: enter (780,1200) -> (800,1400)
+      tl.to("#cursor", { opacity: 1, duration: 0.1 }, 0);
+      tl.to(
+        "#cursor",
+        { ...setC(800, 1400), duration: 20 / 30, ease: "power2.out" },
+        0,
+      );
+      // f20-f35: to AI bubble (818, 1546)
+      tl.to(
+        "#cursor",
+        { ...setC(818, 1546), duration: 15 / 30, ease: "power2.out" },
+        20 / 30,
+      );
+      // f35-f45: to click position (790, 1420)
+      tl.to(
+        "#cursor",
+        { ...setC(790, 1420), duration: 10 / 30, ease: "power2.inOut" },
+        35 / 30,
+      );
+
+      // Lottie cursor: seek click animation on click frame
+      const cursorPlayer = document.querySelector("#cursor dotlottie-player");
+      tl.call(
+        () => {
+          if (cursorPlayer && cursorPlayer.seek) cursorPlayer.seek(35);
+        },
+        null,
+        45 / 30,
+      );
+
+      // Click ripple at f45 (1.5s) — teal, expanding circle
+      tl.set(
+        "#ripple",
+        { x: 790 - 60, y: 1420 - 60, scale: 0, opacity: 1 },
+        45 / 30,
+      );
+      tl.to(
+        "#ripple",
+        { scale: 1.5, opacity: 0, duration: 0.5, ease: "power2.out" },
+        45 / 30,
+      );
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

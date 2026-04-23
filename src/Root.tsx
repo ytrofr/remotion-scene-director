@@ -74,7 +74,7 @@ export const RemotionRoot: React.FC = () => {
   return (
     <>
       {/* ========== SIGMA DEMOS (Agent Pitch Clips) ========== */}
-      <Folder name="Sigma Demos">
+      <Folder name="Sigma-Demos">
         <Composition
           id="DemoCreative"
           component={DemoCreative}
@@ -126,7 +126,7 @@ export const RemotionRoot: React.FC = () => {
       </Folder>
 
       {/* ========== SIGMA FULL (Product + Investor) ========== */}
-      <Folder name="Sigma Full">
+      <Folder name="Sigma-Full">
         <Composition
           id="SigmaAppDemo"
           component={SigmaAppDemo}
@@ -190,7 +190,7 @@ export const RemotionRoot: React.FC = () => {
       </Folder>
 
       {/* ========== MOBILE CHAT ========== */}
-      <Folder name="Mobile Chat">
+      <Folder name="Mobile-Chat">
         <Composition
           id="MobileChatDemoV2"
           component={MobileChatDemoRefactored}

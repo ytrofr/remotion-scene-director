@@ -31,3 +31,10 @@ SCENES.md
 # OS artifacts
 Thumbs.db
 *:Zone.Identifier
+
+# Dorian dual-stack (rendered HF clips + render workdir)
+public/hf-clips/
+hf/.render-work/
+
+# Local render artifacts (HF pilot outputs etc)
+renders/

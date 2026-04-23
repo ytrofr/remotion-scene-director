@@ -96,6 +96,21 @@ public/
 
 ---
 
+## Frameworks — Dual-Stack (Remotion + HyperFrames)
+
+This project runs two video frameworks in parallel. Pick per scene:
+
+| Use                                                          | Framework                 | Path                                       |
+| ------------------------------------------------------------ | ------------------------- | ------------------------------------------ |
+| Hand-gesture phone demos (Dorian, SigmaApp chat)             | **Remotion**              | `src/compositions/`                        |
+| Motion graphics / pitch decks / kinetic type (SigmaInvestor) | **HyperFrames**           | `~/hyperframes-test/` (reference projects) |
+| Website-to-video capture (bypasses Cloudflare)               | **HyperFrames** `capture` | —                                          |
+| Data dashboards / animated charts                            | **HyperFrames**           | —                                          |
+
+**Before starting any new composition**, invoke `/framework-selection` skill for the decision flow. HyperFrames authoring patterns (including the critical `.clip` layout rule): `.claude/rules/hyperframes-patterns.md`. Session evidence: Basic Memory `limor-video-poc/session-summaries/hyperframes-vs-remotion-evaluation-session-2026-04-22`.
+
+---
+
 ## Installed Remotion Packages (all @4.0.443)
 
 | Package                              | Purpose                                           |

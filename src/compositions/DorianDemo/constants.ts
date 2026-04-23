@@ -123,8 +123,8 @@ export const HAND_PHYSICS = {
   tap: {
     floatAmplitude: 2,
     floatSpeed: 0.04,
-    velocityScale: 0.6,
-    maxRotation: 25,
+    velocityScale: 0.2,
+    maxRotation: 10,
     shadowEnabled: true,
     shadowDistance: 10,
     shadowBlur: 12,
@@ -143,8 +143,8 @@ export const HAND_PHYSICS = {
   tapGentle: {
     floatAmplitude: 2,
     floatSpeed: 0.04,
-    velocityScale: 0.5,
-    maxRotation: 20,
+    velocityScale: 0.2,
+    maxRotation: 10,
     shadowEnabled: true,
     shadowDistance: 10,
     shadowBlur: 12,

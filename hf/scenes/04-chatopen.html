@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 4 ChatOpen (HF Pilot)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: 'Rubik', sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 48px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      #phone-stage {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+      }
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* Chat panel — appended to phone.screenEl after build */
+      .chat-panel {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 370px;
+        background: #fff;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+        padding: 15px 16px;
+        z-index: 10;
+        transform: translateY(370px);
+      }
+      .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .chat-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+      }
+      .chat-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1e293b;
+      }
+      .chat-sub {
+        font-size: 10px;
+        color: #2dd4bf;
+      }
+      .chat-msg {
+        background: #f0f0f0;
+        padding: 10px 14px;
+        border-radius: 16px 16px 16px 4px;
+        max-width: 85%;
+        font-size: 13px;
+        color: #1e293b;
+        line-height: 1.4;
+      }
+      .chat-input {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        background: #f5f5f5;
+        border-radius: 20px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 2px solid transparent;
+        transition: none;
+      }
+      .chat-input.focused {
+        background: #fff;
+        border-color: #2dd4bf;
+      }
+      .chat-input-text {
+        color: #999;
+        font-size: 13px;
+      }
+      .chat-send {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+      }
+
+      #cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.5);
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <audio
+        id="sfx-click"
+        src="audio/send-click.wav"
+        data-start="1.6"
+        data-duration="0.5"
+        data-volume="0.4"
+        preload="auto"
+      ></audio>
+
+      <div class="title" id="title">Ask Dorian Anything</div>
+
+      <div id="phone-stage">
+        <div id="phone-mount"></div>
+      </div>
+
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    <!-- Phone content: categories scrolled view -->
+    <template id="phone-content">
+      <div style="margin-left: -5px; margin-top: -70px; position: relative">
+        <img
+          src="public/dorian/woodmart/categories-mobile-2.png"
+          style="width: 402px; height: auto; display: block"
+          alt=""
+        />
+        <div
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #fff;
+          "
+        ></div>
+      </div>
+    </template>
+
+    <script>
+      const phone = buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: true,
+        aiBubbleIcon: 'smiley',
+        hideSearch: true,
+      });
+
+      // Pre-zoom phone to scene-3-end state: scale 2.75, y -374
+      gsap.set('#phone-stage', { scale: 1.528, y: -374 });
+
+      // Append chat panel inside phone screen
+      phone.screenEl.insertAdjacentHTML(
+        'beforeend',
+        `
+        <div class="chat-panel" id="chat-panel">
+          <div class="chat-header">
+            <div class="chat-avatar"></div>
+            <div>
+              <div class="chat-name">Dorian</div>
+              <div class="chat-sub">Your AI Assistant</div>
+            </div>
+          </div>
+          <div class="chat-msg">Hi! How can I help you today?</div>
+          <div class="chat-input" id="chat-input">
+            <span class="chat-input-text">Type a message...</span>
+            <div class="chat-send">→</div>
+          </div>
+        </div>
+      `,
+      );
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Title fade in
+      tl.to('#title', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
+
+      // Chat panel slide up (spring ~ back.out(1.2))
+      // SPRING_CONFIG.slide: damping 18, mass 1, stiffness 120 ~ back.out
+      tl.to('#chat-panel', { y: 0, duration: 0.8, ease: 'back.out(1.2)' }, 0);
+
+      // Cursor path (comp-space)
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(790, 1420) });
+
+      // f0-f20: to (700, 1480)
+      tl.to(
+        '#cursor',
+        { ...setC(700, 1480), duration: 20 / 30, ease: 'power2.out' },
+        0,
+      );
+      // f20-f45: approach input (480, 1520)
+      tl.to(
+        '#cursor',
+        { ...setC(480, 1520), duration: 25 / 30, ease: 'power2.out' },
+        20 / 30,
+      );
+      // f45-f48: move to tap position (480, 1550)
+      tl.to(
+        '#cursor',
+        { ...setC(480, 1550), duration: 3 / 30, ease: 'power2.in' },
+        45 / 30,
+      );
+
+      // Tap at f48 (1.6s) — ripple + input focused + lottie click frame
+      tl.call(
+        () => {
+          document.getElementById('chat-input').classList.add('focused');
+          const player = document.querySelector('#cursor dotlottie-player');
+          if (player && player.seek) player.seek(35);
+        },
+        null,
+        48 / 30,
+      );
+
+      tl.set(
+        '#ripple',
+        { x: 480 - 60, y: 1550 - 60, scale: 0, opacity: 1 },
+        48 / 30,
+      );
+      tl.to(
+        '#ripple',
+        { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' },
+        48 / 30,
+      );
+
+      // Cursor hides after tap
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 53 / 30);
+
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

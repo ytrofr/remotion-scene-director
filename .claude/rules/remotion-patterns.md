@@ -60,8 +60,13 @@
     are hard to debug after multiple commits.
 
 17. **Asset protection**: Files in public/dorian/woodmart/ are real
-    screenshots that CANNOT be recaptured (Cloudflare blocks automation).
-    Never delete, rename, or overwrite without user confirmation.
+    screenshots that CANNOT be recaptured. Note: `dorian.woodmart.xtemos.com`
+    subdomain is DEAD (NXDOMAIN as of 2026-04-22) — the screenshots depict a
+    mobile-electronics skin that no longer exists on any origin. Backup at
+    `~/backups/dorian-woodmart-2026-04-22/` is the only other copy. Never
+    delete, rename, or overwrite without user confirmation. (Note: the parent
+    `woodmart.xtemos.com` is still live with a different furniture/lifestyle
+    skin — captureable via `npx hyperframes capture` if needed.)
 
 18. **2x speed via setpts ONLY — no minterpolate blend**: Use `npm run postrender:2x`
     (plain `setpts=0.5*PTS`). NEVER use `minterpolate=mi_mode=blend` — it creates
@@ -285,3 +290,31 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     (4) The physical file: `rm public/audio/sfx/{name}.wav`.
     Verify with: `grep -rn "{filename}\|sfx-{id}" src/` returns 0. Then
     `npx tsc --noEmit` to confirm no broken imports.
+
+51. **Remotion 4.0.443+ rejects Folder names with spaces**: `<Folder name="X Y">`
+    throws `Folder name can only contain a-z, A-Z, 0-9 and -` at render/Studio
+    load time. Use dashes (`"Sigma-Demos"`) or no separator (`"SigmaDemos"`).
+    Breaks ALL renders globally (not just Studio) — a single bad folder name
+    blocks every `npm run render:*` script. Discovered 2026-04-22 after
+    4.0.419→4.0.443 upgrade. Audit Root.tsx after every Remotion major/minor upgrade.
+
+52. **Dual-stack available**: This project supports HyperFrames (HTML+GSAP)
+    alongside Remotion (React+TSX). Before building any new composition, invoke
+    the `framework-selection` skill to pick the right stack. TL;DR: hand-gesture
+    phone demos stay on Remotion; motion graphics / pitch decks / website-capture
+    scenes go to HyperFrames. Authoring patterns for HyperFrames:
+    `.claude/rules/hyperframes-patterns.md`.
+
+53. **Cursor-shape Lotties need rotation ceiling**: Cursor pointer Lotties
+    with complex bezier paths (e.g. `cursor-real-black.json`) fail to render in
+    Chrome's SVG renderer at rotations >~15-20° — fall back to a filled black
+    bounding rectangle. `FloatingHand` physics at click frames spike velocity
+    (click waypoint has short `duration`), amplified by `velocityScale`, pushing
+    rotation past the threshold. Fix at preset level, not per-scene: any
+    `HAND_PHYSICS.*` preset used with cursor-shape Lotties MUST have
+    `velocityScale ≤ 0.2` and `maxRotation ≤ 10`. Applied to `tap` and `tapGentle`
+    in BOTH `DorianDemo/constants.ts` AND `DorianStores/constants.ts`
+    (each comp owns its own presets). Evidence 2026-04-23: scenes 3 (TapBubble),
+    4 (ChatOpen), 5 (UserTyping), 11 (MapSearch) all showed 1-2-frame black
+    rectangle artifacts at click moments; clean after preset fix. Hand-shape
+    Lotties (`hand-click.json` etc) are unaffected — this is cursor-specific.

@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 10 Store Dashboard (HF, 22s)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: 'Rubik', sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #f8fafc;
+        position: relative;
+      }
+
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 44px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      .subtitle {
+        position: absolute;
+        top: 138px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 500;
+        color: #64748b;
+        z-index: 10;
+        opacity: 0;
+      }
+
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* ── Dashboard content (inside the phone's .dp-scroll) ── */
+      .db {
+        padding: 148px 16px 16px;
+      }
+      .db h1 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+      }
+      .db .sub {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 16px;
+      }
+
+      /* Stat cards ---------------------------------------------------- */
+      .stat-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .stat-card {
+        flex: 1;
+        background: #fff;
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        opacity: 0;
+      }
+      .stat-card .label {
+        font-size: 10px;
+        color: #64748b;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .stat-card .value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .stat-card .delta {
+        font-size: 10px;
+        margin-top: 2px;
+        font-weight: 600;
+      }
+      .stat-card .delta.up {
+        color: #10b981;
+      }
+      .stat-card .delta.down {
+        color: #f59e0b;
+      }
+
+      /* Chart card ---------------------------------------------------- */
+      .chart-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        margin-top: 6px;
+        margin-bottom: 16px;
+        opacity: 0;
+      }
+      .chart-card h2 {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 12px;
+      }
+      .chart-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        height: 88px;
+      }
+      .bar-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .bar {
+        width: 100%;
+        background: #2dd4bf40;
+        border-radius: 4px;
+        min-height: 2px;
+        transform-origin: bottom;
+        transform: scaleY(0);
+      }
+      .bar.hot {
+        background: #2dd4bf;
+      }
+      .bar-label {
+        font-size: 8px;
+        color: #64748b;
+      }
+
+      /* Section headers + cards -------------------------------------- */
+      .section-header {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 16px 0 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        opacity: 0;
+      }
+      .section-header .link {
+        font-size: 10px;
+        color: #2dd4bf;
+        font-weight: 600;
+      }
+
+      .orders-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 4px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        opacity: 0;
+      }
+      .order-row {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+        opacity: 0;
+      }
+      .order-row:last-child {
+        border-bottom: none;
+      }
+      .order-name {
+        flex: 1;
+      }
+      .order-name .n {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+      .order-name .i {
+        font-size: 10px;
+        color: #64748b;
+      }
+      .order-total {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-right: 12px;
+      }
+      .order-status {
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+      .order-status.completed {
+        color: #10b981;
+        background: #10b98115;
+      }
+      .order-status.pending {
+        color: #f59e0b;
+        background: #f59e0b15;
+      }
+      .order-status.shipping {
+        color: #2dd4bf;
+        background: #2dd4bf15;
+      }
+
+      /* Category pills ----------------------------------------------- */
+      .categories-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .cat-pill {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 7px 14px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #1e293b;
+        opacity: 0;
+        transition: none;
+      }
+      .cat-pill.active {
+        background: #2dd4bf;
+        color: #fff;
+        border-color: transparent;
+      }
+
+      /* Activity feed ------------------------------------------------ */
+      .activity-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 4px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+        opacity: 0;
+      }
+      .act-row {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        gap: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        opacity: 0;
+      }
+      .act-row:last-child {
+        border-bottom: none;
+      }
+      .act-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+        color: #fff;
+      }
+      .act-icon.star {
+        background: #f59e0b;
+      }
+      .act-icon.ship {
+        background: #2dd4bf;
+      }
+      .act-icon.check {
+        background: #10b981;
+      }
+      .act-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .act-text .t {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+      .act-text .ago {
+        font-size: 10px;
+        color: #64748b;
+        margin-top: 2px;
+      }
+
+      /* AI bubble pulse overlay (accent, above the .dp-bubble) -------- */
+      .ai-ring {
+        position: absolute;
+        bottom: 50px;
+        right: 15px;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 3px solid #2dd4bf;
+        opacity: 0;
+        z-index: 21;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="22"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="title" id="title">Your Store at a Glance</div>
+      <div class="subtitle" id="subtitle">Real-time insights, one tap away</div>
+      <div id="phone-mount"></div>
+    </div>
+
+    <!-- Audio cues (mapped from DORIAN_STORES_AUDIO['1-StoreDashboard']
+         using only the 4 SFX shipped with the HF asset pack) -->
+    <audio
+      id="sfx-whoosh-in"
+      src="audio/sfx/whoosh.wav"
+      preload="auto"
+    ></audio>
+    <audio
+      id="sfx-whip-chart"
+      src="audio/sfx/whip.wav"
+      preload="auto"
+    ></audio>
+    <audio
+      id="sfx-popup-orders"
+      src="audio/sfx/pop-up.wav"
+      preload="auto"
+    ></audio>
+    <audio
+      id="sfx-switch-tab"
+      src="audio/sfx/switch.wav"
+      preload="auto"
+    ></audio>
+    <audio
+      id="sfx-popup-activity"
+      src="audio/sfx/pop-up.wav"
+      preload="auto"
+    ></audio>
+
+    <!-- Dashboard content — rendered into the phone by buildDorianPhone -->
+    <template id="phone-content">
+      <div class="db">
+        <h1>Store Dashboard</h1>
+        <div class="sub">Welcome back, Sarah</div>
+
+        <div class="stat-row">
+          <div class="stat-card sc" id="sc-revenue">
+            <div class="label">Revenue</div>
+            <div class="value" id="val-revenue">$0</div>
+            <div class="delta up">+12.5% vs last week</div>
+          </div>
+          <div class="stat-card sc" id="sc-orders">
+            <div class="label">Orders</div>
+            <div class="value" id="val-orders">0</div>
+            <div class="delta up">+8.3%</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card sc" id="sc-customers">
+            <div class="label">Customers</div>
+            <div class="value" id="val-customers">0</div>
+            <div class="delta up">+5.2%</div>
+          </div>
+          <div class="stat-card sc" id="sc-avg">
+            <div class="label">Avg. Order</div>
+            <div class="value" id="val-avg">$0</div>
+            <div class="delta down">-2.1%</div>
+          </div>
+        </div>
+
+        <div class="chart-card" id="chart">
+          <h2>Weekly Sales</h2>
+          <div class="chart-bars">
+            <div class="bar-col">
+              <div class="bar" style="height: 32px"></div>
+              <div class="bar-label">Mon</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar" style="height: 52px"></div>
+              <div class="bar-label">Tue</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar" style="height: 40px"></div>
+              <div class="bar-label">Wed</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar" style="height: 64px"></div>
+              <div class="bar-label">Thu</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar" style="height: 44px"></div>
+              <div class="bar-label">Fri</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar hot" style="height: 80px"></div>
+              <div class="bar-label">Sat</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar" style="height: 56px"></div>
+              <div class="bar-label">Sun</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header" id="sh-orders">
+          <span>Recent Orders</span>
+          <span class="link">See all</span>
+        </div>
+        <div class="orders-card" id="orders-card">
+          <div class="order-row or">
+            <div class="order-name">
+              <div class="n">Emma Wilson</div>
+              <div class="i">3 items</div>
+            </div>
+            <div class="order-total">$127.50</div>
+            <div class="order-status completed">Completed</div>
+          </div>
+          <div class="order-row or">
+            <div class="order-name">
+              <div class="n">James Chen</div>
+              <div class="i">1 item</div>
+            </div>
+            <div class="order-total">$45.00</div>
+            <div class="order-status pending">Pending</div>
+          </div>
+          <div class="order-row or">
+            <div class="order-name">
+              <div class="n">Sofia Garcia</div>
+              <div class="i">5 items</div>
+            </div>
+            <div class="order-total">$213.80</div>
+            <div class="order-status shipping">Shipping</div>
+          </div>
+        </div>
+
+        <div class="section-header" id="sh-categories">
+          <span>Top Categories</span>
+          <span class="link">Manage</span>
+        </div>
+        <div class="categories-row">
+          <div class="cat-pill cp active" id="cp-electronics">Electronics</div>
+          <div class="cat-pill cp" id="cp-fashion">Fashion</div>
+          <div class="cat-pill cp" id="cp-home">Home</div>
+          <div class="cat-pill cp" id="cp-beauty">Beauty</div>
+        </div>
+
+        <div class="section-header" id="sh-activity">
+          <span>Recent Activity</span>
+          <span class="link">View log</span>
+        </div>
+        <div class="activity-card" id="activity-card">
+          <div class="act-row ar">
+            <div class="act-icon star">&#9733;</div>
+            <div class="act-text">
+              <div class="t">New 5-star review from John</div>
+              <div class="ago">2m ago</div>
+            </div>
+          </div>
+          <div class="act-row ar">
+            <div class="act-icon ship">&#8599;</div>
+            <div class="act-text">
+              <div class="t">Order #1284 shipped</div>
+              <div class="ago">15m ago</div>
+            </div>
+          </div>
+          <div class="act-row ar">
+            <div class="act-icon check">&#10003;</div>
+            <div class="act-text">
+              <div class="t">Product restocked: Linen Top</div>
+              <div class="ago">1h ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tail spacer so the final scroll target has breathing room -->
+        <div style="height: 60px"></div>
+      </div>
+    </template>
+
+    <script>
+      // ─────────────────────────────────────────────────────────────
+      // 1) Build the phone mockup synchronously (template already parsed)
+      // ─────────────────────────────────────────────────────────────
+      const phone = buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: true,
+        aiBubbleIcon: 'smiley',
+        hideSearch: true,
+      });
+
+      // Inject a subtle AI-bubble pulse ring (our own, above .dp-bubble)
+      const aiRing = document.createElement('div');
+      aiRing.className = 'ai-ring';
+      phone.wrapEl?.appendChild(aiRing);
+
+      // Grab the scrollable inner so we can pan through the long content.
+      const scrollEl = phone.scrollEl;
+
+      // ─────────────────────────────────────────────────────────────
+      // 2) Build GSAP timeline — sync, module scope
+      // ─────────────────────────────────────────────────────────────
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Initial states (GSAP.set, never inline transform — rule #8)
+      gsap.set('#title', { opacity: 0, y: -20 });
+      gsap.set('#subtitle', { opacity: 0, y: -16 });
+      gsap.set('.sc', { opacity: 0, y: 24 });
+      gsap.set('#chart', { opacity: 0, y: 24 });
+      gsap.set('.bar', { scaleY: 0 });
+      gsap.set('#sh-orders', { opacity: 0, y: 10 });
+      gsap.set('#orders-card', { opacity: 0, y: 14 });
+      gsap.set('.or', { opacity: 0, x: 40 });
+      gsap.set('#sh-categories', { opacity: 0, y: 10 });
+      gsap.set('.cp', { opacity: 0, y: 14 });
+      gsap.set('#sh-activity', { opacity: 0, y: 10 });
+      gsap.set('#activity-card', { opacity: 0, y: 14 });
+      gsap.set('.ar', { opacity: 0, x: -30 });
+      if (scrollEl) gsap.set(scrollEl, { y: 0 });
+      gsap.set(aiRing, { opacity: 0, scale: 1 });
+
+      // ══════════════════════════════════════════════════════════════
+      // PHASE 1 — Dashboard opens (0 → 4s)
+      // Title + stat cards stagger in with count-ups
+      // ══════════════════════════════════════════════════════════════
+      tl.to(
+        '#title',
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+        0.1,
+      );
+      tl.to(
+        '#subtitle',
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        0.35,
+      );
+
+      // Stat cards cascade in
+      tl.to(
+        '.sc',
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          ease: 'back.out(1.2)',
+          stagger: 0.12,
+        },
+        0.7,
+      );
+
+      // Count-up numbers — run while cards are animating
+      tl.to(
+        { n: 0 },
+        {
+          n: 12450,
+          duration: 1.6,
+          ease: 'power2.out',
+          onUpdate: function () {
+            const v = Math.floor(this.targets()[0].n);
+            document.getElementById('val-revenue').textContent =
+              '$' + v.toLocaleString();
+          },
+        },
+        0.9,
+      );
+      tl.to(
+        { n: 0 },
+        {
+          n: 284,
+          duration: 1.6,
+          ease: 'power2.out',
+          onUpdate: function () {
+            document.getElementById('val-orders').textContent = Math.floor(
+              this.targets()[0].n,
+            );
+          },
+        },
+        1.0,
+      );
+      tl.to(
+        { n: 0 },
+        {
+          n: 1247,
+          duration: 1.6,
+          ease: 'power2.out',
+          onUpdate: function () {
+            document.getElementById('val-customers').textContent = Math.floor(
+              this.targets()[0].n,
+            ).toLocaleString();
+          },
+        },
+        1.1,
+      );
+      tl.to(
+        { n: 0 },
+        {
+          n: 43.8,
+          duration: 1.6,
+          ease: 'power2.out',
+          onUpdate: function () {
+            document.getElementById('val-avg').textContent =
+              '$' + this.targets()[0].n.toFixed(2);
+          },
+        },
+        1.2,
+      );
+
+      // SFX: whoosh for opening (audio cue ~frame 42 → 1.4s)
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-whoosh-in');
+          a.currentTime = 0;
+          a.volume = 0.45;
+          a.play().catch(() => {});
+        },
+        null,
+        1.4,
+      );
+
+      // AI ring pulse at end of Phase 1
+      tl.to(
+        aiRing,
+        {
+          opacity: 0.6,
+          scale: 1.15,
+          duration: 0.8,
+          ease: 'power2.out',
+        },
+        2.8,
+      );
+      tl.to(
+        aiRing,
+        {
+          opacity: 0,
+          scale: 1.3,
+          duration: 0.6,
+          ease: 'power2.in',
+        },
+        3.6,
+      );
+
+      // ══════════════════════════════════════════════════════════════
+      // PHASE 2 — Weekly Sales chart (4 → 8s)
+      // Card fades in, bars grow sequentially (Sat highlighted)
+      // ══════════════════════════════════════════════════════════════
+      tl.to(
+        '#chart',
+        { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+        4.2,
+      );
+
+      // SFX: whip for chart "draws in"
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-whip-chart');
+          a.currentTime = 0;
+          a.volume = 0.35;
+          a.play().catch(() => {});
+        },
+        null,
+        4.3,
+      );
+
+      // Bars grow in order; Saturday (index 5) gets a tiny extra emphasis
+      const bars = document.querySelectorAll('.bar');
+      bars.forEach((bar, i) => {
+        tl.to(
+          bar,
+          {
+            scaleY: 1,
+            duration: 0.42,
+            ease: 'back.out(1.5)',
+          },
+          4.5 + i * 0.12,
+        );
+      });
+      // Saturday gets a quick emphasis pulse after it finishes growing
+      tl.to(
+        bars[5],
+        {
+          scaleY: 1.08,
+          duration: 0.2,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+        },
+        5.4,
+      );
+
+      // Short breathing hold while user reads the chart
+      // (no animation — natural dwell 5.8 → 8.0)
+
+      // ══════════════════════════════════════════════════════════════
+      // PHASE 3 — Recent Orders (8 → 13s)
+      // Page scrolls down, section header + card appear, rows stream in
+      // ══════════════════════════════════════════════════════════════
+      if (scrollEl) {
+        tl.to(scrollEl, { y: -180, duration: 1.0, ease: 'power2.inOut' }, 8.0);
+      }
+
+      // SFX: pop-up for section change
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-popup-orders');
+          a.currentTime = 0;
+          a.volume = 0.4;
+          a.play().catch(() => {});
+        },
+        null,
+        8.2,
+      );
+
+      tl.to(
+        '#sh-orders',
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        8.4,
+      );
+      tl.to(
+        '#orders-card',
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        8.6,
+      );
+      tl.to(
+        '.or',
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.5,
+          ease: 'power2.out',
+          stagger: 0.25,
+        },
+        8.9,
+      );
+
+      // Breathe on rows 10.3 → 12.8
+
+      // ══════════════════════════════════════════════════════════════
+      // PHASE 4 — Top Categories (13 → 17s)
+      // Scroll a touch further, category header + pills slide in,
+      // tap interaction: Fashion becomes active
+      // ══════════════════════════════════════════════════════════════
+      if (scrollEl) {
+        tl.to(scrollEl, { y: -360, duration: 0.9, ease: 'power2.inOut' }, 12.9);
+      }
+
+      // SFX: switch for tab change feel
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-switch-tab');
+          a.currentTime = 0;
+          a.volume = 0.35;
+          a.play().catch(() => {});
+        },
+        null,
+        13.1,
+      );
+
+      tl.to(
+        '#sh-categories',
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        13.3,
+      );
+      tl.to(
+        '.cp',
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          ease: 'back.out(1.4)',
+          stagger: 0.12,
+        },
+        13.6,
+      );
+
+      // "Tap" Fashion → active; Electronics → inactive
+      tl.call(
+        () => {
+          const fashion = document.getElementById('cp-fashion');
+          const electronics = document.getElementById('cp-electronics');
+          if (fashion) fashion.classList.add('active');
+          if (electronics) electronics.classList.remove('active');
+          const a = document.getElementById('sfx-switch-tab');
+          a.currentTime = 0;
+          a.volume = 0.3;
+          a.play().catch(() => {});
+        },
+        null,
+        15.4,
+      );
+      // Small pop on Fashion when it becomes active
+      tl.fromTo(
+        '#cp-fashion',
+        { scale: 1 },
+        {
+          scale: 1.12,
+          duration: 0.18,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+        },
+        15.4,
+      );
+
+      // ══════════════════════════════════════════════════════════════
+      // PHASE 5 — Recent Activity + settle (17 → 22s)
+      // One more scroll, activity feed populates, AI ring pulses once more,
+      // hand on final state, hand-off to scene 11 cut
+      // ══════════════════════════════════════════════════════════════
+      if (scrollEl) {
+        tl.to(scrollEl, { y: -540, duration: 0.9, ease: 'power2.inOut' }, 17.0);
+      }
+
+      // SFX: pop-up for activity feed entrance
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-popup-activity');
+          a.currentTime = 0;
+          a.volume = 0.4;
+          a.play().catch(() => {});
+        },
+        null,
+        17.2,
+      );
+
+      tl.to(
+        '#sh-activity',
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        17.4,
+      );
+      tl.to(
+        '#activity-card',
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        17.6,
+      );
+      tl.to(
+        '.ar',
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.5,
+          ease: 'power2.out',
+          stagger: 0.28,
+        },
+        17.9,
+      );
+
+      // Final AI ring pulse — "AI is watching, ready to help"
+      tl.to(
+        aiRing,
+        {
+          opacity: 0.55,
+          scale: 1.2,
+          duration: 0.9,
+          ease: 'power2.out',
+        },
+        20.0,
+      );
+      tl.to(
+        aiRing,
+        {
+          opacity: 0,
+          scale: 1.35,
+          duration: 0.8,
+          ease: 'power2.in',
+        },
+        20.9,
+      );
+
+      // Subtle title drift to signal "transitioning on to next scene"
+      tl.to(
+        '#subtitle',
+        { opacity: 0.6, duration: 0.6, ease: 'power1.out' },
+        21.0,
+      );
+
+      // ─────────────────────────────────────────────────────────────
+      // 3) Register synchronously at module scope
+      // ─────────────────────────────────────────────────────────────
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

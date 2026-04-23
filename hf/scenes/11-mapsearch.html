@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 11 Map Search (HF)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: 'Rubik', sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 44px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* Phone content — map search UI */
+      .ms {
+        padding: 148px 16px 16px;
+      }
+      .ms-search {
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        margin-bottom: 12px;
+        transition: border-color 0.2s;
+      }
+      .ms-search.focused {
+        border-color: #2dd4bf;
+      }
+      .ms-search-text {
+        font-size: 12px;
+        color: #94a3b8;
+        font-family: 'Rubik', sans-serif;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .ms-search-text.typed {
+        color: #1e293b;
+      }
+      .ms-map-wrap {
+        position: relative;
+        height: 420px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #e8eee4;
+        opacity: 0;
+      }
+      .ms-map-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .ms-you-here {
+        position: absolute;
+        left: 195px;
+        top: 220px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #4285f4;
+        border: 3px solid #fff;
+        box-shadow:
+          0 0 0 4px rgba(66, 133, 244, 0.3),
+          0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: 5;
+      }
+      .ms-pin {
+        position: absolute;
+        transform-origin: bottom center;
+        transform: translate(-50%, -100%) scale(0);
+        opacity: 0;
+      }
+      .ms-pin svg {
+        display: block;
+      }
+      .ms-pin-label {
+        position: absolute;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 8px;
+        font-weight: 600;
+        color: #1e293b;
+        font-family: 'Rubik', sans-serif;
+        white-space: nowrap;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+      }
+      .ms-badge {
+        margin-top: 12px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      .ms-badge-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #2dd4bf20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .ms-badge-text .n {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+      .ms-badge-text .i {
+        font-size: 10px;
+        color: #64748b;
+      }
+
+      /* Hand cursor at composition level */
+      .cursor {
+        position: absolute;
+        width: 24px;
+        height: 28px;
+        pointer-events: none;
+        z-index: 30;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="8"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="title" id="title">Find Stores Nearby</div>
+      <div id="phone-mount"></div>
+
+      <div class="cursor" id="cursor">
+        <svg viewBox="0 0 24 28" width="24" height="28">
+          <path
+            d="M2 2 L2 22 L7 18 L10 25 L13 24 L10 17 L17 17 Z"
+            fill="#1e293b"
+            stroke="#fff"
+            stroke-width="1.2"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+
+      <audio
+        id="sfx-search-click"
+        src="audio/send-click.wav"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-typing"
+        src="audio/typing-soft.wav"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-pin-click"
+        src="audio/send-click.wav"
+        preload="auto"
+      ></audio>
+    </div>
+
+    <!-- Phone content rendered into dorian-phone by buildDorianPhone -->
+    <template id="phone-content">
+      <div class="ms">
+        <div class="ms-search" id="searchBar">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#94a3b8"
+            stroke-width="2"
+            style="flex-shrink: 0"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <span class="ms-search-text" id="searchText"
+            >Search stores near you...</span
+          >
+        </div>
+
+        <div class="ms-map-wrap" id="mapWrap">
+          <img
+            class="ms-map-img"
+            src="public/dorian/stores/tel-aviv-map.png"
+            alt=""
+          />
+          <div class="ms-you-here"></div>
+          <div id="pinHost"></div>
+        </div>
+
+        <div class="ms-badge" id="badge">
+          <div class="ms-badge-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#2dd4bf">
+              <path
+                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+              />
+            </svg>
+          </div>
+          <div class="ms-badge-text">
+            <div class="n">5 stores found nearby</div>
+            <div class="i">Within 2 km of your location</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // 1) Build phone mockup synchronously at standard zoom.
+      buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: false,
+        hideSearch: true,
+      });
+
+      // 2) Generate 5 store pins (DRY — single SVG template).
+      const PINS = [
+        {
+          id: 'pin1',
+          x: 180,
+          y: 120,
+          label: 'Dorian Market',
+          color: '#f59e0b',
+          delay: 80,
+        },
+        {
+          id: 'pin2',
+          x: 90,
+          y: 200,
+          label: 'Fresh & Co',
+          color: '#2dd4bf',
+          delay: 88,
+        },
+        {
+          id: 'pin3',
+          x: 270,
+          y: 180,
+          label: 'TechZone',
+          color: '#2dd4bf',
+          delay: 96,
+        },
+        {
+          id: 'pin4',
+          x: 150,
+          y: 300,
+          label: 'StyleHouse',
+          color: '#2dd4bf',
+          delay: 104,
+        },
+        {
+          id: 'pin5',
+          x: 300,
+          y: 320,
+          label: 'GreenGrocer',
+          color: '#2dd4bf',
+          delay: 112,
+        },
+      ];
+      const pinSvg = (color) => `
+        <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
+          <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z" fill="${color}"/>
+          <circle cx="14" cy="14" r="6" fill="white"/>
+        </svg>`;
+      const pinHost = document.getElementById('pinHost');
+      pinHost.innerHTML = PINS.map(
+        (p) =>
+          `<div class="ms-pin" id="${p.id}" style="left:${p.x}px;top:${p.y}px;">${pinSvg(p.color)}<div class="ms-pin-label">${p.label}</div></div>`,
+      ).join('');
+
+      // 3) GSAP timeline — synchronous module-scope registration.
+      // Comp coord = 540 + 1.8*(phoneX - 207), 960 + 1.8*(phoneY - 434).
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const cursor = document.getElementById('cursor');
+
+      tl.to('#title', { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0);
+
+      // Phase A: cursor enters, taps search bar, types query
+      gsap.set(cursor, { x: 700, y: 900, opacity: 0 });
+      tl.to(cursor, { opacity: 1, duration: 0.15, ease: 'power2.out' }, 5 / 30);
+      tl.to(
+        cursor,
+        { x: 540 - 10, y: 520, duration: 0.43, ease: 'power2.out' },
+        5 / 30,
+      );
+
+      // Click pulse on search bar @ f18
+      tl.to(
+        cursor,
+        {
+          scale: 0.85,
+          duration: 0.08,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+          transformOrigin: 'top left',
+        },
+        18 / 30,
+      );
+      tl.call(
+        () => {
+          document.getElementById('searchBar').classList.add('focused');
+          document.getElementById('searchText').classList.add('typed');
+          const a = document.getElementById('sfx-search-click');
+          if (a) {
+            a.currentTime = 0;
+            a.play().catch(() => {});
+          }
+        },
+        null,
+        18 / 30,
+      );
+
+      // Typing "Downtown Tel Aviv" (f22-72)
+      const SEARCH = 'Downtown Tel Aviv';
+      const searchEl = document.getElementById('searchText');
+      const typed = { n: 0 };
+      tl.to(
+        typed,
+        {
+          n: SEARCH.length,
+          duration: (72 - 22) / 30,
+          ease: 'none',
+          onUpdate() {
+            const c = Math.floor(typed.n);
+            searchEl.innerHTML =
+              SEARCH.slice(0, c) + '<span style="color:#1e293b;">|</span>';
+          },
+          onStart() {
+            const a = document.getElementById('sfx-typing');
+            if (a) {
+              a.currentTime = 0;
+              a.volume = 0.3;
+              a.play().catch(() => {});
+            }
+          },
+          onComplete() {
+            searchEl.textContent = SEARCH;
+            const a = document.getElementById('sfx-typing');
+            if (a) a.pause();
+          },
+        },
+        22 / 30,
+      );
+
+      // --- Phase B (3-6s): map fade, pins drop, cursor moves to highlighted pin ---
+      tl.to(
+        '#mapWrap',
+        { opacity: 1, duration: 0.6, ease: 'power2.out' },
+        75 / 30,
+      );
+
+      PINS.forEach(({ id, delay }) => {
+        tl.to(
+          '#' + id,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.6)',
+            transformOrigin: 'bottom center',
+          },
+          delay / 30,
+        );
+      });
+
+      // Cursor travels from search bar toward pin#1 (Dorian Market).
+      // Pin#1 in map @ (180,120). Map top inside content ~= 204 in phone-frame y.
+      // Pin tip phone coords ≈ (180, 324). Comp: x=540+1.8*(180-207)=491, y=960+1.8*(324-434)=762.
+      tl.to(
+        cursor,
+        {
+          x: 540 + 1.8 * (180 - 207),
+          y: 960 + 1.8 * (324 - 434),
+          duration: 0.8,
+          ease: 'power2.inOut',
+        },
+        115 / 30,
+      );
+
+      // Pin click @ f150
+      tl.to(
+        cursor,
+        {
+          scale: 0.85,
+          duration: 0.08,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+          transformOrigin: 'top left',
+        },
+        150 / 30,
+      );
+      tl.call(
+        () => {
+          const a = document.getElementById('sfx-pin-click');
+          if (a) {
+            a.currentTime = 0;
+            a.play().catch(() => {});
+          }
+          gsap.to('#pin1', {
+            scale: 1.25,
+            duration: 0.2,
+            ease: 'back.out(2)',
+            transformOrigin: 'bottom center',
+          });
+          gsap.to('#pin1', {
+            scale: 1,
+            duration: 0.25,
+            delay: 0.2,
+            ease: 'power2.out',
+            transformOrigin: 'bottom center',
+          });
+        },
+        null,
+        150 / 30,
+      );
+
+      // --- Phase C (6-8s): store-count badge reveals, hold ---
+      tl.to(
+        '#badge',
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: 'back.out(1.3)',
+        },
+        160 / 30,
+      );
+
+      // Hold to full 8s duration
+      tl.to({}, { duration: (240 - 180) / 30 }, 180 / 30);
+
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

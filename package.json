@@ -27,7 +27,10 @@
     "capture:chat": "npx ts-node scripts/capture-chat-sequence.ts",
     "capture:mobile": "npx ts-node scripts/capture-mobile-chat.ts",
     "scene-director": "vite --config vite.config.ts --port 3001 --host",
-    "validate:hands": "npx tsx scripts/validate-hand-paths.ts"
+    "validate:hands": "npx tsx scripts/validate-hand-paths.ts",
+    "render:hf-full": "bash scripts/render-hf-full.sh",
+    "render:dorian-hybrid": "bash scripts/render-dorian-hybrid.sh",
+    "assemble:dorian-three-way": "bash scripts/assemble-dorian-three-way.sh"
   },
   "keywords": [
     "remotion",

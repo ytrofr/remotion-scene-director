@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 8 Product Page (HF Pilot)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: 'Rubik', sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 44px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      #phone-stage {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+      }
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* Chat overlay — inherits visible state from scene 7, slides down and fades */
+      .chat-panel {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 370px;
+        background: #fff;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+        padding: 15px 16px;
+        z-index: 10;
+        font-family: 'Rubik', sans-serif;
+        overflow: hidden;
+      }
+      .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .chat-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+      }
+      .chat-name {
+        font-weight: 700;
+        font-size: 12px;
+        color: #1e293b;
+      }
+      .chat-sub {
+        font-size: 9px;
+        color: #2dd4bf;
+      }
+      .chat-msg {
+        background: #f0f0f0;
+        padding: 6px 10px;
+        border-radius: 12px 12px 12px 4px;
+        max-width: 85%;
+        font-size: 10px;
+        color: #1e293b;
+        line-height: 1.3;
+        margin-bottom: 6px;
+      }
+      .user-msg {
+        background: #2dd4bf;
+        padding: 6px 10px;
+        border-radius: 12px 12px 4px 12px;
+        max-width: 80%;
+        margin-left: auto;
+        font-size: 10px;
+        color: #fff;
+        line-height: 1.3;
+        margin-bottom: 6px;
+      }
+      .cta-pill {
+        background: #14b8a6;
+        padding: 8px 16px;
+        border-radius: 16px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        max-width: 60%;
+      }
+
+      /* Dorian loader */
+      .loader {
+        position: absolute;
+        top: 148px;
+        left: 0;
+        right: 0;
+        bottom: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        z-index: 8;
+        opacity: 0;
+      }
+      .loader .spinner {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 4px solid #e2e8f0;
+        border-top-color: #2dd4bf;
+        margin-bottom: 16px;
+      }
+      .loader .label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+      }
+      .loader .sub {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      /* Listing layer */
+      #listing {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 390px;
+        z-index: 4;
+        opacity: 0;
+      }
+      #listing img {
+        width: 390px;
+        height: auto;
+        display: block;
+      }
+
+      /* Highlight ring around the "selected" product card at the end of the scene */
+      .product-highlight {
+        position: absolute;
+        left: 12px;
+        top: 340px;
+        width: 366px;
+        height: 260px;
+        border-radius: 14px;
+        border: 3px solid #2dd4bf;
+        box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.25);
+        pointer-events: none;
+        opacity: 0;
+        z-index: 9;
+      }
+
+      #cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.5);
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <audio
+        id="sfx-swipe"
+        src="audio/sfx/whip.wav"
+        data-start="0.933"
+        data-duration="1.0"
+        data-volume="0.3"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-click"
+        src="audio/send-click.wav"
+        data-start="2.7"
+        data-duration="0.3"
+        data-volume="0.45"
+        preload="auto"
+      ></audio>
+
+      <div class="title" id="title">Your Products, Ready</div>
+
+      <div id="phone-stage">
+        <div id="phone-mount"></div>
+      </div>
+
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    <!-- Background content of the phone: continuing state from scene 7 -->
+    <template id="phone-content">
+      <div style="margin-left: -5px; margin-top: -70px; position: relative">
+        <img
+          src="public/dorian/woodmart/categories-mobile-2.png"
+          style="width: 402px; height: auto; display: block"
+          alt=""
+        />
+        <div
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #fff;
+          "
+        ></div>
+      </div>
+    </template>
+
+    <script>
+      const phone = buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: true,
+        aiBubbleIcon: 'smiley',
+        hideSearch: true,
+      });
+
+      // Continuing state from scene 7: phone already zoomed in for chat
+      gsap.set('#phone-stage', { scale: 1.528, y: -374 });
+
+      // Inject chat overlay + loader + listing + highlight into the phone screen
+      phone.screenEl.insertAdjacentHTML(
+        'beforeend',
+        `
+        <div class="chat-panel" id="chat-panel">
+          <div class="chat-header">
+            <div class="chat-avatar"></div>
+            <div>
+              <div class="chat-name">Dorian</div>
+              <div class="chat-sub">Your AI Assistant</div>
+            </div>
+          </div>
+          <div class="chat-msg">Hi! How can I help you today?</div>
+          <div class="user-msg">Show me LG TVs with best reviews</div>
+          <div class="chat-msg">Here are the top-rated LG TVs I found for you.</div>
+          <div class="cta-pill">View Products →</div>
+        </div>
+
+        <div class="loader" id="loader">
+          <div class="spinner" id="loader-spinner"></div>
+          <div class="label">Finding your products...</div>
+          <div class="sub">Powered by Dorian AI</div>
+        </div>
+
+        <div id="listing">
+          <img src="public/dorian/woodmart/lg-tvs-listing-full.png" alt="" />
+        </div>
+
+        <div class="product-highlight" id="highlight"></div>
+      `,
+      );
+
+      const chatPanel = document.getElementById('chat-panel');
+      const loader = document.getElementById('loader');
+      const spinner = document.getElementById('loader-spinner');
+      const listing = document.getElementById('listing');
+      const highlight = document.getElementById('highlight');
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const f = (n) => n / 30; // local frame -> seconds
+
+      // Title fade in
+      tl.to('#title', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
+
+      // Phase 1 (f0-f15): zoom-out from 2.75 -> 1.8 (phone-stage 1.528 -> 1.0)
+      tl.to(
+        '#phone-stage',
+        { scale: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+        0,
+      );
+
+      // Phase 2 (f15-f25): chat panel slides down + fades
+      tl.to(
+        chatPanel,
+        { y: 350, opacity: 0, duration: f(10), ease: 'power2.in' },
+        f(15),
+      );
+
+      // Phase 3 (f20-f40): Dorian loader in + spinner rotates across loader lifetime
+      tl.to(loader, { opacity: 1, duration: f(8), ease: 'power2.out' }, f(20));
+      tl.to(spinner, { rotation: 540, duration: f(51), ease: 'none' }, f(20));
+
+      // Phase 4 (f40-f55): listing fades in behind loader, loader fades out
+      tl.to(
+        listing,
+        { opacity: 1, duration: f(15), ease: 'power2.out' },
+        f(40),
+      );
+      tl.to(loader, { opacity: 0, duration: f(10), ease: 'power2.in' }, f(45));
+
+      // Phase 5 (f55-f72): listing scrolls upward (hand drag)
+      tl.to(listing, { y: -220, duration: f(17), ease: 'power2.out' }, f(55));
+
+      // Phase 6 (f75-f90): highlight chosen product + pulse
+      tl.to(
+        highlight,
+        { opacity: 1, duration: f(8), ease: 'back.out(1.6)' },
+        f(75),
+      );
+      tl.to(
+        highlight,
+        {
+          scale: 1.03,
+          duration: 0.2,
+          yoyo: true,
+          repeat: 1,
+          ease: 'sine.inOut',
+        },
+        f(78),
+      );
+
+      // Cursor path (composition-space; tip offset 45,55)
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(1000, 900) });
+      tl.to('#cursor', { opacity: 1, duration: f(6) }, f(25));
+      tl.to(
+        '#cursor',
+        { ...setC(780, 960), duration: f(15), ease: 'power2.out' },
+        f(25),
+      );
+
+      // Drag down-then-up during scroll phase: mimic swipe-up scroll
+      tl.to(
+        '#cursor',
+        { ...setC(780, 1200), duration: f(10), ease: 'power2.inOut' },
+        f(55),
+      );
+      tl.to(
+        '#cursor',
+        { ...setC(780, 880), duration: f(10), ease: 'power2.out' },
+        f(65),
+      );
+
+      // Move cursor onto highlighted product card
+      tl.to(
+        '#cursor',
+        { ...setC(560, 950), duration: f(10), ease: 'power2.inOut' },
+        f(75),
+      );
+
+      // Final tap at f81 (~2.7s) on the highlighted product
+      const cursorPlayer = document.querySelector('#cursor dotlottie-player');
+      tl.call(
+        () => {
+          if (cursorPlayer && cursorPlayer.seek) cursorPlayer.seek(35);
+        },
+        null,
+        f(81),
+      );
+      tl.set(
+        '#ripple',
+        { x: 560 - 60, y: 950 - 60, scale: 0, opacity: 1 },
+        f(81),
+      );
+      tl.to(
+        '#ripple',
+        { scale: 1.6, opacity: 0, duration: f(9), ease: 'power2.out' },
+        f(81),
+      );
+
+      // Hand-off to scene 9: begin re-zoom so scene 9 opens zoomed (ends ~scale 1.25)
+      tl.to(
+        '#phone-stage',
+        { scale: 1.25, y: -180, duration: f(5), ease: 'power2.in' },
+        f(85),
+      );
+
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

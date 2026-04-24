@@ -67,14 +67,20 @@ done
 
 echo ""
 echo "=== Concat: HF intro + Remotion slice + HF closing ==="
-CONCAT_LIST="$WORK_DIR/concat-hybrid.txt"
-cat > "$CONCAT_LIST" <<EOF
-file '$(pwd)/$INTRO_NORM'
-file '$(pwd)/$REMOTION_SLICE'
-file '$(pwd)/$CLOSING_NORM'
-EOF
-
-"$FFMPEG" -y -f concat -safe 0 -i "$CONCAT_LIST" \
+# IMPORTANT: use concat FILTER, not concat demuxer. The demuxer preserves
+# per-input time_base: HF MP4s are time_base 1/90000, Remotion re-encoded
+# slice is 1/15360. Mixing time_bases in the demuxer produces visually
+# corrupted output — content plays at wildly wrong timestamps. The filter
+# decodes all inputs, concatenates in filter graph with unified timing, and
+# re-encodes cleanly. Slower but correct. Evidence 2026-04-24: demuxer-built
+# hybrid showed scene 11 content at t=5s (should have been scene 2);
+# filter-built hybrid shows scene 6 at t=20s (correct).
+"$FFMPEG" -y \
+  -i "$INTRO_NORM" \
+  -i "$REMOTION_SLICE" \
+  -i "$CLOSING_NORM" \
+  -filter_complex "[0:v][0:a][1:v][1:a][2:v][2:a]concat=n=3:v=1:a=1[v][a]" \
+  -map "[v]" -map "[a]" \
   -c:v libx264 -crf 20 -preset medium -pix_fmt yuv420p \
   -c:a aac -b:a 160k -r 30 \
   "$OUT" 2>&1 | tail -3

@@ -59,7 +59,9 @@
         pointer-events: none;
       }
 
-      /* Chat panel — appended to phone.screenEl after build */
+      /* Chat panel — appended to phone.screenEl after build. Initial y set via
+         gsap.set() in JS, not CSS transform, to avoid gsap_css_transform_conflict
+         (rule: hyperframes-patterns.md). */
       .chat-panel {
         position: absolute;
         bottom: 0;
@@ -71,7 +73,6 @@
         box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
         padding: 15px 16px;
         z-index: 10;
-        transform: translateY(370px);
       }
       .chat-header {
         display: flex;
@@ -261,15 +262,24 @@
       `,
       );
 
+      // Initial chat-panel position — off-screen below (matches CSS bottom:0 origin).
+      // Must happen BEFORE timeline definition so GSAP has a clean starting state.
+      gsap.set('#chat-panel', { y: 370 });
+
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
 
       // Title fade in
       tl.to('#title', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
 
-      // Chat panel slide up (spring ~ back.out(1.2))
-      // SPRING_CONFIG.slide: damping 18, mass 1, stiffness 120 ~ back.out
-      tl.to('#chat-panel', { y: 0, duration: 0.8, ease: 'back.out(1.2)' }, 0);
+      // Chat panel slide up — fromTo pattern makes initial state explicit.
+      // Spring ~ back.out(1.2) matches SPRING_CONFIG.slide (damping 18, stiffness 120).
+      tl.fromTo(
+        '#chat-panel',
+        { y: 370 },
+        { y: 0, duration: 0.8, ease: 'back.out(1.2)' },
+        0,
+      );
 
       // Cursor path (comp-space)
       const TIP_X = 45,

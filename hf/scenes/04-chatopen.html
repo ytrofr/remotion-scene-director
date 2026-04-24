@@ -281,56 +281,27 @@
         0,
       );
 
-      // Cursor path (comp-space)
+      // Cursor path (comp-space). setC offsets Lottie tip into position.
       const TIP_X = 45,
         TIP_Y = 55;
       const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
 
-      gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(790, 1420) });
-
-      // f0-f20: to (700, 1480)
-      tl.to(
-        '#cursor',
-        { ...setC(700, 1480), duration: 20 / 30, ease: 'power2.out' },
-        0,
-      );
-      // f20-f45: approach input (480, 1520)
-      tl.to(
-        '#cursor',
-        { ...setC(480, 1520), duration: 25 / 30, ease: 'power2.out' },
-        20 / 30,
-      );
-      // f45-f48: move to tap position (480, 1550)
-      tl.to(
-        '#cursor',
-        { ...setC(480, 1550), duration: 3 / 30, ease: 'power2.in' },
-        45 / 30,
-      );
-
-      // Tap at f48 (1.6s) — ripple + input focused + lottie click frame
+      // Scene-specific click side-effect: focus the chat input at click frame.
+      // Fires at the same time as the auto-generated click effects below.
       tl.call(
-        () => {
-          document.getElementById('chat-input').classList.add('focused');
-          const player = document.querySelector('#cursor dotlottie-player');
-          if (player && player.seek) player.seek(35);
-        },
+        () => document.getElementById('chat-input').classList.add('focused'),
         null,
-        48 / 30,
+        74 / 30,
       );
 
-      tl.set(
-        '#ripple',
-        { x: 480 - 60, y: 1550 - 60, scale: 0, opacity: 1 },
-        48 / 30,
-      );
-      tl.to(
-        '#ripple',
-        { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' },
-        48 / 30,
-      );
-
-      // Cursor hides after tap
-      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 53 / 30);
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(957, 1465) });
+      tl.to('#cursor', { ...setC(494, 1652), duration: 64/30, ease: 'power2.out' }, 10/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 74/30);
+      tl.set('#ripple', { x: 434, y: 1592, scale: 0, opacity: 1 }, 74/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 74/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 86/30);
+      // @auto-generated-from-scene-director:end
 
       window.__timelines['main'] = tl;
     </script>

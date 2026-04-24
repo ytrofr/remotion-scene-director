@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
 import { spawn } from 'child_process';
+import { updateHfScene } from './scripts/hf-exporter.mjs';
 
 function savePathPlugin(): Plugin {
   return {
@@ -327,8 +328,31 @@ function savePathPlugin(): Plugin {
             }
 
             fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));
+
+            // Auto-sync HF scene HTML (marker-scoped). Only fires for
+            // compositions that have HF counterparts (DorianFull / DorianDemo)
+            // and scenes whose .html file contains the markers — other scenes
+            // are skipped gracefully.
+            let hfSync: {
+              updated: boolean;
+              reason?: string;
+              hfFile?: string;
+            } | null = null;
+            if (
+              pathData &&
+              pathData.length > 0 &&
+              (compositionId === 'DorianFull' || compositionId === 'DorianDemo')
+            ) {
+              hfSync = updateHfScene(__dirname, sceneName, {
+                gesture,
+                animation,
+                dark,
+                path: pathData,
+              });
+            }
+
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true }));
+            res.end(JSON.stringify({ success: true, hfSync }));
           } catch (err) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: String(err) }));

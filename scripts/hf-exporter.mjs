@@ -2,7 +2,8 @@
 // Called from vite.config.ts /api/save-path after codedPaths.data.json write.
 //
 // INPUT: codedPaths entry shape
-//   { gesture, animation, dark, path: [{ frame, x, y, gesture?, duration? }...] }
+//   { gesture, animation, dark, path: [{ frame, x, y, gesture?, duration?, rotation? }...],
+//     secondaryLayers?: [{ gesture, path: [...] }, ...] }
 // OUTPUT: JS code string inserted between
 //   // @auto-generated-from-scene-director:start
 //   ...
@@ -15,6 +16,10 @@
 //
 // fps assumption: 30. Timing `<n>/30` stays explicit in generated code so
 // humans reading the HF file can convert to seconds mentally (f=N → N/30 s).
+//
+// Secondary layers share the single #cursor element and MUST be time-disjoint
+// (cursor hidden between layers via prior click's fade-out). Each secondary
+// layer re-shows the cursor via tl.set + fade-in at its first waypoint.
 
 import fs from 'fs';
 import path from 'path';
@@ -23,59 +28,74 @@ const INDENT = '      ';
 const START_MARKER = '// @auto-generated-from-scene-director:start';
 const END_MARKER = '// @auto-generated-from-scene-director:end';
 
-export function waypointsToHfBlock(entry) {
-  const wps = entry?.path;
-  if (!Array.isArray(wps) || wps.length === 0) return '// (no waypoints)';
+// Emit a tl.to for a pointer/click move. Handles optional rotation on drag.
+function emitMove(out, wp, prev, ease) {
+  const dFrames = Math.max(1, wp.frame - prev.frame);
+  const rot = wp.rotation || 0;
+  const prevRot = prev.rotation || 0;
+  const samePos = wp.x === prev.x && wp.y === prev.y;
+  const sameRot = rot === prevRot;
+  if (samePos && sameRot) return;
+  const props = [];
+  if (!samePos) props.push(`...setC(${wp.x}, ${wp.y})`);
+  if (!sameRot) props.push(`rotation: ${rot}`);
+  out.push(
+    `tl.to('#cursor', { ${props.join(', ')}, duration: ${dFrames}/30, ease: ${ease} }, ${prev.frame}/30);`,
+  );
+}
 
-  const out = [];
+// Process a single waypoint list into GSAP calls. Returns the final `hiddenSince`
+// state so the next layer can pick up correctly.
+function processLayer(out, wps, isFirstLayer, hiddenSince) {
   const first = wps[0];
-  // Match Remotion FloatingHand behavior: if first waypoint is after frame 0,
-  // cursor is invisible until that frame (FloatingHand returns null before
-  // startFrame). Otherwise cursor is visible from scene start.
-  if (first.frame > 0) {
-    out.push(
-      `gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(${first.x}, ${first.y}) });`,
-    );
-    out.push(
-      `tl.to('#cursor', { opacity: 1, duration: 0.1 }, ${first.frame}/30);`,
-    );
+
+  // Seed the cursor: first layer → gsap.set; subsequent layer → tl.set + fade-in
+  if (isFirstLayer) {
+    if (first.frame > 0) {
+      out.push(
+        `gsap.set('#cursor', { opacity: 0, rotation: ${first.rotation || 0}, ...setC(${first.x}, ${first.y}) });`,
+      );
+      out.push(
+        `tl.to('#cursor', { opacity: 1, duration: 0.1 }, ${first.frame}/30);`,
+      );
+    } else {
+      out.push(
+        `gsap.set('#cursor', { opacity: 1, rotation: ${first.rotation || 0}, ...setC(${first.x}, ${first.y}) });`,
+      );
+    }
   } else {
+    // Secondary layer — cursor must have been hidden by the previous layer's
+    // last click fade-out. Pin new position at that fade-out frame (no visual
+    // flash, since opacity=0), then fade in at this layer's first frame.
+    const pinFrame = hiddenSince !== null ? hiddenSince.frame : first.frame;
     out.push(
-      `gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(${first.x}, ${first.y}) });`,
+      `tl.set('#cursor', { ...setC(${first.x}, ${first.y}), rotation: ${first.rotation || 0} }, ${pinFrame}/30);`,
     );
+    out.push(
+      `tl.to('#cursor', { opacity: 1, duration: 0.15 }, ${first.frame}/30);`,
+    );
+    hiddenSince = null;
   }
 
-  // Track whether cursor was hidden by a previous click's fade-out.
-  // After a click, the cursor fades to opacity 0 at click.frame + clickDur.
-  // If a later waypoint moves the cursor, we need to:
-  //  (a) set its position via gsap.set BEFORE the next visible move (avoids stale-pos flash on re-show)
-  //  (b) fade opacity back to 1 at the next waypoint.frame
   let prev = first;
-  let hiddenSince = null; // { frame: N } when cursor is invisible, else null
   for (let i = 1; i < wps.length; i++) {
     const wp = wps[i];
-    const dFrames = Math.max(1, wp.frame - prev.frame);
     const isClick = wp.gesture === 'click';
-    const samePos = wp.x === prev.x && wp.y === prev.y;
 
-    // Re-show cursor if hidden from a prior click's fade-out
+    // Re-show cursor if hidden from a prior click's fade-out in the same layer.
+    // Jump to the new wp position instantly while invisible, then fade in.
+    // (No visible travel between click targets — the cursor just "reappears" at
+    //  the next tap location.)
     if (hiddenSince !== null) {
-      // Pin position to `prev` just before re-show so fade-in shows at correct spot
       out.push(
-        `tl.set('#cursor', { ...setC(${prev.x}, ${prev.y}) }, ${hiddenSince.frame}/30);`,
+        `tl.set('#cursor', { ...setC(${wp.x}, ${wp.y}), rotation: ${wp.rotation || 0} }, ${hiddenSince.frame}/30);`,
       );
       out.push(
         `tl.to('#cursor', { opacity: 1, duration: 0.15 }, ${wp.frame}/30);`,
       );
       hiddenSince = null;
-    }
-
-    // Move cursor to this waypoint (skip if identical to prev position)
-    if (!samePos) {
-      const ease = isClick ? "'power2.in'" : "'power2.out'";
-      out.push(
-        `tl.to('#cursor', { ...setC(${wp.x}, ${wp.y}), duration: ${dFrames}/30, ease: ${ease} }, ${prev.frame}/30);`,
-      );
+    } else {
+      emitMove(out, wp, prev, isClick ? "'power2.in'" : "'power2.out'");
     }
 
     if (isClick) {
@@ -96,6 +116,28 @@ export function waypointsToHfBlock(entry) {
     }
 
     prev = wp;
+  }
+
+  return hiddenSince;
+}
+
+export function waypointsToHfBlock(entry) {
+  const primaryWps = entry?.path;
+  const secondary = Array.isArray(entry?.secondaryLayers)
+    ? entry.secondaryLayers
+    : [];
+
+  if (!Array.isArray(primaryWps) || primaryWps.length === 0) {
+    return '// (no waypoints)';
+  }
+
+  const out = [];
+  let hiddenSince = processLayer(out, primaryWps, true, null);
+
+  for (const layer of secondary) {
+    const wps = layer?.path;
+    if (!Array.isArray(wps) || wps.length === 0) continue;
+    hiddenSince = processLayer(out, wps, false, hiddenSince);
   }
 
   return out.join('\n' + INDENT);

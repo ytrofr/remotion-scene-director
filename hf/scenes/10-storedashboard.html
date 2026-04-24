@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Dorian — Scene 10 Store Dashboard (HF, 22s)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -328,6 +332,36 @@
         z-index: 21;
         pointer-events: none;
       }
+      #cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.5);
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
@@ -344,20 +378,22 @@
       <div class="title" id="title">Your Store at a Glance</div>
       <div class="subtitle" id="subtitle">Real-time insights, one tap away</div>
       <div id="phone-mount"></div>
+
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
     </div>
 
     <!-- Audio cues (mapped from DORIAN_STORES_AUDIO['1-StoreDashboard']
          using only the 4 SFX shipped with the HF asset pack) -->
-    <audio
-      id="sfx-whoosh-in"
-      src="audio/sfx/whoosh.wav"
-      preload="auto"
-    ></audio>
-    <audio
-      id="sfx-whip-chart"
-      src="audio/sfx/whip.wav"
-      preload="auto"
-    ></audio>
+    <audio id="sfx-whoosh-in" src="audio/sfx/whoosh.wav" preload="auto"></audio>
+    <audio id="sfx-whip-chart" src="audio/sfx/whip.wav" preload="auto"></audio>
     <audio
       id="sfx-popup-orders"
       src="audio/sfx/pop-up.wav"
@@ -912,7 +948,47 @@
       );
 
       // ─────────────────────────────────────────────────────────────
-      // 3) Register synchronously at module scope
+      // 3) Cursor path (comp-space; tip offset 45,55)
+      // ─────────────────────────────────────────────────────────────
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(900, 1600) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 2/30);
+      tl.to('#cursor', { ...setC(814, 1543), duration: 40/30, ease: 'power2.in' }, 2/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 42/30);
+      tl.set('#ripple', { x: 754, y: 1483, scale: 0, opacity: 1 }, 42/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 42/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 50/30);
+      tl.set('#cursor', { ...setC(540, 1664), rotation: 0 }, 50/30);
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 92/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 92/30);
+      tl.set('#ripple', { x: 480, y: 1604, scale: 0, opacity: 1 }, 92/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 92/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 97/30);
+      tl.set('#cursor', { ...setC(540, 1664), rotation: 0 }, 97/30);
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 182/30);
+      tl.to('#cursor', { ...setC(969, 1644), duration: 18/30, ease: 'power2.in' }, 182/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 200/30);
+      tl.set('#ripple', { x: 909, y: 1584, scale: 0, opacity: 1 }, 200/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 200/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 210/30);
+      tl.set('#cursor', { ...setC(540, 1300), rotation: 0 }, 210/30);
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 480/30);
+      tl.to('#cursor', { ...setC(540, 1500), duration: 15/30, ease: 'power2.out' }, 480/30);
+      tl.to('#cursor', { ...setC(540, 1650), duration: 5/30, ease: 'power2.in' }, 495/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 500/30);
+      tl.set('#ripple', { x: 480, y: 1590, scale: 0, opacity: 1 }, 500/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 500/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 510/30);
+      tl.set('#cursor', { ...setC(600, 1500), rotation: 0 }, 510/30);
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 520/30);
+      // @auto-generated-from-scene-director:end
+
+      // ─────────────────────────────────────────────────────────────
+      // 4) Register synchronously at module scope
       // ─────────────────────────────────────────────────────────────
       window.__timelines['main'] = tl;
     </script>

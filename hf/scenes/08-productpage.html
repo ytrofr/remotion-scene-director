@@ -398,59 +398,21 @@
         TIP_Y = 55;
       const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
 
-      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(1000, 900) });
-      tl.to('#cursor', { opacity: 1, duration: f(6) }, f(25));
-      tl.to(
-        '#cursor',
-        { ...setC(780, 960), duration: f(15), ease: 'power2.out' },
-        f(25),
-      );
-
-      // Drag down-then-up during scroll phase: mimic swipe-up scroll
-      tl.to(
-        '#cursor',
-        { ...setC(780, 1200), duration: f(10), ease: 'power2.inOut' },
-        f(55),
-      );
-      tl.to(
-        '#cursor',
-        { ...setC(780, 880), duration: f(10), ease: 'power2.out' },
-        f(65),
-      );
-
-      // Move cursor onto highlighted product card
-      tl.to(
-        '#cursor',
-        { ...setC(560, 950), duration: f(10), ease: 'power2.inOut' },
-        f(75),
-      );
-
-      // Final tap at f81 (~2.7s) on the highlighted product
-      const cursorPlayer = document.querySelector('#cursor dotlottie-player');
-      tl.call(
-        () => {
-          if (cursorPlayer && cursorPlayer.seek) cursorPlayer.seek(35);
-        },
-        null,
-        f(81),
-      );
-      tl.set(
-        '#ripple',
-        { x: 560 - 60, y: 950 - 60, scale: 0, opacity: 1 },
-        f(81),
-      );
-      tl.to(
-        '#ripple',
-        { scale: 1.6, opacity: 0, duration: f(9), ease: 'power2.out' },
-        f(81),
-      );
-
       // Hand-off to scene 9: begin re-zoom so scene 9 opens zoomed (ends ~scale 1.25)
+      // (scene-specific side-effect, timed to the last cursor waypoint)
       tl.to(
         '#phone-stage',
         { scale: 1.25, y: -180, duration: f(5), ease: 'power2.in' },
         f(85),
       );
+
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(1050, 960) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 105/30);
+      tl.to('#cursor', { ...setC(780, 960), duration: 10/30, ease: 'power2.out' }, 105/30);
+      tl.to('#cursor', { rotation: -30, duration: 3/30, ease: 'power2.out' }, 115/30);
+      tl.to('#cursor', { rotation: 0, duration: 5/30, ease: 'power2.out' }, 140/30);
+      // @auto-generated-from-scene-director:end
 
       window.__timelines['main'] = tl;
     </script>

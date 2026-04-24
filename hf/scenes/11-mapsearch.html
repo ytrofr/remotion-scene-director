@@ -463,7 +463,7 @@
       tl.set('#ripple', { x: 480, y: 490, scale: 0, opacity: 1 }, 18/30);
       tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 18/30);
       tl.to('#cursor', { opacity: 0, duration: 0.15 }, 26/30);
-      tl.set('#cursor', { ...setC(540, 550) }, 26/30);
+      tl.set('#cursor', { ...setC(540, 550), rotation: 0 }, 26/30);
       tl.to('#cursor', { opacity: 1, duration: 0.15 }, 70/30);
       tl.to('#cursor', { ...setC(540, 750), duration: 50/30, ease: 'power2.out' }, 70/30);
       tl.to('#cursor', { ...setC(542, 769), duration: 20/30, ease: 'power2.out' }, 120/30);

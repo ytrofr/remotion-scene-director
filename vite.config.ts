@@ -359,6 +359,41 @@ function savePathPlugin(): Plugin {
           }
         });
       });
+
+      // Persist feedback pins to disk so Claude can read them without a
+      // manual Save. Written as a flat { compositionId: FeedbackPin[] } map.
+      server.middlewares.use('/api/save-feedback-pins', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: string) => (body += chunk));
+        req.on('end', () => {
+          try {
+            const { feedbackPins } = JSON.parse(body);
+            if (typeof feedbackPins !== 'object' || feedbackPins === null) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({ error: 'feedbackPins object required' }),
+              );
+              return;
+            }
+            const filePath = path.resolve(
+              __dirname,
+              'src/compositions/SceneDirector/feedbackNotes.data.json',
+            );
+            fs.writeFileSync(filePath, JSON.stringify(feedbackPins, null, 2));
+            const total = Object.values(feedbackPins).reduce(
+              (sum: number, arr: unknown) =>
+                sum + (Array.isArray(arr) ? arr.length : 0),
+              0,
+            );
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, total }));
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+        });
+      });
     },
   };
 }

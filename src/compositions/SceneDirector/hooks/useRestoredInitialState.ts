@@ -70,6 +70,9 @@ export function useRestoredInitialState(initialState: DirectorState) {
       ...(savedSession.versionHistory
         ? { versionHistory: savedSession.versionHistory }
         : {}),
+      ...(savedSession.feedbackPins
+        ? { feedbackPins: savedSession.feedbackPins }
+        : {}),
     };
   }, []);
 

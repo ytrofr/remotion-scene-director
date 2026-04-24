@@ -100,6 +100,56 @@ export function directorReducer(
     case 'SET_VIEW':
       return { ...state, currentView: action.view };
 
+    // ── Feedback mode (annotation pins) ───────────────────────────────────
+    case 'TOGGLE_FEEDBACK_MODE':
+      return {
+        ...state,
+        feedbackMode: !state.feedbackMode,
+        editingPinId: null,
+      };
+    case 'ADD_FEEDBACK_PIN': {
+      const comp = action.pin.scene ? state.compositionId : state.compositionId;
+      const existing = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: [...existing, action.pin],
+        },
+        editingPinId: action.pin.id,
+      };
+    }
+    case 'UPDATE_FEEDBACK_PIN': {
+      const comp = state.compositionId;
+      const list = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: list.map((p) =>
+            p.id === action.id ? { ...p, ...action.changes } : p,
+          ),
+        },
+      };
+    }
+    case 'DELETE_FEEDBACK_PIN': {
+      const comp = state.compositionId;
+      const list = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: list.filter((p) => p.id !== action.id),
+        },
+        editingPinId:
+          state.editingPinId === action.id ? null : state.editingPinId,
+      };
+    }
+    case 'SET_EDITING_PIN':
+      return { ...state, editingPinId: action.id };
+    case 'LOAD_FEEDBACK_PINS':
+      return { ...state, feedbackPins: action.pins };
+
     // ── Waypoint actions (delegated) ──────────────────────────────────────
     case 'ADD_WAYPOINT':
     case 'ADD_HAND_GESTURE':

@@ -38,3 +38,6 @@ hf/.render-work/
 
 # Local render artifacts (HF pilot outputs etc)
 renders/
+
+# Ephemeral SceneDirector review pins (auto-synced by dev server)
+src/compositions/SceneDirector/feedbackNotes.data.json

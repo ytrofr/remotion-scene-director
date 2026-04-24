@@ -129,6 +129,11 @@ export function useKeyboardShortcuts({
           e.preventDefault();
           dispatch({ type: 'TOGGLE_TRAIL' });
           break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          dispatch({ type: 'TOGGLE_FEEDBACK_MODE' });
+          break;
         case 'e':
         case 'E':
           e.preventDefault();

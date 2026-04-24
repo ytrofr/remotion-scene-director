@@ -11,6 +11,7 @@ import type { CompositionEntry, SceneInfo } from '../state';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { Layer } from '../layers';
 import { DrawingCanvas } from '../overlays/DrawingCanvas';
+import { FeedbackOverlay } from '../overlays/FeedbackOverlay';
 import { FloatingHandOverlay } from '../overlays/FloatingHandOverlay';
 import { WaypointMarkers } from '../overlays/WaypointMarkers';
 import type { DirectorState } from '../state';
@@ -132,7 +133,7 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
   return (
     <div
       ref={playerAreaRef as React.RefObject<HTMLDivElement>}
-      className="player-area"
+      className={`player-area${state.feedbackMode ? ' player-area--feedback-active' : ''}`}
       onMouseDown={handlePanStart}
       onMouseMove={handlePanMove}
       onMouseUp={handlePanEnd}
@@ -189,8 +190,10 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
           </AudioEntriesContext.Provider>
         </div>
 
-        {/* Drawing canvas overlays the player */}
-        {state.selectedScene && !state.exportOpen && <DrawingCanvas />}
+        {/* Drawing canvas overlays the player (hidden in feedback mode) */}
+        {state.selectedScene && !state.exportOpen && !state.feedbackMode && (
+          <DrawingCanvas />
+        )}
 
         {/* FloatingHand: renders all visible hand layers (+ bleed-over from other scenes) */}
         {state.selectedScene && currentScene && (
@@ -216,6 +219,11 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             effectiveWaypoints={effectiveWaypoints}
             sceneWaypoints={sceneWaypoints}
           />
+        )}
+
+        {/* Feedback overlay — click-to-pin when feedbackMode is on */}
+        {state.feedbackMode && (
+          <FeedbackOverlay containerRef={playerFrameRef} />
         )}
 
         {/* Scene info banner with debug info */}

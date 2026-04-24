@@ -455,6 +455,20 @@ export const Toolbar: React.FC = () => {
 
       <div className="toolbar__spacer" />
 
+      {/* Feedback mode — click-to-pin annotation overlay */}
+      <button
+        onClick={() => dispatch({ type: 'TOGGLE_FEEDBACK_MODE' })}
+        className={`toolbar__btn ${state.feedbackMode ? 'toolbar__btn--feedback-on' : ''}`}
+        title="Feedback mode — click video to drop a note pin (F)"
+      >
+        Feedback
+        <kbd className="toolbar__kbd">F</kbd>
+        {(() => {
+          const n = (state.feedbackPins[state.compositionId] ?? []).length;
+          return n > 0 ? <span className="toolbar__badge">{n}</span> : null;
+        })()}
+      </button>
+
       {/* Trail toggle */}
       <button
         onClick={() => dispatch({ type: 'TOGGLE_TRAIL' })}

@@ -32,6 +32,7 @@ import './styles/index.css';
 import { Toolbar } from './panels/Toolbar';
 import { SceneList } from './panels/SceneList';
 import { Inspector } from './panels/Inspector';
+import { FeedbackPanel } from './panels/FeedbackPanel';
 import { Timeline } from './panels/Timeline';
 import { ExportModal } from './panels/ExportModal';
 import { GalleryView } from './panels/GalleryView';
@@ -546,9 +547,11 @@ export const App: React.FC = () => {
           sceneWaypoints={sceneWaypoints}
         />
 
-        {/* Inspector (right panel) */}
+        {/* Inspector (right panel) — FeedbackPanel when feedback mode is on */}
         <div className="panel inspector-panel">
-          {state.selectedScene ? (
+          {state.feedbackMode ? (
+            <FeedbackPanel />
+          ) : state.selectedScene ? (
             <Inspector />
           ) : (
             <div className="inspector-empty">

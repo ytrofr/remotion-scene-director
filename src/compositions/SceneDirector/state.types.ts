@@ -43,6 +43,19 @@ export interface ActivityEntry {
   snapshot?: DirectorState; // full state snapshot for restore
 }
 
+// Feedback pin — a visual note anchored at (x, y) in composition-space at a specific frame
+export interface FeedbackPin {
+  id: string;
+  scene: string; // scene name (scope: within current composition)
+  frame: number; // global frame number (absolute, not scene-local)
+  x: number; // composition-space x (0 .. video.width)
+  y: number; // composition-space y (0 .. video.height)
+  note: string;
+  severity: 'issue' | 'idea' | 'question'; // color-coded
+  createdAt: number;
+  resolved?: boolean;
+}
+
 // Saved snapshot per scene (for Revert)
 export interface SceneSnapshot {
   waypoints: HandPathPoint[];
@@ -87,6 +100,12 @@ export interface DirectorState {
   versionHistory: Record<string, VersionEntry[]>;
   // Global click animation style (e.g. 'click-burst', 'click-burst-soft', 'click')
   clickAnimation: string;
+  // Feedback mode — click-to-pin annotation overlay
+  feedbackMode: boolean;
+  // Feedback pins keyed by composition id → array of pins across all scenes
+  feedbackPins: Record<string, FeedbackPin[]>;
+  // Currently-edited pin id (inline note textarea), or null
+  editingPinId: string | null;
 }
 
 // Actions
@@ -180,6 +199,20 @@ export type DirectorAction =
       type: 'LOAD_CAPTIONS_FROM_SRT';
       srt: string;
       fps: number;
+    }
+  // Feedback-mode actions
+  | { type: 'TOGGLE_FEEDBACK_MODE' }
+  | { type: 'ADD_FEEDBACK_PIN'; pin: FeedbackPin }
+  | {
+      type: 'UPDATE_FEEDBACK_PIN';
+      id: string;
+      changes: Partial<Omit<FeedbackPin, 'id'>>;
+    }
+  | { type: 'DELETE_FEEDBACK_PIN'; id: string }
+  | { type: 'SET_EDITING_PIN'; id: string | null }
+  | {
+      type: 'LOAD_FEEDBACK_PINS';
+      pins: Record<string, FeedbackPin[]>;
     };
 
 export const initialState: DirectorState = {
@@ -204,4 +237,7 @@ export const initialState: DirectorState = {
   currentView: 'editor',
   versionHistory: {},
   clickAnimation: 'click-burst-soft-xs',
+  feedbackMode: false,
+  feedbackPins: {},
+  editingPinId: null,
 };

@@ -10,7 +10,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { DirectorState, SceneSnapshot, VersionEntry } from '../state';
+import type {
+  DirectorState,
+  FeedbackPin,
+  SceneSnapshot,
+  VersionEntry,
+} from '../state';
 import type { Layer } from '../layers';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 
@@ -31,6 +36,7 @@ export interface SavedSession {
   savedSnapshots?: Record<string, SceneSnapshot>;
   sidebarTab?: 'editor' | 'history';
   versionHistory?: Record<string, VersionEntry[]>;
+  feedbackPins?: Record<string, FeedbackPin[]>;
 }
 
 interface ReloadBackup {
@@ -70,6 +76,7 @@ function buildSessionData(state: DirectorState, frame: number): SavedSession {
     savedSnapshots: state.savedSnapshots,
     sidebarTab: state.sidebarTab,
     versionHistory: state.versionHistory,
+    feedbackPins: state.feedbackPins,
   };
 }
 
@@ -150,6 +157,26 @@ export function useSessionPersistence(state: DirectorState, frame: number) {
     }, 400);
     return () => clearTimeout(t);
   }, [state]);
+
+  // Auto-sync feedback pins to disk (debounced 800ms). Fire-and-forget —
+  // localStorage is the primary store; disk is just so Claude can read them
+  // without a manual Save. Skips when pins haven't changed.
+  const lastPinsJsonRef = useRef<string>('');
+  useEffect(() => {
+    const pinsJson = JSON.stringify(state.feedbackPins);
+    if (pinsJson === lastPinsJsonRef.current) return;
+    const t = setTimeout(() => {
+      lastPinsJsonRef.current = pinsJson;
+      fetch('/api/save-feedback-pins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackPins: state.feedbackPins }),
+      }).catch(() => {
+        /* best-effort; localStorage is the source of truth */
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [state.feedbackPins]);
 
   // Manual save — identical to before, used by Save button / Ctrl+S.
   // Still useful because Save also pushes to codedPaths.data.json.

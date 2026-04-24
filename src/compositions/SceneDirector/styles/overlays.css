@@ -140,3 +140,202 @@
 .drawing-canvas__crosshairs {
   pointer-events: none;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FEEDBACK MODE — click-to-pin annotation
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.feedback-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  z-index: 50;
+}
+.player-area--feedback-active .player-frame {
+  outline: 3px solid #f59e0b;
+  outline-offset: -3px;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.35);
+}
+.feedback-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 51;
+}
+.feedback-pin__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+}
+.feedback-pin__dot span {
+  transform: rotate(45deg);
+}
+.feedback-pin--issue .feedback-pin__dot { background: #ef4444; }
+.feedback-pin--idea .feedback-pin__dot { background: #3b82f6; }
+.feedback-pin--question .feedback-pin__dot { background: #a855f7; }
+.feedback-pin--resolved .feedback-pin__dot {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.feedback-pin__note {
+  margin-top: 6px;
+  padding: 6px 10px;
+  max-width: 240px;
+  background: rgba(17, 24, 39, 0.95);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: auto;
+}
+.feedback-pin__note textarea {
+  width: 240px;
+  min-height: 60px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font: inherit;
+  resize: vertical;
+  outline: none;
+}
+.feedback-pin__meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #9ca3af;
+}
+.feedback-pin__meta button {
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+}
+.feedback-pin__meta button:hover {
+  color: #fff;
+  border-color: #6b7280;
+}
+.feedback-pin__meta button.danger:hover {
+  color: #fca5a5;
+  border-color: #ef4444;
+}
+.feedback-pin__meta select {
+  background: #1f2937;
+  color: #fff;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 10px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FEEDBACK PANEL (right sidebar when feedback mode on)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.feedback-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px;
+  overflow: auto;
+}
+.feedback-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.feedback-panel__hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.feedback-panel__scene {
+  margin-bottom: 14px;
+}
+.feedback-panel__scene-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.feedback-panel__row {
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--panel-bg);
+}
+.feedback-panel__row:hover {
+  border-color: var(--accent);
+}
+.feedback-panel__row--resolved {
+  opacity: 0.5;
+}
+.feedback-panel__row-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.feedback-panel__row-body { flex: 1; min-width: 0; }
+.feedback-panel__row-note {
+  color: var(--text);
+  word-break: break-word;
+}
+.feedback-panel__row-meta {
+  color: var(--text-dim);
+  font-size: 10px;
+  margin-top: 2px;
+}
+.feedback-panel__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.feedback-panel__actions button {
+  flex: 1;
+  padding: 6px;
+  font-size: 11px;
+  background: var(--panel-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.feedback-panel__actions button:hover {
+  border-color: var(--accent);
+}
+.feedback-panel__empty {
+  color: var(--text-dim);
+  font-size: 12px;
+  padding: 20px;
+  text-align: center;
+}

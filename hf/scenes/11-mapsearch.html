@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Dorian — Scene 11 Map Search (HF)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -164,14 +168,36 @@
         color: #64748b;
       }
 
-      /* Hand cursor at composition level */
-      .cursor {
+      /* Hand cursor at composition level — Lottie (unified with scenes 3-9) */
+      #cursor {
         position: absolute;
-        width: 24px;
-        height: 28px;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
         pointer-events: none;
-        z-index: 30;
         opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.5);
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
       }
     </style>
   </head>
@@ -189,16 +215,14 @@
       <div class="title" id="title">Find Stores Nearby</div>
       <div id="phone-mount"></div>
 
-      <div class="cursor" id="cursor">
-        <svg viewBox="0 0 24 28" width="24" height="28">
-          <path
-            d="M2 2 L2 22 L7 18 L10 25 L13 24 L10 17 L17 17 Z"
-            fill="#1e293b"
-            stroke="#fff"
-            stroke-width="1.2"
-            stroke-linejoin="round"
-          />
-        </svg>
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
       </div>
 
       <audio
@@ -206,11 +230,7 @@
         src="audio/send-click.wav"
         preload="auto"
       ></audio>
-      <audio
-        id="sfx-typing"
-        src="audio/typing-soft.wav"
-        preload="auto"
-      ></audio>
+      <audio id="sfx-typing" src="audio/typing-soft.wav" preload="auto"></audio>
       <audio
         id="sfx-pin-click"
         src="audio/send-click.wav"
@@ -333,32 +353,15 @@
       // Comp coord = 540 + 1.8*(phoneX - 207), 960 + 1.8*(phoneY - 434).
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
-      const cursor = document.getElementById('cursor');
+
+      // Cursor tip offset (Lottie cursor — unified with scenes 3-9)
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
 
       tl.to('#title', { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0);
 
-      // Phase A: cursor enters, taps search bar, types query
-      gsap.set(cursor, { x: 700, y: 900, opacity: 0 });
-      tl.to(cursor, { opacity: 1, duration: 0.15, ease: 'power2.out' }, 5 / 30);
-      tl.to(
-        cursor,
-        { x: 540 - 10, y: 520, duration: 0.43, ease: 'power2.out' },
-        5 / 30,
-      );
-
-      // Click pulse on search bar @ f18
-      tl.to(
-        cursor,
-        {
-          scale: 0.85,
-          duration: 0.08,
-          ease: 'power2.out',
-          yoyo: true,
-          repeat: 1,
-          transformOrigin: 'top left',
-        },
-        18 / 30,
-      );
+      // Scene-specific: search bar click side-effects at f18
       tl.call(
         () => {
           document.getElementById('searchBar').classList.add('focused');
@@ -426,33 +429,7 @@
         );
       });
 
-      // Cursor travels from search bar toward pin#1 (Dorian Market).
-      // Pin#1 in map @ (180,120). Map top inside content ~= 204 in phone-frame y.
-      // Pin tip phone coords ≈ (180, 324). Comp: x=540+1.8*(180-207)=491, y=960+1.8*(324-434)=762.
-      tl.to(
-        cursor,
-        {
-          x: 540 + 1.8 * (180 - 207),
-          y: 960 + 1.8 * (324 - 434),
-          duration: 0.8,
-          ease: 'power2.inOut',
-        },
-        115 / 30,
-      );
-
-      // Pin click @ f150
-      tl.to(
-        cursor,
-        {
-          scale: 0.85,
-          duration: 0.08,
-          ease: 'power2.out',
-          yoyo: true,
-          repeat: 1,
-          transformOrigin: 'top left',
-        },
-        150 / 30,
-      );
+      // Scene-specific: pin click side-effects at f150
       tl.call(
         () => {
           const a = document.getElementById('sfx-pin-click');
@@ -477,6 +454,24 @@
         null,
         150 / 30,
       );
+
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(540, 700) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 5/30);
+      tl.to('#cursor', { ...setC(540, 550), duration: 9/30, ease: 'power2.out' }, 5/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 18/30);
+      tl.set('#ripple', { x: 480, y: 490, scale: 0, opacity: 1 }, 18/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 18/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 26/30);
+      tl.set('#cursor', { ...setC(540, 550) }, 26/30);
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 70/30);
+      tl.to('#cursor', { ...setC(540, 750), duration: 50/30, ease: 'power2.out' }, 70/30);
+      tl.to('#cursor', { ...setC(542, 769), duration: 20/30, ease: 'power2.out' }, 120/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 150/30);
+      tl.set('#ripple', { x: 482, y: 709, scale: 0, opacity: 1 }, 150/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 150/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 165/30);
+      // @auto-generated-from-scene-director:end
 
       // --- Phase C (6-8s): store-count badge reveals, hold ---
       tl.to(

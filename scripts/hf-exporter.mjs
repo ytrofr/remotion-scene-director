@@ -45,14 +45,32 @@ export function waypointsToHfBlock(entry) {
     );
   }
 
+  // Track whether cursor was hidden by a previous click's fade-out.
+  // After a click, the cursor fades to opacity 0 at click.frame + clickDur.
+  // If a later waypoint moves the cursor, we need to:
+  //  (a) set its position via gsap.set BEFORE the next visible move (avoids stale-pos flash on re-show)
+  //  (b) fade opacity back to 1 at the next waypoint.frame
   let prev = first;
+  let hiddenSince = null; // { frame: N } when cursor is invisible, else null
   for (let i = 1; i < wps.length; i++) {
     const wp = wps[i];
     const dFrames = Math.max(1, wp.frame - prev.frame);
     const isClick = wp.gesture === 'click';
+    const samePos = wp.x === prev.x && wp.y === prev.y;
+
+    // Re-show cursor if hidden from a prior click's fade-out
+    if (hiddenSince !== null) {
+      // Pin position to `prev` just before re-show so fade-in shows at correct spot
+      out.push(
+        `tl.set('#cursor', { ...setC(${prev.x}, ${prev.y}) }, ${hiddenSince.frame}/30);`,
+      );
+      out.push(
+        `tl.to('#cursor', { opacity: 1, duration: 0.15 }, ${wp.frame}/30);`,
+      );
+      hiddenSince = null;
+    }
 
     // Move cursor to this waypoint (skip if identical to prev position)
-    const samePos = wp.x === prev.x && wp.y === prev.y;
     if (!samePos) {
       const ease = isClick ? "'power2.in'" : "'power2.out'";
       out.push(
@@ -74,6 +92,7 @@ export function waypointsToHfBlock(entry) {
       out.push(
         `tl.to('#cursor', { opacity: 0, duration: 0.15 }, ${wp.frame + clickDur}/30);`,
       );
+      hiddenSince = { frame: wp.frame + clickDur };
     }
 
     prev = wp;

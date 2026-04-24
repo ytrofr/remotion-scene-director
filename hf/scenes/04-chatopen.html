@@ -295,7 +295,8 @@
       );
 
       // @auto-generated-from-scene-director:start
-      gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(957, 1465) });
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(957, 1465) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 10/30);
       tl.to('#cursor', { ...setC(494, 1652), duration: 64/30, ease: 'power2.out' }, 10/30);
       tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 74/30);
       tl.set('#ripple', { x: 434, y: 1592, scale: 0, opacity: 1 }, 74/30);

@@ -29,9 +29,21 @@ export function waypointsToHfBlock(entry) {
 
   const out = [];
   const first = wps[0];
-  out.push(
-    `gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(${first.x}, ${first.y}) });`,
-  );
+  // Match Remotion FloatingHand behavior: if first waypoint is after frame 0,
+  // cursor is invisible until that frame (FloatingHand returns null before
+  // startFrame). Otherwise cursor is visible from scene start.
+  if (first.frame > 0) {
+    out.push(
+      `gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(${first.x}, ${first.y}) });`,
+    );
+    out.push(
+      `tl.to('#cursor', { opacity: 1, duration: 0.1 }, ${first.frame}/30);`,
+    );
+  } else {
+    out.push(
+      `gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(${first.x}, ${first.y}) });`,
+    );
+  }
 
   let prev = first;
   for (let i = 1; i < wps.length; i++) {

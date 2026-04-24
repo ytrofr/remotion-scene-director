@@ -27,7 +27,7 @@
         height: 1920px;
         overflow: hidden;
         background: #fff;
-        font-family: "Rubik", sans-serif;
+        font-family: 'Rubik', sans-serif;
       }
       #stage {
         width: 1080px;
@@ -257,19 +257,19 @@
 
     <script>
       const phone = buildDorianPhone({
-        mountId: "phone-mount",
-        contentTemplateId: "phone-content",
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
         zoom: 1.8,
         showAiBubble: false,
         hideSearch: true,
       });
 
       // Pre-zoom to scene-4 state
-      gsap.set("#phone-stage", { scale: 1.528, y: -374 });
+      gsap.set('#phone-stage', { scale: 1.528, y: -374 });
 
       // Append chat panel (no slide — already visible from scene 4)
       phone.screenEl.insertAdjacentHTML(
-        "beforeend",
+        'beforeend',
         `
         <div class="chat-panel">
           <div class="chat-header">
@@ -293,21 +293,21 @@
       const tl = gsap.timeline({ paused: true });
 
       // Title fade in
-      tl.to("#title", { opacity: 1, duration: 0.3, ease: "power2.out" }, 0);
+      tl.to('#title', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
 
       // Typewriter: "Show me LG TVs with best reviews" (33 chars), f5-f70 local
-      const MSG = "Show me LG TVs with best reviews";
-      const typedEl = document.getElementById("typed-text");
+      const MSG = 'Show me LG TVs with best reviews';
+      const typedEl = document.getElementById('typed-text');
       tl.to(
         { n: 0 },
         {
           n: MSG.length,
           duration: 65 / 30,
-          ease: "none",
+          ease: 'none',
           onUpdate() {
             const n = Math.floor(this.targets()[0].n);
-            typedEl.textContent = n > 0 ? MSG.slice(0, n) : "Type a message...";
-            typedEl.classList.toggle("placeholder", n === 0);
+            typedEl.textContent = n > 0 ? MSG.slice(0, n) : 'Type a message...';
+            typedEl.classList.toggle('placeholder', n === 0);
           },
         },
         5 / 30,
@@ -315,68 +315,54 @@
 
       // Send button activates after typing
       tl.call(
-        () => document.getElementById("chat-send").classList.add("active"),
+        () => document.getElementById('chat-send').classList.add('active'),
         null,
         70 / 30,
       );
 
       // Send button pulse after typing done (subtle)
       tl.to(
-        "#chat-send",
+        '#chat-send',
         {
           scale: 1.08,
           duration: 0.4,
           yoyo: true,
           repeat: 3,
-          ease: "sine.inOut",
+          ease: 'sine.inOut',
         },
         70 / 30,
       );
 
-      // Cursor path — appears at f70, moves to send button, clicks at f105
+      // Cursor path (comp-space). setC offsets Lottie tip into position.
       const TIP_X = 45,
         TIP_Y = 55;
       const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
 
-      gsap.set("#cursor", { opacity: 0, rotation: 0, ...setC(750, 1520) });
-      tl.to("#cursor", { opacity: 1, duration: 0.1 }, 70 / 30);
-      tl.to(
-        "#cursor",
-        { ...setC(730, 1500), duration: 15 / 30, ease: "power2.out" },
-        70 / 30,
-      );
-      tl.to(
-        "#cursor",
-        { ...setC(720, 1490), duration: 15 / 30, ease: "power2.out" },
-        85 / 30,
-      );
-
-      // Click at f105 (3.5s)
+      // Scene-specific click side-effects: mark input sent, clear typed text,
+      // reveal the user message bubble. Fires at click frame 105.
       tl.call(
         () => {
-          document.getElementById("chat-input").classList.add("sent");
-          document.getElementById("typed-text").innerHTML =
+          document.getElementById('chat-input').classList.add('sent');
+          document.getElementById('typed-text').innerHTML =
             '<span class="placeholder">Type a message...</span>';
-          const msg = document.getElementById("user-msg");
-          msg.style.opacity = "1";
-          const player = document.querySelector("#cursor dotlottie-player");
-          if (player && player.seek) player.seek(35);
+          const msg = document.getElementById('user-msg');
+          msg.style.opacity = '1';
         },
         null,
         105 / 30,
       );
-      tl.set(
-        "#ripple",
-        { x: 720 - 60, y: 1490 - 60, scale: 0, opacity: 1 },
-        105 / 30,
-      );
-      tl.to(
-        "#ripple",
-        { scale: 1.5, opacity: 0, duration: 0.5, ease: "power2.out" },
-        105 / 30,
-      );
 
-      window.__timelines["main"] = tl;
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(610, 1654) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 70/30);
+      tl.to('#cursor', { ...setC(968, 1638), duration: 35/30, ease: 'power2.in' }, 70/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 105/30);
+      tl.set('#ripple', { x: 908, y: 1578, scale: 0, opacity: 1 }, 105/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 105/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 115/30);
+      // @auto-generated-from-scene-director:end
+
+      window.__timelines['main'] = tl;
     </script>
   </body>
 </html>

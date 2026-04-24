@@ -89,7 +89,17 @@ See `.claude/rules/hyperframes-patterns.md`. Critical reminders:
 
 - Remotion scenes (2-12): SceneDirector waypoints + audio layers as today.
 - HF scenes (1, 13): motion graphics only, no gestures, authored in code.
-- **Future**: if HF gets gesture scenes, build "Export to HF" button in SceneDirector Toolbar (translates waypoints → GSAP `tl.to()` calls, ~2-3h work).
+- **HF gesture scenes (4-9, 11, 12)**: SceneDirector auto-sync on Save regenerates the cursor-path block in `hf/scenes/<N>-<name>.html` between `// @auto-generated-from-scene-director:start/:end` markers. See `.claude/rules/hf-auto-sync.md` for wiring protocol + API contract.
+
+## Coord-system equivalence (load-bearing invariant)
+
+**HF scenes 4-9 phone-stage transform MUST remain `scale: 1.528, y: -374` on top of `buildDorianPhone({ zoom: 1.8 })`.** This makes effective scale `1.8 × 1.528 = 2.75 ≈ Remotion's chat-zoom 2.76`, so a waypoint coord authored in SceneDirector (Remotion composition-space at chat-zoom) renders at the SAME visual target in HF.
+
+Changing the phone-stage transform in any HF scene BREAKS auto-sync — the generated cursor coords will land at the wrong visual target even though the block regenerates correctly. Either use a coord-adapter helper in `hf/lib/dorian-phone.js`, or exclude that scene from auto-sync (remove markers, author manually).
+
+The cursor element is a SIBLING of `#phone-stage`, so cursor coords are always composition-space regardless of phone-stage transform. But the VISUAL TARGET moves with the transform — that's where the coupling comes from.
+
+Evidence: 2026-04-24 — scene 4 authored at (480, 1550) with transform 1.528/-374 landed BELOW the phone (composition-y > phone-bottom ≈ 1249). Same scene with (494, 1652) from Remotion waypoints lands ON the chat input. Same transform, different coords — coord-authoring was the bug, transform equivalence made the fix portable.
 
 ## Render Commands
 

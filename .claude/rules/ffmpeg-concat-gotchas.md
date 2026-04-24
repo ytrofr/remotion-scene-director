@@ -63,6 +63,22 @@ fi
 
 Or simpler: delete `out/dorian-full.mp4` before assembly and let the guard fail loud.
 
+## 4. Per-stage CRF ≠ final quality when a downstream step re-encodes
+
+**Symptom**: Unifying CRF across all pre-concat inputs produces no visible quality delta. Bitrate differs by <1%, SSIM >0.99.
+
+**Cause**: If a downstream step re-encodes everything at CRF N (e.g. `apply_2x` at CRF 20), the output quality is bounded by **that step's CRF**, not by upstream per-input CRF. The re-encode acts as a codec equalizer — upstream CRF differences vanish.
+
+**Implication**: When one concat input "looks lower quality" than another at the same final CRF, the difference is **content complexity** (simpler scenes compress smaller at the same perceptual target), not encoder settings.
+
+**Fix**: Don't chase per-input CRF uniformity if a downstream re-encode exists. Either:
+
+- Accept content-driven size variance (normal)
+- Raise the FINAL CRF setting (CRF 20 → CRF 18) if the whole bundle looks too compressed
+- Investigate content: maybe the "lower quality" input actually has fewer visible details, not worse encoding
+
+**Evidence**: 2026-04-24 — added `--crf 20` to hyperframes per-scene render to match Remotion slice CRF 20. SSIM of HF 2x before/after: 0.9922. Bitrate delta: -1% (within encoding noise). The change is cosmetically cleaner but produces zero visible improvement because `apply_2x` already normalizes at CRF 20.
+
 ---
 
 ## Companion Rules

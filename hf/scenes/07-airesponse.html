@@ -271,34 +271,15 @@
         40 / 30,
       );
 
-      // Cursor path — appears f70, moves toward View Products button, clicks at f95
       const TIP_X = 45,
         TIP_Y = 55;
       const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
 
-      // Starting position — below, to the right of the button
-      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(650, 1600) });
-      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 70 / 30);
-      // f70-f85: move up toward button
-      tl.to(
-        '#cursor',
-        { ...setC(560, 1480), duration: 15 / 30, ease: 'power2.out' },
-        70 / 30,
-      );
-      // f85-f95: final approach to button center
-      tl.to(
-        '#cursor',
-        { ...setC(540, 1450), duration: 10 / 30, ease: 'power2.in' },
-        85 / 30,
-      );
-
-      // f95: Click — button press feedback + ripple + cursor click frame
+      // Scene-specific: button press feedback on click frame
       tl.call(
         () => {
           const btn = document.getElementById('view-btn');
           if (btn) btn.style.transform = 'scale(0.95)';
-          const player = document.querySelector('#cursor dotlottie-player');
-          if (player && player.seek) player.seek(35);
         },
         null,
         95 / 30,
@@ -308,19 +289,16 @@
         { scale: 1, duration: 0.15, ease: 'power2.out' },
         98 / 30,
       );
-      tl.set(
-        '#ripple',
-        { x: 540 - 60, y: 1450 - 60, scale: 0, opacity: 1 },
-        95 / 30,
-      );
-      tl.to(
-        '#ripple',
-        { scale: 1.8, opacity: 0, duration: 0.5, ease: 'power2.out' },
-        95 / 30,
-      );
 
-      // Cursor fades after tap
-      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 102 / 30);
+      // @auto-generated-from-scene-director:start
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(540, 1600) });
+      tl.to('#cursor', { opacity: 1, duration: 0.1 }, 70/30);
+      tl.to('#cursor', { ...setC(368, 1351), duration: 25/30, ease: 'power2.in' }, 70/30);
+      tl.call(() => { const p = document.querySelector('#cursor dotlottie-player'); if (p && p.seek) p.seek(35); }, null, 95/30);
+      tl.set('#ripple', { x: 308, y: 1291, scale: 0, opacity: 1 }, 95/30);
+      tl.to('#ripple', { scale: 1.5, opacity: 0, duration: 0.5, ease: 'power2.out' }, 95/30);
+      tl.to('#cursor', { opacity: 0, duration: 0.15 }, 105/30);
+      // @auto-generated-from-scene-director:end
 
       // f100-f140: Product cards slide up with stagger (from below phone)
       tl.to(

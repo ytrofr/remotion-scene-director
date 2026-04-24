@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
+import { spawn } from 'child_process';
 
 function savePathPlugin(): Plugin {
   return {
@@ -197,6 +198,87 @@ function savePathPlugin(): Plugin {
             res.end(JSON.stringify({ error: String(err) }));
           }
         });
+      });
+
+      // Render-mode dispatcher: spawns a detached npm/bash script.
+      // Body: { mode: 'remotion' | 'hybrid' | 'hf' }
+      // Returns immediately with logPath so the UI can poll tail.
+      server.middlewares.use('/api/render-mode', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: string) => (body += chunk));
+        req.on('end', () => {
+          try {
+            const { mode } = JSON.parse(body) as {
+              mode: 'remotion' | 'hybrid' | 'hf';
+            };
+            const MODE_MAP: Record<string, { cmd: string; args: string[] }> = {
+              remotion: { cmd: 'npm', args: ['run', 'render:full'] },
+              hybrid: {
+                cmd: 'bash',
+                args: ['scripts/assemble-dorian-three-way.sh'],
+              },
+              hf: { cmd: 'npm', args: ['run', 'render:hf-full'] },
+            };
+            const spec = MODE_MAP[mode];
+            if (!spec) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: `unknown mode: ${mode}` }));
+              return;
+            }
+            const ts = new Date().toISOString().replace(/[:.]/g, '-');
+            const logPath = `/tmp/render-${mode}-${ts}.log`;
+            const logFd = fs.openSync(logPath, 'w');
+            const child = spawn(spec.cmd, spec.args, {
+              cwd: __dirname,
+              detached: true,
+              stdio: ['ignore', logFd, logFd],
+            });
+            child.unref();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify({
+                success: true,
+                mode,
+                pid: child.pid,
+                logPath,
+              }),
+            );
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+        });
+      });
+
+      // Poll render log: tail last N lines of a logfile.
+      server.middlewares.use('/api/render-status', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const url = new URL(req.url || '', 'http://localhost');
+          const logPath = url.searchParams.get('logPath') || '';
+          // Only allow /tmp/render-*.log paths — prevent path traversal
+          if (!/^\/tmp\/render-[a-z]+-[\d\-TZ]+\.log$/.test(logPath)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'invalid logPath' }));
+            return;
+          }
+          if (!fs.existsSync(logPath)) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ running: false, tail: '' }));
+            return;
+          }
+          const content = fs.readFileSync(logPath, 'utf8');
+          const lines = content.split('\n');
+          const tail = lines.slice(-20).join('\n');
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(
+            JSON.stringify({ running: true, tail, bytes: content.length }),
+          );
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: String(err) }));
+        }
       });
 
       server.middlewares.use('/api/save-path', (req, res, next) => {

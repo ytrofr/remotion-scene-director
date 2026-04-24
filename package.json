@@ -20,7 +20,7 @@
     "render:dashmor": "remotion render DashmorDemo out/dashmor-labor-v3.mp4 --gl=angle --codec h264 --crf 23",
     "render:capabilities": "remotion render CapabilitiesDemo out/capabilities-demo.mp4 --gl=angle --codec h264 --crf 23 && ./scripts/post-render-feedback.sh CapabilitiesDemo out/capabilities-demo.mp4",
     "render:stores": "remotion render src/index.ts DorianStores out/dorian-stores.mp4 --gl=angle --codec h264 --crf 23",
-    "render:full": "remotion render src/index.ts DorianFull out/dorian-full.mp4 --gl=angle --codec h264 --crf 23",
+    "render:full": "remotion render src/index.ts DorianFull out/dorian-full.mp4 --gl=angle --codec h264 --crf 20",
     "render:sigma-app": "remotion render src/index.ts SigmaAppDemo out/sigma-app-demo.mp4 --gl=angle --codec h264 --crf 23",
     "render:sigma-investor": "remotion render src/index.ts SigmaInvestorDemo out/sigma-investor-demo.mp4 --gl=angle --codec h264 --crf 23",
     "capture": "npx ts-node scripts/capture-real-screens.ts",

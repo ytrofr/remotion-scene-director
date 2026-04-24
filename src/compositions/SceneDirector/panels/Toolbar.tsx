@@ -45,6 +45,57 @@ export const Toolbar: React.FC = () => {
   const [hasBackup, setHasBackup] = useState<boolean>(
     () => !!getReloadBackup(),
   );
+
+  // Render mode state (Pure Remotion / Hybrid / Pure HF). Only meaningful for
+  // DorianFull — the only composition with an HF counterpart.
+  const [renderMode, setRenderMode] = useState<'remotion' | 'hybrid' | 'hf'>(
+    'remotion',
+  );
+  const [renderState, setRenderState] = useState<
+    'idle' | 'starting' | 'running' | 'error'
+  >('idle');
+  const [renderLogPath, setRenderLogPath] = useState<string | null>(null);
+  const [renderTail, setRenderTail] = useState<string>('');
+  const supportsDualStack = state.compositionId === 'DorianFull';
+
+  const handleRender = useCallback(async () => {
+    setRenderState('starting');
+    setRenderTail('');
+    try {
+      const res = await fetch('/api/render-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: renderMode }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed');
+      setRenderLogPath(data.logPath);
+      setRenderState('running');
+    } catch (err) {
+      console.error('render failed:', err);
+      setRenderState('error');
+      setTimeout(() => setRenderState('idle'), 3000);
+    }
+  }, [renderMode]);
+
+  // Poll the render log while running
+  useEffect(() => {
+    if (renderState !== 'running' || !renderLogPath) return;
+    const poll = async () => {
+      try {
+        const res = await fetch(
+          `/api/render-status?logPath=${encodeURIComponent(renderLogPath)}`,
+        );
+        const data = await res.json();
+        if (data.tail) setRenderTail(data.tail);
+      } catch {
+        // ignore transient poll failures
+      }
+    };
+    poll();
+    const id = setInterval(poll, 3000);
+    return () => clearInterval(id);
+  }, [renderState, renderLogPath]);
   useEffect(() => {
     const id = setInterval(() => setHasBackup(!!getReloadBackup()), 5000);
     return () => clearInterval(id);
@@ -536,6 +587,67 @@ export const Toolbar: React.FC = () => {
       >
         Gallery
       </button>
+
+      {/* Render Mode — only for DorianFull (dual-stack composition) */}
+      {supportsDualStack && (
+        <>
+          <div className="toolbar__divider" />
+          <select
+            value={renderMode}
+            onChange={(e) =>
+              setRenderMode(e.target.value as 'remotion' | 'hybrid' | 'hf')
+            }
+            className="toolbar__select"
+            disabled={renderState === 'running' || renderState === 'starting'}
+            title="Render mode"
+          >
+            <option value="remotion">Pure Remotion</option>
+            <option value="hybrid">Hybrid (Both)</option>
+            <option value="hf">Pure HF</option>
+          </select>
+          <button
+            onClick={handleRender}
+            disabled={renderState === 'running' || renderState === 'starting'}
+            className={`toolbar__btn ${
+              renderState === 'error'
+                ? 'toolbar__btn--clear'
+                : renderState === 'running'
+                  ? 'toolbar__btn--save-ok'
+                  : 'toolbar__btn--export'
+            }`}
+            title={
+              renderState === 'running'
+                ? `Rendering... log: ${renderLogPath}`
+                : `Trigger ${renderMode} render via npm script`
+            }
+          >
+            {renderState === 'starting'
+              ? 'Starting…'
+              : renderState === 'running'
+                ? 'Rendering…'
+                : renderState === 'error'
+                  ? 'Error'
+                  : 'Render'}
+          </button>
+          {renderState === 'running' && renderTail && (
+            <span
+              className="toolbar__render-tail"
+              title={renderTail}
+              style={{
+                fontSize: '10px',
+                color: '#888',
+                maxWidth: '240px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontFamily: 'monospace',
+              }}
+            >
+              {renderTail.split('\n').filter(Boolean).slice(-1)[0] || ''}
+            </span>
+          )}
+        </>
+      )}
     </div>
   );
 };

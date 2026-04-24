@@ -29,7 +29,7 @@ for scene in $(ls "$SCENES_DIR"/*.html | sort); do
   echo ""
   echo "→ $name"
   cp "$scene" "$WORK_DIR/index.html"
-  npx hyperframes render "$WORK_DIR/" -o "$OUT_DIR/$name.mp4" -q standard -f 30 --quiet 2>&1 | tail -3
+  npx hyperframes render "$WORK_DIR/" -o "$OUT_DIR/$name.mp4" -q standard -f 30 --crf 20 --quiet 2>&1 | tail -3
 done
 END=$(date +%s)
 echo ""

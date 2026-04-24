@@ -89,7 +89,14 @@ See `.claude/rules/hyperframes-patterns.md`. Critical reminders:
 
 - Remotion scenes (2-12): SceneDirector waypoints + audio layers as today.
 - HF scenes (1, 13): motion graphics only, no gestures, authored in code.
-- **HF gesture scenes (4-9, 11, 12)**: SceneDirector auto-sync on Save regenerates the cursor-path block in `hf/scenes/<N>-<name>.html` between `// @auto-generated-from-scene-director:start/:end` markers. See `.claude/rules/hf-auto-sync.md` for wiring protocol + API contract.
+- **HF gesture scenes auto-sync status** (updated 2026-04-24):
+  - **Wired (7/13)**: 3, 4, 5, 7, 8, 10, 11 — Save in SceneDirector regenerates the cursor-path block between `// @auto-generated-from-scene-director:start/:end` markers.
+  - **Not wired (3)**: 2-HomeScroll, 6-AIThinking — no cursor gestures (pure motion graphics).
+  - **Pending waypoint authoring (2)**: 9-ProductDetail, 12-AIProducts — no waypoints saved yet; open SceneDirector → draw → Save.
+  - Scene 1 + 13 are motion graphics, not applicable.
+- **Exporter capabilities**: pointer moves, clicks with ripple + lottie seek, drag rotation deltas, multi-click re-show (instant jump while invisible), `secondaryLayers[]` (time-disjoint independent cursor paths on shared `#cursor`). ~180 LOC in `scripts/hf-exporter.mjs`.
+- **Health check**: `npm run doctor:dual-stack` — 6 lint checks (drift, markers, elements, allowlist). Wired into `render:hf-full` pre-flight.
+- See `.claude/rules/hf-auto-sync.md` for wiring protocol + API contract.
 
 ## Coord-system equivalence (load-bearing invariant)
 

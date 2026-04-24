@@ -4,6 +4,18 @@
 set -e
 cd "$(dirname "$0")/.."
 
+# Pre-flight: verify no wired HF scene has drifted from codedPaths.data.json.
+# Stale auto-gen blocks would render with old cursor positions. Fail loud.
+echo "=== Pre-flight: doctor:dual-stack ==="
+if ! node scripts/doctor-dual-stack.mjs; then
+  echo ""
+  echo "ABORT: HF auto-sync drift detected. Run Save in SceneDirector on the"
+  echo "affected scenes (or edit codedPaths.data.json + re-run exporter) before"
+  echo "rendering — otherwise output will have stale cursor positions."
+  exit 1
+fi
+echo ""
+
 SCENES_DIR="hf/scenes"
 WORK_DIR="hf/.render-work"
 OUT_DIR="public/hf-clips"

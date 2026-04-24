@@ -171,7 +171,7 @@
         {
           "x": 1050,
           "y": 960,
-          "frame": 105,
+          "frame": 25,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -179,7 +179,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 115,
+          "frame": 35,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -187,7 +187,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 118,
+          "frame": 38,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -195,7 +195,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 130,
+          "frame": 50,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -203,7 +203,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 140,
+          "frame": 60,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -211,7 +211,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 145,
+          "frame": 65,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -219,7 +219,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 150,
+          "frame": 70,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -301,7 +301,7 @@
         {
           "x": 1050,
           "y": 960,
-          "frame": 105,
+          "frame": 25,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -309,7 +309,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 115,
+          "frame": 35,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -317,7 +317,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 118,
+          "frame": 38,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -325,7 +325,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 130,
+          "frame": 50,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -333,7 +333,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 140,
+          "frame": 60,
           "gesture": "drag",
           "scale": 1,
           "rotation": -30
@@ -341,7 +341,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 145,
+          "frame": 65,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0
@@ -349,7 +349,7 @@
         {
           "x": 780,
           "y": 960,
-          "frame": 150,
+          "frame": 70,
           "gesture": "pointer",
           "scale": 1,
           "rotation": 0

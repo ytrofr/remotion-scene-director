@@ -33,13 +33,18 @@ Code OUTSIDE the markers is user-owned: title fades, panel slides, class toggles
 
 ## What Gets Auto-Generated
 
-| Input (waypoint)               | Output (HF GSAP)                                                                         |
-| ------------------------------ | ---------------------------------------------------------------------------------------- |
-| First waypoint `{x, y, frame}` | `gsap.set('#cursor', { opacity: 1, rotation: 0, ...setC(x, y) });`                       |
-| Pointer waypoint               | `tl.to('#cursor', { ...setC(x, y), duration: d/30, ease: 'power2.out' }, prevFrame/30);` |
-| Click waypoint                 | lottie `seek(35)` tl.call + ripple tl.set + ripple tl.to + cursor fade-out tl.to         |
+| Input (waypoint)                | Output (HF GSAP)                                                                                                                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| First waypoint `{x, y, frame}`  | `gsap.set('#cursor', { opacity: frame>0 ? 0 : 1, rotation: wp.rotation\|\|0, ...setC(x, y) });` + `tl.to opacity:1` at frame if frame>0         |
+| Pointer waypoint                | `tl.to('#cursor', { ...setC(x, y), duration: d/30, ease: 'power2.out' }, prevFrame/30);`                                                        |
+| Drag waypoint (rotation ≠ prev) | `tl.to('#cursor', { rotation: N, duration: d/30 }, prevFrame/30);` — rotation-only emission if same position                                    |
+| Click waypoint                  | lottie `seek(35)` tl.call + ripple tl.set + ripple tl.to + cursor fade-out tl.to at `frame+clickDur`                                            |
+| Re-show after prior click       | `tl.set('#cursor', { ...setC(wp.x, wp.y) }, hiddenSince/30)` + `tl.to opacity:1` at wp.frame — instant jump while invisible, no animated travel |
+| `secondaryLayers[]`             | Each layer processed independently on the shared `#cursor`: tl.set pin at prior fade-out frame + fade-in at layer's first waypoint              |
 
-**NOT auto-generated** (user-owned): class toggles, content mutations, title/panel animations, `<audio>` tags, secondary hand layers.
+**NOT auto-generated** (user-owned): class toggles, content mutations, title/panel animations, `<audio>` tags.
+
+**Secondary layers MUST be time-disjoint** — primary's last click fades cursor out, then sec[0] re-shows at its first waypoint, etc. Overlapping layers would collide on the single `#cursor` element.
 
 ## API Contract
 
@@ -72,8 +77,21 @@ If auto-generated HF cursor lands in WRONG visual position, HALT rollout. Likely
 
 ## Implementation
 
-`scripts/hf-exporter.mjs` (~70 LOC): `waypointsToHfBlock()`, `sceneNameToHfFilename()`, `updateHfScene()`.
-Integration in `vite.config.ts` `/api/save-path` middleware.
+`scripts/hf-exporter.mjs` (~180 LOC): `waypointsToHfBlock()`, `processLayer()`, `emitMove()`, `sceneNameToHfFilename()`, `updateHfScene()`.
+Integration in `vite.config.ts` `/api/save-path` middleware — allowlist: `DorianFull`, `DorianDemo`.
+
+## Health Check
+
+`npm run doctor:dual-stack` — read-only lint for the auto-sync pipeline. 6 checks:
+
+1. Every wired HF scene has `setC` helper + `#cursor` + `#ripple` elements
+2. No hand-authored `tl.(to|set)('#cursor')` OUTSIDE markers (prevents drift)
+3. Scene entry exists in `codedPaths.data.json` (so Save round-trips)
+4. Block byte-exactly matches exporter output (detects stale auto-gen)
+5. Scenes in chat-zoom range (4-9) with `#phone-stage` → verify scale 1.528
+6. `vite.config.ts` allowlist includes `DorianFull` + `DorianDemo`
+
+Exits 1 on any problem. Run after merges, before renders, after mass edits.
 
 ## Companion Rules
 

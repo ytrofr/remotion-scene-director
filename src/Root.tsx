@@ -51,6 +51,20 @@ import {
   SigmaInvestorDemo,
   SIGMA_VIDEO,
 } from './compositions/SigmaInvestorDemo';
+import {
+  ScopeDemoComposition,
+  OAuthFlowComposition,
+  GMAIL_READONLY,
+  GMAIL_SEND,
+  GMAIL_COMPOSE,
+  GMAIL_MODIFY,
+  CALENDAR_DEMO,
+  CONTACTS_DEMO,
+  SHEETS_DEMO,
+  OAUTH_DEMO_FPS,
+  OAUTH_DEMO_WIDTH,
+  OAUTH_DEMO_HEIGHT,
+} from './compositions/AgentSmithOAuth';
 import { SigmaAppDemo, SIGMA_APP_VIDEO } from './compositions/SigmaAppDemo';
 import { DemoCreative } from './compositions/SigmaAppDemo/demos/DemoCreative';
 import { DemoContext } from './compositions/SigmaAppDemo/demos/DemoContext';
@@ -340,6 +354,81 @@ export const RemotionRoot: React.FC = () => {
           fps={STORES_VIDEO.fps}
           width={STORES_VIDEO.width}
           height={STORES_VIDEO.height}
+        />
+      </Folder>
+
+      {/* Google OAuth Verification — submission demo videos */}
+      <Folder name="AgentSmith-OAuth-Verification">
+        <Composition
+          id="AgentSmithOAuthFlow"
+          component={OAuthFlowComposition}
+          durationInFrames={1650}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithGmailReadonly"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: GMAIL_READONLY}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithGmailSend"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: GMAIL_SEND}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithGmailCompose"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: GMAIL_COMPOSE}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithGmailModify"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: GMAIL_MODIFY}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithCalendar"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: CALENDAR_DEMO}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithContacts"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: CONTACTS_DEMO}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
+        />
+        <Composition
+          id="AgentSmithSheets"
+          component={ScopeDemoComposition}
+          defaultProps={{demo: SHEETS_DEMO}}
+          durationInFrames={1500}
+          fps={OAUTH_DEMO_FPS}
+          width={OAUTH_DEMO_WIDTH}
+          height={OAUTH_DEMO_HEIGHT}
         />
       </Folder>
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}

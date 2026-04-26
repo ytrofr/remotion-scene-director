@@ -3,8 +3,11 @@
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .export-modal__backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.8);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -23,7 +26,7 @@
   flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.25s ease;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }
 .export-modal__header {
   display: flex;
@@ -182,9 +185,27 @@
 .feedback-pin__dot span {
   transform: rotate(45deg);
 }
-.feedback-pin--issue .feedback-pin__dot { background: #ef4444; }
-.feedback-pin--idea .feedback-pin__dot { background: #3b82f6; }
-.feedback-pin--question .feedback-pin__dot { background: #a855f7; }
+.feedback-pin__frame-tag {
+  margin-top: 2px;
+  padding: 1px 6px;
+  background: rgba(17, 24, 39, 0.85);
+  color: #fbbf24;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.feedback-pin--issue .feedback-pin__dot {
+  background: #ef4444;
+}
+.feedback-pin--idea .feedback-pin__dot {
+  background: #3b82f6;
+}
+.feedback-pin--question .feedback-pin__dot {
+  background: #a855f7;
+}
 .feedback-pin--resolved .feedback-pin__dot {
   background: #6b7280;
   opacity: 0.55;
@@ -303,7 +324,10 @@
   margin-top: 3px;
   flex-shrink: 0;
 }
-.feedback-panel__row-body { flex: 1; min-width: 0; }
+.feedback-panel__row-body {
+  flex: 1;
+  min-width: 0;
+}
 .feedback-panel__row-note {
   color: var(--text);
   word-break: break-word;

@@ -84,8 +84,9 @@ export const FeedbackPanel: React.FC = () => {
     <div className="feedback-panel">
       <h3>Feedback — {composition.label}</h3>
       <div className="feedback-panel__hint">
-        Click anywhere on the video to drop a pin at the current frame. Pins
-        persist locally and sync to disk on Save.
+        Click the video to drop a pin at the current frame. Pins are
+        time-anchored — they only appear when the playhead is within ±15 frames
+        (~½s). Click any row below to jump to its frame.
       </div>
 
       {pins.length === 0 ? (

@@ -145,6 +145,30 @@ export const App: React.FC = () => {
     if (frameParam) {
       urlFrameRef.current = parseInt(frameParam, 10);
     }
+
+    // Hydrate feedback pins from disk if localStorage didn't have any.
+    // localStorage is the primary store (faster, survives refresh) but if a
+    // fresh browser opens or the Reload button wiped session, the disk file
+    // is the only place older pins live. Best-effort, fire-and-forget.
+    if (
+      !restoredInitial.feedbackPins ||
+      Object.keys(restoredInitial.feedbackPins).length === 0
+    ) {
+      fetch('/api/load-feedback-pins', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((diskPins) => {
+          if (
+            diskPins &&
+            typeof diskPins === 'object' &&
+            Object.keys(diskPins).length > 0
+          ) {
+            dispatch({ type: 'LOAD_FEEDBACK_PINS', pins: diskPins });
+          }
+        })
+        .catch(() => {
+          /* file missing on first run is expected */
+        });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount only
 

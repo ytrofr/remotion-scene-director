@@ -394,6 +394,29 @@ function savePathPlugin(): Plugin {
           }
         });
       });
+
+      // Read feedback pins back from disk — fallback when localStorage is
+      // empty (fresh browser, post-Reload). Returns {} if file missing.
+      server.middlewares.use('/api/load-feedback-pins', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const filePath = path.resolve(
+            __dirname,
+            'src/compositions/SceneDirector/feedbackNotes.data.json',
+          );
+          if (!fs.existsSync(filePath)) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end('{}');
+            return;
+          }
+          const content = fs.readFileSync(filePath, 'utf8');
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(content);
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: String(err) }));
+        }
+      });
     },
   };
 }

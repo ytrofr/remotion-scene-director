@@ -24,6 +24,16 @@ function newPinId() {
   return `pin-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+/**
+ * Pins are time-anchored: visible only when the playhead is within
+ * ±PIN_VISIBILITY_WINDOW frames of the pin's anchor frame. Outside that
+ * window the pin disappears so playback isn't cluttered. The currently-
+ * editing pin is always visible (otherwise typing the note is impossible).
+ *
+ * 30fps × 0.5s = 15 frames either side.
+ */
+const PIN_VISIBILITY_WINDOW = 15;
+
 export const FeedbackOverlay: React.FC<Props> = ({ containerRef }) => {
   const { state, dispatch, composition, frame, playerRef, currentScene } =
     useDirector();
@@ -33,7 +43,15 @@ export const FeedbackOverlay: React.FC<Props> = ({ containerRef }) => {
     composition.video.height,
   );
 
-  const pins = state.feedbackPins[state.compositionId] ?? [];
+  const allPins = state.feedbackPins[state.compositionId] ?? [];
+
+  // Time-anchored visibility: only show pins near the current frame, plus
+  // whichever one is being edited (so its textarea doesn't disappear mid-type).
+  const pins = allPins.filter(
+    (p) =>
+      p.id === state.editingPinId ||
+      Math.abs(p.frame - frame) <= PIN_VISIBILITY_WINDOW,
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -134,7 +152,7 @@ const PinMarker: React.FC<PinMarkerProps> = ({
       <div
         className="feedback-pin__dot"
         onClick={handleDotClick}
-        title={`Scene: ${pin.scene} • Frame ${pin.frame}`}
+        title={`Scene: ${pin.scene} • Frame ${pin.frame} (click to jump)`}
       >
         <span>
           {pin.severity === 'idea'
@@ -144,6 +162,7 @@ const PinMarker: React.FC<PinMarkerProps> = ({
               : '•'}
         </span>
       </div>
+      <div className="feedback-pin__frame-tag">f{pin.frame}</div>
       {(isEditing || pin.note) && (
         <div
           className="feedback-pin__note"

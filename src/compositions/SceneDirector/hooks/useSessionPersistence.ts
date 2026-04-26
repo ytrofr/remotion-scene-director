@@ -160,8 +160,13 @@ export function useSessionPersistence(state: DirectorState, frame: number) {
 
   // Auto-sync feedback pins to disk (debounced 800ms). Fire-and-forget —
   // localStorage is the primary store; disk is just so Claude can read them
-  // without a manual Save. Skips when pins haven't changed.
-  const lastPinsJsonRef = useRef<string>('');
+  // without a manual Save.
+  //
+  // CRITICAL: seed lastPinsJsonRef with the INITIAL state on first render so
+  // the effect's mount-time fire is a no-op. Otherwise an empty in-memory
+  // state on a fresh browser would clobber the user's pins on disk before
+  // the disk-load fallback (in App.tsx) gets a chance to hydrate them.
+  const lastPinsJsonRef = useRef<string>(JSON.stringify(state.feedbackPins));
   useEffect(() => {
     const pinsJson = JSON.stringify(state.feedbackPins);
     if (pinsJson === lastPinsJsonRef.current) return;

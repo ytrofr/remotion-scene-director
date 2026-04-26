@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "description": "Frozen composition files. Edits blocked by .claude/hooks/protect-frozen-compositions.sh. See .claude/rules/version-safe-iteration.md for bump procedure.",
+  "frozen": [
+    {
+      "file": "src/compositions/DorianFull/DorianFull.tsx",
+      "version": "DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/DorianDemo.tsx",
+      "version": "DorianDemo V1.00 (used by DorianFull V1.00)",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/index.ts",
+      "version": "DorianDemo V1.00 (used by DorianFull V1.00)",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/IntroScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/HomeScrollScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/TapBubbleScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/ChatOpenScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/UserTypingScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/AIThinkingScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/AIResponseScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/ProductPageScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/ProductPageParts.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/ProductDetailScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianDemo/scenes/OutroScene.tsx",
+      "version": "DorianDemo V1.00 / DorianFull V1.00 (closing)",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianStores/DorianStores.tsx",
+      "version": "DorianStores V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianStores/scenes/StoreDashboardScene.tsx",
+      "version": "DorianStores V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianStores/scenes/MapSearchScene.tsx",
+      "version": "DorianStores V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    },
+    {
+      "file": "src/compositions/DorianStores/scenes/AIProductsScene.tsx",
+      "version": "DorianStores V1.00 / DorianFull V1.00",
+      "frozenAt": "2026-04-26"
+    }
+  ]
+}

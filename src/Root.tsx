@@ -48,6 +48,10 @@ import {
 } from './compositions/DorianStores/DorianStoresDebug';
 import { DorianFull, FULL_VIDEO } from './compositions/DorianFull/DorianFull';
 import {
+  DorianFullV1_01,
+  FULL_VIDEO_V1_01,
+} from './compositions/DorianFull/DorianFullV1.01';
+import {
   SigmaInvestorDemo,
   SIGMA_VIDEO,
 } from './compositions/SigmaInvestorDemo';
@@ -200,6 +204,14 @@ export const RemotionRoot: React.FC = () => {
           fps={FULL_VIDEO.fps}
           width={FULL_VIDEO.width}
           height={FULL_VIDEO.height}
+        />
+        <Composition
+          id="DorianFullV1-01"
+          component={DorianFullV1_01}
+          durationInFrames={FULL_VIDEO_V1_01.durationInFrames}
+          fps={FULL_VIDEO_V1_01.fps}
+          width={FULL_VIDEO_V1_01.width}
+          height={FULL_VIDEO_V1_01.height}
         />
       </Folder>
 
@@ -370,7 +382,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithGmailReadonly"
           component={ScopeDemoComposition}
-          defaultProps={{demo: GMAIL_READONLY}}
+          defaultProps={{ demo: GMAIL_READONLY }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -379,7 +391,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithGmailSend"
           component={ScopeDemoComposition}
-          defaultProps={{demo: GMAIL_SEND}}
+          defaultProps={{ demo: GMAIL_SEND }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -388,7 +400,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithGmailCompose"
           component={ScopeDemoComposition}
-          defaultProps={{demo: GMAIL_COMPOSE}}
+          defaultProps={{ demo: GMAIL_COMPOSE }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -397,7 +409,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithGmailModify"
           component={ScopeDemoComposition}
-          defaultProps={{demo: GMAIL_MODIFY}}
+          defaultProps={{ demo: GMAIL_MODIFY }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -406,7 +418,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithCalendar"
           component={ScopeDemoComposition}
-          defaultProps={{demo: CALENDAR_DEMO}}
+          defaultProps={{ demo: CALENDAR_DEMO }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -415,7 +427,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithContacts"
           component={ScopeDemoComposition}
-          defaultProps={{demo: CONTACTS_DEMO}}
+          defaultProps={{ demo: CONTACTS_DEMO }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
@@ -424,7 +436,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           id="AgentSmithSheets"
           component={ScopeDemoComposition}
-          defaultProps={{demo: SHEETS_DEMO}}
+          defaultProps={{ demo: SHEETS_DEMO }}
           durationInFrames={1500}
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}

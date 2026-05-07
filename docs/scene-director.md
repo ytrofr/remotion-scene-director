@@ -22,7 +22,12 @@ src/compositions/SceneDirector/
 ├── codedPaths.ts               # getCodedPath() — source-of-truth paths per scene
 ├── compositions.ts             # COMPOSITIONS registry + COMPOSITION_COMPONENTS
 ├── panels/
-│   ├── Toolbar.tsx             # Top bar: tool buttons, dark toggle, save
+│   ├── LeftRail.tsx            # Vertical 72px tool surface (gestures, Select, Undo, cursor size)
+│   ├── Toolbar.tsx             # Slim top bar: composition · version · feedback/trail · render · save cluster · ⋯ More
+│   ├── VersionBar.tsx          # Sub-version dropdown + lock badge (in Toolbar) — see "Version Dropdown Contract" below
+│   ├── MoreMenu.tsx            # ⋯ overflow menu: Reload / Undo Reload / Export / Gallery / Freeze
+│   ├── ToolbarDemos.tsx        # Standalone design-decision page at ?view=toolbar-demos
+│   ├── icons.tsx               # Inline SVG icon set (currentColor stroke)
 │   ├── SceneList.tsx           # Left: scene list + layer stack per scene
 │   ├── Inspector.tsx           # Right: waypoint/layer editor tabs
 │   ├── Timeline.tsx            # Bottom: multi-row timeline (scenes/hand/audio)
@@ -43,6 +48,60 @@ src/compositions/SceneDirector/
     ├── useGallerySelection.ts  # Gallery active set + localStorage persistence
     └── galleryActive.ts        # Derives picker lists from galleryData pickerSlot
 ```
+
+### Toolbar Layout (Layout C — Left Rail + Slim Top, since 2026-04-26)
+
+CSS grid in `styles/base.css` adds a `rail` column on the left:
+
+```
+grid-template-columns: 72px 210px 1fr 250px;
+grid-template-areas:
+  "rail toolbar  toolbar   toolbar"
+  "rail scenes   player    inspector"
+  "rail timeline timeline  timeline";
+```
+
+**LeftRail** (72px, full height, Figma-style):
+
+- 5 gesture buttons (Click/Scroll/Drag/Swipe/Point) — keys 1-5
+- divider → Select (S) + Undo (Ctrl+Z)
+- divider → cursor size slider (only when a non-Select tool is active)
+- Click an active gesture again → variant flyout pops to the **right** of the rail (Hand Style / Pointer / Light-Dark / Click Effect)
+
+**Top Toolbar** (slim) carries:
+
+- SD logo · Composition select · `<VersionBar>` · spacer
+- Feedback (F) · Trail (T)
+- Render mode select + Render button (only when composition supports dual-stack — i.e. DorianFull)
+- **Save cluster**: Save (Ctrl+S) · Save as Version · Revert · ⋯ More
+
+**Save cluster mechanics**:
+
+- **Save** writes current scene to disk + marks snapshot
+- **Save as Version** = Save + auto-bump (V1.0X → V1.0X+1). Backend `/api/versions/bump` clones the .tsx file, auto-seeds `codedPaths.data.json`, AND auto-wires all 5 registries (Root.tsx, compositions.ts COMPOSITIONS array + component-map, codedPaths.ts, layers.ts, package.json render scripts). Popover shows ✓/✗ per registry — anything ✗ is a manual fallback. Helpers live at the top of `vite.config.ts` (`wireRootTsx`, `wireCompositionsTs`, `wireCodedPathsTs`, `wireLayersTs`, `wirePackageJson`). See `.claude/rules/version-safe-iteration.md` for the procedure.
+- **Revert** restores last saved snapshot (only shown when a snapshot exists)
+- **⋯ More** popover holds: Reload from disk · Undo Reload · Export code · Gallery · Freeze
+
+**Cross-component triggers**: SaveCluster fires `window.dispatchEvent(new CustomEvent('sd-bump-version'))` after Save → VersionBar listens via window event and runs its existing onBump (popover renders anchored to VersionBar). Same pattern: MoreMenu's Freeze fires `sd-freeze-version`. Avoids state-lifting refactor.
+
+**Design-decision pattern**: visit `?view=toolbar-demos` to see the 4 mock layouts side-by-side using real CSS. Resize the window to test responsiveness. Layout C was picked here on 2026-04-26.
+
+### Version Dropdown Contract — TWO dropdowns, never three
+
+**Source of truth**: `Toolbar.tsx` (composition picker) + `VersionBar.tsx` (sub-version picker). Both are required. Adding a third is a regression — the family dropdown was deleted on 2026-05-04 because it duplicated information already encoded in the other two.
+
+| Dropdown        | File             | Source                                                                  | What it shows                                                         | What clicking does                                                                              |
+| --------------- | ---------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Main video**  | `Toolbar.tsx`    | `COMPOSITIONS` filtered by `!VERSION_RE.test(c.id)` (base ids only)     | One row per family, base label only (e.g. "Dorian Full")              | Same family → no-op; different family → jumps to family's LATEST version (`familyLatestOrBase`) |
+| **Sub-version** | `VersionBar.tsx` | `detectFamilies()` walking `COMPOSITIONS` for `^.+V\d+-\d+$` ids + base | V1.00 → V1.0N for the current family; hidden when comp is unversioned | Sets `compositionId` to the chosen version                                                      |
+
+**Invariants**:
+
+- Main dropdown's `value` is `baseOf(state.compositionId)` — NOT the raw compositionId. So `DorianFullV1-15` shows "Dorian Full" selected.
+- VersionBar renders nothing when the current comp is non-versioned (e.g. SigmaAppDemo). Test: `if (!currentFamily) return null`.
+- Versioned comp ids match `^(.+?)V(\d+)-(\d{2})$` (dash form, NOT dot form). The dot form `V1.15` is the human label; in code it's always `V1-15`.
+
+**Anti-pattern (DO NOT add)**: a family dropdown above the sub-version. The family is fully encoded by the main video dropdown — adding a third selector creates redundant state and a synchronization tax (which dropdown is the source of truth?).
 
 ### Layer System
 

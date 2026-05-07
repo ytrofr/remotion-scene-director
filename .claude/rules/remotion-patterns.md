@@ -305,32 +305,143 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     scenes go to HyperFrames. Authoring patterns for HyperFrames:
     `.claude/rules/hyperframes-patterns.md`.
 
-53. **Cursor-shape Lotties need rotation ceiling**: Cursor pointer Lotties
-    with complex bezier paths (e.g. `cursor-real-black.json`) fail to render in
-    Chrome's SVG renderer at rotations >~15-20° — fall back to a filled black
-    bounding rectangle. `FloatingHand` physics at click frames spike velocity
-    (click waypoint has short `duration`), amplified by `velocityScale`, pushing
-    rotation past the threshold. Fix at preset level, not per-scene: any
-    `HAND_PHYSICS.*` preset used with cursor-shape Lotties MUST have
-    `velocityScale ≤ 0.2` and `maxRotation ≤ 10`. Applied to `tap` and `tapGentle`
-    in BOTH `DorianDemo/constants.ts` AND `DorianStores/constants.ts`
+53. **Cursor-shape Lotties are render-fragile (rotation case)**: Cursor pointer
+    Lotties with complex bezier paths (e.g. `cursor-real-black.json`) fail to
+    render in headless Chrome's SVG renderer at rotations >~15-20° — fall back
+    to a filled black bounding rectangle. `FloatingHand` physics at click frames
+    spike velocity (click waypoint has short `duration`), amplified by
+    `velocityScale`, pushing rotation past the threshold. Fix at preset level,
+    not per-scene: any `HAND_PHYSICS.*` preset used with cursor-shape Lotties
+    MUST have `velocityScale ≤ 0.2` and `maxRotation ≤ 10`. Applied to `tap` and
+    `tapGentle` in BOTH `DorianDemo/constants.ts` AND `DorianStores/constants.ts`
     (each comp owns its own presets). Evidence 2026-04-23: scenes 3 (TapBubble),
     4 (ChatOpen), 5 (UserTyping), 11 (MapSearch) all showed 1-2-frame black
     rectangle artifacts at click moments; clean after preset fix. Hand-shape
     Lotties (`hand-click.json` etc) are unaffected — this is cursor-specific.
+    **Related fragility (mount-count)**: see rule 55. The "rotation case" here
+    is ONE failure mode — these Lotties are fragile in headless render in
+    several ways, not just rotation. Don't dismiss this rule because waypoints
+    have explicit `rotation: 0` (which bypasses physics-rotation) — rule 55
+    covers mount-time SVG bounding-box flashes that hit even at zero rotation.
 
 54. **Studio preview ≠ render for visual bugs**: Remotion Studio uses live
     Chrome (fast, forgiving). `remotion render` uses headless Chrome with
     stricter SVG/Canvas behavior — complex Lotties, some filters, and
     rotation edge cases can fail ONLY in render (rule 53 cursor bug was
     invisible in Studio). When debugging a render artifact, always reproduce
-    in actual render, never trust Studio alone. Verification funnel
-    (fastest → slowest, escalate tier only if prior tier looks clean):
-    (1) **Still frame** — `npx remotion still src/index.ts <Comp> out.png --frame=N`
-    (~30s, ideal for click-moment artifacts)
-    (2) **Scoped range** — `npx remotion render src/index.ts <Comp> out.mp4 --frames=START-END`
-    (~2-3min for ~500 frames, ideal for scene-range bugs)
-    (3) **Full render** — 10-15min, only after tiers 1-2 confirm the fix
-    Evidence 2026-04-23: cursor black rectangle invisible in Studio, obvious
-    at frame 348 still; fix verified via `--frames=0-540` in 3 min instead of
-    full re-render. Same funnel works for any Remotion render artifact.
+    in actual render, never trust Studio alone. **Pick verification tier by
+    artifact type, not by intuition**:
+    (1) **Still frame** (`npx remotion still ... --frame=N`, ~30s) — verifies
+    cursor POSITION at one moment. CANNOT detect flicker, multi-frame
+    glitches, mount artifacts, or transition bugs (those are temporal —
+    one frame in isolation looks fine). Use for: "is the cursor where I
+    expect at click frame N?"
+    (2) **Scoped range** (`npx remotion render ... --frames=START-END`,
+    ~2-3min for ~500 frames) — verifies MOTION across consecutive frames.
+    Required for: cursor flicker, layer mount/unmount transitions, Lottie
+    load glitches, post-process artifacts. Use whenever cursor moves OR
+    multiple `<FloatingHand>` instances mount/unmount in the scene.
+    (3) **Full render** (10-15min) — only after tiers 1-2 confirm the fix.
+    Evidence 2026-04-23: cursor rectangle visible in single-frame still.
+    Evidence 2026-04-26 (V1.07): stills at f920/f950/f980/f1010 looked
+    clean — those were MID-segment frames. Cursor flicker between layer
+    transitions (frames 122-124, 172-174, 212-214 scene-local) was
+    invisible in stills, obvious in playback. Always range-render scenes
+    with cursor motion + multiple show/hide windows BEFORE shipping.
+
+55. **One FloatingHand per scene by default — minimize cursor mounts**:
+    Each `<FloatingHand>` instance independently loads its Lottie animation
+    on mount. In headless render, every Lottie load can produce a 1-2 frame
+    SVG bounding-box flash before the shape finalizes. Hand-shape Lotties
+    (`hand-click.json` etc.) tolerate this; cursor-shape Lotties
+    (`cursor-real-black.json` etc.) flash visibly. N instances = N flashes.
+    Compounding bug: when two `<FloatingHand>` show-windows OVERLAP
+    (`showA = frame >= 45 && frame < 125` + `showB = frame >= 122 && frame < 158`),
+    both render simultaneously at frames 122-124, and B renders at its FIRST
+    waypoint position (not animated transit) → looks like the cursor jumps.
+    **Default architecture**: ONE `<FloatingHand>` mounted for the entire
+    scene with a single combined path. Achieve "discrete click events" via
+    `scale: 0` waypoint TRIPLETS (fade out at current position → invisible
+    jump to next target → fade in) — gives the same UX as separate mounts
+    without the flash + overlap costs. Mount count is an IMPLEMENTATION
+    decision, not a UX requirement; user requests for "separate click
+    layers" usually mean discrete events in time, not separate React
+    instances. Multiple instances are only justified when they need
+    different `animation` props (different cursor types) OR different
+    `dark`/`physics` configs OR truly disjoint windows with safety buffer
+    (≥3 frames between unmount and next mount). When in doubt, ASK whether
+    the user wants visual separation (cursor disappears between events) or
+    logical separation (one cursor visits multiple targets) — both achievable
+    with one instance via path waypoints. Verification: per rule 54, ALWAYS
+    range-render the scene before shipping when it has cursor motion.
+    Evidence 2026-04-26: V1.07 ProductDetail used 4 `<FloatingHand>`
+    instances per user "separate layers" request → cursor rectangle flashes
+    at every mount + flicker at 3 transition windows. V1.08 collapsed to 1
+    instance with scale:0 fades → clean. Cross-ref: rule 53 (rotation
+    fragility — companion failure mode), rule 54 (verification funnel).
+    **Caveat 2026-04-27**: V1.08's mount-collapse alone wasn't enough.
+    Two additional bugs surfaced during user-reported "still flickering":
+    `useHandAnimation` had `scale: point.scale || 1` (3 lines) which ate
+    `scale: 0` waypoints (JS truthy: `0 || 1 === 1`) — cursor never went
+    invisible, just slid visibly between targets. Fixed by `||` → `??`.
+    See rule 56 + `.claude/rules/typescript-nullish-coalescing.md`.
+
+56. **Render compositions with cursor Lotties using `--gl=swiftshader`, NOT
+    `--gl=angle`, for full-length renders (≥1000 frames)**: ANGLE GPU
+    rasterization state degrades over long renders — after ~1000 frames of
+    accumulated render context, complex SVG bezier paths (specifically
+    cursor-shape Lotties like `cursor-real-black.json`) start rasterizing as
+    horizontal stripes on the right edge, perceived as a "black rectangle"
+    around the cursor. swiftshader (CPU rasterization) is immune. Empirical
+    proof, 4-test matrix on V1.08 at scene 9 f990 (2026-04-27):
+    | Test | `--gl=` | Lottie | Scope | Result |
+    |------|---------|--------|-------|--------|
+    | Control | angle | real-black | full 2590f | BROKEN |
+    | A (chunked) | angle | real-black | 655f | clean |
+    | B | swiftshader | real-black | full 2590f | clean + sharp |
+    | C | angle | real-charcoal | full 2590f | partial — artifacts |
+    A+B clean → bug is render-context dependent. B+C contrast → swiftshader
+    works regardless of cursor; cursor swap helps but doesn't fully fix in
+    long ANGLE renders. Therefore: long ANGLE rendering of complex SVG
+    paths is the bug. **Use `--gl=swiftshader` for production renders of any
+    composition with cursor Lotties**. Performance comparable to ANGLE at
+    concurrency 8 (~3-4 min for 2590f in this case). Add per-version scripts
+    e.g. `render:dorian-full:v1.08:swiftshader[:2x]` (see V1.08 in
+    `package.json`). **Companion: keep `physics.shadowEnabled: true`** — the
+    shadow div's `filter: blur(N px)` (N≥8) DOES force a sibling stacking
+    context that helps in scoped renders, but is INSUFFICIENT in long ANGLE
+    renders. Shadow is helpful, swiftshader is the deterministic fix. Both
+    together = belt + suspenders. Forbidden: `shadowEnabled: false`
+    globally; `transform: translateZ(0)`/`willChange: transform` on the
+    cursor div directly (makes it worse). Caveats: short comps (<1000f),
+    HF scenes, and hand-shape (non-cursor) Lotties are unaffected — keep
+    using ANGLE there for speed. Cross-ref: rule 53 (rotation fragility,
+    same render-engine fragility class), rule 55 (mount discipline),
+    rule 57 (render-context-dependent bug protocol),
+    `.claude/rules/visual-bug-render-trace.md`,
+    `.claude/rules/typescript-nullish-coalescing.md`.
+
+57. **Render-context-dependent bugs: build a 2x2 matrix, not another fix**:
+    When the SAME code yields DIFFERENT results based on render scope
+    (scoped clean vs full broken, low-concurrency clean vs high-concurrency
+    broken, ANGLE broken vs swiftshader clean), the bug is in the render
+    engine state, NOT in the composition. Don't refactor. Don't keep
+    iterating fixes inside the composition. Build an NxN test matrix
+    varying ONLY environmental factors (engine flag, concurrency, frame
+    range, output codec) and observe which factor causes the divergence.
+    Each cell isolates one variable. The fix is almost always an engine
+    flag (`--gl=swiftshader`, `--concurrency=4`, `--codec=...`), not a
+    code change. Evidence 2026-04-27: rule 56's first version theorized
+    "shadow is load-bearing" based on a SCOPED render being clean. Full
+    render of same composition with same code was still broken. A 4-test
+    matrix in 15 min (3 parallel renders + ffmpeg pixel-zoom) revealed
+    the real cause (ANGLE long-render degradation) where 5 sessions of
+    code refactoring had failed. Protocol when "same code, different
+    output" is observed: (1) STOP code edits; (2) enumerate all
+    environmental variables in current render command; (3) build matrix
+    flipping each one independently; (4) render in parallel; (5)
+    pixel-zoom to compare; (6) the cell that differs reveals the
+    causal variable. Cross-ref: rule 54 (verification funnel — still vs
+    range vs full),
+    `~/.claude/projects/-home-ytr-limor-video-poc/memory/feedback_floating_hand_mount_discipline.md`
+    (full empirical record).

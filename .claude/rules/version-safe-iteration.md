@@ -46,26 +46,40 @@ When a render is approved, the new version's files get added to `src/composition
 
 ## Bump Procedure
 
-When the hook blocks an Edit, follow these steps EXACTLY (no shortcuts):
+There are TWO bump paths. Use the auto path for incremental sub-versions (V1.0X → V1.0Y); the manual path is only required for the first ever V1.00 → V1.01 of a brand-new family.
+
+### Path A — Auto bump (V1.0X → V1.0Y, X ≥ 1)
+
+In SceneDirector, click **Save as Version** on the Toolbar. The `/api/versions/bump` endpoint (in `vite.config.ts`) does ALL of this in one shot:
+
+1. Clones `<Family>V1.0X.tsx` → `<Family>V1.0Y.tsx` (component identifier renamed).
+2. Auto-seeds `codedPaths.data.json` — copies the OLD compId's saved-scene block under the NEW compId so your in-progress waypoints carry over.
+3. Auto-wires all 5 registry files:
+   - `src/Root.tsx` — adds the import + `<Composition id="<Family>V1-0Y" .../>` block
+   - `src/compositions/SceneDirector/compositions.ts` — adds the import + COMPOSITIONS entry + component-map row
+   - `src/compositions/SceneDirector/codedPaths.ts` — adds the CODED_PATHS_REGISTRY entry
+   - `src/compositions/SceneDirector/layers.ts` — clones the CODED_AUDIO_REGISTRY block
+   - `package.json` — clones any render scripts containing the old compId+label
+4. Returns a popover showing ✓/✗ per file. Each helper is **idempotent** (skips if NEW already present) and **fail-soft** (one failure doesn't break the others). Anything ✗ surfaces as a manual step.
+5. Edit the new `.tsx` freely (it's not in `.frozen.json` yet).
+6. Render. On approval, run `/freeze <Name>V1.0Y` to seal.
+7. Next iteration: hook blocks V1.0Y → click Save as Version again.
+
+The auto-wire helpers live near the top of `vite.config.ts` (`wireRootTsx`, `wireCompositionsTs`, `wireCodedPathsTs`, `wireLayersTs`, `wirePackageJson`, `cloneRegistryBlock`, `findBalancedBlockEnd`). Each anchors on the OLD entry's exact text shape — preserve that shape if you ever add registry entries by hand.
+
+### Path B — Manual first bump (V1.00 → V1.01 of a new family)
+
+The auto endpoint deliberately rejects V1.00 → V1.01 because the rename can't safely word-boundary-match `${family}` as an identifier in peer files. Do this once per family:
 
 1. **Identify scope**: which composition's render does this touch? (e.g. DorianFull)
-2. **Find current version**: highest `<Name>V*.tsx` in the comp's directory (or V1.00 if none)
-3. **Compute next**: `V1.01` if current is `V1.00`, etc.
-4. **Selective clone**: copy only the files you'll modify. Unchanged scenes can stay shared with V1.00 (they're frozen — safe).
-   - Cloning `DorianFull.tsx` → `DorianFullV1.01.tsx`: rename component, update internal imports to point to V1.01 versions of any cloned scenes
-   - Cloning a scene: rename component, identical contents otherwise
-5. **Register in Root.tsx**: add `<Composition id="<Name>V1.01" component={<Name>V1_01} ... />` next to the V1.00 entry. Don't unregister V1.00.
-6. **Add render scripts** to `package.json`:
-   - `render:<name>:v1.01`
-   - `render:<name>:v1.01:2x` (if a 2x variant exists for V1.00)
-7. **Audio + waypoint registries**: append a new top-level key (`DorianFullV1.01`) to:
-   - `src/compositions/SceneDirector/codedPaths.data.json`
-   - `src/compositions/SceneDirector/layers.ts` `CODED_AUDIO_REGISTRY`
-   - Initial value: deep-copy from V1.00's key, then mutate
-8. **Make the edit** in the new V1.01 files. Hook allows it.
-9. **Render + show user**.
-10. **On user approval**: run `/freeze <Name>V1.01` (or manually add the cloned files to `.frozen.json`). V1.01 is now sealed.
-11. **Next iteration**: hook blocks V1.01 — bump to V1.02.
+2. **Selective clone**: copy `<Name>.tsx` → `<Name>V1.01.tsx`, rename component, update internal imports.
+3. **Register in Root.tsx**: add `<Composition id="<Name>V1-01" component={<Name>V1_01} ... />` next to the V1.00 entry. Don't unregister V1.00.
+4. **Add render scripts** to `package.json` (`render:<name>:v1.01` etc.).
+5. **Append registries**: `compositions.ts` COMPOSITIONS + component-map, `codedPaths.ts` CODED_PATHS_REGISTRY, `layers.ts` CODED_AUDIO_REGISTRY.
+6. **Make the edit** in the new V1.01 files. Hook allows it.
+7. **Render + show user**.
+8. **On user approval**: run `/freeze <Name>V1.01`. V1.01 is now sealed.
+9. **Next iteration**: use Path A.
 
 ---
 

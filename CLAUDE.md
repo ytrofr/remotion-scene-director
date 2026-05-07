@@ -160,19 +160,23 @@ This project runs two video frameworks in parallel. Pick per scene:
 
 Read these files ONLY when working on the relevant area:
 
-| Topic                               | File                                       |
-| ----------------------------------- | ------------------------------------------ |
-| Composition tables, debug tools     | `docs/compositions.md`                     |
-| FloatingHand, Lottie, hand gestures | `docs/floating-hand.md`                    |
-| Screenshot capture, Playwright      | `docs/capture-workflow.md`                 |
-| SceneDirector editor architecture   | `docs/scene-director.md`                   |
-| Gallery & picker architecture       | `docs/scene-director.md` (Gallery section) |
-| Shared debug component library      | `docs/debug-tools.md`                      |
-| Video learnings (feedback loop)     | `docs/video-learnings.md`                  |
-| Shared components (transitions etc) | `docs/shared-components.md`                |
-| Enforced coding rules (46 rules)    | `.claude/rules/remotion-patterns.md`       |
-| Dorian phone UI requirements        | `.claude/rules/dorian-standards.md`        |
-| UI element coordinates per scene    | `docs/coordinate-map.md`                   |
+| Topic                                    | File                                              |
+| ---------------------------------------- | ------------------------------------------------- |
+| Composition tables, debug tools          | `docs/compositions.md`                            |
+| FloatingHand, Lottie, hand gestures      | `docs/floating-hand.md`                           |
+| Screenshot capture, Playwright           | `docs/capture-workflow.md`                        |
+| SceneDirector editor architecture        | `docs/scene-director.md`                          |
+| Gallery & picker architecture            | `docs/scene-director.md` (Gallery section)        |
+| Shared debug component library           | `docs/debug-tools.md`                             |
+| Video learnings (feedback loop)          | `docs/video-learnings.md`                         |
+| Shared components (transitions etc)      | `docs/shared-components.md`                       |
+| Enforced coding rules (46 rules)         | `.claude/rules/remotion-patterns.md`              |
+| Dorian phone UI requirements             | `.claude/rules/dorian-standards.md`               |
+| UI element coordinates per scene         | `docs/coordinate-map.md`                          |
+| SD state isolation (no cross-comp bleed) | `.claude/rules/scene-director-state-isolation.md` |
+| SD save semantics (Save = save all)      | `.claude/rules/scene-director-save-semantics.md`  |
+| SD bar-label per-layer truth             | `.claude/rules/scene-director-bar-label-truth.md` |
+| SD multi-row hand bars + lane override   | `.claude/rules/scene-director-multi-row-bars.md`  |
 
 ## Skills (auto-loaded when relevant)
 

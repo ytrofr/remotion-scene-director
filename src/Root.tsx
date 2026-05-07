@@ -48,9 +48,57 @@ import {
 } from './compositions/DorianStores/DorianStoresDebug';
 import { DorianFull, FULL_VIDEO } from './compositions/DorianFull/DorianFull';
 import {
-  DorianFullV1_01,
-  FULL_VIDEO_V1_01,
-} from './compositions/DorianFull/DorianFullV1.01';
+  DorianFullV1_10,
+  FULL_VIDEO_V1_10,
+} from './compositions/DorianFull/DorianFullV1.10';
+import {
+  DorianFullV1_11,
+  FULL_VIDEO_V1_11,
+} from './compositions/DorianFull/DorianFullV1.11';
+import {
+  DorianFullV1_12,
+  FULL_VIDEO_V1_12,
+} from './compositions/DorianFull/DorianFullV1.12';
+import {
+  DorianFullV1_13,
+  FULL_VIDEO_V1_13,
+} from './compositions/DorianFull/DorianFullV1.13';
+import {
+  DorianFullV1_140,
+  FULL_VIDEO_V1_140,
+} from './compositions/DorianFull/DorianFullV1.140';
+import {
+  DorianFullV1_14,
+  FULL_VIDEO_V1_14,
+} from './compositions/DorianFull/DorianFullV1.14';
+import {
+  DorianFullV1_15,
+  FULL_VIDEO_V1_15,
+} from './compositions/DorianFull/DorianFullV1.15';
+import {
+  DorianFullV1_16,
+  FULL_VIDEO_V1_16,
+} from './compositions/DorianFull/DorianFullV1.16';
+import {
+  DorianFullV1_17,
+  FULL_VIDEO_V1_17,
+} from './compositions/DorianFull/DorianFullV1.17';
+import {
+  DorianFullV1_18,
+  FULL_VIDEO_V1_18,
+} from './compositions/DorianFull/DorianFullV1.18';
+import {
+  ClickStyleDemo,
+  CLICK_STYLE_DEMO_TOTAL,
+} from './compositions/ClickStyleDemo/ClickStyleDemo';
+import {
+  DorianImprovementsDemo,
+  DORIAN_IMPROVEMENTS_TOTAL,
+} from './compositions/DorianImprovementsDemo/DorianImprovementsDemo';
+import {
+  DorianImprovementsDemoV2,
+  DORIAN_IMPROVEMENTS_V2_TOTAL,
+} from './compositions/DorianImprovementsDemoV2/DorianImprovementsDemoV2';
 import {
   SigmaInvestorDemo,
   SIGMA_VIDEO,
@@ -87,6 +135,10 @@ import {
   ScrollStyleDemo,
   SCROLL_DEMO_VIDEO,
 } from './compositions/ScrollStyleDemo';
+import {
+  ScrollEffectDemo,
+  SCROLL_EFFECT_VIDEO,
+} from './compositions/ScrollEffectDemo/ScrollEffectDemo';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -206,12 +258,108 @@ export const RemotionRoot: React.FC = () => {
           height={FULL_VIDEO.height}
         />
         <Composition
-          id="DorianFullV1-01"
-          component={DorianFullV1_01}
-          durationInFrames={FULL_VIDEO_V1_01.durationInFrames}
-          fps={FULL_VIDEO_V1_01.fps}
-          width={FULL_VIDEO_V1_01.width}
-          height={FULL_VIDEO_V1_01.height}
+          id="DorianFullV1-10"
+          component={DorianFullV1_10}
+          durationInFrames={FULL_VIDEO_V1_10.durationInFrames}
+          fps={FULL_VIDEO_V1_10.fps}
+          width={FULL_VIDEO_V1_10.width}
+          height={FULL_VIDEO_V1_10.height}
+        />
+        <Composition
+          id="DorianFullV1-11"
+          component={DorianFullV1_11}
+          durationInFrames={FULL_VIDEO_V1_11.durationInFrames}
+          fps={FULL_VIDEO_V1_11.fps}
+          width={FULL_VIDEO_V1_11.width}
+          height={FULL_VIDEO_V1_11.height}
+        />
+        <Composition
+          id="DorianFullV1-12"
+          component={DorianFullV1_12}
+          durationInFrames={FULL_VIDEO_V1_12.durationInFrames}
+          fps={FULL_VIDEO_V1_12.fps}
+          width={FULL_VIDEO_V1_12.width}
+          height={FULL_VIDEO_V1_12.height}
+        />
+        <Composition
+          id="DorianFullV1-13"
+          component={DorianFullV1_13}
+          durationInFrames={FULL_VIDEO_V1_13.durationInFrames}
+          fps={FULL_VIDEO_V1_13.fps}
+          width={FULL_VIDEO_V1_13.width}
+          height={FULL_VIDEO_V1_13.height}
+        />
+        <Composition
+          id="DorianFullV1-140"
+          component={DorianFullV1_140}
+          durationInFrames={FULL_VIDEO_V1_140.durationInFrames}
+          fps={FULL_VIDEO_V1_140.fps}
+          width={FULL_VIDEO_V1_140.width}
+          height={FULL_VIDEO_V1_140.height}
+        />
+        <Composition
+          id="DorianFullV1-14"
+          component={DorianFullV1_14}
+          durationInFrames={FULL_VIDEO_V1_14.durationInFrames}
+          fps={FULL_VIDEO_V1_14.fps}
+          width={FULL_VIDEO_V1_14.width}
+          height={FULL_VIDEO_V1_14.height}
+        />
+        <Composition
+          id="DorianFullV1-15"
+          component={DorianFullV1_15}
+          durationInFrames={FULL_VIDEO_V1_15.durationInFrames}
+          fps={FULL_VIDEO_V1_15.fps}
+          width={FULL_VIDEO_V1_15.width}
+          height={FULL_VIDEO_V1_15.height}
+        />
+        <Composition
+          id="DorianFullV1-16"
+          component={DorianFullV1_16}
+          durationInFrames={FULL_VIDEO_V1_16.durationInFrames}
+          fps={FULL_VIDEO_V1_16.fps}
+          width={FULL_VIDEO_V1_16.width}
+          height={FULL_VIDEO_V1_16.height}
+        />
+        <Composition
+          id="DorianFullV1-17"
+          component={DorianFullV1_17}
+          durationInFrames={FULL_VIDEO_V1_17.durationInFrames}
+          fps={FULL_VIDEO_V1_17.fps}
+          width={FULL_VIDEO_V1_17.width}
+          height={FULL_VIDEO_V1_17.height}
+        />
+        <Composition
+          id="DorianFullV1-18"
+          component={DorianFullV1_18}
+          durationInFrames={FULL_VIDEO_V1_18.durationInFrames}
+          fps={FULL_VIDEO_V1_18.fps}
+          width={FULL_VIDEO_V1_18.width}
+          height={FULL_VIDEO_V1_18.height}
+        />
+        <Composition
+          id="ClickStyleDemo"
+          component={ClickStyleDemo}
+          durationInFrames={CLICK_STYLE_DEMO_TOTAL}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="DorianImprovementsDemo"
+          component={DorianImprovementsDemo}
+          durationInFrames={DORIAN_IMPROVEMENTS_TOTAL}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="DorianImprovementsDemoV2"
+          component={DorianImprovementsDemoV2}
+          durationInFrames={DORIAN_IMPROVEMENTS_V2_TOTAL}
+          fps={30}
+          width={1080}
+          height={1920}
         />
       </Folder>
 
@@ -296,6 +444,14 @@ export const RemotionRoot: React.FC = () => {
           fps={SCROLL_DEMO_VIDEO.fps}
           width={SCROLL_DEMO_VIDEO.width}
           height={SCROLL_DEMO_VIDEO.height}
+        />
+        <Composition
+          id="ScrollEffectDemo"
+          component={ScrollEffectDemo}
+          durationInFrames={SCROLL_EFFECT_VIDEO.durationInFrames}
+          fps={SCROLL_EFFECT_VIDEO.fps}
+          width={SCROLL_EFFECT_VIDEO.width}
+          height={SCROLL_EFFECT_VIDEO.height}
         />
       </Folder>
 

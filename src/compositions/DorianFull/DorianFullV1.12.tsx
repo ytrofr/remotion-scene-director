@@ -1,15 +1,14 @@
 /**
- * DorianFullV1_01 — V1.01 of DorianFull.
+ * DorianFullV1_12 — V1.12 of DorianFull.
  *
- * Diff vs V1.00 (DorianFull.tsx):
- *   - Uses DorianDemoV1_01 (scene 9 extended 90f → 180f)
- *   - DORIAN_CUT shifts 960 → 1050; downstream offsets +90
- *   - White-flash TransitionOverlay REMOVED
- *   - 9→10 transition: scene 9 slides off left (handled inside ProductDetailSceneV1_01),
- *     scene 10 mounts 20f early at frame 1030 so it's visible underneath as scene 9 leaves
- *   - JSX z-order: Stores Sequence rendered FIRST (lower z), Demo Sequence SECOND
- *     so DorianDemo sits on top during the 20f slide overlap
- *   - Total duration: 2430 → 2520 (+3s)
+ * Diff vs V1.09:
+ *   - Uses DorianDemoV1_12 (scene 9 ProductDetail prepended with big
+ *     scrollbar-drag before existing click sequence).
+ *   - Replaces StoreDashboardScene with StoreDashboardSceneV1_12 — adds
+ *     big scrollbar-drag during best-sellers scroll window (scene-local
+ *     frames 360-460).
+ *   - Scenes 2 (HomeScroll) + 8 (ProductPage) inherit V1.09's big scrollbar.
+ *   - All timing identical to V1.09: DORIAN_CUT=1120, total=2620.
  *
  * See .claude/rules/version-safe-iteration.md for bump procedure.
  */
@@ -20,41 +19,43 @@ import {
   Sequence,
   staticFile,
   useCurrentFrame,
+  interpolate,
 } from 'remotion';
 import {
-  DorianDemoV1_01,
-  SCENES_V1_01 as DORIAN_SCENES,
-} from '../DorianDemo/DorianDemoV1.01';
+  DorianDemoV1_12,
+  SCENES_V1_12 as DORIAN_SCENES,
+} from '../DorianDemo/DorianDemoV1.12';
 import { OutroScene } from '../DorianDemo/scenes/OutroScene';
-import { SCENES as STORES_SCENES } from '../DorianStores/constants';
-import { StoreDashboardScene } from '../DorianStores/scenes/StoreDashboardScene';
+import { SCENES as STORES_SCENES, COLORS } from '../DorianStores/constants';
+import { StoreDashboardSceneV1_12 } from '../DorianStores/scenes/StoreDashboardSceneV1.12';
 import { MapSearchScene } from '../DorianStores/scenes/MapSearchScene';
 import { AIProductsScene } from '../DorianStores/scenes/AIProductsScene';
 import { getCodedAudio } from '../SceneDirector/layers';
 import { useSceneDirectorMode } from '../../components/FloatingHand/SceneDirectorMode';
 import { AudioEntriesContext } from '../SceneDirector/AudioLayerRenderer';
 import { computeVolumeAtFrame } from '../../lib/audioEnvelope';
+import { fontFamily } from '../../lib/fonts';
 
-// ── Timing ──
 const DORIAN_CUT =
-  DORIAN_SCENES.productDetail.start + DORIAN_SCENES.productDetail.duration; // 1050
-const SLIDE_OVERLAP = 20; // frames where scene 9 is sliding out and scene 10 is visible underneath
-const STORES_OFFSET = DORIAN_CUT; // 1050
+  DORIAN_SCENES.productDetail.start + DORIAN_SCENES.productDetail.duration;
+const STORES_OFFSET = DORIAN_CUT;
 const STORES_TOTAL =
   STORES_SCENES.dashboard.duration +
   STORES_SCENES.mapSearch.duration +
-  STORES_SCENES.aiProducts.duration; // 1290
-const CLOSING_OFFSET = STORES_OFFSET + STORES_TOTAL; // 2340
-const CLOSING_DURATION = DORIAN_SCENES.outro.duration; // 180
+  STORES_SCENES.aiProducts.duration;
+const CLOSING_OFFSET = STORES_OFFSET + STORES_TOTAL;
+const CLOSING_DURATION = DORIAN_SCENES.outro.duration;
 
-export const FULL_VIDEO_V1_01 = {
+const LOADER_END = STORES_OFFSET + 25;
+
+export const FULL_VIDEO_V1_12 = {
   width: 1080,
   height: 1920,
   fps: 30,
-  durationInFrames: CLOSING_OFFSET + CLOSING_DURATION, // 2340 + 180 = 2520
+  durationInFrames: CLOSING_OFFSET + CLOSING_DURATION,
 };
 
-export const FULL_SCENE_INFO_V1_01 = [
+export const FULL_SCENE_INFO_V1_12 = [
   {
     name: '1-Intro',
     start: DORIAN_SCENES.intro.start,
@@ -124,11 +125,10 @@ export const FULL_SCENE_INFO_V1_01 = [
   {
     name: '13-Closing',
     start: CLOSING_OFFSET,
-    end: FULL_VIDEO_V1_01.durationInFrames,
+    end: FULL_VIDEO_V1_12.durationInFrames,
   },
 ];
 
-// ── Audio (mirrors V1.00 pattern: DorianDemoV1_01 handles scenes 1-9, this handles 10-13) ──
 const STORES_AUDIO_SCENES = [
   { name: '10-StoreDashboard', start: STORES_OFFSET },
   {
@@ -145,7 +145,7 @@ const STORES_AUDIO_SCENES = [
   { name: '13-Closing', start: CLOSING_OFFSET },
 ];
 
-const StoresAudioFromLayersV1_01: React.FC = () => {
+const StoresAudioFromLayersV1_12: React.FC = () => {
   const entries = React.useContext(AudioEntriesContext);
   const storesEntries = entries.filter((e) => e.globalFrom >= DORIAN_CUT);
   return (
@@ -176,16 +176,15 @@ const StoresAudioFromLayersV1_01: React.FC = () => {
   );
 };
 
-const DorianFullStoresAudioV1_01: React.FC = () => {
+const DorianFullStoresAudioV1_12: React.FC = () => {
   const isSceneDirector = useSceneDirectorMode();
   if (isSceneDirector) return null;
 
   const audioElements: React.ReactElement[] = [];
   for (const scene of STORES_AUDIO_SCENES) {
-    // Read both V1.00 (shared assets, e.g. closing scene chime) and V1.01 keys
     const entries = [
       ...getCodedAudio('DorianFull', scene.name),
-      ...getCodedAudio('DorianFullV1.01', scene.name),
+      ...getCodedAudio('DorianFullV1.12', scene.name),
     ];
     for (const entry of entries) {
       const globalFrom = scene.start + entry.startFrame;
@@ -203,33 +202,106 @@ const DorianFullStoresAudioV1_01: React.FC = () => {
   return <>{audioElements}</>;
 };
 
-// Optional faint cue at the slide moment — uncomment when SFX picked.
-// Keeping commented to avoid silent dependency on a file that doesn't exist yet.
-// const SlideTransitionAudio: React.FC = () => (
-//   <Sequence from={DORIAN_CUT - SLIDE_OVERLAP} durationInFrames={SLIDE_OVERLAP}>
-//     <Audio src={staticFile('audio/sfx/whoosh.wav')} volume={0.4} />
-//   </Sequence>
-// );
+const PageLoadOverlayV1_12: React.FC = () => {
+  const frame = useCurrentFrame();
+  if (frame < STORES_OFFSET || frame >= LOADER_END) return null;
 
-// ── Main composition ──
-export const DorianFullV1_01: React.FC = () => {
-  // useCurrentFrame referenced indirectly to keep React subscription if needed later
-  useCurrentFrame();
+  const fadeOut = interpolate(frame, [LOADER_END - 12, LOADER_END], [1, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const spinDegrees = (frame - (STORES_OFFSET - 12)) * 8;
 
   return (
+    <AbsoluteFill
+      style={{
+        zIndex: 9999,
+        pointerEvents: 'none',
+        background: `rgba(255, 255, 255, ${fadeOut})`,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%) scale(1.8)',
+          opacity: fadeOut,
+        }}
+      >
+        <div
+          style={{
+            width: 390 + 24,
+            height: 844 + 24,
+            background: '#1a1a1a',
+            borderRadius: 55,
+            padding: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 390,
+              height: 844,
+              borderRadius: 45,
+              overflow: 'hidden',
+              position: 'relative',
+              background: 'white',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                border: '4px solid #E2E8F0',
+                borderTopColor: COLORS.primary,
+                transform: `rotate(${spinDegrees}deg)`,
+                marginBottom: 16,
+              }}
+            />
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: COLORS.text,
+                fontFamily,
+              }}
+            >
+              Opening My Store...
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: COLORS.textLight,
+                fontFamily,
+                marginTop: 4,
+              }}
+            >
+              Powered by Dorian AI
+            </div>
+          </div>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+export const DorianFullV1_12: React.FC = () => {
+  return (
     <AbsoluteFill style={{ background: '#FFFFFF' }}>
-      <DorianFullStoresAudioV1_01 />
-      <StoresAudioFromLayersV1_01 />
+      <DorianFullStoresAudioV1_12 />
+      <StoresAudioFromLayersV1_12 />
 
-      {/* ── z-order: Stores rendered FIRST (lower z) so Demo (on top) can slide off and reveal it ── */}
-
-      {/* Part 2 (rendered first for z-order): Stores scenes — scene 10 mounts SLIDE_OVERLAP frames early */}
       <Sequence
-        from={STORES_OFFSET - SLIDE_OVERLAP}
-        durationInFrames={STORES_SCENES.dashboard.duration + SLIDE_OVERLAP}
+        from={STORES_OFFSET}
+        durationInFrames={STORES_SCENES.dashboard.duration}
         name="10-StoreDashboard"
       >
-        <StoreDashboardScene />
+        <StoreDashboardSceneV1_12 />
       </Sequence>
       <Sequence
         from={STORES_OFFSET + STORES_SCENES.dashboard.duration}
@@ -257,15 +329,15 @@ export const DorianFullV1_01: React.FC = () => {
         <OutroScene />
       </Sequence>
 
-      {/* Part 1 (rendered last = top z): DorianDemoV1.01 (scenes 1-9). Scene 9 internally
-          slides off left during local frames 160-180 (= global 1030-1050), revealing scene 10. */}
       <Sequence
         from={0}
         durationInFrames={DORIAN_CUT}
-        name="DorianDemo-Part-V1.01"
+        name="DorianDemo-Part-V1.12"
       >
-        <DorianDemoV1_01 />
+        <DorianDemoV1_12 />
       </Sequence>
+
+      <PageLoadOverlayV1_12 />
     </AbsoluteFill>
   );
 };

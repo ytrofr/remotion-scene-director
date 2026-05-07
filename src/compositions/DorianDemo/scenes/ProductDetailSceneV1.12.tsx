@@ -19,106 +19,118 @@ import {
 import { fontFamily } from '../../../lib/fonts';
 import { FloatingHand } from '../../../components/FloatingHand';
 import { HandPathPoint } from '../../../components/FloatingHand/types';
+import { getSavedPath } from '../../SceneDirector/codedPaths';
 
-// Scene 9 V1.01: extended detail (180f / 6s):
-// 0-25  detail crossfade
-// 25-50 scroll image up 380px to expose product specs
-// 50-75 hand→Add to Cart→click→ripple
-// 75-95 button → "Added ✓"
-// 95-120 hand→hamburger→click
-// 120-140 drawer slides in from left
-// 140-160 hand→"My Store" menu item→click
-// 160-180 whole scene slides off left (handled by DorianFullV1.01 wrapper too — see below)
+// Scene 9 V1.12 (250f / 8.33s):
 //
-// The slide-off transform is APPLIED HERE so the hand goes with it.
-// DorianFullV1.01 starts scene 10 underneath at frame 1030 (overlap 20f) so
-// scene 10 is revealed as scene 9 slides left.
+// Diff vs V1.08:
+//   - Replaced free-form scroll waypoints (frames 0-120) with the BIG
+//     scrollbar-drag pattern matching V1.09 scenes 2 + 8. Cursor lives on
+//     the right-edge scrollbar at X=880, drags Y from 860→1060 (200px range)
+//     while content scrolls in the background.
+//   - After scroll-drag (frame 122), cursor invisibly teleports to Add to
+//     Cart and the existing V1.08 click sequence runs unchanged.
+//   - Scroll content interpolation, audio cues, drawer/cart logic identical
+//     to V1.08.
 
-const SCENE_W = 1080;
+const SKIP_START = 880;
+const SKIP_END = 1380;
+const HOLD_OFFSET = -75;
+const SCROLL_END = -1075;
 
-export const ProductDetailSceneV1_01: React.FC = () => {
+export const ProductDetailSceneV1_12: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Phase animations
-  const crossfade = interpolate(frame, [5, 25], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
+  // Scroll mirrors hand drag exactly (same as V1.07).
+  const detailTop = interpolate(
+    frame,
+    [0, 50, 78, 85, 115],
+    [HOLD_OFFSET, HOLD_OFFSET, -505, -505, SCROLL_END],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
+  );
 
-  // Scroll content down to expose Add to Cart (image translates up)
-  const scrollY = interpolate(frame, [25, 50], [0, -380], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: (t) => 1 - Math.pow(1 - t, 3), // cubic ease-out
-  });
-
-  // Add to Cart button states
-  const cartClicked = frame >= 70;
-  const addedShown = frame >= 75;
+  const cartClicked = frame >= 145;
+  const addedShown = frame >= 150;
   const checkmarkPop = spring({
-    frame: frame - 78,
+    frame: frame - 153,
     fps,
     config: SPRING_CONFIG.bouncy,
   });
 
-  // Drawer slide in from left (frames 120-140)
+  const drawerVisible = frame >= 188;
   const drawerSlide = spring({
-    frame: frame - 120,
+    frame: frame - 190,
     fps,
     config: SPRING_CONFIG.slide,
   });
-  const drawerVisible = frame >= 118;
-  // Drawer width 280px at phone scale, slides from -280 to 0
   const drawerX = interpolate(drawerSlide, [0, 1], [-280, 0]);
+  const myStoreClicked = frame >= 232;
 
-  // Menu item highlight (clicked at frame 160)
-  const menuClicked = frame >= 158;
-
-  // Whole scene slides off left at end (frames 160-180)
-  // Linear easing — feels like a deliberate page transition, not a snap.
-  const sceneSlideX = interpolate(frame, [160, 180], [0, -SCENE_W], {
+  const pageLoadVisible = interpolate(frame, [238, 250], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
+  const pageLoadSpin = (frame - 238) * 8;
 
-  // ── Hand path (composition-space coords; scene 9 is at zoom 1.8, offsetY 0) ──
-  // Formula: compX = 540 + 1.8*(phoneX - 207); compY = 960 + 1.8*(phoneY - 434)
-  // Add to Cart at phone (195, 740) → comp (518, 1511)
-  // Hamburger at phone (32, 88) → comp (225, 337)
-  // Drawer "My Store" item at phone (140, 360) → comp (419, 827)
-  const handPath: HandPathPoint[] = [
-    // Move to Add to Cart
-    { x: 700, y: 1700, frame: 50, gesture: 'pointer', scale: 1, rotation: 0 },
-    { x: 518, y: 1511, frame: 65, gesture: 'pointer', scale: 1, rotation: 0 },
+  // Single cursor path — covers entire scene, scale:0 hides between actions.
+  // Coords are composition-space (1080×1920); FloatingHand renders OUTSIDE
+  // the scaled phone wrapper. Phone center=(540,960), scale=1.8.
+  //   Add to Cart   phone (195, 740) → comp (518, 1635)
+  //   Hamburger     phone (32,  88)  → comp (225, 337)
+  //   My Store      phone (140, 360) → comp (419, 827)
+  // V1.12 path: BIG scrollbar drag (X=880, Y 860→1060 over frames 25-115),
+  // then invisible jump to Add to Cart and existing click sequence.
+  const savedPath = getSavedPath('DorianFullV1-10', '9-ProductDetail');
+  const handPath: HandPathPoint[] = savedPath?.path ?? [
+    // Hold invisible at scene start (Lottie loads, SVG renders before reveal)
+    { x: 880, y: 860, frame: 0, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 880, y: 860, frame: 20, gesture: 'pointer', scale: 0, rotation: 0 },
+    // Cursor appears on scrollbar (top of track)
+    { x: 880, y: 860, frame: 25, gesture: 'pointer', scale: 1, rotation: 0 },
+    // Begin drag
+    { x: 880, y: 860, frame: 32, gesture: 'drag', scale: 1, rotation: 0 },
+    // Drag down the scrollbar — covers content scroll window
+    { x: 880, y: 1060, frame: 115, gesture: 'drag', scale: 1, rotation: 0 },
+    // Release
+    { x: 880, y: 1060, frame: 120, gesture: 'pointer', scale: 1, rotation: 0 },
+    // → Add to Cart (invisible jump)
+    { x: 880, y: 1060, frame: 122, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 650, y: 1700, frame: 124, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 650, y: 1700, frame: 126, gesture: 'pointer', scale: 1, rotation: 0 },
+    { x: 518, y: 1635, frame: 142, gesture: 'pointer', scale: 1, rotation: 0 },
     {
       x: 518,
-      y: 1511,
-      frame: 70,
+      y: 1635,
+      frame: 145,
       gesture: 'click',
       scale: 1,
       rotation: 0,
       duration: 8,
     },
-    // Move to hamburger
-    { x: 400, y: 1100, frame: 100, gesture: 'pointer', scale: 1, rotation: 0 },
-    { x: 225, y: 337, frame: 115, gesture: 'pointer', scale: 1, rotation: 0 },
+    // → Hamburger (invisible jump)
+    { x: 518, y: 1635, frame: 158, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 400, y: 1000, frame: 173, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 400, y: 1000, frame: 175, gesture: 'pointer', scale: 1, rotation: 0 },
+    { x: 225, y: 337, frame: 187, gesture: 'pointer', scale: 1, rotation: 0 },
     {
       x: 225,
       y: 337,
-      frame: 118,
+      frame: 190,
       gesture: 'click',
       scale: 1,
       rotation: 0,
       duration: 6,
     },
-    // Move to "My Store" menu item
-    { x: 350, y: 600, frame: 145, gesture: 'pointer', scale: 1, rotation: 0 },
-    { x: 419, y: 827, frame: 155, gesture: 'pointer', scale: 1, rotation: 0 },
+    // → My Store (invisible jump)
+    { x: 225, y: 337, frame: 202, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 350, y: 600, frame: 213, gesture: 'pointer', scale: 0, rotation: 0 },
+    { x: 350, y: 600, frame: 215, gesture: 'pointer', scale: 1, rotation: 0 },
+    { x: 419, y: 827, frame: 229, gesture: 'pointer', scale: 1, rotation: 0 },
     {
       x: 419,
       y: 827,
-      frame: 160,
+      frame: 232,
       gesture: 'click',
       scale: 1,
       rotation: 0,
@@ -127,34 +139,31 @@ export const ProductDetailSceneV1_01: React.FC = () => {
   ];
 
   return (
-    <AbsoluteFill
-      style={{
-        background: COLORS.white,
-        transform: `translateX(${sceneSlideX}px)`,
-      }}
-    >
-      <AnimatedText
-        delay={0}
-        style={{
-          position: 'absolute',
-          top: 80,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          zIndex: 10,
-        }}
-      >
-        <div
+    <AbsoluteFill style={{ background: COLORS.white }}>
+      {frame < 238 && (
+        <AnimatedText
+          delay={0}
           style={{
-            fontSize: 44,
-            fontWeight: 700,
-            color: COLORS.text,
-            fontFamily,
+            position: 'absolute',
+            top: 80,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            zIndex: 10,
           }}
         >
-          Product Details
-        </div>
-      </AnimatedText>
+          <div
+            style={{
+              fontSize: 44,
+              fontWeight: 700,
+              color: COLORS.text,
+              fontFamily,
+            }}
+          >
+            Product Details
+          </div>
+        </AnimatedText>
+      )}
 
       <div
         style={{
@@ -185,30 +194,15 @@ export const ProductDetailSceneV1_01: React.FC = () => {
               background: '#fff',
             }}
           >
-            {/* Listing fading out */}
+            {/* Detail page — TWO segments to skip image-y SKIP_START..SKIP_END */}
             <div
               style={{
                 position: 'absolute',
-                top: -300 + scrollY,
+                top: detailTop,
                 left: 0,
                 width: 390,
-                opacity: 1 - crossfade,
-              }}
-            >
-              <Img
-                src={staticFile('dorian/woodmart/lg-tvs-listing-full.png')}
-                style={{ width: 390, height: 'auto', display: 'block' }}
-              />
-            </div>
-
-            {/* Detail page */}
-            <div
-              style={{
-                position: 'absolute',
-                top: scrollY,
-                left: 0,
-                width: 390,
-                opacity: crossfade,
+                height: SKIP_START,
+                overflow: 'hidden',
               }}
             >
               <Img
@@ -216,12 +210,44 @@ export const ProductDetailSceneV1_01: React.FC = () => {
                 style={{ width: 390, height: 'auto', display: 'block' }}
               />
             </div>
+            <div
+              style={{
+                position: 'absolute',
+                top: detailTop + SKIP_START,
+                left: 0,
+                width: 390,
+                height: 8655 - SKIP_END,
+                overflow: 'hidden',
+              }}
+            >
+              <Img
+                src={staticFile('dorian/woodmart/lg-tv-detail.png')}
+                style={{
+                  width: 390,
+                  height: 'auto',
+                  display: 'block',
+                  marginTop: -SKIP_END,
+                }}
+              />
+            </div>
 
             <StatusBar />
             <DynamicIsland />
             <DorianNavHeader showSearch={true} />
 
-            {/* Add to Cart button — sticky bottom of phone */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 100,
+                background: COLORS.white,
+                zIndex: 14,
+              }}
+            />
+
+            {/* Add to Cart button */}
             <div
               style={{
                 position: 'absolute',
@@ -229,7 +255,6 @@ export const ProductDetailSceneV1_01: React.FC = () => {
                 right: 16,
                 bottom: 24,
                 zIndex: 15,
-                opacity: frame >= 25 ? 1 : 0,
               }}
             >
               <div
@@ -281,7 +306,6 @@ export const ProductDetailSceneV1_01: React.FC = () => {
               </div>
             </div>
 
-            {/* Hamburger drawer (left side) */}
             {drawerVisible && (
               <div
                 style={{
@@ -314,11 +338,11 @@ export const ProductDetailSceneV1_01: React.FC = () => {
                   { label: 'Categories', highlight: false },
                   { label: 'My Cart', highlight: false },
                   { label: 'My Orders', highlight: false },
-                  { label: 'My Store', highlight: true }, // navigation target
+                  { label: 'My Store', highlight: true },
                   { label: 'Settings', highlight: false },
                 ].map((item) => {
                   const isTarget = item.highlight;
-                  const tappedNow = isTarget && menuClicked;
+                  const tappedNow = isTarget && myStoreClicked;
                   return (
                     <div
                       key={item.label}
@@ -367,7 +391,54 @@ export const ProductDetailSceneV1_01: React.FC = () => {
               </div>
             )}
 
-            {/* AI Bubble - hidden once drawer opens */}
+            {frame >= 238 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'white',
+                  opacity: pageLoadVisible,
+                  zIndex: 50,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    border: '4px solid #E2E8F0',
+                    borderTopColor: COLORS.primary,
+                    transform: `rotate(${pageLoadSpin}deg)`,
+                    marginBottom: 16,
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: COLORS.text,
+                    fontFamily,
+                  }}
+                >
+                  Opening My Store...
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: COLORS.textLight,
+                    fontFamily,
+                    marginTop: 4,
+                  }}
+                >
+                  Powered by Dorian AI
+                </div>
+              </div>
+            )}
+
             {!drawerVisible && (
               <div
                 style={{
@@ -384,19 +455,18 @@ export const ProductDetailSceneV1_01: React.FC = () => {
         </div>
       </div>
 
-      {/* Hand cursor (composition-space) */}
-      {frame >= 50 && frame < 175 && (
-        <FloatingHand
-          path={handPath}
-          startFrame={0}
-          animation="cursor-real-black"
-          size={120 * (1.8 / 1.8)} // ~120 at zoom 1.8
-          dark={false}
-          showRipple={true}
-          rippleColor="rgba(45, 212, 191, 0.5)"
-          physics={HAND_PHYSICS.tapGentle}
-        />
-      )}
+      {/* Single FloatingHand mounted for entire scene — single Lottie load,
+          scale:0 waypoints hide cursor between discrete click events. */}
+      <FloatingHand
+        path={handPath}
+        startFrame={0}
+        animation="cursor-real-black"
+        size={120}
+        dark={false}
+        showRipple={true}
+        rippleColor="rgba(45, 212, 191, 0.5)"
+        physics={HAND_PHYSICS.scrollbar}
+      />
     </AbsoluteFill>
   );
 };

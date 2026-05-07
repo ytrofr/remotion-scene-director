@@ -19,9 +19,16 @@ public/dashmor/
 public/screenshots/
 *.png
 
-# Generated audio (voiceover, SFX downloads)
+# Generated audio (voiceover, SFX downloads, royalty-free music library)
 public/voiceover/
 public/audio/sfx/
+public/audio/music/
+
+# Per-render diagnostic frames (large, ephemeral)
+probe-frames/
+
+# Claude Code runtime locks
+.claude/scheduled_tasks.lock
 
 # Internal docs
 SESSION-HANDOFF.md
@@ -41,3 +48,6 @@ renders/
 
 # Ephemeral SceneDirector review pins (auto-synced by dev server)
 src/compositions/SceneDirector/feedbackNotes.data.json
+
+# SceneDirector save history (local recovery log; dev-only, can grow large)
+src/compositions/SceneDirector/codedPaths.history.jsonl

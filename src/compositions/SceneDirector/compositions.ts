@@ -57,42 +57,23 @@ import {
   FULL_VIDEO,
   FULL_SCENE_INFO,
 } from '../DorianFull/DorianFull';
-import {
-  DorianFullV1_10,
-  FULL_VIDEO_V1_10,
-  FULL_SCENE_INFO_V1_10,
-} from '../DorianFull/DorianFullV1.10';
-import {
-  DorianFullV1_11,
-  FULL_VIDEO_V1_11,
-  FULL_SCENE_INFO_V1_11,
-} from '../DorianFull/DorianFullV1.11';
-import {
-  DorianFullV1_12,
-  FULL_VIDEO_V1_12,
-  FULL_SCENE_INFO_V1_12,
-} from '../DorianFull/DorianFullV1.12';
+// V1.10–V1.16 archived from SD dropdown 2026-05-07. Components still imported
+// for COMPOSITION_COMPONENTS map (V1.14–V1.20 wrappers transitively reference
+// the V1.13 component tree). See dropdown-archive comment block below.
+import { DorianFullV1_10 } from '../DorianFull/DorianFullV1.10';
+import { DorianFullV1_11 } from '../DorianFull/DorianFullV1.11';
+import { DorianFullV1_12 } from '../DorianFull/DorianFullV1.12';
 import {
   DorianFullV1_13,
-  FULL_VIDEO_V1_13,
   FULL_SCENE_INFO_V1_13,
 } from '../DorianFull/DorianFullV1.13';
 import {
   DorianFullV1_140,
   FULL_VIDEO_V1_140,
 } from '../DorianFull/DorianFullV1.140';
-import {
-  DorianFullV1_14,
-  FULL_VIDEO_V1_14,
-} from '../DorianFull/DorianFullV1.14';
-import {
-  DorianFullV1_15,
-  FULL_VIDEO_V1_15,
-} from '../DorianFull/DorianFullV1.15';
-import {
-  DorianFullV1_16,
-  FULL_VIDEO_V1_16,
-} from '../DorianFull/DorianFullV1.16';
+import { DorianFullV1_14 } from '../DorianFull/DorianFullV1.14';
+import { DorianFullV1_15 } from '../DorianFull/DorianFullV1.15';
+import { DorianFullV1_16 } from '../DorianFull/DorianFullV1.16';
 import {
   DorianFullV1_17,
   FULL_VIDEO_V1_17,
@@ -323,118 +304,13 @@ export const COMPOSITIONS: CompositionEntry[] = [
       end: s.end,
     })),
   },
-  {
-    id: 'DorianFullV1-10',
-    label: 'Dorian Full V1.10 (big scrollbar in scenes 2/8/9/10)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_10.width,
-      height: FULL_VIDEO_V1_10.height,
-      fps: FULL_VIDEO_V1_10.fps,
-      frames: FULL_VIDEO_V1_10.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_10.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-11',
-    label: 'Dorian Full V1.11 (stable — promoted from V1.10)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_11.width,
-      height: FULL_VIDEO_V1_11.height,
-      fps: FULL_VIDEO_V1_11.fps,
-      frames: FULL_VIDEO_V1_11.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_11.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-12',
-    label: 'Dorian Full V1.12 (scene 8 TV-card click)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_12.width,
-      height: FULL_VIDEO_V1_12.height,
-      fps: FULL_VIDEO_V1_12.fps,
-      frames: FULL_VIDEO_V1_12.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_12.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-13',
-    label: 'Dorian Full V1.13 (soft-pulse clicks + scene 4 sound fix)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_13.width,
-      height: FULL_VIDEO_V1_13.height,
-      fps: FULL_VIDEO_V1_13.fps,
-      frames: FULL_VIDEO_V1_13.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-14',
-    label: 'Dorian Full V1.14 (V1.13 + Funkorama funk)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_14.width,
-      height: FULL_VIDEO_V1_14.height,
-      fps: FULL_VIDEO_V1_14.fps,
-      frames: FULL_VIDEO_V1_14.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-15',
-    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_15.width,
-      height: FULL_VIDEO_V1_15.height,
-      fps: FULL_VIDEO_V1_15.fps,
-      frames: FULL_VIDEO_V1_15.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
-  {
-    id: 'DorianFullV1-16',
-    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
-    group: 'Dorian',
-    video: {
-      width: FULL_VIDEO_V1_16.width,
-      height: FULL_VIDEO_V1_16.height,
-      fps: FULL_VIDEO_V1_16.fps,
-      frames: FULL_VIDEO_V1_16.durationInFrames,
-    },
-    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
-      name: s.name,
-      start: s.start,
-      end: s.end,
-    })),
-  },
+  // ── ARCHIVED 2026-05-07 ────────────────────────────────────────────────
+  // V1.10–V1.16 entries removed from the SD dropdown to clean up after V1.21.
+  // .tsx files, JSON entries, audio entries, npm scripts, and the
+  // COMPOSITION_COMPONENTS map at the bottom of this file all REMAIN — V1.13
+  // is imported transitively by V1.14–V1.20 wrappers, so the file MUST stay
+  // on disk. To unarchive, re-add the matching dropdown entry block here.
+  // ───────────────────────────────────────────────────────────────────────
   {
     id: 'DorianFullV1-17',
     label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',

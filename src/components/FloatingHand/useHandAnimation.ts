@@ -110,7 +110,7 @@ function computeHandStateInner(
       x: point.x,
       y: point.y,
       rotation: point.rotation || 0,
-      scale: point.scale || 1,
+      scale: point.scale ?? 1,
       gesture: point.gesture || 'pointer',
       velocityX: 0,
       velocityY: 0,
@@ -143,7 +143,7 @@ function computeHandStateInner(
       x: point.x,
       y: point.y,
       gesture: point.gesture || 'pointer',
-      scale: point.scale || 1,
+      scale: point.scale ?? 1,
       rotation: point.rotation,
     });
 
@@ -165,7 +165,7 @@ function computeHandStateInner(
         x: point.x,
         y: point.y,
         gesture: point.gesture || 'pointer',
-        scale: point.scale || 1,
+        scale: point.scale ?? 1,
         rotation: point.rotation,
       });
     }

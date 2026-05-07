@@ -16,6 +16,7 @@ import {
 import { LottieHand } from './hands/LottieHand';
 import { LottieHandStandalone } from './hands/LottieHandStandalone';
 import { useSceneDirectorMode } from './SceneDirectorMode';
+import { useClickStyle, computeClickPulseScale } from './ClickStyleContext';
 
 /**
  * SimpleCursorHand - SVG cursor for standalone rendering (outside Remotion).
@@ -161,6 +162,7 @@ const FloatingHandStandalone: React.FC<
   physics: physicsOverrides,
   clickAnimation,
   clickSpeed,
+  clickStyle: clickStyleOverride,
 }) => {
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
@@ -175,6 +177,13 @@ const FloatingHandStandalone: React.FC<
     () => computeFloatEffect(frame, physics),
     [frame, physics],
   );
+  const effectiveClickStyle = useClickStyle(clickStyleOverride);
+  const clickPulse =
+    effectiveClickStyle === 'soft-pulse'
+      ? computeClickPulseScale(path, frame - startFrame)
+      : 1;
+  const effectiveShowRipple =
+    effectiveClickStyle === 'soft-pulse' ? false : showRipple;
 
   if (frame < startFrame) return null;
 
@@ -207,7 +216,7 @@ const FloatingHandStandalone: React.FC<
         zIndex: 1000,
       }}
     >
-      {showRipple && isClickGesture && (
+      {effectiveShowRipple && isClickGesture && (
         <div
           style={{
             position: 'absolute',
@@ -231,7 +240,7 @@ const FloatingHandStandalone: React.FC<
           transform: `
             translate(-25%, -10%)
             rotate(${handState.rotation}deg)
-            scale(${handState.scale})
+            scale(${handState.scale * clickPulse})
           `,
           transformOrigin: 'center center',
           pointerEvents: 'none',
@@ -264,6 +273,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   showRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   clickAnimation,
+  clickStyle: clickStyleOverride,
 }) => {
   const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
@@ -273,6 +283,13 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   };
   const handState = useHandAnimation(path, startFrame, physics);
   const { offsetY, shadowScale } = useFloatEffect(physics);
+  const effectiveClickStyle = useClickStyle(clickStyleOverride);
+  const clickPulse =
+    effectiveClickStyle === 'soft-pulse'
+      ? computeClickPulseScale(path, frame - startFrame)
+      : 1;
+  const effectiveShowRipple =
+    effectiveClickStyle === 'soft-pulse' ? false : showRipple;
 
   // Hide composition's built-in hand when SceneDirector provides its own overlay
   if (isSceneDirector || frame < startFrame) return null;
@@ -280,7 +297,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   const finalX = handState.x;
   const finalY = handState.y + offsetY;
   const finalRotation = handState.rotation;
-  const finalScale = handState.scale;
+  const finalScale = handState.scale * clickPulse;
 
   const isClickGesture = handState.gesture === 'click';
   const rippleScale = isClickGesture
@@ -302,7 +319,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
         zIndex: 1000,
       }}
     >
-      {showRipple && isClickGesture && (
+      {effectiveShowRipple && isClickGesture && (
         <div
           style={{
             position: 'absolute',

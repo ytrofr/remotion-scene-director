@@ -110,6 +110,12 @@ export interface FloatingHandProps {
   // Effects
   showRipple?: boolean;
   rippleColor?: string;
+
+  // Click visual treatment. Overrides ClickStyleContext if set.
+  // - 'default' (or unset): Lottie advance + ripple (controlled by showRipple)
+  // - 'soft-pulse': Lottie advance + cursor pulses 1.0→0.82→1.0 over click
+  //   duration. Ripple suppressed regardless of showRipple.
+  clickStyle?: 'default' | 'soft-pulse';
 }
 
 // Computed hand state at a given frame

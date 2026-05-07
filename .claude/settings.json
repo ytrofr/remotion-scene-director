@@ -9,6 +9,43 @@
             "statusMessage": "Loading session context..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/inter-agent-auto-monitor-project.sh",
+            "statusMessage": "Checking inter-agent bus..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/branch-lock-on-start.sh",
+            "statusMessage": "Checking peer sessions..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-end-document.sh",
+            "statusMessage": "Snapshotting commit baseline..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-end-document.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -19,6 +56,16 @@
             "type": "command",
             "command": ".claude/hooks/protect-frozen-compositions.sh",
             "statusMessage": "Checking frozen composition registry..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/scene-director-save-defense.sh",
+            "statusMessage": "Checking SD save safety..."
           }
         ]
       }
@@ -44,6 +91,15 @@
           }
         ],
         "if": "Edit(*/codedPaths.ts) || Edit(*/layers.ts) || Write(*/codedPaths.ts) || Write(*/layers.ts)"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-render-feedback.sh"
+          }
+        ]
       }
     ],
     "PreCompact": [

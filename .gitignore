@@ -27,8 +27,9 @@ public/audio/music/
 # Per-render diagnostic frames (large, ephemeral)
 probe-frames/
 
-# Claude Code runtime locks
+# Claude Code runtime locks + per-session logs
 .claude/scheduled_tasks.lock
+.claude/logs/
 
 # Internal docs
 SESSION-HANDOFF.md

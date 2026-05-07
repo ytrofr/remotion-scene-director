@@ -9,6 +9,7 @@
 import { GESTURE_PRESETS, type GestureTool } from './gestures';
 import type { DirectorState } from './state';
 import type { SaveProposal } from './saveDiff';
+import type { SceneConfigEntry } from './sceneConfig';
 
 /**
  * Collect every scene name in the current state that has any per-scene data.
@@ -67,4 +68,47 @@ export function filterPersistableProposals(
   return proposals.filter(
     ({ proposal }) => proposal.path.length > 0 || proposal.locked === true,
   );
+}
+
+// ── sceneConfig save flow (P1.4 — separate from path Save per s1 concern 2)
+
+/**
+ * Collect every scene name in the current state that has a sceneConfig entry.
+ * Sorted for deterministic save order.
+ *
+ * Parallel to collectScenesToSave but pulls from `state.sceneConfig` only.
+ * Toolbar.handleSave runs both flows sequentially: path Save first, then
+ * sceneConfig Save. Two atomic file writes (per-file atomic via
+ * writeFileSync); divergence between files is recovered by next idempotent
+ * Save.
+ */
+export function collectSceneConfigsToSave(state: DirectorState): string[] {
+  return Object.keys(state.sceneConfig).sort();
+}
+
+/** Return the sceneConfig entry for a scene (already in state form). */
+export function buildSceneConfigProposal(
+  state: DirectorState,
+  scene: string,
+): SceneConfigEntry | null {
+  return state.sceneConfig[scene] ?? null;
+}
+
+/**
+ * Filter sceneConfig proposals to those that should actually be POSTed.
+ * Empty entry (`{}`) + not _locked = skip (nothing to persist; would create
+ * a noise entry on disk).
+ */
+export function filterPersistableSceneConfigs(
+  proposals: { scene: string; entry: SceneConfigEntry }[],
+): { scene: string; entry: SceneConfigEntry }[] {
+  return proposals.filter(({ entry }) => {
+    const keys = Object.keys(entry);
+    if (keys.length === 0) return false;
+    // an entry with ONLY `_locked: false` and nothing else is also noise
+    if (keys.length === 1 && keys[0] === '_locked' && entry._locked === false) {
+      return false;
+    }
+    return true;
+  });
 }

@@ -10,6 +10,7 @@ import type {
 import type { GestureTool } from './gestures';
 import type { Layer, LayerBase, LayerData } from './layers';
 import type { CodedPath } from './codedPaths';
+import type { SceneConfigEntry } from './sceneConfig';
 
 // Scene info (unified format across compositions)
 export interface SceneInfo {
@@ -131,6 +132,15 @@ export interface DirectorState {
   feedbackPins: Record<string, FeedbackPin[]>;
   // Currently-edited pin id (inline note textarea), or null
   editingPinId: string | null;
+  /**
+   * Per-scene config entries for the CURRENT composition (in-memory shadow of
+   * sceneConfig.data.json[compositionId]._scenes). 10th scene-keyed slice
+   * field. Plan §4.1 axis 1. Loaded by SET_COMPOSITION via DirectorSlice.
+   *
+   * Initial: empty `{}` — back-compat shim. Callers fall back to legacy paths
+   * (codedPaths, in-tsx click trail constants) when the entry is missing.
+   */
+  sceneConfig: Record<string, SceneConfigEntry>;
 }
 
 /**
@@ -150,6 +160,8 @@ export interface DirectorSlice {
   waypoints?: Record<string, HandPathPoint[]>;
   savedSnapshots?: Record<string, SceneSnapshot>;
   versionHistory?: Record<string, VersionEntry[]>;
+  /** 10th key — see plan §4.1 axis 1, P1.3. */
+  sceneConfig?: Record<string, SceneConfigEntry>;
 }
 
 // Actions
@@ -295,4 +307,5 @@ export const initialState: DirectorState = {
   feedbackMode: false,
   feedbackPins: {},
   editingPinId: null,
+  sceneConfig: {},
 };

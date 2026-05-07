@@ -62,6 +62,7 @@ export function directorReducer(
         waypoints: slice.waypoints ?? {},
         savedSnapshots: slice.savedSnapshots ?? {},
         versionHistory: slice.versionHistory ?? {},
+        sceneConfig: slice.sceneConfig ?? {},
       };
     }
     case 'SELECT_SCENE':

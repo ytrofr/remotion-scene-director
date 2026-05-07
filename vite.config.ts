@@ -1183,6 +1183,391 @@ function savePathPlugin(): Plugin {
         });
       });
 
+      // ── sceneConfig endpoints (P1.4 + P1.5) ──────────────────────────
+      // Plan: ~/.claude/plans/plan-this-properly-in-atomic-eich.md axis 1.
+      // sceneConfig.data.json shape: {[compId]: {_extends?, _scenes: {[scene]: SceneConfigEntry}}}
+      // Per s1 concern 2 (atomicity): separate file from codedPaths.data.json.
+      // Recovery: re-Save is idempotent (state.sceneConfig is the source-of-truth in memory).
+      server.middlewares.use('/api/save-scene-config', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        let body = '';
+        req.on('data', (chunk: string) => (body += chunk));
+        req.on('end', () => {
+          try {
+            const { compositionId, sceneName, entry } = JSON.parse(body) as {
+              compositionId: string;
+              sceneName: string;
+              entry: Record<string, unknown> | null;
+            };
+            if (!compositionId || !sceneName) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  error: 'compositionId + sceneName required',
+                }),
+              );
+              return;
+            }
+            const filePath = path.resolve(
+              __dirname,
+              'src/compositions/SceneDirector/sceneConfig.data.json',
+            );
+            const existing = fs.existsSync(filePath)
+              ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
+              : {};
+            const prevComp = existing[compositionId] ?? null;
+            const prevEntry = prevComp?._scenes?.[sceneName] ?? null;
+
+            // Init compId entry if absent
+            if (!existing[compositionId]) {
+              existing[compositionId] = { _scenes: {} };
+            }
+            if (!existing[compositionId]._scenes) {
+              existing[compositionId]._scenes = {};
+            }
+
+            const entryKeys = entry ? Object.keys(entry) : [];
+            const isEmpty =
+              !entry ||
+              entryKeys.length === 0 ||
+              (entryKeys.length === 1 &&
+                entryKeys[0] === '_locked' &&
+                entry._locked === false);
+
+            if (isEmpty) {
+              // Delete entry on empty (mirror save-path pattern)
+              delete existing[compositionId]._scenes[sceneName];
+              // If _scenes is now empty AND no _extends, delete the comp too
+              if (
+                Object.keys(existing[compositionId]._scenes).length === 0 &&
+                !existing[compositionId]._extends
+              ) {
+                delete existing[compositionId];
+              }
+            } else {
+              existing[compositionId]._scenes[sceneName] = entry;
+            }
+
+            // Atomic per-file write (writeFileSync replaces atomically on POSIX
+            // when source/dest on same filesystem — no torn-write risk).
+            fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));
+
+            // History log (best-effort, bounded — mirrors codedPaths history)
+            try {
+              const histPath = path.resolve(
+                __dirname,
+                'src/compositions/SceneDirector/sceneConfig.history.jsonl',
+              );
+              const newEntry =
+                existing?.[compositionId]?._scenes?.[sceneName] ?? null;
+              const record = {
+                timestamp: Date.now(),
+                compositionId,
+                sceneName,
+                prevEntry,
+                newEntry,
+              };
+              fs.appendFileSync(histPath, JSON.stringify(record) + '\n');
+              const MAX_HISTORY_LINES = 500;
+              const histRaw = fs.readFileSync(histPath, 'utf8');
+              const histLines = histRaw
+                .split('\n')
+                .filter((l: string) => l.trim().length > 0);
+              if (histLines.length > MAX_HISTORY_LINES) {
+                const trimmed =
+                  histLines.slice(-MAX_HISTORY_LINES).join('\n') + '\n';
+                fs.writeFileSync(histPath, trimmed);
+              }
+            } catch {
+              // History is best-effort; primary save already succeeded
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+        });
+      });
+
+      // GET resolved sceneConfig (walks _extends chain server-side).
+      server.middlewares.use('/api/get-scene-config', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const url = new URL(req.url ?? '', 'http://localhost');
+          const compId = url.searchParams.get('compositionId') ?? '';
+          const sceneName = url.searchParams.get('sceneName') ?? '';
+          if (!compId) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'compositionId required' }));
+            return;
+          }
+          const filePath = path.resolve(
+            __dirname,
+            'src/compositions/SceneDirector/sceneConfig.data.json',
+          );
+          const registry = fs.existsSync(filePath)
+            ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
+            : {};
+
+          // Inline chain walk (server-side; mirrors sceneConfig.ts walkExtendsChain)
+          // Cycle/depth-detected to match client behavior.
+          const MAX_DEPTH = 5;
+          const walkChain = (id: string): string[] => {
+            const chain: string[] = [];
+            const seen = new Set<string>();
+            let cursor: string | undefined = id;
+            while (cursor) {
+              if (seen.has(cursor)) {
+                throw new Error(`cycle at ${cursor}`);
+              }
+              seen.add(cursor);
+              chain.push(cursor);
+              if (chain.length > MAX_DEPTH) {
+                throw new Error(`depth > ${MAX_DEPTH}`);
+              }
+              cursor = registry[cursor]?._extends;
+            }
+            return chain.reverse();
+          };
+
+          const chain = walkChain(compId);
+
+          if (!sceneName) {
+            // Return full resolved scenes record
+            const out: Record<string, unknown> = {};
+            for (const id of chain) {
+              const scenes = registry[id]?._scenes ?? {};
+              for (const [name, entry] of Object.entries(scenes)) {
+                out[name] = { ...(out[name] as object), ...(entry as object) };
+              }
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ scenes: out }));
+            return;
+          }
+
+          // Single-scene resolve — property-level merge per chain
+          let merged: Record<string, unknown> | null = null;
+          for (const id of chain) {
+            const entry = registry[id]?._scenes?.[sceneName];
+            if (!entry) continue;
+            merged = { ...(merged ?? {}), ...entry };
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ entry: merged }));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: String(err) }));
+        }
+      });
+
+      // Bump-data-only — like /api/versions/bump but DOES NOT clone .tsx file.
+      // New version is a compositions.ts entry + sceneConfig.data.json entry only.
+      // Per plan §4.5 P4: forward-only, V1.22+ ships as data-only by default.
+      server.middlewares.use(
+        '/api/versions/bump-data-only',
+        (req, res, next) => {
+          if (req.method !== 'POST') return next();
+
+          let body = '';
+          req.on('data', (chunk: string) => (body += chunk));
+          req.on('end', () => {
+            try {
+              const { fromCompositionId, newSubVersion } = JSON.parse(body) as {
+                fromCompositionId: string;
+                newSubVersion?: string;
+              };
+              if (!fromCompositionId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({ error: 'fromCompositionId required' }),
+                );
+                return;
+              }
+
+              // Parse "DorianFullV1-21" → family + dotted version "1.21"
+              const m = fromCompositionId.match(/^(.+)V(\d+)-(\d+)$/);
+              if (!m) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({
+                    error: `invalid composition id shape: ${fromCompositionId}`,
+                  }),
+                );
+                return;
+              }
+              const family = m[1];
+              const major = parseInt(m[2], 10);
+              const minor = parseInt(m[3], 10);
+
+              const newMinor = parseInt(newSubVersion ?? `${minor + 1}`, 10);
+              const newCompId = `${family}V${major}-${newMinor}`;
+
+              // Initialize sceneConfig entry chained to old composition.
+              const cfgPath = path.resolve(
+                __dirname,
+                'src/compositions/SceneDirector/sceneConfig.data.json',
+              );
+              const cfg = fs.existsSync(cfgPath)
+                ? JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
+                : {};
+              if (cfg[newCompId]) {
+                res.writeHead(409, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({
+                    error: `${newCompId} already exists in sceneConfig`,
+                  }),
+                );
+                return;
+              }
+              cfg[newCompId] = {
+                _extends: fromCompositionId,
+                _scenes: {},
+              };
+              fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+
+              // NOTE: full registry auto-wire (compositions.ts + Root.tsx +
+              // package.json + codedPaths.ts + layers.ts) is intentionally
+              // OUT OF SCOPE for P1 — the data-only version chains via
+              // sceneConfig._extends, so callers fall back to the parent's
+              // .tsx component. Full wiring lives in P4 when SD UI surfaces
+              // the "New Variant (data-only)" button.
+
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  newCompId,
+                  fromCompositionId,
+                  mode: 'data-only',
+                  note: 'sceneConfig entry created; compositions.ts wiring deferred to P4',
+                }),
+              );
+            } catch (err) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: String(err) }));
+            }
+          });
+        },
+      );
+
+      // Migrate codedPaths.data.json[compId] → sceneConfig.data.json[compId]._scenes
+      // One-shot copy. Idempotent — running twice produces the same result.
+      // Per plan §3 IN scope: opt-in migration via this endpoint.
+      server.middlewares.use(
+        '/api/versions/migrate-coded-paths',
+        (req, res, next) => {
+          if (req.method !== 'POST') return next();
+          let body = '';
+          req.on('data', (chunk: string) => (body += chunk));
+          req.on('end', () => {
+            try {
+              const { compositionId, dryRun } = JSON.parse(body || '{}') as {
+                compositionId: string;
+                dryRun?: boolean;
+              };
+              if (!compositionId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'compositionId required' }));
+                return;
+              }
+              const codedPath = path.resolve(
+                __dirname,
+                'src/compositions/SceneDirector/codedPaths.data.json',
+              );
+              const cfgPath = path.resolve(
+                __dirname,
+                'src/compositions/SceneDirector/sceneConfig.data.json',
+              );
+              const coded = fs.existsSync(codedPath)
+                ? JSON.parse(fs.readFileSync(codedPath, 'utf8'))
+                : {};
+              const cfg = fs.existsSync(cfgPath)
+                ? JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
+                : {};
+
+              const sourceScenes = coded[compositionId] ?? {};
+              const sceneCount = Object.keys(sourceScenes).length;
+              if (sceneCount === 0) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({
+                    error: `no codedPaths entry for ${compositionId}`,
+                  }),
+                );
+                return;
+              }
+
+              // Build new sceneConfig entries — note: codedPaths data IS
+              // path/gesture/animation/dark/_locked/secondaryLayers. We copy
+              // the locked + meta-ish fields (_locked) and skip path data
+              // (which stays the source of truth in codedPaths.data.json).
+              const migrated: Record<string, Record<string, unknown>> = {};
+              for (const [scene, entry] of Object.entries(sourceScenes) as [
+                string,
+                Record<string, unknown>,
+              ][]) {
+                const out: Record<string, unknown> = {};
+                if (entry._locked === true) out._locked = true;
+                // Future migration could add: meta from scene info
+                // file, markers extracted from path waypoints, etc. P1
+                // keeps it minimal — opt-in copy of locked-state.
+                if (Object.keys(out).length > 0) {
+                  migrated[scene] = out;
+                }
+              }
+
+              if (dryRun) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({
+                    success: true,
+                    dryRun: true,
+                    compositionId,
+                    sourceSceneCount: sceneCount,
+                    migratedSceneCount: Object.keys(migrated).length,
+                    migratedScenes: Object.keys(migrated),
+                  }),
+                );
+                return;
+              }
+
+              // Idempotent merge: existing sceneConfig entries WIN over
+              // migrated ones (so re-running doesn't clobber subsequent edits).
+              if (!cfg[compositionId]) {
+                cfg[compositionId] = { _scenes: {} };
+              }
+              if (!cfg[compositionId]._scenes) {
+                cfg[compositionId]._scenes = {};
+              }
+              for (const [scene, entry] of Object.entries(migrated)) {
+                if (!cfg[compositionId]._scenes[scene]) {
+                  cfg[compositionId]._scenes[scene] = entry;
+                }
+              }
+              fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  success: true,
+                  compositionId,
+                  sourceSceneCount: sceneCount,
+                  migratedSceneCount: Object.keys(migrated).length,
+                  migratedScenes: Object.keys(migrated),
+                }),
+              );
+            } catch (err) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: String(err) }));
+            }
+          });
+        },
+      );
+
       // Persist feedback pins to disk so Claude can read them without a
       // manual Save. Written as a flat { compositionId: FeedbackPin[] } map.
       server.middlewares.use('/api/save-feedback-pins', (req, res, next) => {

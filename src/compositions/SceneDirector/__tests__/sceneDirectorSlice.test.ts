@@ -142,6 +142,7 @@ describe('SET_COMPOSITION reducer', () => {
       sceneGesture: { '4-ChatOpen': 'click' },
       sceneDark: { '4-ChatOpen': true },
       versionHistory: { '4-ChatOpen': [] },
+      sceneConfig: { '4-ChatOpen': { meta: { duration: 100 } } },
     };
     const next = directorReducer(state1, {
       type: 'SET_COMPOSITION',
@@ -152,6 +153,23 @@ describe('SET_COMPOSITION reducer', () => {
     expect(next.sceneGesture).toEqual({});
     expect(next.sceneDark).toEqual({});
     expect(next.versionHistory).toEqual({});
+    expect(next.sceneConfig).toEqual({});
+  });
+
+  it('replaces sceneConfig with supplied slice (10th key, P1.3)', () => {
+    const state1: DirectorState = {
+      ...initialState,
+      compositionId: 'V1-20',
+      sceneConfig: { '8-ProductPage': { meta: { duration: 100 } } },
+    };
+    const next = directorReducer(state1, {
+      type: 'SET_COMPOSITION',
+      id: 'V1-21',
+      slice: {
+        sceneConfig: { '8-ProductPage': { meta: { duration: 220 } } },
+      },
+    });
+    expect(next.sceneConfig['8-ProductPage']?.meta?.duration).toBe(220);
   });
 
   it('clears selectedScene + selectedWaypoint on switch', () => {
@@ -328,6 +346,23 @@ describe('extractSlice', () => {
     expect(loaded.waypoints).toEqual(state.waypoints);
     expect(loaded.sceneGesture).toEqual(state.sceneGesture);
     expect(loaded.sceneDark).toEqual(state.sceneDark);
+  });
+
+  it('round-trips sceneConfig (10th key, P1.3)', () => {
+    const state: DirectorState = {
+      ...initialState,
+      compositionId: 'V1-21',
+      sceneConfig: {
+        '8-ProductPage': {
+          meta: { duration: 220 },
+          markers: { tvCard: { x: 540, y: 1480 } },
+          _locked: false,
+        },
+      },
+    };
+    saveSlice(state.compositionId, extractSlice(state));
+    const loaded = loadSlice(state.compositionId);
+    expect(loaded.sceneConfig).toEqual(state.sceneConfig);
   });
 });
 

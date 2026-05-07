@@ -220,6 +220,7 @@ export function extractSlice(state: DirectorState): DirectorSlice {
     waypoints: state.waypoints,
     savedSnapshots: state.savedSnapshots,
     versionHistory: state.versionHistory,
+    sceneConfig: state.sceneConfig,
   };
 }
 

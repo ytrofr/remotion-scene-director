@@ -13,6 +13,9 @@ import {
   collectScenesToSave,
   buildProposalForScene,
   filterPersistableProposals,
+  collectSceneConfigsToSave,
+  buildSceneConfigProposal,
+  filterPersistableSceneConfigs,
 } from '../saveAll';
 import { initialState, type DirectorState } from '../state.types';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
@@ -245,5 +248,78 @@ describe('Save-everything regression: the scene 1/2/3 lost-work scenario', () =>
     expect(
       proposals.find((p) => p.scene === '4-ChatOpen')!.proposal.path,
     ).toHaveLength(2);
+  });
+});
+
+// ── sceneConfig save flow (P1.4) ───────────────────────────────────────────
+
+describe('collectSceneConfigsToSave', () => {
+  it('returns empty when state.sceneConfig is empty', () => {
+    const state: DirectorState = { ...initialState };
+    expect(collectSceneConfigsToSave(state)).toEqual([]);
+  });
+
+  it('returns sorted scene names from state.sceneConfig', () => {
+    const state: DirectorState = {
+      ...initialState,
+      sceneConfig: {
+        '8-ProductPage': { meta: { duration: 220 } },
+        '4-ChatOpen': { _locked: true },
+        '2-HomeScroll': { markers: { tvCard: { x: 1, y: 2 } } },
+      },
+    };
+    expect(collectSceneConfigsToSave(state)).toEqual([
+      '2-HomeScroll',
+      '4-ChatOpen',
+      '8-ProductPage',
+    ]);
+  });
+});
+
+describe('buildSceneConfigProposal', () => {
+  it('returns the entry for the requested scene', () => {
+    const state: DirectorState = {
+      ...initialState,
+      sceneConfig: {
+        '8-ProductPage': { meta: { duration: 220 } },
+      },
+    };
+    expect(buildSceneConfigProposal(state, '8-ProductPage')).toEqual({
+      meta: { duration: 220 },
+    });
+  });
+
+  it('returns null for missing scene', () => {
+    expect(buildSceneConfigProposal(initialState, 'ghost-scene')).toBeNull();
+  });
+});
+
+describe('filterPersistableSceneConfigs', () => {
+  it('drops empty entries', () => {
+    const out = filterPersistableSceneConfigs([
+      { scene: 's1', entry: {} },
+      { scene: 's2', entry: { meta: { duration: 100 } } },
+    ]);
+    expect(out.map((x) => x.scene)).toEqual(['s2']);
+  });
+
+  it('drops entries that ONLY have _locked:false (noise)', () => {
+    const out = filterPersistableSceneConfigs([
+      { scene: 's1', entry: { _locked: false } },
+      { scene: 's2', entry: { _locked: true } },
+    ]);
+    expect(out.map((x) => x.scene)).toEqual(['s2']);
+  });
+
+  it('keeps entries with markers / clickFlash / audio', () => {
+    const out = filterPersistableSceneConfigs([
+      { scene: 's1', entry: { markers: { x: { x: 1, y: 1 } } } },
+      { scene: 's2', entry: { clickFlash: [{ x: 1, y: 1, frame: 1 }] } },
+      {
+        scene: 's3',
+        entry: { audio: [{ file: 'a.wav', frame: 0 }] },
+      },
+    ]);
+    expect(out.map((x) => x.scene)).toEqual(['s1', 's2', 's3']);
   });
 });

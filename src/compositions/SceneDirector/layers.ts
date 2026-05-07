@@ -830,6 +830,156 @@ const CODED_AUDIO_REGISTRY: Record<
     '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
     '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
   },
+  'DorianFullV1-19': {
+    ...DORIAN_AUDIO,
+    // Music split into two layers: scene 1 covers Dorian half (frames 0-1120),
+    // scene 10 covers Stores+Closing half (frames 1120-2590). The split is
+    // necessary because in SceneDirector preview, AudioFromLayers inside
+    // DorianDemoV1_12 is wrapped in <Sequence from=0 dur=DORIAN_CUT> which
+    // clamps any scene-1-registered audio at frame 1120. Stores audio renders
+    // via StoresAudioFromLayersV1_13 which only picks up entries with
+    // globalFrom >= DORIAN_CUT — hence the second registration at scene 10.
+    // Render mode is unaffected (top-level <BackgroundMusic> handles both).
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1120,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': [
+      ...DORIAN_STORES_AUDIO['1-StoreDashboard'],
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1470,
+        volume: 0.15,
+      },
+    ],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-20': {
+    ...DORIAN_AUDIO,
+    // Music split into two layers: scene 1 covers Dorian half (frames 0-1120),
+    // scene 10 covers Stores+Closing half (frames 1120-2590). The split is
+    // necessary because in SceneDirector preview, AudioFromLayers inside
+    // DorianDemoV1_12 is wrapped in <Sequence from=0 dur=DORIAN_CUT> which
+    // clamps any scene-1-registered audio at frame 1120. Stores audio renders
+    // via StoresAudioFromLayersV1_13 which only picks up entries with
+    // globalFrom >= DORIAN_CUT — hence the second registration at scene 10.
+    // Render mode is unaffected (top-level <BackgroundMusic> handles both).
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1120,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': [
+      ...DORIAN_STORES_AUDIO['1-StoreDashboard'],
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1470,
+        volume: 0.15,
+      },
+    ],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-21': {
+    ...DORIAN_AUDIO,
+    // Music split into two layers: scene 1 covers Dorian half (frames 0-1120),
+    // scene 10 covers Stores+Closing half (frames 1120-2590). The split is
+    // necessary because in SceneDirector preview, AudioFromLayers inside
+    // DorianDemoV1_12 is wrapped in <Sequence from=0 dur=DORIAN_CUT> which
+    // clamps any scene-1-registered audio at frame 1120. Stores audio renders
+    // via StoresAudioFromLayersV1_13 which only picks up entries with
+    // globalFrom >= DORIAN_CUT — hence the second registration at scene 10.
+    // Render mode is unaffected (top-level <BackgroundMusic> handles both).
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1120,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    // V1.21 scene 8: click moved from scene-local f147 → f200 (extended scene
+    // 8 from 150 → 220 frames so the click feels deliberate after a slow
+    // travel + HOLD on the TV card). See DorianFullV1.21.tsx.
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 200,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': [
+      ...DORIAN_STORES_AUDIO['1-StoreDashboard'],
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1470,
+        volume: 0.15,
+      },
+    ],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
   'DorianFullV1-140': {
     ...DORIAN_AUDIO,
     '1-Intro': [
@@ -879,7 +1029,7 @@ export function getCodedAudio(
 }
 
 // Layer types
-export type LayerType = 'hand' | 'zoom' | 'audio' | 'caption';
+export type LayerType = 'hand' | 'zoom' | 'audio' | 'caption' | 'clickFlash';
 
 // Base layer properties shared by all layer types
 export interface LayerBase {
@@ -956,6 +1106,31 @@ export interface CaptionLayer extends LayerBase {
   data: CaptionLayerData;
 }
 
+// Click-flash layer — visual click indication on the website (expanding ring +
+// brief opacity flash at composition-space (x, y) at scene-local frame).
+// Reusable across ALL compositions, not just Dorian. Designed to be paired with
+// a click waypoint at the same frame so the cursor's soft-pulse + the flash
+// fire simultaneously.
+export interface ClickFlashLayerData {
+  /** composition-space x (0 .. video.width). Same coord space as hand waypoints. */
+  x: number;
+  /** composition-space y (0 .. video.height). */
+  y: number;
+  /** scene-local frame number where the flash starts. */
+  frame: number;
+  /** ring + flash color (any CSS color). Default: COLORS.primary if undefined. */
+  color?: string;
+  /** maximum ring radius in px (composition-space). Default 120. */
+  peakRadius?: number;
+  /** total animation duration in frames. Default 24 (~0.8s at 30fps). */
+  durationInFrames?: number;
+}
+
+export interface ClickFlashLayer extends LayerBase {
+  type: 'clickFlash';
+  data: ClickFlashLayerData;
+}
+
 export const AUDIO_FILES = [
   { id: 'audio/send-click.wav', label: 'Click' },
   { id: 'audio/typing-soft.wav', label: 'Typing' },
@@ -966,14 +1141,20 @@ export const AUDIO_FILES = [
   { id: 'audio/sfx/pop-up.wav', label: 'Pop Up' },
 ];
 
-export type Layer = HandLayer | ZoomLayer | AudioLayer | CaptionLayer;
+export type Layer =
+  | HandLayer
+  | ZoomLayer
+  | AudioLayer
+  | CaptionLayer
+  | ClickFlashLayer;
 
 // Discriminated union of all layer data types
 export type LayerData =
   | HandLayerData
   | ZoomLayerData
   | AudioLayerData
-  | CaptionLayerData;
+  | CaptionLayerData
+  | ClickFlashLayerData;
 
 // Generate unique layer ID
 let layerCounter = 0;
@@ -1100,4 +1281,56 @@ export function computeZoomAtFrame(
 
 function applyEasing(t: number, easing: ZoomKeyframe['easing']): number {
   return applyNamedEasing(t, easing as EasingName);
+}
+
+// Create a default click-flash layer
+export function createClickFlashLayer(
+  scene: string,
+  data: ClickFlashLayerData,
+  order: number = 4,
+): ClickFlashLayer {
+  return {
+    id: generateLayerId('clickFlash'),
+    type: 'clickFlash',
+    scene,
+    name: `Flash @(${data.x}, ${data.y})`,
+    visible: true,
+    locked: false,
+    order,
+    data,
+  };
+}
+
+// Per-composition + per-scene click-flash entries. Mirrors the audio registry
+// pattern (CODED_AUDIO_REGISTRY). DorianFull-family wrappers read this via
+// getCodedClickFlashes() to know which flashes to render. ENSURE_SCENE_LAYERS
+// auto-creates ClickFlashLayer instances from this registry on scene seed —
+// flashes appear as editable entries in SceneDirector slice (long-term: via
+// drag-handle UI on the phone preview).
+const CODED_CLICK_FLASH_REGISTRY: Record<
+  string,
+  Record<string, ClickFlashLayerData[]>
+> = {
+  // V1.21: TV-card click in scene 8 (composition-space 518, 1150 at scene-local
+  // frame 200 — see DorianFullV1.21 sceneOverrides). Teal expanding ring +
+  // brief opacity flash so the click reads as a deliberate navigation.
+  'DorianFullV1-21': {
+    '8-ProductPage': [
+      {
+        x: 518,
+        y: 1150,
+        frame: 200,
+        color: '#2DD4BF',
+        peakRadius: 140,
+        durationInFrames: 24,
+      },
+    ],
+  },
+};
+
+export function getCodedClickFlashes(
+  compositionId: string,
+  sceneName: string,
+): ClickFlashLayerData[] {
+  return CODED_CLICK_FLASH_REGISTRY[compositionId]?.[sceneName] ?? [];
 }

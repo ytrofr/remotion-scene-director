@@ -25,7 +25,10 @@ import {
   OutroScene,
 } from './scenes';
 import { HomeScrollSceneV1_09 } from './scenes/HomeScrollSceneV1.09';
-import { ProductPageSceneV1_12 } from './scenes/ProductPageSceneV1.12';
+import {
+  ProductPageSceneV1_12,
+  type ProductPageSceneV1_12_SceneConfig,
+} from './scenes/ProductPageSceneV1.12';
 import { ProductDetailSceneV1_12 } from './scenes/ProductDetailSceneV1.12';
 import { getCodedAudio } from '../SceneDirector/layers';
 import {
@@ -58,65 +61,104 @@ export const VIDEO_V1_12 = {
   durationInFrames: 1300,
 };
 
-const SCENE_ENTRIES = [
-  {
-    name: '1-Intro',
-    start: SCENES_V1_12.intro.start,
-    duration: SCENES_V1_12.intro.duration,
-  },
-  {
-    name: '2-HomeScroll',
-    start: SCENES_V1_12.homeScroll.start,
-    duration: SCENES_V1_12.homeScroll.duration,
-  },
-  {
-    name: '3-TapBubble',
-    start: SCENES_V1_12.tapBubble.start,
-    duration: SCENES_V1_12.tapBubble.duration,
-  },
-  {
-    name: '4-ChatOpen',
-    start: SCENES_V1_12.chatOpen.start,
-    duration: SCENES_V1_12.chatOpen.duration,
-  },
-  {
-    name: '5-UserTyping',
-    start: SCENES_V1_12.userTyping.start,
-    duration: SCENES_V1_12.userTyping.duration,
-  },
-  {
-    name: '6-AIThinking',
-    start: SCENES_V1_12.aiThinking.start,
-    duration: SCENES_V1_12.aiThinking.duration,
-  },
-  {
-    name: '7-AIResponse',
-    start: SCENES_V1_12.aiResponse.start,
-    duration: SCENES_V1_12.aiResponse.duration,
-  },
-  {
-    name: '8-ProductPage',
-    start: SCENES_V1_12.productPage.start,
-    duration: SCENES_V1_12.productPage.duration,
-  },
-  {
-    name: '9-ProductDetail',
-    start: SCENES_V1_12.productDetail.start,
-    duration: SCENES_V1_12.productDetail.duration,
-  },
-  {
-    name: '10-Outro',
-    start: SCENES_V1_12.outro.start,
-    duration: SCENES_V1_12.outro.duration,
-  },
-];
+// ── C lever (sceneOverrides + cascade) ──────────────────────────────────────
+// Future versions of DorianFull (V1.21+) extend specific scene durations
+// without forking this file. They pass `sceneOverrides` to <DorianDemoV1_12 />
+// and the component cascades the deltas — extending productPage by 70f shifts
+// productDetail.start +70 and outro.start +70 automatically. Total duration
+// from `resolveDurationV1_12(overrides)`.
+//
+// Only durations are configurable. Starts cascade automatically. The first
+// 7 scenes (intro → aiResponse) are anchored to V1.00 timing — never
+// overridable, because they're shared across all DorianFull variants and
+// any adjustment would ripple through every version's audio cues.
 
-const DorianAudioV1_12: React.FC = () => {
+export interface SceneOverridesV1_12 {
+  productPage?: {
+    duration?: number;
+    /** Pass-through to ProductPageSceneV1_12 for click-target / click-frame tweaks. */
+    sceneConfig?: ProductPageSceneV1_12_SceneConfig;
+  };
+  productDetail?: { duration?: number };
+  outro?: { duration?: number };
+}
+
+export type ResolvedScenesV1_12 = typeof SCENES_V1_12;
+
+/**
+ * Cascade scene-duration overrides over the V1.12 base. productPage extends →
+ * productDetail.start shifts → outro.start shifts. Returns a fully-resolved
+ * scenes object with the same shape as SCENES_V1_12.
+ */
+export function resolveScenesV1_12(
+  overrides: SceneOverridesV1_12 = {},
+): ResolvedScenesV1_12 {
+  const ppDur =
+    overrides.productPage?.duration ?? SCENES_V1_12.productPage.duration;
+  const pdDur =
+    overrides.productDetail?.duration ?? SCENES_V1_12.productDetail.duration;
+  const outDur = overrides.outro?.duration ?? SCENES_V1_12.outro.duration;
+  const ppShift = ppDur - SCENES_V1_12.productPage.duration;
+  const pdShift = ppShift + (pdDur - SCENES_V1_12.productDetail.duration);
+  return {
+    intro: SCENES_V1_12.intro,
+    homeScroll: SCENES_V1_12.homeScroll,
+    tapBubble: SCENES_V1_12.tapBubble,
+    chatOpen: SCENES_V1_12.chatOpen,
+    userTyping: SCENES_V1_12.userTyping,
+    aiThinking: SCENES_V1_12.aiThinking,
+    aiResponse: SCENES_V1_12.aiResponse,
+    productPage: {
+      start: SCENES_V1_12.productPage.start,
+      duration: ppDur,
+    },
+    productDetail: {
+      start: SCENES_V1_12.productDetail.start + ppShift,
+      duration: pdDur,
+    },
+    outro: {
+      start: SCENES_V1_12.outro.start + pdShift,
+      duration: outDur,
+    },
+  };
+}
+
+export function resolveDurationV1_12(
+  overrides: SceneOverridesV1_12 = {},
+): number {
+  const r = resolveScenesV1_12(overrides);
+  return r.outro.start + r.outro.duration;
+}
+
+interface SceneEntry {
+  name: string;
+  start: number;
+  duration: number;
+}
+
+function buildSceneEntries(scenes: ResolvedScenesV1_12): SceneEntry[] {
+  return [
+    { name: '1-Intro', ...scenes.intro },
+    { name: '2-HomeScroll', ...scenes.homeScroll },
+    { name: '3-TapBubble', ...scenes.tapBubble },
+    { name: '4-ChatOpen', ...scenes.chatOpen },
+    { name: '5-UserTyping', ...scenes.userTyping },
+    { name: '6-AIThinking', ...scenes.aiThinking },
+    { name: '7-AIResponse', ...scenes.aiResponse },
+    { name: '8-ProductPage', ...scenes.productPage },
+    { name: '9-ProductDetail', ...scenes.productDetail },
+    { name: '10-Outro', ...scenes.outro },
+  ];
+}
+
+const DorianAudioV1_12: React.FC<{ sceneEntries: SceneEntry[] }> = ({
+  sceneEntries,
+}) => {
   const isSceneDirector = useSceneDirectorMode();
   if (isSceneDirector) return null;
 
   const audioElements: React.ReactElement[] = [];
-  for (const scene of SCENE_ENTRIES) {
+  for (const scene of sceneEntries) {
     const entries = [
       ...getCodedAudio('DorianDemo', scene.name),
       ...getCodedAudio('DorianDemoV1.12', scene.name),
@@ -137,12 +179,14 @@ const DorianAudioV1_12: React.FC = () => {
   return <>{audioElements}</>;
 };
 
-const DorianSecondaryHandsV1_12: React.FC = () => {
+const DorianSecondaryHandsV1_12: React.FC<{ sceneEntries: SceneEntry[] }> = ({
+  sceneEntries,
+}) => {
   const isSceneDirector = useSceneDirectorMode();
   if (isSceneDirector) return null;
 
   const elements: React.ReactElement[] = [];
-  for (const scene of SCENE_ENTRIES) {
+  for (const scene of sceneEntries) {
     // Scenes 2 (HomeScroll) and 8 (ProductPage) are owned entirely by
     // V1.09 hardcoded paths — skip secondary-hand replay from saved data.
     if (scene.name === '2-HomeScroll' || scene.name === '8-ProductPage')
@@ -175,79 +219,90 @@ const DorianSecondaryHandsV1_12: React.FC = () => {
   return <>{elements}</>;
 };
 
-export const DorianDemoV1_12: React.FC = () => {
+interface DorianDemoV1_12_Props {
+  /** Optional scene-duration overrides + per-scene config (V1.21+). When
+   *  omitted, uses base SCENES_V1_12 timing — V1.13–V1.20 behavior unchanged. */
+  sceneOverrides?: SceneOverridesV1_12;
+}
+
+export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
+  sceneOverrides,
+} = {}) => {
+  const scenes = resolveScenesV1_12(sceneOverrides);
+  const sceneEntries = buildSceneEntries(scenes);
+  const productPageConfig = sceneOverrides?.productPage?.sceneConfig;
   return (
     <AbsoluteFill style={{ background: 'transparent' }}>
-      <DorianAudioV1_12 />
+      <DorianAudioV1_12 sceneEntries={sceneEntries} />
       <AudioFromLayers />
-      <DorianSecondaryHandsV1_12 />
+      <DorianSecondaryHandsV1_12 sceneEntries={sceneEntries} />
 
       <Sequence
-        from={SCENES_V1_12.intro.start}
-        durationInFrames={SCENES_V1_12.intro.duration}
+        from={scenes.intro.start}
+        durationInFrames={scenes.intro.duration}
         name="1-Intro"
       >
         <IntroScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.homeScroll.start}
-        durationInFrames={SCENES_V1_12.homeScroll.duration}
+        from={scenes.homeScroll.start}
+        durationInFrames={scenes.homeScroll.duration}
         name="2-HomeScroll"
       >
         <HomeScrollSceneV1_09 />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.tapBubble.start}
-        durationInFrames={SCENES_V1_12.tapBubble.duration}
+        from={scenes.tapBubble.start}
+        durationInFrames={scenes.tapBubble.duration}
         name="3-TapBubble"
       >
         <TapAIBubbleScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.chatOpen.start}
-        durationInFrames={SCENES_V1_12.chatOpen.duration}
+        from={scenes.chatOpen.start}
+        durationInFrames={scenes.chatOpen.duration}
         name="4-ChatOpen"
       >
         <ChatOpenScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.userTyping.start}
-        durationInFrames={SCENES_V1_12.userTyping.duration}
+        from={scenes.userTyping.start}
+        durationInFrames={scenes.userTyping.duration}
         name="5-UserTyping"
       >
         <UserTypingScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.aiThinking.start}
-        durationInFrames={SCENES_V1_12.aiThinking.duration}
+        from={scenes.aiThinking.start}
+        durationInFrames={scenes.aiThinking.duration}
         name="6-AIThinking"
       >
         <AIThinkingScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.aiResponse.start}
-        durationInFrames={SCENES_V1_12.aiResponse.duration}
+        from={scenes.aiResponse.start}
+        durationInFrames={scenes.aiResponse.duration}
         name="7-AIResponse"
       >
         <AIResponseScene />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.productPage.start}
-        durationInFrames={SCENES_V1_12.productPage.duration}
+        from={scenes.productPage.start}
+        durationInFrames={scenes.productPage.duration}
         name="8-ProductPage"
       >
-        <ProductPageSceneV1_12 />
+        <ProductPageSceneV1_12 sceneConfig={productPageConfig} />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.productDetail.start}
-        durationInFrames={SCENES_V1_12.productDetail.duration}
+        from={scenes.productDetail.start}
+        durationInFrames={scenes.productDetail.duration}
         name="9-ProductDetail"
       >
         <ProductDetailSceneV1_12 />
       </Sequence>
       <Sequence
-        from={SCENES_V1_12.outro.start}
-        durationInFrames={SCENES_V1_12.outro.duration}
+        from={scenes.outro.start}
+        durationInFrames={scenes.outro.duration}
         name="10-Outro"
       >
         <OutroScene />

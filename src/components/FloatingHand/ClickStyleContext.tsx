@@ -34,24 +34,32 @@ export function useClickStyle(override?: ClickStyle): ClickStyle {
 
 /**
  * Compute the soft-pulse scale multiplier for a given local frame.
- * Returns 1.0 outside click windows; 1.0 → 0.82 → 1.0 during a click
- * (triangle wave over the click duration, default 8 frames).
+ * Returns 1.0 outside click windows; 1.0 → peak → 1.0 during a click,
+ * over a TIGHT fixed window centered on the click frame — punchy beat.
+ *
+ * Why a fixed window (not waypoint.duration): click waypoints carry
+ * `duration` for Lottie click-anim sync (typically 45 frames / 1.5s),
+ * which is way too slow for a perceptual click beat. The pulse is a
+ * separate visual concern — short and deep so the eye reads "click".
  *
  * Pure function — safe in render path.
  */
+const PULSE_WINDOW_FRAMES = 6; // total triangle window (down + back up)
+const PULSE_PEAK = 0.66; // shrink to 66% at the bottom of the beat
+
 export function computeClickPulseScale(
   path: { gesture?: string; frame?: number; duration?: number }[],
   localFrame: number,
-  fallbackDuration = 8,
-  peak = 0.82,
+  windowFrames = PULSE_WINDOW_FRAMES,
+  peak = PULSE_PEAK,
 ): number {
   for (const wp of path) {
     if (wp.gesture !== 'click') continue;
     const wf = wp.frame ?? 0;
-    const dur = wp.duration ?? fallbackDuration;
-    if (localFrame >= wf && localFrame < wf + dur) {
-      const t = (localFrame - wf) / dur;
-      // Triangle wave 0 → 1 → 0 over the duration
+    // Pulse plays in the first `windowFrames` of the click waypoint.
+    if (localFrame >= wf && localFrame < wf + windowFrames) {
+      const t = (localFrame - wf) / windowFrames;
+      // Triangle wave 0 → 1 → 0 over the window (peak at midpoint)
       const tri = t < 0.5 ? t * 2 : (1 - t) * 2;
       return 1 - (1 - peak) * tri;
     }

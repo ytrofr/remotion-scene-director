@@ -88,6 +88,18 @@ import {
   FULL_VIDEO_V1_18,
 } from './compositions/DorianFull/DorianFullV1.18';
 import {
+  DorianFullV1_19,
+  FULL_VIDEO_V1_19,
+} from './compositions/DorianFull/DorianFullV1.19';
+import {
+  DorianFullV1_20,
+  FULL_VIDEO_V1_20,
+} from './compositions/DorianFull/DorianFullV1.20';
+import {
+  DorianFullV1_21,
+  FULL_VIDEO_V1_21,
+} from './compositions/DorianFull/DorianFullV1.21';
+import {
   ClickStyleDemo,
   CLICK_STYLE_DEMO_TOTAL,
 } from './compositions/ClickStyleDemo/ClickStyleDemo';
@@ -336,6 +348,30 @@ export const RemotionRoot: React.FC = () => {
           fps={FULL_VIDEO_V1_18.fps}
           width={FULL_VIDEO_V1_18.width}
           height={FULL_VIDEO_V1_18.height}
+        />
+        <Composition
+          id="DorianFullV1-19"
+          component={DorianFullV1_19}
+          durationInFrames={FULL_VIDEO_V1_19.durationInFrames}
+          fps={FULL_VIDEO_V1_19.fps}
+          width={FULL_VIDEO_V1_19.width}
+          height={FULL_VIDEO_V1_19.height}
+        />
+        <Composition
+          id="DorianFullV1-20"
+          component={DorianFullV1_20}
+          durationInFrames={FULL_VIDEO_V1_20.durationInFrames}
+          fps={FULL_VIDEO_V1_20.fps}
+          width={FULL_VIDEO_V1_20.width}
+          height={FULL_VIDEO_V1_20.height}
+        />
+        <Composition
+          id="DorianFullV1-21"
+          component={DorianFullV1_21}
+          durationInFrames={FULL_VIDEO_V1_21.durationInFrames}
+          fps={FULL_VIDEO_V1_21.fps}
+          width={FULL_VIDEO_V1_21.width}
+          height={FULL_VIDEO_V1_21.height}
         />
         <Composition
           id="ClickStyleDemo"

@@ -33,6 +33,30 @@ export interface CompositionEntry {
   globalOffsetY?: number;
   /** Optional SRT caption content for the captions timeline row */
   captionsSrt?: string;
+  /**
+   * Per-composition override for the SceneDirector preview's click-animation
+   * Lottie. When set, FloatingHandOverlay ignores the global
+   * `state.clickAnimation` for this composition.
+   *   - undefined (default) → use global state.clickAnimation (legacy behavior)
+   *   - null                → suppress the click Lottie entirely; rely on the
+   *                            FloatingHand soft-pulse shrink only.
+   *                            (Use for DorianFullV1.19+ — matches the rendered
+   *                             output where no burst Lottie is loaded.)
+   *   - string              → force a specific Lottie id (advanced)
+   */
+  clickAnimationOverride?: string | null;
+  /**
+   * Per-composition override for FloatingHand's click visual style in the
+   * SceneDirector preview overlay. The render path gets its style from the
+   * `<ClickStyleProvider>` wrapping the composition tree (V1.13+ uses
+   * 'soft-pulse'), but the SD overlay sits OUTSIDE that tree, so the
+   * provider never reaches it. Setting `clickStyle` here lets the overlay
+   * render its FloatingHand instances with the same style as the final MP4.
+   *   - undefined (default) → 'default' (cursor unchanged on click)
+   *   - 'soft-pulse'         → cursor shrinks like a beat on the click frame
+   *                             (matches V1.13+ rendered output)
+   */
+  clickStyle?: 'default' | 'soft-pulse';
 }
 
 // Activity log entry

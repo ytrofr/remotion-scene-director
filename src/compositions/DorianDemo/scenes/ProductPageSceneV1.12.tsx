@@ -15,6 +15,11 @@
  * timing, content scroll) is unchanged from V1.00.
  *
  * Companion: DorianDemoV1.12.tsx imports this. See .claude/rules/version-safe-iteration.md.
+ *
+ * Mini-D refactor (V1.21+): accepts optional `sceneConfig` prop so future
+ * versions can extend scene 8 (longer hold before click, different click
+ * target) WITHOUT forking this file. Default values match the original V1.12
+ * hardcoded behavior — passing nothing == V1.12. See V1.21 for usage.
  */
 import React from 'react';
 import {
@@ -46,8 +51,45 @@ import {
 import { fontFamily } from '../../../lib/fonts';
 import { DorianLoader, ChatOverlay, HomeBackground } from './ProductPageParts';
 
+/**
+ * Scene-config props for callers (V1.21+) that want to extend the click
+ * sequence without forking this file. All fields optional; omitted fields
+ * fall back to the V1.12 hardcoded constants.
+ *
+ * Cursor goes through 4 phases:
+ *   1. ENTER (f105 → f110): off-screen → scrollbar
+ *   2. SCROLLBAR DRAG (f112 → f140): always tied to scrollProgress, NEVER
+ *      configurable — content scroll happens at exactly these frames.
+ *   3. POST-DRAG TRAVEL (f142 → preClickFrame): cursor moves from scrollbar
+ *      bottom (X_SCROLLBAR, Y_BOT) to the click target (tvCardX, tvCardY).
+ *      Slow travel (longer gap between f142 and preClickFrame) = more
+ *      deliberate "user is reading the listing" feel.
+ *   4. CLICK + FADE (clickFrame, fadeOutFrame): click waypoint then scale: 0
+ *      fade-out so the boundary into scene 9 reads as a navigation.
+ */
+export interface ProductPageSceneV1_12_SceneConfig {
+  /** TV-card click target X in composition space. Default 518. */
+  tvCardX?: number;
+  /** TV-card click target Y in composition space. Default 1150. */
+  tvCardY?: number;
+  /** Scene-local frame the cursor arrives at the TV card. Default 146. */
+  preClickFrame?: number;
+  /** Scene-local frame the click waypoint fires. Default 147. */
+  clickFrame?: number;
+  /** Click waypoint duration. Default 6. */
+  clickDuration?: number;
+  /** Scene-local frame the cursor scale fades to 0. Default 150. */
+  fadeOutFrame?: number;
+}
+
+interface ProductPageSceneV1_12_Props {
+  sceneConfig?: ProductPageSceneV1_12_SceneConfig;
+}
+
 // Scene 8 V1.12: Product page with scrollbar-drag cursor.
-export const ProductPageSceneV1_12: React.FC = () => {
+export const ProductPageSceneV1_12: React.FC<ProductPageSceneV1_12_Props> = ({
+  sceneConfig,
+} = {}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -88,15 +130,19 @@ export const ProductPageSceneV1_12: React.FC = () => {
   });
 
   // V1.12: Scrollbar drag (f110-f140), then cursor travels to a TV-card and
-  // clicks it (f140-f148) so the transition into scene 9 reads as a click,
-  // not a hard cut. Click target is composition-space (518, 1150) — center of
-  // phone, mid-card area at zoomScale 1.8. Adjust via SceneDirector.
+  // clicks it. Click target + frames are configurable via sceneConfig (Mini-D
+  // refactor) so callers like V1.21 can extend the post-drag travel and click
+  // window without forking this file.
   const X_SCROLLBAR = 880;
   const Y_MID = 960;
   const Y_TOP = Y_MID - 100;
   const Y_BOT = Y_MID + 100;
-  const TV_CARD_X = 518;
-  const TV_CARD_Y = 1150;
+  const TV_CARD_X = sceneConfig?.tvCardX ?? 518;
+  const TV_CARD_Y = sceneConfig?.tvCardY ?? 1150;
+  const PRE_CLICK_FRAME = sceneConfig?.preClickFrame ?? 146;
+  const CLICK_FRAME = sceneConfig?.clickFrame ?? 147;
+  const CLICK_DURATION = sceneConfig?.clickDuration ?? 6;
+  const FADE_OUT_FRAME = sceneConfig?.fadeOutFrame ?? 150;
   const scrollHandPath: HandPathPoint[] = [
     // Enter from off-screen right at f105 (slightly before scroll begins)
     {
@@ -125,7 +171,7 @@ export const ProductPageSceneV1_12: React.FC = () => {
       rotation: 0,
       scale: 1,
     },
-    // End drag at f140 (matches scrollProgress end)
+    // End drag at f140 (matches scrollProgress end — NEVER configurable)
     {
       x: X_SCROLLBAR,
       y: Y_BOT,
@@ -143,30 +189,34 @@ export const ProductPageSceneV1_12: React.FC = () => {
       rotation: 0,
       scale: 1,
     },
-    // Travel to TV card centre by f146 (~4 frames, fast move)
+    // Travel to TV card centre. V1.12 default = f146 (4 frames after release,
+    // fast). V1.21 extends to f175 (~33 frames, slow) for a more deliberate
+    // "user is reading the listing" feel.
     {
       x: TV_CARD_X,
       y: TV_CARD_Y,
-      frame: 146,
+      frame: PRE_CLICK_FRAME,
       gesture: 'pointer',
       rotation: 0,
       scale: 1,
     },
-    // Click the TV card at f147 — duration 6 plays the click animation
+    // Click. Cursor sits on the TV card from PRE_CLICK_FRAME to CLICK_FRAME
+    // because both endpoints share (TV_CARD_X, TV_CARD_Y) — interpolation
+    // between equal positions is static.
     {
       x: TV_CARD_X,
       y: TV_CARD_Y,
-      frame: 147,
+      frame: CLICK_FRAME,
       gesture: 'click',
       rotation: 0,
       scale: 1,
-      duration: 6,
+      duration: CLICK_DURATION,
     },
     // Fade out at scene end so the boundary into scene 9 reads as a navigation
     {
       x: TV_CARD_X,
       y: TV_CARD_Y,
-      frame: 150,
+      frame: FADE_OUT_FRAME,
       gesture: 'pointer',
       rotation: 0,
       scale: 0,

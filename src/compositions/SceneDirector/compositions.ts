@@ -102,6 +102,19 @@ import {
   FULL_VIDEO_V1_18,
 } from '../DorianFull/DorianFullV1.18';
 import {
+  DorianFullV1_19,
+  FULL_VIDEO_V1_19,
+} from '../DorianFull/DorianFullV1.19';
+import {
+  DorianFullV1_20,
+  FULL_VIDEO_V1_20,
+} from '../DorianFull/DorianFullV1.20';
+import {
+  DorianFullV1_21,
+  FULL_VIDEO_V1_21,
+  FULL_SCENE_INFO_V1_21,
+} from '../DorianFull/DorianFullV1.21';
+import {
   ClickStyleDemo,
   CLICK_STYLE_DEMO_TOTAL,
 } from '../ClickStyleDemo/ClickStyleDemo';
@@ -455,6 +468,69 @@ export const COMPOSITIONS: CompositionEntry[] = [
     })),
   },
   {
+    id: 'DorianFullV1-19',
+    label: 'Dorian Full V1.19 (V1.18 + soft-pulse-only clicks, no burst)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_19.width,
+      height: FULL_VIDEO_V1_19.height,
+      fps: FULL_VIDEO_V1_19.fps,
+      frames: FULL_VIDEO_V1_19.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+    // Suppress the SD preview's click-burst Lottie + apply soft-pulse
+    // shrink so the editor matches the rendered output (V1.13's
+    // ClickStyleProvider value="soft-pulse" governs the render path).
+    clickAnimationOverride: null,
+    clickStyle: 'soft-pulse',
+  },
+  {
+    id: 'DorianFullV1-20',
+    label: 'Dorian Full V1.20 (V1.19 + scene-4 cursor-size normalized)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_20.width,
+      height: FULL_VIDEO_V1_20.height,
+      fps: FULL_VIDEO_V1_20.fps,
+      frames: FULL_VIDEO_V1_20.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+    // Suppress the SD preview's click-burst Lottie + apply soft-pulse
+    // shrink so the editor matches the rendered output (V1.13's
+    // ClickStyleProvider value="soft-pulse" governs the render path).
+    clickAnimationOverride: null,
+    clickStyle: 'soft-pulse',
+  },
+  {
+    id: 'DorianFullV1-21',
+    label: 'Dorian Full V1.21 (extended scene 8 + click trail + flash)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_21.width,
+      height: FULL_VIDEO_V1_21.height,
+      fps: FULL_VIDEO_V1_21.fps,
+      frames: FULL_VIDEO_V1_21.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_21.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+    // Suppress the SD preview's click-burst Lottie + apply soft-pulse
+    // shrink so the editor matches the rendered output (V1.13's
+    // ClickStyleProvider value="soft-pulse" governs the render path).
+    clickAnimationOverride: null,
+    clickStyle: 'soft-pulse',
+  },
+  {
     id: 'DorianFullV1-140',
     label: 'Dorian Full V1.140 (V1.13 + Cozy Coffee House jazz lounge)',
     group: 'Dorian',
@@ -731,6 +807,9 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   'DorianFullV1-16': DorianFullV1_16,
   'DorianFullV1-17': DorianFullV1_17,
   'DorianFullV1-18': DorianFullV1_18,
+  'DorianFullV1-19': DorianFullV1_19,
+  'DorianFullV1-20': DorianFullV1_20,
+  'DorianFullV1-21': DorianFullV1_21,
   'DorianFullV1-140': DorianFullV1_140,
   ClickStyleDemo: ClickStyleDemo,
   DorianImprovementsDemo,

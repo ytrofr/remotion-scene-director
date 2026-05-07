@@ -37,7 +37,20 @@ const SingleHandRenderer: React.FC<{
   /** The scene this layer belongs to (may differ from selected scene for bleed-over) */
   ownerScene: SceneInfo;
   ownerSceneName: string;
-}> = ({ layer, isPrimary, state, frame, ownerScene, ownerSceneName }) => {
+  /** Per-composition override for the click-animation Lottie. */
+  clickAnimationOverride?: string | null;
+  /** Per-composition click visual style (mirrors render-path ClickStyleProvider). */
+  clickStyle?: 'default' | 'soft-pulse';
+}> = ({
+  layer,
+  isPrimary,
+  state,
+  frame,
+  ownerScene,
+  ownerSceneName,
+  clickAnimationOverride,
+  clickStyle,
+}) => {
   const wps = layer.data.waypoints;
   if (!wps || wps.length === 0) return null;
 
@@ -77,11 +90,17 @@ const SingleHandRenderer: React.FC<{
   const zoomDefault = Math.round(120 * ((ownerScene.zoom ?? 1.8) / 1.8));
   const size = layer.data.size ?? zoomDefault;
 
-  // Build click animation file from pointer base + global click style
-  const clickAnimFile = buildClickAnimationFile(
-    animation,
-    state.clickAnimation,
-  );
+  // Build click animation file. Per-composition override (set via
+  // CompositionEntry.clickAnimationOverride in compositions.ts) wins over
+  // the global state.clickAnimation. `null` explicitly suppresses the
+  // click Lottie — used by V1.19+ to match the rendered output (which
+  // doesn't load any burst Lottie either).
+  const clickAnimFile =
+    clickAnimationOverride === null
+      ? undefined
+      : clickAnimationOverride !== undefined
+        ? buildClickAnimationFile(animation, clickAnimationOverride)
+        : buildClickAnimationFile(animation, state.clickAnimation);
 
   // Compute click animation speed: scales proportionally to user-set duration
   // speed = CLICK_ANIM_DURATION / actual_duration (normal=1.0 at 45f, faster when shorter)
@@ -103,6 +122,7 @@ const SingleHandRenderer: React.FC<{
       physics={{ ...DEFAULT_PHYSICS, ...preset.physics }}
       clickAnimation={clickAnimFile}
       clickSpeed={clickSpeed}
+      clickStyle={clickStyle}
     />
   );
 };
@@ -212,6 +232,8 @@ export const FloatingHandOverlay: React.FC<Props> = ({
             frame={frame}
             ownerScene={scene}
             ownerSceneName={sceneName}
+            clickAnimationOverride={composition.clickAnimationOverride}
+            clickStyle={composition.clickStyle}
           />
         ))}
       </div>

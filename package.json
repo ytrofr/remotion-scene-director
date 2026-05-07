@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "remotion studio --port 3000",
     "dev:dorian": "remotion studio --port 3000",
+    "r": "node scripts/render.mjs",
+    "r:auto": "node scripts/render.mjs",
+    "r:selftest": "node scripts/render.mjs --selftest",
     "render": "remotion render LimorAIDemo out/limor-ai-demo.mp4 --gl=angle --codec h264 --crf 23",
     "render:720p": "remotion render LimorAIDemo out/limor-ai-demo-720p.mp4 --scale=0.667 --gl=angle --codec h264 --crf 23",
     "render:old": "remotion render LimorAppDemo out/limor-demo.mp4 --gl=angle --codec h264 --crf 23",

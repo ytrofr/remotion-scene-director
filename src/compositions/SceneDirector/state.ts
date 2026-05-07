@@ -38,13 +38,32 @@ export function directorReducer(
 
   switch (action.type) {
     // ── Simple UI / navigation actions (inline — one-liners) ──────────────
-    case 'SET_COMPOSITION':
+    case 'SET_COMPOSITION': {
+      // Composition-scoped state (no bleed). The dispatcher (App.tsx
+      // `wrappedDispatch`) saves the OUTGOING comp's slice to localStorage
+      // and attaches the INCOMING comp's slice to this action. The reducer
+      // atomically replaces all scene-keyed maps with the new slice, or
+      // empty defaults when the new comp has no saved slice yet.
+      //
+      // ENSURE_SCENE_LAYERS will re-seed defaults from codedPaths/layers
+      // registry when scene layers are absent.
+      const slice = action.slice ?? {};
       return {
         ...state,
         compositionId: action.id,
         selectedScene: null,
         selectedWaypoint: null,
+        sceneGesture: slice.sceneGesture ?? {},
+        sceneAnimation: slice.sceneAnimation ?? {},
+        sceneDark: slice.sceneDark ?? {},
+        sceneLocked: slice.sceneLocked ?? {},
+        clearedSceneLayers: slice.clearedSceneLayers ?? {},
+        layers: slice.layers ?? {},
+        waypoints: slice.waypoints ?? {},
+        savedSnapshots: slice.savedSnapshots ?? {},
+        versionHistory: slice.versionHistory ?? {},
       };
+    }
     case 'SELECT_SCENE':
       return {
         ...state,
@@ -92,6 +111,11 @@ export function directorReducer(
       return {
         ...state,
         sceneDark: { ...state.sceneDark, [action.scene]: action.dark },
+      };
+    case 'TOGGLE_SCENE_LOCK':
+      return {
+        ...state,
+        sceneLocked: { ...state.sceneLocked, [action.scene]: action.locked },
       };
     case 'SET_CLICK_ANIMATION':
       return { ...state, clickAnimation: action.animation };
@@ -155,6 +179,7 @@ export function directorReducer(
     case 'ADD_HAND_GESTURE':
     case 'UPDATE_WAYPOINT':
     case 'DELETE_WAYPOINT':
+    case 'RIPPLE_SHIFT_WAYPOINTS':
     case 'SET_WAYPOINTS':
     case 'ADOPT_CODED_PATH':
     case 'IMPORT_PATHS':

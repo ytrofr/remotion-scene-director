@@ -1,5 +1,7 @@
 /* ── Reset ── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -15,10 +17,19 @@ body {
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
 
 /* ── Base element resets ── */
 button {
@@ -26,29 +37,57 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
 }
-button:active { transform: scale(0.97); }
-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button:active {
+  transform: scale(0.97);
+}
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 
 select {
   font-family: var(--font);
   outline: none;
 }
-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 
 /* ── Animations ── */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes pulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* ── Shared separator utility ── */
@@ -58,15 +97,18 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   padding-bottom: 10px;
 }
 
-/* ── App Grid ── */
+/* ── App Grid ──
+   Left "rail" column hosts editing tools (gestures, select, undo, cursor
+   size). Spans toolbar + body + timeline rows so it's a continuous side
+   surface, Figma-style. */
 .app {
   display: grid;
   grid-template-rows: 48px 1fr auto;
-  grid-template-columns: 210px 1fr 250px;
+  grid-template-columns: 72px 210px 1fr 250px;
   grid-template-areas:
-    "toolbar  toolbar   toolbar"
-    "scenes   player    inspector"
-    "timeline timeline  timeline";
+    'rail toolbar  toolbar   toolbar'
+    'rail scenes   player    inspector'
+    'rail timeline timeline  timeline';
   height: calc(100vh / 1.05);
   width: calc(100vw / 1.05);
   background: var(--bg);
@@ -116,9 +158,9 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   transition: transform 0.18s cubic-bezier(0.25, 0.1, 0.25, 1);
   will-change: transform;
   box-shadow:
-    0 8px 32px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.06),
-    0 0 60px rgba(91,156,246,0.06);
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 60px rgba(91, 156, 246, 0.06);
 }
 
 /* ── Info Banner (overlay on video) ── */
@@ -130,11 +172,11 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   color: var(--text-muted);
   font-family: var(--mono);
   pointer-events: none;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   padding: 5px 12px;
   border-radius: var(--radius);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ── Zoom indicator ── */
@@ -145,13 +187,15 @@ select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   font-size: 11px;
   color: var(--text-muted);
   font-family: var(--mono);
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   padding: 4px 10px;
   border-radius: var(--radius);
   cursor: pointer;
   z-index: 15;
 }
-.zoom-indicator:hover { color: var(--accent); }
+.zoom-indicator:hover {
+  color: var(--accent);
+}
 
 /* ── Inspector empty state ── */
 .inspector-empty {

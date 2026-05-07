@@ -283,6 +283,18 @@ export function handleLayerAction(
             coded?.animation ?? GESTURE_PRESETS[gesture3].animation,
         };
       }
+      // Seed lock state from codedPaths (only if not already set by user/session)
+      if (
+        newState.sceneLocked[action.scene] === undefined &&
+        coded?._locked !== undefined
+      ) {
+        newState = changed ? newState : { ...state };
+        changed = true;
+        newState.sceneLocked = {
+          ...newState.sceneLocked,
+          [action.scene]: coded._locked,
+        };
+      }
 
       if (!changed) return state;
 

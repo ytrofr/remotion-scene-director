@@ -271,6 +271,35 @@ export const Inspector: React.FC = () => {
           <span className="inspector__size-value">{layerSize}</span>
         </div>
       )}
+      {selectedHandLayer &&
+        typeof (selectedHandLayer.data as { laneOverride?: number } | undefined)
+          ?.laneOverride === 'number' && (
+          <div className="inspector__size-row">
+            <label className="inspector__size-label">Lane</label>
+            <span className="inspector__size-value" style={{ flex: 1 }}>
+              pinned to row{' '}
+              {
+                (selectedHandLayer.data as { laneOverride: number })
+                  .laneOverride
+              }
+            </span>
+            <button
+              type="button"
+              className="inspector__dark-btn"
+              title="Restore auto-pack (no manual lane pin)"
+              onClick={() =>
+                dispatch({
+                  type: 'UPDATE_LAYER_DATA',
+                  scene,
+                  layerId: selectedHandLayer.id,
+                  data: { laneOverride: undefined },
+                })
+              }
+            >
+              Reset
+            </button>
+          </div>
+        )}
     </div>
   );
 
@@ -448,12 +477,27 @@ export const Inspector: React.FC = () => {
             onChange={(v) => update({ y: v })}
             step={5}
           />
-          <NumField
-            label="Frame"
-            value={waypoint.frame ?? 0}
-            onChange={(v) => update({ frame: v })}
-            min={0}
-          />
+          {/* Frame — editing this MOVES THE WHOLE BAR by the delta.
+              Every WP in the layer shifts by (newFrame - oldFrame), so the
+              gesture bar SLIDES as one unit. Bar length is unchanged. Use
+              "Duration" below to stretch a specific segment. */}
+          <div title="Editing Frame slides the WHOLE gesture bar by the same amount — every waypoint moves together. Bar length stays constant; only its position in the timeline changes.">
+            <NumField
+              label="Frame"
+              value={waypoint.frame ?? 0}
+              onChange={(v) => {
+                const delta = v - (waypoint.frame ?? 0);
+                if (delta === 0) return;
+                dispatch({
+                  type: 'RIPPLE_SHIFT_WAYPOINTS',
+                  scene,
+                  fromIndex: 0,
+                  deltaFrames: delta,
+                });
+              }}
+              min={0}
+            />
+          </div>
 
           {/* Gesture selector per waypoint */}
           <div className="inspector__field">
@@ -479,13 +523,122 @@ export const Inspector: React.FC = () => {
             </select>
           </div>
 
-          <NumField
-            label="Duration"
-            value={waypoint.duration ?? 0}
-            onChange={(v) => update({ duration: v })}
-            min={0}
-            step={5}
-          />
+          {/* Click duration — only for click waypoints. Controls how long
+              the click animation plays. Hold (non-click pause) removed —
+              use Duration below to control inter-waypoint spacing instead. */}
+          {waypoint.gesture === 'click' && (
+            <div title="Frames the cursor stays in click position (Lottie click animation length). Default 45.">
+              <NumField
+                label="Click duration"
+                value={waypoint.duration ?? 0}
+                onChange={(v) => update({ duration: v })}
+                min={0}
+                step={5}
+              />
+            </div>
+          )}
+
+          {/* Duration — gap from this WP to the next. Editing ripple-shifts
+              every later WP by the delta, so the gap stretches/shrinks
+              independently. Bar length grows/shrinks. Hidden on last WP. */}
+          {!isLastWaypoint &&
+            (() => {
+              const nextWp = sceneWaypoints[idx + 1];
+              const segment = (nextWp.frame ?? 0) - (waypoint.frame ?? 0);
+              return (
+                <div title="Frames from this waypoint to the next. Editing this PUSHES every later waypoint by the same amount — the gesture bar grows/shrinks accordingly.">
+                  <NumField
+                    label="Duration"
+                    value={Math.max(0, segment)}
+                    onChange={(v) => {
+                      const delta = v - segment;
+                      if (delta === 0) return;
+                      dispatch({
+                        type: 'RIPPLE_SHIFT_WAYPOINTS',
+                        scene,
+                        fromIndex: idx + 1,
+                        deltaFrames: delta,
+                      });
+                    }}
+                    min={0}
+                    step={5}
+                  />
+                  <small
+                    style={{
+                      display: 'block',
+                      color: '#999',
+                      fontSize: 10,
+                      marginTop: 2,
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    Ripple: WPs after this shift by Δ.
+                  </small>
+                </div>
+              );
+            })()}
+
+          {/* Shift gesture — slide the WHOLE layer (every WP from index 0)
+              by ±N frames. Bar position changes; bar length is unchanged.
+              Available on every WP because it acts on the entire gesture,
+              not just from this WP onward. */}
+          <div
+            style={{ display: 'flex', gap: 6, marginTop: 4 }}
+            title="Slide the entire gesture later (positive) or earlier (negative). The bar's LENGTH does not change — only its position."
+          >
+            <button
+              type="button"
+              onClick={() =>
+                dispatch({
+                  type: 'RIPPLE_SHIFT_WAYPOINTS',
+                  scene,
+                  fromIndex: 0,
+                  deltaFrames: -10,
+                })
+              }
+              className="inspector__small-btn"
+            >
+              −10f
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                dispatch({
+                  type: 'RIPPLE_SHIFT_WAYPOINTS',
+                  scene,
+                  fromIndex: 0,
+                  deltaFrames: 10,
+                })
+              }
+              className="inspector__small-btn"
+            >
+              +10f
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                dispatch({
+                  type: 'RIPPLE_SHIFT_WAYPOINTS',
+                  scene,
+                  fromIndex: 0,
+                  deltaFrames: 30,
+                })
+              }
+              className="inspector__small-btn"
+            >
+              +30f
+            </button>
+            <span
+              style={{
+                fontSize: 10,
+                color: '#999',
+                fontStyle: 'italic',
+                alignSelf: 'center',
+              }}
+            >
+              shift whole gesture
+            </span>
+          </div>
 
           {/* Add Click End — only on last non-click waypoint */}
           {isLastWaypoint && !hasClickEnd && (

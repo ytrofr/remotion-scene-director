@@ -58,6 +58,62 @@ import {
   FULL_SCENE_INFO,
 } from '../DorianFull/DorianFull';
 import {
+  DorianFullV1_10,
+  FULL_VIDEO_V1_10,
+  FULL_SCENE_INFO_V1_10,
+} from '../DorianFull/DorianFullV1.10';
+import {
+  DorianFullV1_11,
+  FULL_VIDEO_V1_11,
+  FULL_SCENE_INFO_V1_11,
+} from '../DorianFull/DorianFullV1.11';
+import {
+  DorianFullV1_12,
+  FULL_VIDEO_V1_12,
+  FULL_SCENE_INFO_V1_12,
+} from '../DorianFull/DorianFullV1.12';
+import {
+  DorianFullV1_13,
+  FULL_VIDEO_V1_13,
+  FULL_SCENE_INFO_V1_13,
+} from '../DorianFull/DorianFullV1.13';
+import {
+  DorianFullV1_140,
+  FULL_VIDEO_V1_140,
+} from '../DorianFull/DorianFullV1.140';
+import {
+  DorianFullV1_14,
+  FULL_VIDEO_V1_14,
+} from '../DorianFull/DorianFullV1.14';
+import {
+  DorianFullV1_15,
+  FULL_VIDEO_V1_15,
+} from '../DorianFull/DorianFullV1.15';
+import {
+  DorianFullV1_16,
+  FULL_VIDEO_V1_16,
+} from '../DorianFull/DorianFullV1.16';
+import {
+  DorianFullV1_17,
+  FULL_VIDEO_V1_17,
+} from '../DorianFull/DorianFullV1.17';
+import {
+  DorianFullV1_18,
+  FULL_VIDEO_V1_18,
+} from '../DorianFull/DorianFullV1.18';
+import {
+  ClickStyleDemo,
+  CLICK_STYLE_DEMO_TOTAL,
+} from '../ClickStyleDemo/ClickStyleDemo';
+import {
+  DorianImprovementsDemo,
+  DORIAN_IMPROVEMENTS_TOTAL,
+} from '../DorianImprovementsDemo/DorianImprovementsDemo';
+import {
+  DorianImprovementsDemoV2,
+  DORIAN_IMPROVEMENTS_V2_TOTAL,
+} from '../DorianImprovementsDemoV2/DorianImprovementsDemoV2';
+import {
   SigmaAppDemo,
   SIGMA_APP_VIDEO,
   SCENE_INFO as SIGMA_APP_SCENE_INFO,
@@ -86,6 +142,11 @@ import {
 } from '../SigmaAppDemo/demos/DemoCampaign';
 import { TransitionShowcase } from '../SigmaAppDemo/TransitionShowcase';
 import { ScrollStyleDemo, SCROLL_DEMO_VIDEO } from '../ScrollStyleDemo';
+import {
+  ScrollEffectDemo,
+  SCROLL_EFFECT_VIDEO,
+  SCROLL_EFFECT_SCENES,
+} from '../ScrollEffectDemo/ScrollEffectDemo';
 import {
   DEMO_CREATIVE_VIDEO,
   DEMO_CONTEXT_VIDEO,
@@ -250,6 +311,226 @@ export const COMPOSITIONS: CompositionEntry[] = [
     })),
   },
   {
+    id: 'DorianFullV1-10',
+    label: 'Dorian Full V1.10 (big scrollbar in scenes 2/8/9/10)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_10.width,
+      height: FULL_VIDEO_V1_10.height,
+      fps: FULL_VIDEO_V1_10.fps,
+      frames: FULL_VIDEO_V1_10.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_10.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-11',
+    label: 'Dorian Full V1.11 (stable — promoted from V1.10)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_11.width,
+      height: FULL_VIDEO_V1_11.height,
+      fps: FULL_VIDEO_V1_11.fps,
+      frames: FULL_VIDEO_V1_11.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_11.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-12',
+    label: 'Dorian Full V1.12 (scene 8 TV-card click)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_12.width,
+      height: FULL_VIDEO_V1_12.height,
+      fps: FULL_VIDEO_V1_12.fps,
+      frames: FULL_VIDEO_V1_12.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_12.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-13',
+    label: 'Dorian Full V1.13 (soft-pulse clicks + scene 4 sound fix)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_13.width,
+      height: FULL_VIDEO_V1_13.height,
+      fps: FULL_VIDEO_V1_13.fps,
+      frames: FULL_VIDEO_V1_13.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-14',
+    label: 'Dorian Full V1.14 (V1.13 + Funkorama funk)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_14.width,
+      height: FULL_VIDEO_V1_14.height,
+      fps: FULL_VIDEO_V1_14.fps,
+      frames: FULL_VIDEO_V1_14.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-15',
+    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_15.width,
+      height: FULL_VIDEO_V1_15.height,
+      fps: FULL_VIDEO_V1_15.fps,
+      frames: FULL_VIDEO_V1_15.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-16',
+    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_16.width,
+      height: FULL_VIDEO_V1_16.height,
+      fps: FULL_VIDEO_V1_16.fps,
+      frames: FULL_VIDEO_V1_16.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-17',
+    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_17.width,
+      height: FULL_VIDEO_V1_17.height,
+      fps: FULL_VIDEO_V1_17.fps,
+      frames: FULL_VIDEO_V1_17.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-18',
+    label: 'Dorian Full V1.15 (V1.13 + Funkorama funk)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_18.width,
+      height: FULL_VIDEO_V1_18.height,
+      fps: FULL_VIDEO_V1_18.fps,
+      frames: FULL_VIDEO_V1_18.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'DorianFullV1-140',
+    label: 'Dorian Full V1.140 (V1.13 + Cozy Coffee House jazz lounge)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_140.width,
+      height: FULL_VIDEO_V1_140.height,
+      fps: FULL_VIDEO_V1_140.fps,
+      frames: FULL_VIDEO_V1_140.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_13.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
+    id: 'ClickStyleDemo',
+    label: 'Click Style Demo (5 variants — pick one for V1.13)',
+    group: 'Dorian',
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: CLICK_STYLE_DEMO_TOTAL,
+    },
+    scenes: [
+      { name: 'A — Lottie + Ripple', start: 0, end: 90 },
+      { name: 'B — Soft pulse only', start: 90, end: 180 },
+      { name: 'C — Pulse + dot', start: 180, end: 270 },
+      { name: 'D — Pulse + small ripple', start: 270, end: 360 },
+      { name: 'E — Lottie only', start: 360, end: 450 },
+    ],
+  },
+  {
+    id: 'DorianImprovementsDemo',
+    label: 'Dorian Improvements Demo (4 cursor/UX upgrades)',
+    group: 'Dorian',
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: DORIAN_IMPROVEMENTS_TOTAL,
+    },
+    scenes: [
+      { name: '1-Baseline', start: 0, end: 90 },
+      { name: '2-Decel', start: 90, end: 180 },
+      { name: '3-SmallRipple', start: 180, end: 270 },
+      { name: '4-Zoom', start: 270, end: 360 },
+    ],
+  },
+  {
+    id: 'DorianImprovementsDemoV2',
+    label: 'Dorian Improvements Demo V2 (12 patterns)',
+    group: 'Dorian',
+    video: {
+      width: 1080,
+      height: 1920,
+      fps: 30,
+      frames: DORIAN_IMPROVEMENTS_V2_TOTAL,
+    },
+    scenes: [
+      { name: '5-HoverPulse', start: 0, end: 90 },
+      { name: '6-ClickBurst', start: 90, end: 180 },
+      { name: '7-Swipe', start: 180, end: 270 },
+      { name: '8-Pinch', start: 270, end: 360 },
+      { name: '9-Wobble', start: 360, end: 450 },
+      { name: '10-DoubleClick', start: 450, end: 540 },
+      { name: '11-Annotation', start: 540, end: 630 },
+      { name: '12-BuildReveal', start: 630, end: 720 },
+      { name: '13-ColorSwatches', start: 720, end: 810 },
+      { name: '14-ResultChip', start: 810, end: 900 },
+      { name: '15-MotionBlur', start: 900, end: 990 },
+      { name: '16-LightLeak', start: 990, end: 1080 },
+    ],
+  },
+  {
     id: 'DorianStoresDebug',
     label: 'Stores Debug (Scene 1 only)',
     group: 'Dorian',
@@ -399,6 +680,22 @@ export const COMPOSITIONS: CompositionEntry[] = [
     ],
   },
   {
+    id: 'ScrollEffectDemo',
+    label: 'Scroll Effect Lottie Picker (7 options)',
+    group: 'Utilities',
+    video: {
+      width: SCROLL_EFFECT_VIDEO.width,
+      height: SCROLL_EFFECT_VIDEO.height,
+      fps: SCROLL_EFFECT_VIDEO.fps,
+      frames: SCROLL_EFFECT_VIDEO.durationInFrames,
+    },
+    scenes: SCROLL_EFFECT_SCENES.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+  },
+  {
     id: 'TransitionShowcase',
     label: 'Transition Showcase (5 effects)',
     group: 'Sigma Demos',
@@ -425,6 +722,19 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DorianStores,
   DorianStoresDebug,
   DorianFull,
+  'DorianFullV1-10': DorianFullV1_10,
+  'DorianFullV1-11': DorianFullV1_11,
+  'DorianFullV1-12': DorianFullV1_12,
+  'DorianFullV1-13': DorianFullV1_13,
+  'DorianFullV1-14': DorianFullV1_14,
+  'DorianFullV1-15': DorianFullV1_15,
+  'DorianFullV1-16': DorianFullV1_16,
+  'DorianFullV1-17': DorianFullV1_17,
+  'DorianFullV1-18': DorianFullV1_18,
+  'DorianFullV1-140': DorianFullV1_140,
+  ClickStyleDemo: ClickStyleDemo,
+  DorianImprovementsDemo,
+  DorianImprovementsDemoV2,
   SigmaAppDemo,
   SigmaInvestorDemo,
   DemoCreative,
@@ -434,4 +744,5 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   DemoCampaign,
   TransitionShowcase,
   ScrollStyleDemo,
+  ScrollEffectDemo,
 };

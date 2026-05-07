@@ -56,6 +56,9 @@ export function useRestoredInitialState(initialState: DirectorState) {
         ? { sceneAnimation: savedSession.sceneAnimation }
         : {}),
       ...(savedSession.sceneDark ? { sceneDark: savedSession.sceneDark } : {}),
+      ...(savedSession.sceneLocked
+        ? { sceneLocked: savedSession.sceneLocked }
+        : {}),
       ...(savedSession.clearedSceneLayers
         ? { clearedSceneLayers: savedSession.clearedSceneLayers }
         : {}),

@@ -82,6 +82,7 @@ export interface DirectorState {
   draggingIndex: number | null; // waypoint index being dragged (for hand snap)
   sceneAnimation: Record<string, LottieAnimation>; // per-scene animation override
   sceneDark: Record<string, boolean>; // per-scene dark mode override
+  sceneLocked: Record<string, boolean>; // per-scene lock — Reload skips locked scenes
   showTrail: boolean;
   exportOpen: boolean;
   importOpen: boolean;
@@ -95,7 +96,7 @@ export interface DirectorState {
   savedSnapshots: Record<string, SceneSnapshot>;
   // Sidebar tab: editor or history
   sidebarTab: 'editor' | 'history';
-  currentView: 'editor' | 'gallery';
+  currentView: 'editor' | 'gallery' | 'sound-gallery';
   // Version history (per scene, appended on each Save)
   versionHistory: Record<string, VersionEntry[]>;
   // Global click animation style (e.g. 'click-burst', 'click-burst-soft', 'click')
@@ -108,9 +109,28 @@ export interface DirectorState {
   editingPinId: string | null;
 }
 
+/**
+ * Per-composition slice — the scene-keyed maps that must NOT bleed across
+ * compositions. When SET_COMPOSITION fires, the dispatcher loads the new
+ * comp's slice from localStorage and attaches it to the action so the
+ * reducer can apply it atomically. If absent (e.g. fresh comp), reducer
+ * resets these fields to empty.
+ */
+export interface DirectorSlice {
+  sceneGesture?: Record<string, GestureTool>;
+  sceneAnimation?: Record<string, LottieAnimation>;
+  sceneDark?: Record<string, boolean>;
+  sceneLocked?: Record<string, boolean>;
+  clearedSceneLayers?: Record<string, boolean>;
+  layers?: Record<string, import('./layers').Layer[]>;
+  waypoints?: Record<string, HandPathPoint[]>;
+  savedSnapshots?: Record<string, SceneSnapshot>;
+  versionHistory?: Record<string, VersionEntry[]>;
+}
+
 // Actions
 export type DirectorAction =
-  | { type: 'SET_COMPOSITION'; id: string }
+  | { type: 'SET_COMPOSITION'; id: string; slice?: DirectorSlice }
   | { type: 'SELECT_SCENE'; name: string }
   | { type: 'SET_TOOL'; tool: GestureTool | 'select' }
   | { type: 'SET_SCENE_GESTURE'; scene: string; gesture: GestureTool }
@@ -122,6 +142,15 @@ export type DirectorAction =
       point: Partial<HandPathPoint>;
     }
   | { type: 'DELETE_WAYPOINT'; scene: string; index: number }
+  | {
+      // Ripple-shift: add `deltaFrames` to wp.frame for every waypoint with
+      // index >= fromIndex, in the currently selected layer (primary or
+      // secondary). Used by Inspector "Segment" / "Stretch later" controls.
+      type: 'RIPPLE_SHIFT_WAYPOINTS';
+      scene: string;
+      fromIndex: number;
+      deltaFrames: number;
+    }
   | { type: 'SET_WAYPOINTS'; scene: string; waypoints: HandPathPoint[] }
   | { type: 'SELECT_WAYPOINT'; index: number | null }
   | { type: 'TOGGLE_TRAIL' }
@@ -135,12 +164,13 @@ export type DirectorAction =
     }
   | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
   | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
+  | { type: 'TOGGLE_SCENE_LOCK'; scene: string; locked: boolean }
   | { type: 'SET_CLICK_ANIMATION'; animation: string }
   | { type: 'REVERT_SCENE'; scene: string }
   | { type: 'RELOAD_SCENE_FROM_DISK'; scene: string }
   | { type: 'MARK_SAVED'; scene: string }
   | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
-  | { type: 'SET_VIEW'; view: 'editor' | 'gallery' }
+  | { type: 'SET_VIEW'; view: 'editor' | 'gallery' | 'sound-gallery' }
   | { type: 'RESTORE_VERSION'; scene: string; snapshot: SceneSnapshot }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
@@ -225,6 +255,7 @@ export const initialState: DirectorState = {
   draggingIndex: null,
   sceneAnimation: {},
   sceneDark: {},
+  sceneLocked: {},
   showTrail: false,
   exportOpen: false,
   importOpen: false,

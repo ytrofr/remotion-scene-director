@@ -16,6 +16,8 @@ export interface CodedPath {
   animation: string;
   dark?: boolean;
   secondaryLayers?: Array<{ gesture: GestureTool; path: HandPathPoint[] }>;
+  /** When true, Reload skips this scene; Save prompts for confirmation. */
+  _locked?: boolean;
 }
 
 // ── MobileChatDemoCombined paths (from COMBINED_HAND_PATH_MARKERS) ──
@@ -681,6 +683,206 @@ const DEMO_CREATIVE_PATHS: Record<string, CodedPath> = {
   },
 };
 
+// ── DorianFull V1.10 baseline (also used as V1.11 baseline) ──
+// Big scrollbar drag in scenes 2/8/9/10. Saved-data overlay per version
+// applied via mergePaths(...) in the registry below.
+const DORIAN_FULL_V1_10_BASELINE: Record<string, CodedPath> = {
+  ...DORIAN_PATHS,
+  '2-HomeScroll': {
+    gesture: 'scroll',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      { x: 1050, y: 860, frame: 0, gesture: 'pointer', rotation: 0, scale: 1 },
+      { x: 880, y: 860, frame: 20, gesture: 'pointer', rotation: 0, scale: 1 },
+      { x: 880, y: 860, frame: 30, gesture: 'drag', rotation: 0, scale: 1 },
+      { x: 880, y: 1060, frame: 120, gesture: 'drag', rotation: 0, scale: 1 },
+      {
+        x: 880,
+        y: 1060,
+        frame: 125,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 880,
+        y: 1060,
+        frame: 150,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+    ],
+  },
+  '8-ProductPage': {
+    gesture: 'scroll',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      {
+        x: 1050,
+        y: 860,
+        frame: 105,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 880,
+        y: 860,
+        frame: 110,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      { x: 880, y: 860, frame: 112, gesture: 'drag', rotation: 0, scale: 1 },
+      { x: 880, y: 1060, frame: 140, gesture: 'drag', rotation: 0, scale: 1 },
+      {
+        x: 880,
+        y: 1060,
+        frame: 145,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 880,
+        y: 1060,
+        frame: 150,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+    ],
+  },
+  '9-ProductDetail': {
+    gesture: 'scroll',
+    animation: 'cursor-real-black',
+    dark: false,
+    path: [
+      { x: 880, y: 860, frame: 0, gesture: 'pointer', rotation: 0, scale: 0 },
+      { x: 880, y: 860, frame: 20, gesture: 'pointer', rotation: 0, scale: 0 },
+      { x: 880, y: 860, frame: 25, gesture: 'pointer', rotation: 0, scale: 1 },
+      { x: 880, y: 860, frame: 32, gesture: 'drag', rotation: 0, scale: 1 },
+      { x: 880, y: 1060, frame: 115, gesture: 'drag', rotation: 0, scale: 1 },
+      {
+        x: 880,
+        y: 1060,
+        frame: 120,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 880,
+        y: 1060,
+        frame: 122,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 0,
+      },
+      {
+        x: 650,
+        y: 1700,
+        frame: 124,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 0,
+      },
+      {
+        x: 650,
+        y: 1700,
+        frame: 126,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 518,
+        y: 1635,
+        frame: 142,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      {
+        x: 518,
+        y: 1635,
+        frame: 145,
+        gesture: 'click',
+        rotation: 0,
+        scale: 1,
+        duration: 8,
+      },
+      {
+        x: 518,
+        y: 1635,
+        frame: 158,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 0,
+      },
+      {
+        x: 400,
+        y: 1000,
+        frame: 173,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 0,
+      },
+      {
+        x: 400,
+        y: 1000,
+        frame: 175,
+        gesture: 'pointer',
+        rotation: 0,
+        scale: 1,
+      },
+      { x: 225, y: 337, frame: 187, gesture: 'pointer', rotation: 0, scale: 1 },
+      {
+        x: 225,
+        y: 337,
+        frame: 190,
+        gesture: 'click',
+        rotation: 0,
+        scale: 1,
+        duration: 6,
+      },
+      { x: 225, y: 337, frame: 202, gesture: 'pointer', rotation: 0, scale: 0 },
+      { x: 350, y: 600, frame: 213, gesture: 'pointer', rotation: 0, scale: 0 },
+      { x: 350, y: 600, frame: 215, gesture: 'pointer', rotation: 0, scale: 1 },
+      { x: 419, y: 827, frame: 229, gesture: 'pointer', rotation: 0, scale: 1 },
+      {
+        x: 419,
+        y: 827,
+        frame: 232,
+        gesture: 'click',
+        rotation: 0,
+        scale: 1,
+        duration: 6,
+      },
+    ],
+  },
+  '10-StoreDashboard': {
+    ...DORIAN_STORES_PATHS['1-StoreDashboard'],
+    secondaryLayers: [
+      ...(DORIAN_STORES_PATHS['1-StoreDashboard'].secondaryLayers ?? []),
+      {
+        gesture: 'scroll',
+        path: [
+          { x: 880, y: 860, frame: 360, gesture: 'pointer', scale: 1 },
+          { x: 880, y: 860, frame: 370, gesture: 'drag', scale: 1 },
+          { x: 880, y: 1060, frame: 440, gesture: 'drag', scale: 1 },
+          { x: 880, y: 1060, frame: 450, gesture: 'pointer', scale: 1 },
+        ],
+      },
+    ],
+  },
+  '11-MapSearch': DORIAN_STORES_PATHS['2-MapSearch'],
+  '12-AIProducts': DORIAN_STORES_PATHS['3-AIProducts'],
+};
+
 const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
   MobileChatDemoCombined: mergePaths(
     COMBINED_PATHS,
@@ -698,6 +900,55 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
       '12-AIProducts': DORIAN_STORES_PATHS['3-AIProducts'],
     },
     saved.DorianFull,
+  ),
+  // DorianFullV1-10: scenes 2/8/9/10 use big-scrollbar drag (see baseline above).
+  'DorianFullV1-10': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-10'],
+  ),
+  // DorianFullV1-11: STABLE — promoted from V1.10. Same hardcoded baseline.
+  // User-saved overlay carries the V1.11-specific waypoint edits.
+  'DorianFullV1-11': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-11'],
+  ),
+  // DorianFullV1-12: scene 8 click added in ProductPageSceneV1.12 (.tsx).
+  // Registry mirrors V1.10 baseline; user-saved overlay carries V1.12 edits.
+  'DorianFullV1-12': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-12'],
+  ),
+  // DorianFullV1-13: soft-pulse click style applied via ClickStyleProvider
+  // (no waypoint changes — visual only). Registry mirrors V1.12 baseline.
+  'DorianFullV1-13': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-13'],
+  ),
+  // DorianFullV1-131/132/133: V1.13 + soundtrack (Energy / Creative Minds /
+  // Memories). Hand paths identical to V1.13 — diff is audio-only.
+  'DorianFullV1-14': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-14'],
+  ),
+  'DorianFullV1-15': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-15'],
+  ),
+  'DorianFullV1-16': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-16'],
+  ),
+  'DorianFullV1-17': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-17'],
+  ),
+  'DorianFullV1-18': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-18'],
+  ),
+  'DorianFullV1-140': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-140'],
   ),
   SigmaAppDemo: mergePaths(SIGMA_APP_PATHS, saved.SigmaAppDemo),
   SigmaInvestorDemo: { ...saved.SigmaInvestorDemo },

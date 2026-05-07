@@ -327,6 +327,220 @@ const DEMO_CREATIVE_AUDIO: Record<string, CodedAudioEntry[]> = {
   ],
 };
 
+// ── DorianFull V1.01 scene 9 (extended ProductDetail) ──
+// Frames are LOCAL to scene 9 (180f). Clicks land on:
+//   - frame 70: Add to Cart (teal floating button)
+//   - frame 118: hamburger menu (drawer slides in 120→140)
+//   - frame 160: "My Store" drawer item → triggers slide-off to scene 10 (160→180)
+const DORIAN_FULL_V1_01_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  // Click: Add to Cart
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 70,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: hamburger + drawer pop
+  {
+    file: 'audio/sfx/pop-up.wav',
+    startFrame: 118,
+    durationInFrames: 25,
+    volume: 0.55,
+  },
+  // Click: "My Store" menu item
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 160,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Slide-off transition to scene 10 (160→180)
+  {
+    file: 'audio/sfx/whoosh.wav',
+    startFrame: 162,
+    durationInFrames: 22,
+    volume: 0.4,
+  },
+];
+
+// V1.03: simpler scene 9 — intro click + Add to Cart click + slide-off only.
+// No hamburger / My Store clicks. Total scene 9 = 220f.
+const DORIAN_FULL_V1_03_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  // Intro: click on product card on the listing
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 22,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: Add to Cart (mainFrame 125 + PHASE_OFFSET 45 = local 170)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 170,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Slide-off transition to scene 10 (mainFrame 157 + 45 = 202)
+  {
+    file: 'audio/sfx/whoosh.wav',
+    startFrame: 202,
+    durationInFrames: 22,
+    volume: 0.4,
+  },
+];
+
+// V1.07: slower drag-scroll + 4 separate click layers. Same 3 click sounds
+// as V1.06 but shifted: Add to Cart 100→145, hamburger 152→190, My Store
+// 190→232. Total scene 9 = 250f.
+const DORIAN_FULL_V1_07_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 145,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 190,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 232,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+];
+
+// V1.06: scene 9 starts directly on product detail page. Removed intro click
+// sound (was at 22). All other clicks shifted -70f. Total scene 9 = 210f.
+const DORIAN_FULL_V1_06_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  // Add to Cart click
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 100,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Hamburger click (synced with drawer slide-in)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 152,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // My Store click
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 190,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+];
+
+// V1.05: V1.04 with hamburger click sound moved 217 → 222 (= global 1092),
+// syncing with cursor click animation + drawer slide-in.
+const DORIAN_FULL_V1_05_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 22,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 170,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 222,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 260,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+];
+
+// V1.04: V1.03 + hamburger + My Store at the end (no slide-off, page-load
+// loader transitions to scene 10). Total scene 9 = 280f.
+const DORIAN_FULL_V1_04_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  // Intro: click on product card on the listing
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 22,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: Add to Cart (mainFrame 125 + PHASE_OFFSET 45 = local 170)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 170,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: hamburger (frame 217)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 217,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: My Store menu item (frame 260)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 260,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+];
+
+// V1.02: V1.01 entries shifted by +115 frames (intro click+loader 50f + 1.5s
+// hold + slow scroll). Plus new intro click at frame 22.
+const DORIAN_FULL_V1_02_SCENE_9_AUDIO: CodedAudioEntry[] = [
+  // Intro: click on product card on the listing
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 22,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: Add to Cart (V1.01 was 70)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 185,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Click: hamburger + drawer pop (V1.01 was 118)
+  {
+    file: 'audio/sfx/pop-up.wav',
+    startFrame: 233,
+    durationInFrames: 25,
+    volume: 0.55,
+  },
+  // Click: "My Store" menu item (V1.01 was 160)
+  {
+    file: 'audio/send-click.wav',
+    startFrame: 275,
+    durationInFrames: 15,
+    volume: 0.6,
+  },
+  // Slide-off transition to scene 10 (V1.01 was 162)
+  {
+    file: 'audio/sfx/whoosh.wav',
+    startFrame: 277,
+    durationInFrames: 22,
+    volume: 0.4,
+  },
+];
+
 const CODED_AUDIO_REGISTRY: Record<
   string,
   Record<string, CodedAudioEntry[]>
@@ -338,6 +552,313 @@ const CODED_AUDIO_REGISTRY: Record<
   DorianStores: DORIAN_STORES_AUDIO,
   DorianFull: {
     ...DORIAN_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  // Read by DorianAudioV1_01 inside DorianDemoV1_01 — picks up scene 9 V1.01
+  // SFX in the actual render pipeline.
+  // Read by SceneDirector's ENSURE_SCENE_LAYERS when the user picks
+  // DorianFullV1-01 → scene 9. This makes the SFX appear as editable audio
+  // layers in the timeline (not just inline render).
+  // V1.02 scene 9 audio: V1.01 entries shifted +45 frames + new intro click at f22.
+  // V1.08: same audio cues as V1.07 (cursor-flicker fix is visual-only).
+  // V1.09: same audio cues as V1.08 (HomeScroll/ProductPage cursor change is visual-only).
+  // V1.10: same audio cues as V1.09. Big scrollbar drag is visual-only —
+  // no new SFX (cursor on scrollbar is silent in V1.09 too).
+  'DorianDemoV1.10': {
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+  },
+  'DorianFullV1-10': {
+    ...DORIAN_AUDIO,
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  // V1.11: STABLE — same audio cues as V1.10.
+  'DorianDemoV1.11': {
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+  },
+  'DorianFullV1-11': {
+    ...DORIAN_AUDIO,
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  // V1.12: scene 8 adds a TV-card click — keep the swipe sfx, append send-click at f147.
+  'DorianDemoV1.12': {
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+  },
+  'DorianFullV1-12': {
+    ...DORIAN_AUDIO,
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  // V1.13: same as V1.12 audio + scene 4 ChatOpen send-click added at f74
+  // (the actual click waypoint frame; the existing f48 cue is the chat-open
+  // transition sound, kept for the slide-in effect).
+  'DorianFullV1-13': {
+    ...DORIAN_AUDIO,
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  // V1.131/132/133: same SFX cues as V1.13, plus a full-video music cue
+  // anchored to scene 1-Intro (startFrame 0, duration covers entire video).
+  // SD reads these to spawn audio layers — the music shows as a single bar
+  // spanning all scenes. Render path uses BackgroundMusic (gated, see
+  // DorianFullV1.13X.tsx) for proper fade in/out — this layer is for SD only.
+  'DorianFullV1-14': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 5400,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-15': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 5400,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-16': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 5400,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-17': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 5400,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-18': {
+    ...DORIAN_AUDIO,
+    // Music split into two layers: scene 1 covers Dorian half (frames 0-1120),
+    // scene 10 covers Stores+Closing half (frames 1120-2590). The split is
+    // necessary because in SceneDirector preview, AudioFromLayers inside
+    // DorianDemoV1_12 is wrapped in <Sequence from=0 dur=DORIAN_CUT> which
+    // clamps any scene-1-registered audio at frame 1120. Stores audio renders
+    // via StoresAudioFromLayersV1_13 which only picks up entries with
+    // globalFrom >= DORIAN_CUT — hence the second registration at scene 10.
+    // Render mode is unaffected (top-level <BackgroundMusic> handles both).
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1120,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': [
+      ...DORIAN_STORES_AUDIO['1-StoreDashboard'],
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1470,
+        volume: 0.15,
+      },
+    ],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
+  'DorianFullV1-140': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-backbay-lounge.mp3',
+        startFrame: 0,
+        durationInFrames: 5400,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 147,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
     '10-StoreDashboard': DORIAN_STORES_AUDIO['1-StoreDashboard'],
     '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
     '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
@@ -377,6 +898,12 @@ export interface HandLayerData {
   waypoints: HandPathPoint[];
   gesture: GestureTool;
   size?: number; // per-layer hand size (effective, zoom-adjusted)
+  // Optional manual lane pin in the Timeline. When undefined, the layer is
+  // greedy-packed onto the first row where it doesn't time-overlap. When set,
+  // useHandLayerRows places the layer in this lane (extending the row count if
+  // needed) UNLESS another override already occupies the same lane at an
+  // overlapping time — in that case it falls back to greedy.
+  laneOverride?: number;
 }
 
 export interface HandLayer extends LayerBase {

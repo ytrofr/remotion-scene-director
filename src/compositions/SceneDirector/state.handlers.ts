@@ -30,6 +30,7 @@ type WaypointAction = Extract<
   | { type: 'ADD_WAYPOINT' }
   | { type: 'UPDATE_WAYPOINT' }
   | { type: 'DELETE_WAYPOINT' }
+  | { type: 'RIPPLE_SHIFT_WAYPOINTS' }
   | { type: 'SET_WAYPOINTS' }
   | { type: 'ADD_HAND_GESTURE' }
   | { type: 'ADOPT_CODED_PATH' }
@@ -173,6 +174,57 @@ export function handleWaypointAction(
       };
       return syncHandLayer(withWp, action.scene);
     }
+    case 'RIPPLE_SHIFT_WAYPOINTS': {
+      // Routes to the SAME layer UPDATE_WAYPOINT routes to (selected secondary
+      // layer if applicable, else primary). Bumps every WP at index >=
+      // fromIndex by deltaFrames. To keep the bar's LENGTH constant when
+      // user shifts left and the leftmost WP would go below 0, clamp the
+      // delta uniformly to -min(frames). All WPs in the shift range move by
+      // the SAME amount, so the bar slides as one unit, never deforms.
+      const shift = (wps: HandPathPoint[]): HandPathPoint[] => {
+        const range = wps.slice(action.fromIndex);
+        if (range.length === 0) return wps;
+        const minFrame = Math.min(...range.map((wp) => wp.frame ?? 0));
+        const effectiveDelta = Math.max(action.deltaFrames, -minFrame);
+        if (effectiveDelta === 0) return wps;
+        return wps.map((wp, i) =>
+          i >= action.fromIndex
+            ? { ...wp, frame: (wp.frame ?? 0) + effectiveDelta }
+            : wp,
+        );
+      };
+
+      if (state.selectedLayerId) {
+        const sceneLayers = state.layers[action.scene] || [];
+        const selIdx = sceneLayers.findIndex(
+          (l) => l.id === state.selectedLayerId,
+        );
+        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
+        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
+        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
+          const layerWps =
+            (selLayer.data as { waypoints?: HandPathPoint[] }).waypoints || [];
+          const updated = sceneLayers.map((l, i) =>
+            i === selIdx
+              ? ({
+                  ...l,
+                  data: { ...l.data, waypoints: shift(layerWps) },
+                } as Layer)
+              : l,
+          );
+          return {
+            ...state,
+            layers: { ...state.layers, [action.scene]: updated },
+          };
+        }
+      }
+      const wps = state.waypoints[action.scene] || [];
+      const withWp = {
+        ...state,
+        waypoints: { ...state.waypoints, [action.scene]: shift(wps) },
+      };
+      return syncHandLayer(withWp, action.scene);
+    }
     case 'SET_WAYPOINTS': {
       const withWp = {
         ...state,
@@ -237,6 +289,7 @@ export function handleSceneManagementAction(
       const { [scene]: _sg, ...gestureRest } = state.sceneGesture;
       const { [scene]: _sa, ...animRest } = state.sceneAnimation;
       const { [scene]: _sd, ...darkRest } = state.sceneDark;
+      const { [scene]: _sl, ...lockRest } = state.sceneLocked;
       const { [scene]: _ss, ...snapRest } = state.savedSnapshots;
       void _wp;
       void _ly;
@@ -244,6 +297,7 @@ export function handleSceneManagementAction(
       void _sg;
       void _sa;
       void _sd;
+      void _sl;
       void _ss;
       return {
         ...state,
@@ -253,6 +307,7 @@ export function handleSceneManagementAction(
         sceneGesture: gestureRest,
         sceneAnimation: animRest,
         sceneDark: darkRest,
+        sceneLocked: lockRest,
         savedSnapshots: snapRest,
         selectedWaypoint: null,
         selectedLayerId: null,

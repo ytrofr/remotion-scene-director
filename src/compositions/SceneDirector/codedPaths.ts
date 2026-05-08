@@ -958,6 +958,10 @@ const CODED_PATHS_REGISTRY: Record<string, Record<string, CodedPath>> = {
     DORIAN_FULL_V1_10_BASELINE,
     saved['DorianFullV1-21'],
   ),
+  'DorianFullV1-22': mergePaths(
+    DORIAN_FULL_V1_10_BASELINE,
+    saved['DorianFullV1-22'] || saved['DorianFullV1-21'],
+  ),
   'DorianFullV1-140': mergePaths(
     DORIAN_FULL_V1_10_BASELINE,
     saved['DorianFullV1-140'],

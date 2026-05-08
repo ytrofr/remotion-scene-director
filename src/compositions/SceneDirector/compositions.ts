@@ -96,6 +96,11 @@ import {
   FULL_SCENE_INFO_V1_21,
 } from '../DorianFull/DorianFullV1.21';
 import {
+  DorianFullV1_22,
+  FULL_VIDEO_V1_22,
+  FULL_SCENE_INFO_V1_22,
+} from '../DorianFull/DorianFullV1.22';
+import {
   ClickStyleDemo,
   CLICK_STYLE_DEMO_TOTAL,
 } from '../ClickStyleDemo/ClickStyleDemo';
@@ -407,6 +412,24 @@ export const COMPOSITIONS: CompositionEntry[] = [
     clickStyle: 'soft-pulse',
   },
   {
+    id: 'DorianFullV1-22',
+    label: 'Dorian Full V1.22 (default 2x — visuals fast, music 1x)',
+    group: 'Dorian',
+    video: {
+      width: FULL_VIDEO_V1_22.width,
+      height: FULL_VIDEO_V1_22.height,
+      fps: FULL_VIDEO_V1_22.fps,
+      frames: FULL_VIDEO_V1_22.durationInFrames,
+    },
+    scenes: FULL_SCENE_INFO_V1_22.map((s) => ({
+      name: s.name,
+      start: s.start,
+      end: s.end,
+    })),
+    clickAnimationOverride: null,
+    clickStyle: 'soft-pulse',
+  },
+  {
     id: 'DorianFullV1-140',
     label: 'Dorian Full V1.140 (V1.13 + Cozy Coffee House jazz lounge)',
     group: 'Dorian',
@@ -686,6 +709,7 @@ export const COMPOSITION_COMPONENTS: Record<string, React.FC> = {
   'DorianFullV1-19': DorianFullV1_19,
   'DorianFullV1-20': DorianFullV1_20,
   'DorianFullV1-21': DorianFullV1_21,
+  'DorianFullV1-22': DorianFullV1_22,
   'DorianFullV1-140': DorianFullV1_140,
   ClickStyleDemo: ClickStyleDemo,
   DorianImprovementsDemo,

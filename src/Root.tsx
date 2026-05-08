@@ -100,6 +100,10 @@ import {
   FULL_VIDEO_V1_21,
 } from './compositions/DorianFull/DorianFullV1.21';
 import {
+  DorianFullV1_22,
+  FULL_VIDEO_V1_22,
+} from './compositions/DorianFull/DorianFullV1.22';
+import {
   ClickStyleDemo,
   CLICK_STYLE_DEMO_TOTAL,
 } from './compositions/ClickStyleDemo/ClickStyleDemo';
@@ -372,6 +376,15 @@ export const RemotionRoot: React.FC = () => {
           fps={FULL_VIDEO_V1_21.fps}
           width={FULL_VIDEO_V1_21.width}
           height={FULL_VIDEO_V1_21.height}
+        />
+        <Composition
+          id="DorianFullV1-22"
+          component={DorianFullV1_22}
+          durationInFrames={FULL_VIDEO_V1_22.durationInFrames}
+          fps={FULL_VIDEO_V1_22.fps}
+          width={FULL_VIDEO_V1_22.width}
+          height={FULL_VIDEO_V1_22.height}
+          defaultProps={{ noMusic: false }}
         />
         <Composition
           id="ClickStyleDemo"

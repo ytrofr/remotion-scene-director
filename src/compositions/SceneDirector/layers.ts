@@ -980,6 +980,52 @@ const CODED_AUDIO_REGISTRY: Record<
     '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
     '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
   },
+  // V1.22 — same scene structure + audio cues as V1.21. Music registrations
+  // here are for SceneDirector preview at 1x. The default render path
+  // (`scripts/render-fast2x.mjs`) renders V1-22 with `noMusic=true` and
+  // overlays music post-render at 1x tempo. The 1x debug render
+  // (`render:dorian-full:v1.22:1x`) plays this embedded music inline.
+  'DorianFullV1-22': {
+    ...DORIAN_AUDIO,
+    '1-Intro': [
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1120,
+        volume: 0.15,
+      },
+    ],
+    '4-ChatOpen': [
+      ...DORIAN_AUDIO['4-ChatOpen'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 74,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '8-ProductPage': [
+      ...DORIAN_AUDIO['8-ProductPage'],
+      {
+        file: 'audio/send-click.wav',
+        startFrame: 200,
+        durationInFrames: 15,
+        volume: 0.5,
+      },
+    ],
+    '9-ProductDetail': DORIAN_FULL_V1_07_SCENE_9_AUDIO,
+    '10-StoreDashboard': [
+      ...DORIAN_STORES_AUDIO['1-StoreDashboard'],
+      {
+        file: 'audio/music/kml-funkorama.mp3',
+        startFrame: 0,
+        durationInFrames: 1470,
+        volume: 0.15,
+      },
+    ],
+    '11-MapSearch': DORIAN_STORES_AUDIO['2-MapSearch'],
+    '12-AIProducts': DORIAN_STORES_AUDIO['3-AIProducts'],
+  },
   'DorianFullV1-140': {
     ...DORIAN_AUDIO,
     '1-Intro': [
@@ -1315,6 +1361,19 @@ const CODED_CLICK_FLASH_REGISTRY: Record<
   // frame 200 — see DorianFullV1.21 sceneOverrides). Teal expanding ring +
   // brief opacity flash so the click reads as a deliberate navigation.
   'DorianFullV1-21': {
+    '8-ProductPage': [
+      {
+        x: 518,
+        y: 1150,
+        frame: 200,
+        color: '#2DD4BF',
+        peakRadius: 140,
+        durationInFrames: 24,
+      },
+    ],
+  },
+  // V1.22 inherits V1.21's click flash. Same TV-card click in scene 8.
+  'DorianFullV1-22': {
     '8-ProductPage': [
       {
         x: 518,

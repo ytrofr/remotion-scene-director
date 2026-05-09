@@ -17,7 +17,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useDirector } from '../context';
 import { useToComp } from '../hooks/useToComp';
-import { GESTURE_PRESETS, type GestureTool } from '../gestures';
+import { CLICK_ANIM_DURATION, type GestureTool } from '../gestures';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import { Crosshairs } from './Crosshairs';
 import { HandCursorPreview } from './HandCursorPreview';
@@ -146,13 +146,23 @@ export const DrawingCanvas: React.FC = () => {
     const rawScene = raw.map((p) => toScene(p));
 
     if (hasExistingWaypoints) {
-      // EDIT MODE: distinguish click (short) vs freehand draw (long)
+      // EDIT MODE: distinguish click (short) vs freehand draw (long).
+      //
+      // Short click default = CLICK gesture (regardless of activeTool):
+      // a single click in edit mode is the user saying "I want a click
+      // event here". Was previously inheriting activeTool (which often
+      // sticks to whatever was used last — e.g. scroll), confusing users
+      // who expected click. They can change to pointer/scroll/etc via the
+      // per-WP Gesture dropdown in the Inspector if needed.
+      //
+      // Drag: both endpoints stay pointer (it's a movement path, not a
+      // click); layer gesture follows activeTool.
       const localFrame = Math.max(0, frame - currentScene.start);
-      const gesture = (
+      const dragLayerGesture = (
         state.activeTool !== 'select' ? state.activeTool : 'click'
       ) as GestureTool;
       if (rawScene.length < 5) {
-        // Short click → create NEW independent hand gesture
+        // Short click → create NEW click event (most common intent)
         const pos = rawScene[0];
         dispatch({
           type: 'ADD_HAND_GESTURE',
@@ -162,11 +172,12 @@ export const DrawingCanvas: React.FC = () => {
               x: pos.x,
               y: pos.y,
               frame: localFrame,
-              gesture: 'pointer' as const,
+              gesture: 'click' as const,
+              duration: CLICK_ANIM_DURATION,
               scale: 1,
             },
           ],
-          gesture,
+          gesture: 'click',
           sceneZoom: currentScene.zoom,
         });
       } else {
@@ -193,7 +204,7 @@ export const DrawingCanvas: React.FC = () => {
               scale: 1,
             },
           ],
-          gesture,
+          gesture: dragLayerGesture,
           sceneZoom: currentScene.zoom,
         });
       }

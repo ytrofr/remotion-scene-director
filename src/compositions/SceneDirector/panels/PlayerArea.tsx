@@ -11,6 +11,7 @@ import type { CompositionEntry, SceneInfo } from '../state';
 import type { HandPathPoint } from '../../../components/FloatingHand/types';
 import type { Layer } from '../layers';
 import { DrawingCanvas } from '../overlays/DrawingCanvas';
+import { FeedbackOverlay } from '../overlays/FeedbackOverlay';
 import { FloatingHandOverlay } from '../overlays/FloatingHandOverlay';
 import { WaypointMarkers } from '../overlays/WaypointMarkers';
 import type { DirectorState } from '../state';
@@ -26,6 +27,10 @@ interface PlayerAreaProps {
   handlePanStart: React.MouseEventHandler;
   handlePanMove: React.MouseEventHandler;
   handlePanEnd: React.MouseEventHandler;
+  /** Suppresses browser context menu so right-drag can pan */
+  handleContextMenu: React.MouseEventHandler;
+  /** True while the user is actively panning (for cursor feedback) */
+  isPanning: boolean;
   /** Current composition config */
   composition: CompositionEntry;
   /** The video component to render */
@@ -73,7 +78,6 @@ const ActiveWaypointMarkers: React.FC<{
   sceneWaypoints: HandPathPoint[];
 }> = ({
   containerRef,
-  state,
   currentScene,
   frame,
   showTrail,
@@ -91,14 +95,10 @@ const ActiveWaypointMarkers: React.FC<{
 
   // Only show when playhead is within range (or in trail mode always show)
   const inRange = showTrail || (frame >= handStart && frame <= handEnd);
-  if (state.preview || !inRange) return null;
+  if (!inRange) return null;
 
   return (
-    <WaypointMarkers
-      containerRef={containerRef}
-      editable={!state.preview}
-      waypoints={wps}
-    />
+    <WaypointMarkers containerRef={containerRef} editable waypoints={wps} />
   );
 };
 
@@ -109,6 +109,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
   handlePanStart,
   handlePanMove,
   handlePanEnd,
+  handleContextMenu,
+  isPanning,
   composition,
   VideoComponent,
   zoom,
@@ -131,11 +133,12 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
   return (
     <div
       ref={playerAreaRef as React.RefObject<HTMLDivElement>}
-      className="player-area"
+      className={`player-area${state.feedbackMode ? ' player-area--feedback-active' : ''}`}
       onMouseDown={handlePanStart}
       onMouseMove={handlePanMove}
       onMouseUp={handlePanEnd}
-      onMouseLeave={handlePanEnd}
+      onContextMenu={handleContextMenu}
+      style={{ cursor: isPanning ? 'grabbing' : undefined }}
     >
       {/* Aspect-ratio container - keeps 9:16 centered */}
       <div
@@ -143,10 +146,15 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
         className="player-frame"
         style={{
           aspectRatio: `${composition.video.width} / ${composition.video.height}`,
-          transform:
-            zoom > 1
+          // While panning, the hook writes transform directly to this element's DOM
+          // for 60fps smoothness. Don't let React fight it with stale pan state.
+          transform: isPanning
+            ? undefined
+            : zoom > 1
               ? `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`
               : undefined,
+          // Disable the 0.18s smoothing during pan — that transition IS the lag.
+          transition: isPanning ? 'none' : undefined,
         }}
       >
         <div
@@ -182,8 +190,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
           </AudioEntriesContext.Provider>
         </div>
 
-        {/* Drawing canvas overlays the player */}
-        {state.selectedScene && !state.preview && !state.exportOpen && (
+        {/* Drawing canvas overlays the player (hidden in feedback mode) */}
+        {state.selectedScene && !state.exportOpen && !state.feedbackMode && (
           <DrawingCanvas />
         )}
 
@@ -213,6 +221,11 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
           />
         )}
 
+        {/* Feedback overlay — click-to-pin when feedbackMode is on */}
+        {state.feedbackMode && (
+          <FeedbackOverlay containerRef={playerFrameRef} />
+        )}
+
         {/* Scene info banner with debug info */}
         {state.selectedScene && currentScene && (
           <div className="info-banner">
@@ -225,7 +238,6 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             {state.selectedWaypoint !== null &&
               ` | sel:#${state.selectedWaypoint + 1}`}
             {state.showTrail && ' | TRAIL'}
-            {state.preview && ' | PREVIEW'}
           </div>
         )}
       </div>
@@ -239,7 +251,7 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
             setPan({ x: 0, y: 0 });
           }}
         >
-          {Math.round(zoom * 100)}% — Alt+drag to pan, 0 to reset
+          {Math.round(zoom * 100)}% — right-click drag to pan, 0 to reset
         </div>
       )}
     </div>

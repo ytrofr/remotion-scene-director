@@ -190,6 +190,22 @@ export function handleLayerAction(
               defaultSize,
             ),
           );
+
+          // ── Secondary hand layers from codedPaths ──
+          if (coded?.secondaryLayers) {
+            for (const sec of coded.secondaryLayers) {
+              if (sec.path.length > 0) {
+                const secLayer = createHandLayer(
+                  action.scene,
+                  sec.path,
+                  sec.gesture as GestureTool,
+                  order++,
+                  defaultSize,
+                );
+                newLayers.push(secLayer);
+              }
+            }
+          }
         }
       }
 
@@ -265,6 +281,18 @@ export function handleLayerAction(
           ...newState.sceneAnimation,
           [action.scene]:
             coded?.animation ?? GESTURE_PRESETS[gesture3].animation,
+        };
+      }
+      // Seed lock state from codedPaths (only if not already set by user/session)
+      if (
+        newState.sceneLocked[action.scene] === undefined &&
+        coded?._locked !== undefined
+      ) {
+        newState = changed ? newState : { ...state };
+        changed = true;
+        newState.sceneLocked = {
+          ...newState.sceneLocked,
+          [action.scene]: coded._locked,
         };
       }
 

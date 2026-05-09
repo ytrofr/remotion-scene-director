@@ -66,7 +66,10 @@ export const ChatOverlay: React.FC<{
   <div
     style={{
       position: 'absolute',
-      bottom: 60 - chatSlide * 350,
+      // Start at bottom: 0 to match scene 7's ending chat position.
+      // Slide distance bumped to 400 so the now-taller (370px) panel still
+      // exits cleanly (370 + buffer < 400).
+      bottom: 0 - chatSlide * 400,
       left: 0,
       right: 0,
       height: chatHeight,

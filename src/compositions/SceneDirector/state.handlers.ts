@@ -16,6 +16,10 @@ import type {
 } from './state.types';
 import { syncHandLayer, MAX_LOG } from './state.helpers';
 
+// Keep per-scene version history lean — 20 saves is ~20KB/scene, cheap for
+// localStorage while giving plenty of rollback depth for active editing.
+const MAX_VERSIONS_PER_SCENE = 20;
+
 // Re-export layer handlers so state.ts can import from a single module
 export { handleLayerAction } from './state.layerHandlers';
 
@@ -26,6 +30,7 @@ type WaypointAction = Extract<
   | { type: 'ADD_WAYPOINT' }
   | { type: 'UPDATE_WAYPOINT' }
   | { type: 'DELETE_WAYPOINT' }
+  | { type: 'RIPPLE_SHIFT_WAYPOINTS' }
   | { type: 'SET_WAYPOINTS' }
   | { type: 'ADD_HAND_GESTURE' }
   | { type: 'ADOPT_CODED_PATH' }
@@ -169,6 +174,57 @@ export function handleWaypointAction(
       };
       return syncHandLayer(withWp, action.scene);
     }
+    case 'RIPPLE_SHIFT_WAYPOINTS': {
+      // Routes to the SAME layer UPDATE_WAYPOINT routes to (selected secondary
+      // layer if applicable, else primary). Bumps every WP at index >=
+      // fromIndex by deltaFrames. To keep the bar's LENGTH constant when
+      // user shifts left and the leftmost WP would go below 0, clamp the
+      // delta uniformly to -min(frames). All WPs in the shift range move by
+      // the SAME amount, so the bar slides as one unit, never deforms.
+      const shift = (wps: HandPathPoint[]): HandPathPoint[] => {
+        const range = wps.slice(action.fromIndex);
+        if (range.length === 0) return wps;
+        const minFrame = Math.min(...range.map((wp) => wp.frame ?? 0));
+        const effectiveDelta = Math.max(action.deltaFrames, -minFrame);
+        if (effectiveDelta === 0) return wps;
+        return wps.map((wp, i) =>
+          i >= action.fromIndex
+            ? { ...wp, frame: (wp.frame ?? 0) + effectiveDelta }
+            : wp,
+        );
+      };
+
+      if (state.selectedLayerId) {
+        const sceneLayers = state.layers[action.scene] || [];
+        const selIdx = sceneLayers.findIndex(
+          (l) => l.id === state.selectedLayerId,
+        );
+        const selLayer = selIdx >= 0 ? sceneLayers[selIdx] : null;
+        const primaryIdx = sceneLayers.findIndex((l) => l.type === 'hand');
+        if (selLayer?.type === 'hand' && selIdx !== primaryIdx) {
+          const layerWps =
+            (selLayer.data as { waypoints?: HandPathPoint[] }).waypoints || [];
+          const updated = sceneLayers.map((l, i) =>
+            i === selIdx
+              ? ({
+                  ...l,
+                  data: { ...l.data, waypoints: shift(layerWps) },
+                } as Layer)
+              : l,
+          );
+          return {
+            ...state,
+            layers: { ...state.layers, [action.scene]: updated },
+          };
+        }
+      }
+      const wps = state.waypoints[action.scene] || [];
+      const withWp = {
+        ...state,
+        waypoints: { ...state.waypoints, [action.scene]: shift(wps) },
+      };
+      return syncHandLayer(withWp, action.scene);
+    }
     case 'SET_WAYPOINTS': {
       const withWp = {
         ...state,
@@ -211,6 +267,7 @@ export function handleWaypointAction(
 type SceneManagementAction = Extract<
   DirectorAction,
   | { type: 'REVERT_SCENE' }
+  | { type: 'RELOAD_SCENE_FROM_DISK' }
   | { type: 'MARK_SAVED' }
   | { type: 'RESTORE_VERSION' }
   | { type: 'LOG_ACTIVITY' }
@@ -222,6 +279,40 @@ export function handleSceneManagementAction(
   action: SceneManagementAction,
 ): DirectorState {
   switch (action.type) {
+    case 'RELOAD_SCENE_FROM_DISK': {
+      // Wipe all in-memory state for this scene so ENSURE_SCENE_LAYERS re-seeds
+      // from codedPaths.data.json / codedPaths.ts on the next dispatch.
+      const scene = action.scene;
+      const { [scene]: _wp, ...waypointsRest } = state.waypoints;
+      const { [scene]: _ly, ...layersRest } = state.layers;
+      const { [scene]: _cl, ...clearedRest } = state.clearedSceneLayers;
+      const { [scene]: _sg, ...gestureRest } = state.sceneGesture;
+      const { [scene]: _sa, ...animRest } = state.sceneAnimation;
+      const { [scene]: _sd, ...darkRest } = state.sceneDark;
+      const { [scene]: _sl, ...lockRest } = state.sceneLocked;
+      const { [scene]: _ss, ...snapRest } = state.savedSnapshots;
+      void _wp;
+      void _ly;
+      void _cl;
+      void _sg;
+      void _sa;
+      void _sd;
+      void _sl;
+      void _ss;
+      return {
+        ...state,
+        waypoints: waypointsRest,
+        layers: layersRest,
+        clearedSceneLayers: clearedRest,
+        sceneGesture: gestureRest,
+        sceneAnimation: animRest,
+        sceneDark: darkRest,
+        sceneLocked: lockRest,
+        savedSnapshots: snapRest,
+        selectedWaypoint: null,
+        selectedLayerId: null,
+      };
+    }
     case 'REVERT_SCENE': {
       const snap = state.savedSnapshots[action.scene];
       if (!snap) return state; // No saved state to revert to
@@ -258,10 +349,15 @@ export function handleSceneManagementAction(
         timestamp: Date.now(),
         snapshot: { ...snap },
       });
+      // Trim oldest entries beyond the cap — keeps localStorage lean.
+      const trimmed =
+        sceneVersions.length > MAX_VERSIONS_PER_SCENE
+          ? sceneVersions.slice(-MAX_VERSIONS_PER_SCENE)
+          : sceneVersions;
       return {
         ...state,
         savedSnapshots: { ...state.savedSnapshots, [scene]: snap },
-        versionHistory: { ...state.versionHistory, [scene]: sceneVersions },
+        versionHistory: { ...state.versionHistory, [scene]: trimmed },
       };
     }
     case 'RESTORE_VERSION': {

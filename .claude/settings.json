@@ -9,6 +9,65 @@
             "statusMessage": "Loading session context..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/inter-agent-auto-monitor-project.sh",
+            "statusMessage": "Checking inter-agent bus..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/branch-lock-on-start.sh",
+            "statusMessage": "Checking peer sessions..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-end-document.sh",
+            "statusMessage": "Snapshotting commit baseline..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-end-document.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/protect-frozen-compositions.sh",
+            "statusMessage": "Checking frozen composition registry..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/scene-director-save-defense.sh",
+            "statusMessage": "Checking SD save safety..."
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -21,6 +80,26 @@
             "statusMessage": "Formatting..."
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-hand-paths.sh",
+            "statusMessage": "Validating hand paths..."
+          }
+        ],
+        "if": "Edit(*/codedPaths.ts) || Edit(*/layers.ts) || Write(*/codedPaths.ts) || Write(*/layers.ts)"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-render-feedback.sh"
+          }
+        ]
       }
     ],
     "PreCompact": [
@@ -30,6 +109,17 @@
             "type": "command",
             "command": ".claude/hooks/pre-compact.sh",
             "statusMessage": "Backing up session..."
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-compact.sh",
+            "statusMessage": "🔄 Reloading critical context..."
           }
         ]
       }

@@ -120,11 +120,24 @@ export const HAND_PHYSICS = {
     shadowBlur: 10,
     smoothing: 0.2,
   },
+  // V1.09+: scrollbar-drag (Big-200px). No velocity tilt, no rotation. Used
+  // when cursor sits on the right scrollbar position and slides ±100px while
+  // content scrolls. Selected from ScrollEffectDemo Option 3 (Big-200px).
+  scrollbar: {
+    floatAmplitude: 0,
+    floatSpeed: 0,
+    velocityScale: 0,
+    maxRotation: 0,
+    shadowEnabled: true,
+    shadowDistance: 8,
+    shadowBlur: 10,
+    smoothing: 0.2,
+  },
   tap: {
     floatAmplitude: 2,
     floatSpeed: 0.04,
-    velocityScale: 0.6,
-    maxRotation: 25,
+    velocityScale: 0.2,
+    maxRotation: 10,
     shadowEnabled: true,
     shadowDistance: 10,
     shadowBlur: 12,
@@ -143,8 +156,8 @@ export const HAND_PHYSICS = {
   tapGentle: {
     floatAmplitude: 2,
     floatSpeed: 0.04,
-    velocityScale: 0.5,
-    maxRotation: 20,
+    velocityScale: 0.2,
+    maxRotation: 10,
     shadowEnabled: true,
     shadowDistance: 10,
     shadowBlur: 12,

@@ -19,21 +19,8 @@ import { PointerShapeCard } from './PointerShapeCard';
 const SFX_FILE_MAP: Record<string, string> = {
   'sfx-whoosh': 'audio/sfx/whoosh.wav',
   'sfx-whip': 'audio/sfx/whip.wav',
-  'sfx-page-turn': 'audio/sfx/page-turn.wav',
   'sfx-switch': 'audio/sfx/switch.wav',
-  'sfx-mouse-click': 'audio/sfx/mouse-click.wav',
-  'sfx-shutter-modern': 'audio/sfx/shutter-modern.wav',
-  'sfx-shutter-old': 'audio/sfx/shutter-old.wav',
   'sfx-pop-up': 'audio/sfx/pop-up.wav',
-  'sfx-notification': 'audio/sfx/notification.wav',
-  'sfx-soft-click': 'audio/sfx/soft-click.wav',
-  'sfx-success-ding': 'audio/sfx/success-ding.mp3',
-  'sfx-swoosh-transition': 'audio/sfx/swoosh-transition.wav',
-  'sfx-chime': 'audio/sfx/chime.wav',
-  'sfx-slide': 'audio/sfx/slide.wav',
-  'sfx-bass-impact': 'audio/sfx/bass-impact.wav',
-  'sfx-sparkle': 'audio/sfx/sparkle.wav',
-  'sfx-riser': 'audio/sfx/riser.wav',
 };
 
 interface GalleryViewProps {

@@ -1,0 +1,284 @@
+{
+  "MobileChatDemoCombined": {
+    "3-V2-Typing": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 921,
+          "y": 2003,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1568,
+          "frame": 5,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ]
+    },
+    "4-V2-Send": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 681,
+          "y": 1488,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 146,
+          "y": 1496,
+          "frame": 10,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ]
+    }
+  },
+  "DorianDemo": {
+    "2-HomeScroll": {
+      "gesture": "scroll",
+      "animation": "hand-scroll-clean",
+      "path": [
+        {
+          "x": 1050,
+          "y": 960,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 20,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 28,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 60,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 90,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 118,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 125,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 150,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        }
+      ]
+    },
+    "3-TapBubble": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 780,
+          "y": 1200,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 800,
+          "y": 1400,
+          "frame": 20,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 818,
+          "y": 1546,
+          "frame": 35,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 790,
+          "y": 1420,
+          "frame": 45,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 2
+        }
+      ]
+    },
+    "4-ChatOpen": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 957,
+          "y": 1465,
+          "frame": 0,
+          "gesture": "pointer",
+          "scale": 1.5
+        },
+        {
+          "x": 494,
+          "y": 1652,
+          "frame": 90,
+          "gesture": "pointer",
+          "scale": 1.5
+        }
+      ],
+      "dark": true
+    },
+    "8-ProductPage": {
+      "gesture": "scroll",
+      "animation": "hand-scroll-clean",
+      "path": [
+        {
+          "x": 1050,
+          "y": 960,
+          "frame": 105,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 115,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 118,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 130,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 140,
+          "gesture": "drag",
+          "scale": 1,
+          "rotation": -30
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 145,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        },
+        {
+          "x": 780,
+          "y": 960,
+          "frame": 150,
+          "gesture": "pointer",
+          "scale": 1,
+          "rotation": 0
+        }
+      ]
+    },
+    "7-AIResponse": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 540,
+          "y": 1600,
+          "frame": 70,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1480,
+          "frame": 85,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 540,
+          "y": 1450,
+          "frame": 95,
+          "gesture": "click",
+          "scale": 1,
+          "duration": 10
+        }
+      ],
+      "dark": true
+    },
+    "5-UserTyping": {
+      "gesture": "click",
+      "animation": "hand-click",
+      "path": [
+        {
+          "x": 482,
+          "y": 1666,
+          "frame": 76,
+          "gesture": "pointer",
+          "scale": 1
+        },
+        {
+          "x": 969,
+          "y": 1658,
+          "frame": 106,
+          "gesture": "pointer",
+          "scale": 1
+        }
+      ],
+      "dark": true
+    }
+  }
+}

@@ -10,6 +10,7 @@ import type {
 import type { GestureTool } from './gestures';
 import type { Layer, LayerBase, LayerData } from './layers';
 import type { CodedPath } from './codedPaths';
+import type { SceneConfigEntry } from './sceneConfig';
 
 // Scene info (unified format across compositions)
 export interface SceneInfo {
@@ -25,12 +26,38 @@ export interface SceneInfo {
 export interface CompositionEntry {
   id: string;
   label: string;
+  /** Group name for dropdown optgroup (e.g. 'Sigma Demos', 'Dorian') */
+  group?: string;
   video: { width: number; height: number; fps: number; frames: number };
   scenes: SceneInfo[];
   /** Global Y offset applied by the composition (e.g. translateY(120px) in Combined) */
   globalOffsetY?: number;
   /** Optional SRT caption content for the captions timeline row */
   captionsSrt?: string;
+  /**
+   * Per-composition override for the SceneDirector preview's click-animation
+   * Lottie. When set, FloatingHandOverlay ignores the global
+   * `state.clickAnimation` for this composition.
+   *   - undefined (default) → use global state.clickAnimation (legacy behavior)
+   *   - null                → suppress the click Lottie entirely; rely on the
+   *                            FloatingHand soft-pulse shrink only.
+   *                            (Use for DorianFullV1.19+ — matches the rendered
+   *                             output where no burst Lottie is loaded.)
+   *   - string              → force a specific Lottie id (advanced)
+   */
+  clickAnimationOverride?: string | null;
+  /**
+   * Per-composition override for FloatingHand's click visual style in the
+   * SceneDirector preview overlay. The render path gets its style from the
+   * `<ClickStyleProvider>` wrapping the composition tree (V1.13+ uses
+   * 'soft-pulse'), but the SD overlay sits OUTSIDE that tree, so the
+   * provider never reaches it. Setting `clickStyle` here lets the overlay
+   * render its FloatingHand instances with the same style as the final MP4.
+   *   - undefined (default) → 'default' (cursor unchanged on click)
+   *   - 'soft-pulse'         → cursor shrinks like a beat on the click frame
+   *                             (matches V1.13+ rendered output)
+   */
+  clickStyle?: 'default' | 'soft-pulse';
 }
 
 // Activity log entry
@@ -39,6 +66,19 @@ export interface ActivityEntry {
   action: string; // human-readable description
   scene?: string; // affected scene
   snapshot?: DirectorState; // full state snapshot for restore
+}
+
+// Feedback pin — a visual note anchored at (x, y) in composition-space at a specific frame
+export interface FeedbackPin {
+  id: string;
+  scene: string; // scene name (scope: within current composition)
+  frame: number; // global frame number (absolute, not scene-local)
+  x: number; // composition-space x (0 .. video.width)
+  y: number; // composition-space y (0 .. video.height)
+  note: string;
+  severity: 'issue' | 'idea' | 'question'; // color-coded
+  createdAt: number;
+  resolved?: boolean;
 }
 
 // Saved snapshot per scene (for Revert)
@@ -67,7 +107,7 @@ export interface DirectorState {
   draggingIndex: number | null; // waypoint index being dragged (for hand snap)
   sceneAnimation: Record<string, LottieAnimation>; // per-scene animation override
   sceneDark: Record<string, boolean>; // per-scene dark mode override
-  preview: boolean;
+  sceneLocked: Record<string, boolean>; // per-scene lock — Reload skips locked scenes
   showTrail: boolean;
   exportOpen: boolean;
   importOpen: boolean;
@@ -81,16 +121,52 @@ export interface DirectorState {
   savedSnapshots: Record<string, SceneSnapshot>;
   // Sidebar tab: editor or history
   sidebarTab: 'editor' | 'history';
-  currentView: 'editor' | 'gallery';
+  currentView: 'editor' | 'gallery' | 'sound-gallery';
   // Version history (per scene, appended on each Save)
   versionHistory: Record<string, VersionEntry[]>;
   // Global click animation style (e.g. 'click-burst', 'click-burst-soft', 'click')
   clickAnimation: string;
+  // Feedback mode — click-to-pin annotation overlay
+  feedbackMode: boolean;
+  // Feedback pins keyed by composition id → array of pins across all scenes
+  feedbackPins: Record<string, FeedbackPin[]>;
+  // Currently-edited pin id (inline note textarea), or null
+  editingPinId: string | null;
+  /**
+   * Per-scene config entries for the CURRENT composition (in-memory shadow of
+   * sceneConfig.data.json[compositionId]._scenes). 10th scene-keyed slice
+   * field. Plan §4.1 axis 1. Loaded by SET_COMPOSITION via DirectorSlice.
+   *
+   * Initial: empty `{}` — back-compat shim. Callers fall back to legacy paths
+   * (codedPaths, in-tsx click trail constants) when the entry is missing.
+   */
+  sceneConfig: Record<string, SceneConfigEntry>;
+}
+
+/**
+ * Per-composition slice — the scene-keyed maps that must NOT bleed across
+ * compositions. When SET_COMPOSITION fires, the dispatcher loads the new
+ * comp's slice from localStorage and attaches it to the action so the
+ * reducer can apply it atomically. If absent (e.g. fresh comp), reducer
+ * resets these fields to empty.
+ */
+export interface DirectorSlice {
+  sceneGesture?: Record<string, GestureTool>;
+  sceneAnimation?: Record<string, LottieAnimation>;
+  sceneDark?: Record<string, boolean>;
+  sceneLocked?: Record<string, boolean>;
+  clearedSceneLayers?: Record<string, boolean>;
+  layers?: Record<string, import('./layers').Layer[]>;
+  waypoints?: Record<string, HandPathPoint[]>;
+  savedSnapshots?: Record<string, SceneSnapshot>;
+  versionHistory?: Record<string, VersionEntry[]>;
+  /** 10th key — see plan §4.1 axis 1, P1.3. */
+  sceneConfig?: Record<string, SceneConfigEntry>;
 }
 
 // Actions
 export type DirectorAction =
-  | { type: 'SET_COMPOSITION'; id: string }
+  | { type: 'SET_COMPOSITION'; id: string; slice?: DirectorSlice }
   | { type: 'SELECT_SCENE'; name: string }
   | { type: 'SET_TOOL'; tool: GestureTool | 'select' }
   | { type: 'SET_SCENE_GESTURE'; scene: string; gesture: GestureTool }
@@ -102,9 +178,17 @@ export type DirectorAction =
       point: Partial<HandPathPoint>;
     }
   | { type: 'DELETE_WAYPOINT'; scene: string; index: number }
+  | {
+      // Ripple-shift: add `deltaFrames` to wp.frame for every waypoint with
+      // index >= fromIndex, in the currently selected layer (primary or
+      // secondary). Used by Inspector "Segment" / "Stretch later" controls.
+      type: 'RIPPLE_SHIFT_WAYPOINTS';
+      scene: string;
+      fromIndex: number;
+      deltaFrames: number;
+    }
   | { type: 'SET_WAYPOINTS'; scene: string; waypoints: HandPathPoint[] }
   | { type: 'SELECT_WAYPOINT'; index: number | null }
-  | { type: 'TOGGLE_PREVIEW' }
   | { type: 'TOGGLE_TRAIL' }
   | { type: 'TOGGLE_EXPORT' }
   | { type: 'TOGGLE_IMPORT' }
@@ -116,11 +200,13 @@ export type DirectorAction =
     }
   | { type: 'SET_SCENE_ANIMATION'; scene: string; animation: LottieAnimation }
   | { type: 'SET_SCENE_DARK'; scene: string; dark: boolean }
+  | { type: 'TOGGLE_SCENE_LOCK'; scene: string; locked: boolean }
   | { type: 'SET_CLICK_ANIMATION'; animation: string }
   | { type: 'REVERT_SCENE'; scene: string }
+  | { type: 'RELOAD_SCENE_FROM_DISK'; scene: string }
   | { type: 'MARK_SAVED'; scene: string }
   | { type: 'SET_SIDEBAR_TAB'; tab: 'editor' | 'history' }
-  | { type: 'SET_VIEW'; view: 'editor' | 'gallery' }
+  | { type: 'SET_VIEW'; view: 'editor' | 'gallery' | 'sound-gallery' }
   | { type: 'RESTORE_VERSION'; scene: string; snapshot: SceneSnapshot }
   | { type: 'START_DRAG'; index: number }
   | { type: 'END_DRAG' }
@@ -179,6 +265,20 @@ export type DirectorAction =
       type: 'LOAD_CAPTIONS_FROM_SRT';
       srt: string;
       fps: number;
+    }
+  // Feedback-mode actions
+  | { type: 'TOGGLE_FEEDBACK_MODE' }
+  | { type: 'ADD_FEEDBACK_PIN'; pin: FeedbackPin }
+  | {
+      type: 'UPDATE_FEEDBACK_PIN';
+      id: string;
+      changes: Partial<Omit<FeedbackPin, 'id'>>;
+    }
+  | { type: 'DELETE_FEEDBACK_PIN'; id: string }
+  | { type: 'SET_EDITING_PIN'; id: string | null }
+  | {
+      type: 'LOAD_FEEDBACK_PINS';
+      pins: Record<string, FeedbackPin[]>;
     };
 
 export const initialState: DirectorState = {
@@ -191,7 +291,7 @@ export const initialState: DirectorState = {
   draggingIndex: null,
   sceneAnimation: {},
   sceneDark: {},
-  preview: false,
+  sceneLocked: {},
   showTrail: false,
   exportOpen: false,
   importOpen: false,
@@ -204,4 +304,8 @@ export const initialState: DirectorState = {
   currentView: 'editor',
   versionHistory: {},
   clickAnimation: 'click-burst-soft-xs',
+  feedbackMode: false,
+  feedbackPins: {},
+  editingPinId: null,
+  sceneConfig: {},
 };

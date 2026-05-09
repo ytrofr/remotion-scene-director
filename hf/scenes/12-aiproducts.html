@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 12 AIProducts (HF)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      /* prettier-ignore */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      /* prettier-ignore */
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #fff; font-family: 'Rubik', sans-serif; }
+      /* prettier-ignore */
+      #stage { width: 1080px; height: 1920px; background: #f8fafc; position: relative; }
+      /* prettier-ignore */
+      .title { position: absolute; top: 80px; left: 0; right: 0; text-align: center; font-size: 44px; font-weight: 700; color: #1e293b; z-index: 10; opacity: 0; }
+      /* prettier-ignore */
+      #phone-mount { position: absolute; inset: 0; pointer-events: none; }
+
+      /* Chat panel content — renders inside phone screen, below sticky header */
+      /* prettier-ignore */
+      .ai-chat { padding: 160px 16px 16px; display: flex; flex-direction: column; min-height: 844px; }
+      /* prettier-ignore */
+      .chat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; opacity: 0; transform: translateY(-8px); }
+      /* prettier-ignore */
+      .chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%); box-shadow: 0 4px 10px rgba(45, 212, 191, 0.35); }
+      /* prettier-ignore */
+      .chat-name { font-weight: 700; font-size: 14px; color: #1e293b; }
+      /* prettier-ignore */
+      .chat-sub { font-size: 10px; color: #2dd4bf; font-weight: 600; }
+      /* prettier-ignore */
+      .ai-greeting { background: #f0f0f0; padding: 10px 14px; border-radius: 14px 14px 14px 4px; max-width: 85%; font-size: 12px; color: #1e293b; line-height: 1.4; margin-bottom: 10px; opacity: 0; transform: translateY(12px); }
+      /* prettier-ignore */
+      .user-msg { background: #2dd4bf; padding: 10px 14px; border-radius: 14px 14px 4px 14px; max-width: 80%; margin-left: auto; margin-bottom: 10px; font-size: 12px; color: #fff; line-height: 1.4; opacity: 0; transform: translateY(12px); }
+      /* prettier-ignore */
+      .thinking-bubble { background: #f0f0f0; padding: 10px 14px; border-radius: 14px 14px 14px 4px; width: 60px; display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; opacity: 0; }
+      /* prettier-ignore */
+      .thinking-bubble span { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; display: inline-block; }
+      /* prettier-ignore */
+      .ai-response { background: #f0f0f0; padding: 10px 14px; border-radius: 14px 14px 14px 4px; max-width: 90%; font-size: 12px; color: #1e293b; line-height: 1.4; margin-bottom: 12px; opacity: 0; transform: translateY(12px); }
+      /* prettier-ignore */
+      .ai-caret { display: inline-block; opacity: 0; }
+      /* prettier-ignore */
+      .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+      /* prettier-ignore */
+      .product-card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; opacity: 0; transform: translateY(20px) scale(0.9); }
+      /* prettier-ignore */
+      .product-thumb { width: 100%; height: 100px; border-radius: 8px; margin-bottom: 8px; background: #f6f7f9; overflow: hidden; }
+      /* prettier-ignore */
+      .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+      /* prettier-ignore */
+      .product-title { font-size: 11px; font-weight: 600; color: #1e293b; margin-bottom: 4px; line-height: 1.25; }
+      /* prettier-ignore */
+      .product-price { font-size: 12px; font-weight: 700; color: #2dd4bf; }
+      /* prettier-ignore */
+      .add-btn { background: #2dd4bf; border-radius: 14px; padding: 14px; text-align: center; color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 8px 20px rgba(45, 212, 191, 0.35); opacity: 0; transform: scale(0.85); transform-origin: center center; }
+      /* prettier-ignore */
+      .add-btn-glow { position: absolute; left: 0; right: 0; top: 0; bottom: 0; border-radius: 14px; border: 3px solid #2dd4bf; opacity: 0; pointer-events: none; }
+      /* prettier-ignore */
+      .add-btn-wrap { position: relative; }
+      /* prettier-ignore */
+      .chat-input { margin-top: auto; padding: 8px 0 20px; border-top: 1px solid #e2e8f0; }
+      /* prettier-ignore */
+      .chat-input-inner { background: #f5f5f5; border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border: 2px solid #e2e8f0; }
+      /* prettier-ignore */
+      .chat-input-text { color: #999; font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      /* prettier-ignore */
+      .chat-input-text.focused { color: #1e293b; }
+      /* prettier-ignore */
+      .chat-input-send { width: 28px; height: 28px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; flex-shrink: 0; }
+      /* prettier-ignore */
+      .chat-input-send.active { background: #2dd4bf; }
+      /* prettier-ignore */
+      .input-caret { display: inline-block; color: #1e293b; }
+      /* prettier-ignore */
+      #cursor { position: absolute; left: 0; top: 0; width: 200px; height: 200px; transform-origin: 45px 55px; z-index: 100; pointer-events: none; opacity: 0; }
+      /* prettier-ignore */
+      #cursor dotlottie-player { width: 100%; height: 100%; display: block; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.25)); }
+      /* prettier-ignore */
+      .ripple { position: absolute; left: 0; top: 0; width: 120px; height: 120px; border-radius: 50%; background: rgba(45, 212, 191, 0.5); transform: translate(-50%, -50%) scale(0); opacity: 0; z-index: 99; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="13"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Audio cues aligned to the simplified beats -->
+      <audio
+        id="sfx-input-focus"
+        src="audio/send-click.wav"
+        data-start="3.0"
+        data-duration="0.5"
+        data-volume="0.55"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-typing"
+        src="audio/typing-soft.wav"
+        data-start="3.3"
+        data-duration="2.5"
+        data-volume="0.3"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-send"
+        src="audio/send-click.wav"
+        data-start="5.8"
+        data-duration="0.5"
+        data-volume="0.6"
+        preload="auto"
+      ></audio>
+      <audio
+        id="sfx-cta-click"
+        src="audio/send-click.wav"
+        data-start="11.3"
+        data-duration="0.5"
+        data-volume="0.65"
+        preload="auto"
+      ></audio>
+
+      <div class="title" id="title">AI Product Creator</div>
+      <div id="phone-mount"></div>
+
+      <div id="ripple" class="ripple"></div>
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    <!-- Phone content rendered via buildDorianPhone's scroll area -->
+    <template id="phone-content">
+      <div class="ai-chat">
+        <div class="chat-header" id="ch-header">
+          <div class="chat-avatar"></div>
+          <div>
+            <div class="chat-name">Dorian AI</div>
+            <div class="chat-sub">Product Creator</div>
+          </div>
+        </div>
+
+        <div class="ai-greeting" id="ai-greeting">
+          What kind of products would you like me to create for your store?
+        </div>
+
+        <div class="user-msg" id="user-msg">Create a summer collection</div>
+
+        <div class="thinking-bubble" id="thinking">
+          <span></span><span></span><span></span>
+        </div>
+
+        <div class="ai-response" id="ai-response">
+          <span id="ai-text"></span
+          ><span class="ai-caret" id="ai-caret">|</span>
+        </div>
+
+        <div class="product-grid" id="product-grid">
+          <div class="product-card" id="card-1">
+            <div class="product-thumb">
+              <img src="public/dorian/stores/product-linen-top.jpg" alt="" />
+            </div>
+            <div class="product-title">Breezy Linen Top</div>
+            <div class="product-price">$34.99</div>
+          </div>
+          <div class="product-card" id="card-2">
+            <div class="product-thumb">
+              <img
+                src="public/dorian/stores/product-ocean-shorts.jpg"
+                alt=""
+              />
+            </div>
+            <div class="product-title">Ocean Wave Shorts</div>
+            <div class="product-price">$29.99</div>
+          </div>
+          <div class="product-card" id="card-3">
+            <div class="product-thumb">
+              <img
+                src="public/dorian/stores/product-maxi-dress.jpg"
+                alt=""
+              />
+            </div>
+            <div class="product-title">Sunset Maxi Dress</div>
+            <div class="product-price">$54.99</div>
+          </div>
+          <div class="product-card" id="card-4">
+            <div class="product-thumb">
+              <img src="public/dorian/stores/product-tote-bag.jpg" alt="" />
+            </div>
+            <div class="product-title">Palm Leaf Tote</div>
+            <div class="product-price">$24.99</div>
+          </div>
+        </div>
+
+        <div class="add-btn-wrap">
+          <div class="add-btn" id="add-btn">Add Products to Store</div>
+          <div class="add-btn-glow" id="add-btn-glow"></div>
+        </div>
+
+        <div class="chat-input" id="chat-input">
+          <div class="chat-input-inner" id="chat-input-inner">
+            <div class="chat-input-text" id="chat-input-text">
+              Describe products to create...<span
+                class="input-caret"
+                id="input-caret"
+                style="opacity: 0"
+                >|</span
+              >
+            </div>
+            <div class="chat-input-send" id="chat-input-send">→</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // Build the phone mockup synchronously
+      const phone = buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: false,
+        hideSearch: true,
+      });
+
+      // Timeline — SYNC registration at module scope (HF invariant)
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Title fade in (0-0.5s)
+      tl.to('#title', { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0);
+
+      // -------------------------------------------------------------------
+      // PHASE 1 (0-3s, f0-f90): Chat panel entrance + AI greeting
+      // -------------------------------------------------------------------
+      tl.to(
+        '#ch-header',
+        { opacity: 1, y: 0, duration: 15 / 30, ease: 'back.out(1.4)' },
+        10 / 30,
+      );
+      tl.to(
+        '#ai-greeting',
+        { opacity: 1, y: 0, duration: 20 / 30, ease: 'back.out(1.3)' },
+        25 / 30,
+      );
+
+      // -------------------------------------------------------------------
+      // PHASE 2 (3-6s, f90-f180): User types prompt + sends
+      // -------------------------------------------------------------------
+      const promptText = 'Create a summer collection';
+      const inputTextEl = document.getElementById('chat-input-text');
+      const sendBtnEl = document.getElementById('chat-input-send');
+
+      // Input focus ring (f90)
+      tl.to(
+        '#chat-input-inner',
+        { borderColor: '#2dd4bf', duration: 0.15, ease: 'power2.out' },
+        90 / 30,
+      );
+
+      // Caret blink during typing
+      tl.to(
+        '#input-caret',
+        { opacity: 1, duration: 0.3, repeat: 12, yoyo: true, ease: 'steps(1)' },
+        90 / 30,
+      );
+
+      // Typewriter into input (f90-f170)
+      tl.to(
+        { n: 0 },
+        {
+          n: promptText.length,
+          duration: 80 / 30,
+          ease: 'none',
+          onUpdate() {
+            const n = Math.floor(this.targets()[0].n);
+            inputTextEl.firstChild.nodeValue = promptText.slice(0, n);
+            inputTextEl.classList.add('focused');
+            if (n >= 15) sendBtnEl.classList.add('active');
+          },
+        },
+        90 / 30,
+      );
+
+      // Send click (f170-f175): hide caret, button press-bounce
+      tl.to('#input-caret', { opacity: 0, duration: 0.1 }, 170 / 30);
+      tl.to(
+        '#chat-input-send',
+        {
+          scale: 0.88,
+          duration: 0.1,
+          ease: 'power2.out',
+          yoyo: true,
+          repeat: 1,
+        },
+        170 / 30,
+      );
+
+      // User message bubble slides up (f175-f195)
+      tl.to(
+        '#user-msg',
+        { opacity: 1, y: 0, duration: 20 / 30, ease: 'back.out(1.4)' },
+        175 / 30,
+      );
+
+      // Reset input after send
+      tl.call(
+        () => {
+          inputTextEl.firstChild.nodeValue = 'Describe products to create...';
+          inputTextEl.classList.remove('focused');
+          sendBtnEl.classList.remove('active');
+          document.getElementById('chat-input-inner').style.borderColor =
+            '#e2e8f0';
+        },
+        null,
+        175 / 30,
+      );
+
+      // -------------------------------------------------------------------
+      // PHASE 3 (6-10s, f180-f300): Thinking dots → AI response → 4 cards
+      // -------------------------------------------------------------------
+      tl.to('#thinking', { opacity: 1, duration: 0.2 }, 195 / 30);
+
+      // Bounce each of 3 dots in a staggered wave
+      const dots = document.querySelectorAll('#thinking span');
+      dots.forEach((d, i) => {
+        tl.to(
+          d,
+          { y: -6, duration: 0.25, ease: 'sine.inOut', repeat: 5, yoyo: true },
+          195 / 30 + i * 0.12,
+        );
+      });
+      tl.to('#thinking', { opacity: 0, duration: 0.15 }, 240 / 30);
+
+      // AI response bubble + typewriter (f240-f290)
+      tl.to(
+        '#ai-response',
+        { opacity: 1, y: 0, duration: 15 / 30, ease: 'back.out(1.3)' },
+        240 / 30,
+      );
+
+      const AI_MSG = "I've created 4 products for your summer collection:";
+      const aiTextEl = document.getElementById('ai-text');
+      tl.to(
+        { n: 0 },
+        {
+          n: AI_MSG.length,
+          duration: 45 / 30,
+          ease: 'none',
+          onUpdate() {
+            aiTextEl.textContent = AI_MSG.slice(
+              0,
+              Math.floor(this.targets()[0].n),
+            );
+          },
+        },
+        245 / 30,
+      );
+      tl.to(
+        '#ai-caret',
+        { opacity: 1, duration: 0.25, repeat: 6, yoyo: true, ease: 'steps(1)' },
+        245 / 30,
+      );
+      tl.to('#ai-caret', { opacity: 0, duration: 0.1 }, 290 / 30);
+
+      // Product cards stagger in (f270-f310)
+      tl.to(
+        '.product-card',
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 18 / 30,
+          ease: 'back.out(1.5)',
+          stagger: 0.18,
+        },
+        270 / 30,
+      );
+
+      // -------------------------------------------------------------------
+      // PHASE 4 (10-13s, f300-f390): CTA + cursor tap + highlight pulse
+      // -------------------------------------------------------------------
+      tl.to(
+        '#add-btn',
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 20 / 30,
+          ease: 'elastic.out(1, 0.5)',
+        },
+        310 / 30,
+      );
+
+      // Cursor: approach button from below-right, then descend onto it.
+      // Comp-space approximation at phone zoom 1.8: CTA near (540, 1450).
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(700, 1650) });
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 320 / 30);
+      tl.to(
+        '#cursor',
+        { ...setC(610, 1520), duration: 15 / 30, ease: 'power2.out' },
+        320 / 30,
+      );
+      tl.to(
+        '#cursor',
+        { ...setC(540, 1450), duration: 10 / 30, ease: 'power2.in' },
+        335 / 30,
+      );
+
+      // Click @ f345: cursor click frame, button press, ripple, glow pulse
+      tl.call(
+        () => {
+          const player = document.querySelector('#cursor dotlottie-player');
+          if (player && player.seek) player.seek(35);
+        },
+        null,
+        345 / 30,
+      );
+      tl.to(
+        '#add-btn',
+        { scale: 0.93, duration: 0.1, ease: 'power2.out' },
+        345 / 30,
+      );
+      tl.to(
+        '#add-btn',
+        { scale: 1, duration: 0.2, ease: 'back.out(2)' },
+        348 / 30,
+      );
+
+      tl.set('#ripple', { x: 540, y: 1450, scale: 0, opacity: 0.9 }, 345 / 30);
+      tl.to(
+        '#ripple',
+        { scale: 2.2, opacity: 0, duration: 0.6, ease: 'power2.out' },
+        345 / 30,
+      );
+
+      tl.to(
+        '#add-btn-glow',
+        { opacity: 0.7, duration: 0.2, ease: 'power2.out' },
+        345 / 30,
+      );
+      tl.to(
+        '#add-btn-glow',
+        { opacity: 0, duration: 0.6, ease: 'power2.out' },
+        355 / 30,
+      );
+
+      tl.to('#cursor', { opacity: 0, duration: 0.25 }, 355 / 30);
+
+      // Final hold (f370-f390): subtle shadow deepen to imply "products added"
+      tl.to(
+        '#add-btn',
+        {
+          boxShadow: '0 12px 30px rgba(45, 212, 191, 0.6)',
+          duration: 0.4,
+          ease: 'power2.out',
+        },
+        370 / 30,
+      );
+
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

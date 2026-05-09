@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 10 Outro (HF)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: "Rubik", sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+      .scene-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 70px;
+      }
+      .logo-row {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        opacity: 0;
+        transform: scale(0);
+      }
+      .logo-icon {
+        width: 200px;
+        height: 200px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        box-shadow: 0 20px 40px rgba(45, 212, 191, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon-inner {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 16px solid #fff;
+        border-right-color: transparent;
+        transform: rotate(-45deg);
+      }
+      .logo-text {
+        font-size: 120px;
+        font-weight: 800;
+        color: #1e293b;
+        letter-spacing: 2px;
+      }
+      .tagline {
+        font-size: 48px;
+        font-weight: 500;
+        color: #64748b;
+        opacity: 0;
+        text-align: center;
+      }
+      .cta {
+        background: #2dd4bf;
+        color: #fff;
+        padding: 25px 60px;
+        border-radius: 50px;
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        opacity: 0;
+        box-shadow: 0 10px 30px rgba(45, 212, 191, 0.35);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="6"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="scene-content">
+        <div class="logo-row" id="logo">
+          <div class="logo-icon"><div class="logo-icon-inner"></div></div>
+          <div class="logo-text">DORIAN</div>
+        </div>
+        <div class="tagline" id="tagline">The Future of Local Commerce</div>
+        <div class="cta" id="cta">Coming Soon</div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Remotion bouncy: damping 10, mass 0.8, stiffness 150 → elastic.out
+      tl.to(
+        "#logo",
+        { opacity: 1, scale: 1, duration: 0.9, ease: "elastic.out(1, 0.5)" },
+        0,
+      );
+      // Tagline: gentle spring offset frame 25
+      tl.to(
+        "#tagline",
+        { opacity: 1, duration: 0.7, ease: "power2.out" },
+        25 / 30,
+      );
+      // CTA: gentle spring offset frame 50
+      tl.to("#cta", { opacity: 1, duration: 0.7, ease: "power2.out" }, 50 / 30);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

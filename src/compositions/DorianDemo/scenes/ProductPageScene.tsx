@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AbsoluteFill,
+  Easing,
   Img,
   staticFile,
   useCurrentFrame,
@@ -35,7 +36,10 @@ export const ProductPageScene: React.FC = () => {
 
   const message = TEXT_CONTENT.userTyping.userMessage;
   const aiMessage = TEXT_CONTENT.aiResponse.aiMessage;
-  const chatHeight = 260;
+  // Match scene 7's ending chat-panel size so frame 720 doesn't shrink/lift.
+  // Was 260 before 2026-04-26 — caused the chat to visually shrink + jump up
+  // 60px at the scene boundary.
+  const chatHeight = 370;
 
   // Phase 1 (frames 0-25): Zoom out from 2.76 to 1.8 to reveal full phone
   // Phase 2 (frames 25-40): Chat panel slides down, loader appears inside phone content area
@@ -45,7 +49,9 @@ export const ProductPageScene: React.FC = () => {
 
   const zoomOutProgress = spring({ frame, fps, config: SPRING_CONFIG.zoom });
   const zoomScale = interpolate(zoomOutProgress, [0, 1], [2.75, 1.8]);
-  const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-560, 0]);
+  // Start at -374 (matches scenes 3-7 chat-zoom offset). Was -560 before
+  // 2026-04-26 which caused a 186px vertical jump at the 7→8 boundary.
+  const zoomOffsetY = interpolate(zoomOutProgress, [0, 1], [-374, 0]);
 
   const chatSlide = interpolate(frame, [25, 40], [0, 1], {
     extrapolateLeft: 'clamp',
@@ -71,6 +77,7 @@ export const ProductPageScene: React.FC = () => {
   const scrollProgress = interpolate(frame, [110, 140], [0, 300], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
   });
 
   // Hand for scrolling
@@ -86,9 +93,9 @@ export const ProductPageScene: React.FC = () => {
       gesture: 'pointer' as const,
       rotation: 0,
     },
-    { x: handX, y: handY, frame: 118, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 130, gesture: 'drag' as const, rotation: -30 },
-    { x: handX, y: handY, frame: 140, gesture: 'drag' as const, rotation: -30 },
+    { x: handX, y: handY, frame: 118, gesture: 'drag' as const, rotation: -22 },
+    { x: handX, y: handY, frame: 130, gesture: 'drag' as const, rotation: -22 },
+    { x: handX, y: handY, frame: 140, gesture: 'drag' as const, rotation: -22 },
     {
       x: handX,
       y: handY,

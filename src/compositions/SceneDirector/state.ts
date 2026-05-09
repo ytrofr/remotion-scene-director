@@ -38,13 +38,33 @@ export function directorReducer(
 
   switch (action.type) {
     // ── Simple UI / navigation actions (inline — one-liners) ──────────────
-    case 'SET_COMPOSITION':
+    case 'SET_COMPOSITION': {
+      // Composition-scoped state (no bleed). The dispatcher (App.tsx
+      // `wrappedDispatch`) saves the OUTGOING comp's slice to localStorage
+      // and attaches the INCOMING comp's slice to this action. The reducer
+      // atomically replaces all scene-keyed maps with the new slice, or
+      // empty defaults when the new comp has no saved slice yet.
+      //
+      // ENSURE_SCENE_LAYERS will re-seed defaults from codedPaths/layers
+      // registry when scene layers are absent.
+      const slice = action.slice ?? {};
       return {
         ...state,
         compositionId: action.id,
         selectedScene: null,
         selectedWaypoint: null,
+        sceneGesture: slice.sceneGesture ?? {},
+        sceneAnimation: slice.sceneAnimation ?? {},
+        sceneDark: slice.sceneDark ?? {},
+        sceneLocked: slice.sceneLocked ?? {},
+        clearedSceneLayers: slice.clearedSceneLayers ?? {},
+        layers: slice.layers ?? {},
+        waypoints: slice.waypoints ?? {},
+        savedSnapshots: slice.savedSnapshots ?? {},
+        versionHistory: slice.versionHistory ?? {},
+        sceneConfig: slice.sceneConfig ?? {},
       };
+    }
     case 'SELECT_SCENE':
       return {
         ...state,
@@ -66,8 +86,6 @@ export function directorReducer(
     }
     case 'SELECT_WAYPOINT':
       return { ...state, selectedWaypoint: action.index };
-    case 'TOGGLE_PREVIEW':
-      return { ...state, preview: !state.preview };
     case 'TOGGLE_TRAIL':
       return { ...state, showTrail: !state.showTrail };
     case 'TOGGLE_EXPORT':
@@ -95,6 +113,11 @@ export function directorReducer(
         ...state,
         sceneDark: { ...state.sceneDark, [action.scene]: action.dark },
       };
+    case 'TOGGLE_SCENE_LOCK':
+      return {
+        ...state,
+        sceneLocked: { ...state.sceneLocked, [action.scene]: action.locked },
+      };
     case 'SET_CLICK_ANIMATION':
       return { ...state, clickAnimation: action.animation };
     case 'SET_SIDEBAR_TAB':
@@ -102,11 +125,62 @@ export function directorReducer(
     case 'SET_VIEW':
       return { ...state, currentView: action.view };
 
+    // ── Feedback mode (annotation pins) ───────────────────────────────────
+    case 'TOGGLE_FEEDBACK_MODE':
+      return {
+        ...state,
+        feedbackMode: !state.feedbackMode,
+        editingPinId: null,
+      };
+    case 'ADD_FEEDBACK_PIN': {
+      const comp = action.pin.scene ? state.compositionId : state.compositionId;
+      const existing = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: [...existing, action.pin],
+        },
+        editingPinId: action.pin.id,
+      };
+    }
+    case 'UPDATE_FEEDBACK_PIN': {
+      const comp = state.compositionId;
+      const list = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: list.map((p) =>
+            p.id === action.id ? { ...p, ...action.changes } : p,
+          ),
+        },
+      };
+    }
+    case 'DELETE_FEEDBACK_PIN': {
+      const comp = state.compositionId;
+      const list = state.feedbackPins[comp] ?? [];
+      return {
+        ...state,
+        feedbackPins: {
+          ...state.feedbackPins,
+          [comp]: list.filter((p) => p.id !== action.id),
+        },
+        editingPinId:
+          state.editingPinId === action.id ? null : state.editingPinId,
+      };
+    }
+    case 'SET_EDITING_PIN':
+      return { ...state, editingPinId: action.id };
+    case 'LOAD_FEEDBACK_PINS':
+      return { ...state, feedbackPins: action.pins };
+
     // ── Waypoint actions (delegated) ──────────────────────────────────────
     case 'ADD_WAYPOINT':
     case 'ADD_HAND_GESTURE':
     case 'UPDATE_WAYPOINT':
     case 'DELETE_WAYPOINT':
+    case 'RIPPLE_SHIFT_WAYPOINTS':
     case 'SET_WAYPOINTS':
     case 'ADOPT_CODED_PATH':
     case 'IMPORT_PATHS':
@@ -127,6 +201,7 @@ export function directorReducer(
 
     // ── Scene management actions (delegated) ──────────────────────────────
     case 'REVERT_SCENE':
+    case 'RELOAD_SCENE_FROM_DISK':
     case 'MARK_SAVED':
     case 'RESTORE_VERSION':
     case 'LOG_ACTIVITY':

@@ -19,9 +19,17 @@ public/dashmor/
 public/screenshots/
 *.png
 
-# Generated audio (voiceover, SFX downloads)
+# Generated audio (voiceover, SFX downloads, royalty-free music library)
 public/voiceover/
 public/audio/sfx/
+public/audio/music/
+
+# Per-render diagnostic frames (large, ephemeral)
+probe-frames/
+
+# Claude Code runtime locks + per-session logs
+.claude/scheduled_tasks.lock
+.claude/logs/
 
 # Internal docs
 SESSION-HANDOFF.md
@@ -31,3 +39,16 @@ SCENES.md
 # OS artifacts
 Thumbs.db
 *:Zone.Identifier
+
+# Dorian dual-stack (rendered HF clips + render workdir)
+public/hf-clips/
+hf/.render-work/
+
+# Local render artifacts (HF pilot outputs etc)
+renders/
+
+# Ephemeral SceneDirector review pins (auto-synced by dev server)
+src/compositions/SceneDirector/feedbackNotes.data.json
+
+# SceneDirector save history (local recovery log; dev-only, can grow large)
+src/compositions/SceneDirector/codedPaths.history.jsonl

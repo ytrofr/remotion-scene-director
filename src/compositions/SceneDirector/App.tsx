@@ -21,8 +21,14 @@ import { getCodedPath } from './codedPaths';
 import type { HandPathPoint } from '../../components/FloatingHand/types';
 import { computeZoomAtFrame, type ZoomLayer } from './layers';
 
-import { useSessionPersistence } from './hooks/useSessionPersistence';
+import {
+  useSessionPersistence,
+  saveSlice,
+  loadSlice,
+  extractSlice,
+} from './hooks/useSessionPersistence';
 import { useRestoredInitialState } from './hooks/useRestoredInitialState';
+import type { DirectorAction } from './state.types';
 import { useAudioEntries } from './hooks/useAudioEntries';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePlayerControls } from './hooks/usePlayerControls';
@@ -32,21 +38,38 @@ import './styles/index.css';
 import { Toolbar } from './panels/Toolbar';
 import { SceneList } from './panels/SceneList';
 import { Inspector } from './panels/Inspector';
+import { FeedbackPanel } from './panels/FeedbackPanel';
 import { Timeline } from './panels/Timeline';
 import { ExportModal } from './panels/ExportModal';
 import { GalleryView } from './panels/GalleryView';
+import { SoundGallery } from './panels/SoundGallery';
+import { ToolbarDemos } from './panels/ToolbarDemos';
+import { LeftRail } from './panels/LeftRail';
 import PlayerArea from './panels/PlayerArea';
 
 const CURSOR_SCALE_KEY = 'scene-director-cursor-scale';
 const PLAYBACK_RATE_KEY = 'scene-director-playback-rate';
 const PLAYHEAD_KEY = 'scene-director-playhead';
 
+// Top-level wrapper: routes to standalone demo page or main app.
+// Demo page check runs BEFORE any hooks so the editor app's hook ordering
+// is preserved (React hooks rule).
 export const App: React.FC = () => {
+  if (
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('view') === 'toolbar-demos'
+  ) {
+    return <ToolbarDemos />;
+  }
+  return <AppEditor />;
+};
+
+const AppEditor: React.FC = () => {
   // Restore session from localStorage
   const { restoredInitial, savedSession } =
     useRestoredInitialState(initialState);
 
-  const [undoState, dispatch] = useReducer(undoableReducer, {
+  const [undoState, rawDispatch] = useReducer(undoableReducer, {
     past: [],
     present: restoredInitial,
     future: [],
@@ -54,6 +77,42 @@ export const App: React.FC = () => {
   const state = undoState.present;
   const canUndo = undoState.past.length > 0;
   const canRedo = undoState.future.length > 0;
+
+  // Composition-scoped dispatch wrapper.
+  //
+  // SET_COMPOSITION must atomically (a) persist the outgoing comp's slice to
+  // localStorage and (b) load the incoming comp's slice and attach it to the
+  // action so the reducer can apply it without a flicker render.
+  //
+  // Without this wrapper, the reducer would clear per-scene state and a later
+  // useEffect would have no way to recover the OLD slice (already wiped from
+  // memory) AND would race the debounced auto-save (which would persist an
+  // empty slice for the new comp before we could load the saved one).
+  //
+  // stateRef keeps the latest state available without re-creating the
+  // wrapper on every render.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const dispatch = useCallback((action: DirectorAction) => {
+    if (
+      action.type === 'SET_COMPOSITION' &&
+      action.id !== stateRef.current.compositionId
+    ) {
+      // Persist outgoing slice synchronously
+      if (stateRef.current.compositionId) {
+        saveSlice(
+          stateRef.current.compositionId,
+          extractSlice(stateRef.current),
+        );
+      }
+      // Load incoming slice and attach to action
+      const slice = loadSlice(action.id);
+      rawDispatch({ ...action, slice });
+    } else {
+      rawDispatch(action);
+    }
+  }, []);
   const playerRef = useRef<PlayerRef | null>(null);
   const playerFrameRef = useRef<HTMLDivElement>(null);
 
@@ -102,11 +161,13 @@ export const App: React.FC = () => {
     setZoom,
     pan,
     setPan,
+    isPanning,
     playerAreaRef,
     handlePanStart,
     handlePanMove,
     handlePanEnd,
-  } = usePlayerControls(state.compositionId);
+    handleContextMenu,
+  } = usePlayerControls(state.compositionId, playerFrameRef);
 
   // Sync URL query params (?comp=, ?scene=, ?frame=, ?view=gallery)
   // 1. On mount: read URL and apply overrides (URL takes priority over localStorage)
@@ -114,9 +175,13 @@ export const App: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
-    // ?view=gallery
-    if (params.get('view') === 'gallery' && state.currentView !== 'gallery') {
-      dispatch({ type: 'SET_VIEW', view: 'gallery' });
+    // ?view=gallery | sound-gallery
+    const viewParam = params.get('view');
+    if (
+      (viewParam === 'gallery' || viewParam === 'sound-gallery') &&
+      state.currentView !== viewParam
+    ) {
+      dispatch({ type: 'SET_VIEW', view: viewParam });
     }
 
     // ?comp= — select composition if it exists
@@ -142,6 +207,30 @@ export const App: React.FC = () => {
     if (frameParam) {
       urlFrameRef.current = parseInt(frameParam, 10);
     }
+
+    // Hydrate feedback pins from disk if localStorage didn't have any.
+    // localStorage is the primary store (faster, survives refresh) but if a
+    // fresh browser opens or the Reload button wiped session, the disk file
+    // is the only place older pins live. Best-effort, fire-and-forget.
+    if (
+      !restoredInitial.feedbackPins ||
+      Object.keys(restoredInitial.feedbackPins).length === 0
+    ) {
+      fetch('/api/load-feedback-pins', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((diskPins) => {
+          if (
+            diskPins &&
+            typeof diskPins === 'object' &&
+            Object.keys(diskPins).length > 0
+          ) {
+            dispatch({ type: 'LOAD_FEEDBACK_PINS', pins: diskPins });
+          }
+        })
+        .catch(() => {
+          /* file missing on first run is expected */
+        });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount only
 
@@ -149,8 +238,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     const url = new URL(window.location.href);
 
-    if (state.currentView === 'gallery') {
-      url.searchParams.set('view', 'gallery');
+    if (
+      state.currentView === 'gallery' ||
+      state.currentView === 'sound-gallery'
+    ) {
+      url.searchParams.set('view', state.currentView);
     } else {
       url.searchParams.delete('view');
     }
@@ -493,17 +585,32 @@ export const App: React.FC = () => {
   });
 
   const isGallery = state.currentView === 'gallery';
+  const isSoundGallery = state.currentView === 'sound-gallery';
+  const overlayHidden = isGallery || isSoundGallery;
 
   return (
     <DirectorProvider value={ctxValue}>
-      {/* Gallery overlays the editor — editor stays mounted to preserve refs & listeners */}
+      {/* Overlays — editor stays mounted underneath to preserve refs & listeners */}
       {isGallery && (
         <GalleryView
           onClose={() => dispatch({ type: 'SET_VIEW', view: 'editor' })}
         />
       )}
+      {isSoundGallery && (
+        <SoundGallery
+          onClose={() => dispatch({ type: 'SET_VIEW', view: 'editor' })}
+        />
+      )}
 
-      <div className="app" style={isGallery ? { display: 'none' } : undefined}>
+      <div
+        className="app"
+        style={overlayHidden ? { display: 'none' } : undefined}
+      >
+        {/* Left rail — gesture/select/undo tools (Layout C) */}
+        <div style={{ gridArea: 'rail' }}>
+          <LeftRail />
+        </div>
+
         {/* Toolbar */}
         <div style={{ gridArea: 'toolbar' }}>
           <Toolbar />
@@ -522,6 +629,8 @@ export const App: React.FC = () => {
           handlePanStart={handlePanStart}
           handlePanMove={handlePanMove}
           handlePanEnd={handlePanEnd}
+          handleContextMenu={handleContextMenu}
+          isPanning={isPanning}
           composition={composition}
           VideoComponent={VideoComponent}
           zoom={zoom}
@@ -542,9 +651,11 @@ export const App: React.FC = () => {
           sceneWaypoints={sceneWaypoints}
         />
 
-        {/* Inspector (right panel) */}
+        {/* Inspector (right panel) — FeedbackPanel when feedback mode is on */}
         <div className="panel inspector-panel">
-          {state.selectedScene ? (
+          {state.feedbackMode ? (
+            <FeedbackPanel />
+          ) : state.selectedScene ? (
             <Inspector />
           ) : (
             <div className="inspector-empty">

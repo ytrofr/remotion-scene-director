@@ -9,7 +9,11 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDirector } from '../context';
 import { useAudioDrag, useHandDrag, useCaptionDrag } from './useTimelineDrag';
-import { useHandLayers, useAudioRows, useCaptionBars } from './useTimelineData';
+import {
+  useHandLayerRows,
+  useAudioRows,
+  useCaptionBars,
+} from './useTimelineData';
 import { MIN_CLICK_DURATION } from '../gestures';
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2];
@@ -125,16 +129,91 @@ export const Timeline: React.FC = () => {
   const isPlaying = playerRef.current?.isPlaying() ?? false;
 
   // Collect hand/audio layers across all scenes (extracted to useTimelineData.ts)
-  const handLayers = useHandLayers(state.layers, scenes);
+  const handLayerRows = useHandLayerRows(state.layers, scenes);
   const audioRows = useAudioRows(state.layers, scenes);
   const captionBars = useCaptionBars(state.layers);
 
-  const hasHand = handLayers.length > 0;
+  // Lane-drag state: which hand bar is being vertically reassigned, and
+  // which target row the cursor currently hovers. Drives ghost rendering +
+  // target-row highlight. Cleared on mouseup.
+  const [laneDragState, setLaneDragState] = useState<{
+    layerId: string;
+    sceneName: string;
+    sourceRowIdx: number;
+    targetRowIdx: number;
+    barLeftPct: number;
+    barWidthPct: number;
+  } | null>(null);
+
+  // Vertical lane reassignment (Shift+drag on a hand bar): track cursor Y
+  // across the timeline track area, compute which hand-row it's over,
+  // dispatch UPDATE_LAYER_DATA { laneOverride } on release. Plain drag
+  // (no shift) is handled by the existing handleHandEdgeDown time-drag —
+  // we don't intercept it, so there's no React-render gap and time-drag
+  // feels instant.
+  const startLaneDrag = useCallback(
+    (
+      e: React.MouseEvent,
+      layerId: string,
+      sceneName: string,
+      sourceRowIdx: number,
+      barLeftPct: number,
+      barWidthPct: number,
+    ) => {
+      e.stopPropagation();
+      e.preventDefault();
+      let targetRowIdx = sourceRowIdx;
+      setLaneDragState({
+        layerId,
+        sceneName,
+        sourceRowIdx,
+        targetRowIdx: sourceRowIdx,
+        barLeftPct,
+        barWidthPct,
+      });
+
+      const onMove = (ev: MouseEvent) => {
+        const el = tracksRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        // Hand rows start AFTER the Scenes row + gap.
+        const yInTracks = ev.clientY - rect.top;
+        const handStart = ROW_HEIGHT + ROW_GAP;
+        const rel = yInTracks - handStart;
+        const rowH = ROW_HEIGHT + ROW_GAP;
+        // Allow targeting one slot past the last row (creates a NEW lane).
+        const maxRow = handLayerRows.length;
+        const rowIdx = Math.max(0, Math.min(maxRow, Math.floor(rel / rowH)));
+        targetRowIdx = rowIdx;
+        setLaneDragState((prev) =>
+          prev ? { ...prev, targetRowIdx: rowIdx } : prev,
+        );
+      };
+      const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        setLaneDragState(null);
+        if (targetRowIdx !== sourceRowIdx) {
+          dispatch({
+            type: 'UPDATE_LAYER_DATA',
+            scene: sceneName,
+            layerId,
+            data: { laneOverride: targetRowIdx },
+          });
+        }
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    },
+    [handLayerRows.length, dispatch],
+  );
+
   const hasCaptions = captionBars.length > 0;
+  const handRowCount = handLayerRows.length;
   const audioRowCount = Math.max(1, audioRows.length);
   const totalHeight =
     ROW_HEIGHT +
-    (hasHand ? ROW_HEIGHT + ROW_GAP : 0) +
+    handRowCount * (ROW_HEIGHT + ROW_GAP) +
     audioRowCount * (ROW_HEIGHT + ROW_GAP) +
     (hasCaptions ? ROW_HEIGHT + ROW_GAP : 0);
 
@@ -215,14 +294,15 @@ export const Timeline: React.FC = () => {
           <div className="timeline__row-label" style={{ height: ROW_HEIGHT }}>
             Scenes
           </div>
-          {hasHand && (
+          {Array.from({ length: handRowCount }, (_, i) => (
             <div
+              key={`hand-label-${i}`}
               className="timeline__row-label timeline__row-label--hand"
               style={{ height: ROW_HEIGHT, marginTop: ROW_GAP }}
             >
-              Hand
+              {i === 0 ? 'Hand' : ''}
             </div>
-          )}
+          ))}
           {Array.from({ length: audioRowCount }, (_, i) => (
             <div
               key={i}
@@ -284,15 +364,28 @@ export const Timeline: React.FC = () => {
             })}
           </div>
 
-          {/* Row 2: Hand gesture bars */}
-          {hasHand && (
+          {/* Row 2+: Hand gesture bars — one row per overlap level (audio-style).
+              Overlapping gestures (e.g. primary path + secondary click layers
+              in the same scene window) get split onto separate rows so each
+              bar is independently selectable + draggable.
+
+              When the bar is selected, mousedown enters axis-detect mode:
+              - Vertical-dominant drag → reassign to a different lane via
+                laneOverride (UPDATE_LAYER_DATA).
+              - Horizontal-dominant drag → existing time-move drag.
+              - No movement past dead zone → no-op (selection stuck on prior click). */}
+          {handLayerRows.map((rowEntries, handRowIdx) => (
             <div
-              className="timeline__row"
+              key={`hand-row-${handRowIdx}`}
+              className={`timeline__row${
+                laneDragState && laneDragState.targetRowIdx === handRowIdx
+                  ? ' timeline__row--lane-target'
+                  : ''
+              }`}
               style={{ height: ROW_HEIGHT, marginTop: ROW_GAP }}
             >
-              {handLayers.map(({ layer, sceneStart, sceneEnd, sceneName }) => {
+              {rowEntries.map(({ layer, sceneStart, sceneEnd, sceneName }) => {
                 const wps = layer.data.waypoints;
-                const isSingle = wps && wps.length === 1;
                 let globalStart: number;
                 let globalEnd: number;
                 let wpFrame = 0;
@@ -325,30 +418,55 @@ export const Timeline: React.FC = () => {
                   0.3,
                   ((globalEnd - globalStart) / totalFrames) * 100,
                 );
+                // Per-layer gesture is the source of truth for the bar
+                // label — sceneGesture is only a fallback for legacy layers
+                // that don't have data.gesture set. Otherwise a new "click"
+                // layer added in a scene whose sceneGesture="scroll" would
+                // show the wrong label.
                 const gesture =
-                  state.sceneGesture[sceneName] ||
                   layer.data.gesture ||
+                  state.sceneGesture[sceneName] ||
                   'click';
                 const isSelected = state.selectedLayerId === layer.id;
+                const isLaneDragging = laneDragState?.layerId === layer.id;
                 return (
                   <div
                     key={layer.id}
-                    className={`timeline__hand-bar ${isSelected ? 'timeline__hand-bar--selected' : ''}`}
+                    className={`timeline__hand-bar ${isSelected ? 'timeline__hand-bar--selected' : ''}${
+                      isLaneDragging ? ' timeline__hand-bar--lane-dragging' : ''
+                    }`}
                     style={{ left: `${left}%`, width: `${width}%` }}
-                    title={`${gesture} (f${globalStart - sceneStart}-${globalEnd - sceneStart})`}
+                    title={`${gesture} (f${globalStart - sceneStart}-${globalEnd - sceneStart}) — drag to move in time, Shift+drag to change row`}
                     onMouseDown={(e) => {
                       e.stopPropagation();
-                      if (isSelected) {
-                        // Determine if this is a secondary layer
-                        const sceneLayers = state.layers[sceneName] || [];
-                        const primaryIdx = sceneLayers.findIndex(
-                          (l) => l.type === 'hand',
+                      // Always select on mousedown (so the new bar
+                      // immediately shows handles, inspector updates,
+                      // and drag works in one gesture).
+                      if (!isSelected) {
+                        dispatch({ type: 'SELECT_LAYER', layerId: layer.id });
+                        dispatch({ type: 'SELECT_SCENE', name: sceneName });
+                        dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
+                      }
+                      const sceneLayers = state.layers[sceneName] || [];
+                      const primaryIdx = sceneLayers.findIndex(
+                        (l) => l.type === 'hand',
+                      );
+                      const selIdx = sceneLayers.findIndex(
+                        (l) => l.id === layer.id,
+                      );
+                      const isSecondary = selIdx >= 0 && selIdx !== primaryIdx;
+                      // Shift+drag → lane reassignment (vertical move).
+                      // Plain drag → time move (existing handler, instant).
+                      if (e.shiftKey) {
+                        startLaneDrag(
+                          e,
+                          layer.id,
+                          sceneName,
+                          handRowIdx,
+                          left,
+                          width,
                         );
-                        const selIdx = sceneLayers.findIndex(
-                          (l) => l.id === layer.id,
-                        );
-                        const isSecondary =
-                          selIdx >= 0 && selIdx !== primaryIdx;
+                      } else {
                         handleHandEdgeDown(
                           e,
                           sceneName,
@@ -358,11 +476,7 @@ export const Timeline: React.FC = () => {
                           wps || [],
                           isSecondary ? layer.id : null,
                         );
-                        return;
                       }
-                      dispatch({ type: 'SELECT_LAYER', layerId: layer.id });
-                      dispatch({ type: 'SELECT_SCENE', name: sceneName });
-                      dispatch({ type: 'SET_SIDEBAR_TAB', tab: 'editor' });
                     }}
                   >
                     {isSelected && (
@@ -467,6 +581,25 @@ export const Timeline: React.FC = () => {
                 );
               })}
             </div>
+          ))}
+
+          {/* Lane-drag ghost: floating bar showing target lane while user drags
+              vertically. Positioned absolutely over the target hand row. */}
+          {laneDragState && (
+            <div
+              className="timeline__hand-bar timeline__hand-bar--ghost"
+              style={{
+                position: 'absolute',
+                left: `${laneDragState.barLeftPct}%`,
+                width: `${laneDragState.barWidthPct}%`,
+                top:
+                  ROW_HEIGHT +
+                  ROW_GAP +
+                  laneDragState.targetRowIdx * (ROW_HEIGHT + ROW_GAP),
+                height: ROW_HEIGHT,
+                pointerEvents: 'none',
+              }}
+            />
           )}
 
           {/* Row 3+: Audio bars (one row per overlap level) */}

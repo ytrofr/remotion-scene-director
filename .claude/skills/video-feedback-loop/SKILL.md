@@ -1,6 +1,6 @@
 ---
 name: video-feedback-loop
-description: 'Self-learning feedback loop for video production. Captures what worked/failed after each render, accumulates learnings across sessions, and improves future videos. Use after rendering a video or when reviewing video quality.'
+description: 'Capture self-learning feedback for video production. Records what worked/failed after each render, accumulates learnings across sessions, and improves future videos. Use after rendering a video or when reviewing video quality.'
 ---
 
 # Video Feedback Loop — Self-Learning System

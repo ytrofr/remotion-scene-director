@@ -782,20 +782,6 @@ export const SharedComponentsDemo: React.FC = () => {
           }
         />
       </Sequence>
-
-      <Sequence from={590} durationInFrames={20}>
-        <Audio
-          src={staticFile('audio/sfx/soft-click.wav')}
-          volume={(f) =>
-            computeVolumeAtFrame(f, {
-              baseVolume: 0.6,
-              fadeInFrames: 3,
-              fadeOutFrames: 8,
-              totalFrames: 20,
-            })
-          }
-        />
-      </Sequence>
     </AbsoluteFill>
   );
 };

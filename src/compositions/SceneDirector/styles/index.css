@@ -2,9 +2,12 @@
 @import './tokens.css';
 @import './base.css';
 @import './toolbar.css';
+@import './rail.css';
 @import './inspector.css';
 @import './timeline.css';
 @import './layers.css';
 @import './overlays.css';
 @import './history.css';
 @import './gallery.css';
+@import './sound-gallery.css';
+@import './demos.css';

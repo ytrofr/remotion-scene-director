@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 1 Intro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      :root {
+        --teal: #2dd4bf;
+        --teal-dark: #14b8a6;
+        --text: #1e293b;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #ffffff;
+        font-family:
+          "Rubik",
+          -apple-system,
+          sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #ffffff;
+      }
+      .scene-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+      }
+      .logo-row {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        opacity: 0;
+        transform: scale(0);
+      }
+      .logo-icon {
+        width: 180px;
+        height: 180px;
+        border-radius: 45px;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        box-shadow: 0 20px 40px rgba(45, 212, 191, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon-inner {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        border: 14px solid #ffffff;
+        border-right-color: transparent;
+        transform: rotate(-45deg);
+      }
+      .logo-text {
+        font-size: 108px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: 2px;
+      }
+      .subtitle {
+        font-size: 48px;
+        font-weight: 500;
+        color: var(--teal);
+        letter-spacing: 8px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="2.5"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div class="scene-content">
+        <div class="logo-row" id="logo">
+          <div class="logo-icon"><div class="logo-icon-inner"></div></div>
+          <div class="logo-text">DORIAN</div>
+        </div>
+        <div class="subtitle" id="subtitle">COMMUNITY MARKETPLACE</div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Remotion bouncy spring (damping:10, mass:0.8, stiffness:150) → elastic.out
+      tl.to(
+        "#logo",
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.9,
+          ease: "elastic.out(1, 0.5)",
+        },
+        0,
+      );
+
+      // Subtitle: gentle spring (damping:20, stiffness:80), starts at frame 20 (= 0.667s)
+      tl.to(
+        "#subtitle",
+        {
+          opacity: 1,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        20 / 30,
+      );
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

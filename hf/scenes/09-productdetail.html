@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dorian — Scene 9 Product Detail (HF Pilot)</title>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@dotlottie/player-component@2.7.12/dist/dotlottie-player.js"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="components/dorian-phone.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #fff;
+        font-family: 'Rubik', sans-serif;
+      }
+      #stage {
+        width: 1080px;
+        height: 1920px;
+        background: #fff;
+        position: relative;
+      }
+      .title {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 44px;
+        font-weight: 700;
+        color: #1e293b;
+        z-index: 10;
+        opacity: 0;
+      }
+      #phone-stage {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+      }
+      #phone-mount {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* Product detail content injected into .dp-scroll */
+      .pd {
+        padding: 148px 0 24px;
+        font-family: 'Rubik', sans-serif;
+      }
+      .pd .hero {
+        width: 390px;
+        height: 340px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        opacity: 0;
+      }
+      .pd .hero img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .pd .info {
+        padding: 20px 18px 0;
+      }
+      .pd .brand {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        opacity: 0;
+      }
+      .pd h2 {
+        font-size: 19px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 6px;
+        line-height: 1.25;
+        opacity: 0;
+      }
+      .pd .rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #64748b;
+        opacity: 0;
+      }
+      .pd .rating .stars {
+        color: #f59e0b;
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .pd .price {
+        margin-top: 14px;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        opacity: 0;
+      }
+      .pd .price .now {
+        font-size: 26px;
+        font-weight: 800;
+        color: #1e293b;
+      }
+      .pd .price .old {
+        font-size: 14px;
+        color: #94a3b8;
+        text-decoration: line-through;
+      }
+      .pd .cta {
+        margin: 20px 18px 0;
+        height: 54px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 10px 20px rgba(45, 212, 191, 0.35);
+        opacity: 0;
+      }
+      .pd .cta svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      #cursor {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        transform-origin: 45px 55px;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #cursor dotlottie-player {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+      }
+      .ripple {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(45, 212, 191, 0.55);
+        transform-origin: center center;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stage"
+      class="clip"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3"
+      data-track-index="0"
+      data-width="1080"
+      data-height="1920"
+    >
+      <audio
+        id="sfx-click"
+        src="audio/sfx/pop-up.wav"
+        data-start="2.2"
+        data-duration="0.5"
+        data-volume="0.6"
+        preload="auto"
+      ></audio>
+
+      <div class="title" id="title">Product Details</div>
+
+      <div id="phone-stage"><div id="phone-mount"></div></div>
+
+      <div id="ripple" class="ripple"></div>
+
+      <div id="cursor">
+        <dotlottie-player
+          src="lottie/cursor-real-black.json"
+          autoplay
+          speed="0"
+        ></dotlottie-player>
+      </div>
+    </div>
+
+    <!-- Phone content: product detail view -->
+    <template id="phone-content">
+      <div class="pd">
+        <div class="hero" id="pd-hero">
+          <img
+            src="public/dorian/woodmart/lg-tv-detail.png"
+            alt="LG OLED TV"
+          />
+        </div>
+        <div class="info">
+          <div class="brand" id="pd-brand">LG Electronics</div>
+          <h2 id="pd-title">LG C3 65" OLED evo 4K Smart TV</h2>
+          <div class="rating" id="pd-rating">
+            <span class="stars">★★★★★</span>
+            <span>4.8 &middot; 1,247 reviews</span>
+          </div>
+          <div class="price" id="pd-price">
+            <span class="now">$1,799</span>
+            <span class="old">$2,499</span>
+          </div>
+        </div>
+        <div class="cta" id="pd-cta">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path
+              d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"
+            />
+          </svg>
+          Add to cart
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // Continuing state from scene 8: phone already zoomed (scale 1.528, y -374)
+      const phone = buildDorianPhone({
+        mountId: 'phone-mount',
+        contentTemplateId: 'phone-content',
+        zoom: 1.8,
+        showAiBubble: true,
+        aiBubbleIcon: 'smiley',
+        hideSearch: false,
+        initialScrollY: 0,
+      });
+
+      gsap.set('#phone-stage', { scale: 1.528, y: -374 });
+
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Title fade in
+      tl.to('#title', { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0);
+
+      // Staggered entry of product detail content
+      const fadeUp = (sel, dy, dur, ease, at) =>
+        tl.fromTo(
+          sel,
+          { opacity: 0, y: dy },
+          { opacity: 1, y: 0, duration: dur, ease },
+          at,
+        );
+
+      fadeUp('#pd-hero', 30, 0.5, 'power3.out', 0.1);
+      fadeUp('#pd-brand', 16, 0.4, 'power2.out', 0.35);
+      fadeUp('#pd-title', 16, 0.4, 'power2.out', 0.45);
+      fadeUp('#pd-rating', 12, 0.4, 'power2.out', 0.6);
+      fadeUp('#pd-price', 12, 0.4, 'power2.out', 0.75);
+
+      // CTA pops in with back.out for "button ready" feel
+      tl.fromTo(
+        '#pd-cta',
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.5)' },
+        0.95,
+      );
+
+      // Cursor path — comp-space coords. Tip offset (45, 55).
+      // Phone at scale 1.528*1.8 = 2.75, y-shift -374. CTA sits low on screen (~y 1680).
+      const TIP_X = 45,
+        TIP_Y = 55;
+      const setC = (x, y) => ({ x: x - TIP_X, y: y - TIP_Y });
+
+      gsap.set('#cursor', { opacity: 0, rotation: 0, ...setC(820, 1820) });
+
+      // Cursor enters bottom-right at t=0.8s, glides to CTA, settles, clicks at t=2.2s
+      tl.to('#cursor', { opacity: 1, duration: 0.15 }, 0.8);
+      tl.to(
+        '#cursor',
+        { ...setC(560, 1690), duration: 1.0, ease: 'power2.inOut' },
+        0.8,
+      );
+      tl.to(
+        '#cursor',
+        { ...setC(540, 1680), duration: 0.4, ease: 'power2.out' },
+        1.8,
+      );
+
+      // Lottie click seek at t=2.2s
+      const cursorPlayer = document.querySelector('#cursor dotlottie-player');
+      tl.call(
+        () => {
+          if (cursorPlayer && cursorPlayer.seek) cursorPlayer.seek(35);
+        },
+        null,
+        2.2,
+      );
+
+      // Ripple + CTA press at t=2.2s
+      tl.set('#ripple', { x: 540, y: 1680, scale: 0, opacity: 1 }, 2.2);
+      tl.to(
+        '#ripple',
+        { scale: 1.6, opacity: 0, duration: 0.5, ease: 'power2.out' },
+        2.2,
+      );
+      tl.to(
+        '#pd-cta',
+        { scale: 0.95, duration: 0.08, ease: 'power2.out' },
+        2.2,
+      );
+      tl.to('#pd-cta', { scale: 1, duration: 0.2, ease: 'back.out(2)' }, 2.28);
+
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

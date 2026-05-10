@@ -451,7 +451,10 @@ export const DorianFullV1_22: React.FC<DorianFullV1_22Props> = ({
           durationInFrames={DORIAN_CUT}
           name="DorianDemo-Part-V1.22"
         >
-          <DorianDemoV1_12 sceneOverrides={SCENE_OVERRIDES_V1_22} />
+          <DorianDemoV1_12
+            sceneOverrides={SCENE_OVERRIDES_V1_22}
+            compositionId="DorianFullV1-22"
+          />
         </Sequence>
 
         {/* Click flash overlays — read from CODED_CLICK_FLASH_REGISTRY in

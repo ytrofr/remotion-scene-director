@@ -223,10 +223,17 @@ interface DorianDemoV1_12_Props {
   /** Optional scene-duration overrides + per-scene config (V1.21+). When
    *  omitted, uses base SCENES_V1_12 timing — V1.13–V1.20 behavior unchanged. */
   sceneOverrides?: SceneOverridesV1_12;
+  /** Optional parent composition ID. When set, scenes that support SD
+   *  overrides (currently HomeScrollSceneV1_09) read saved waypoints from
+   *  this comp's entry. V1.22+ passes "DorianFullV1-22" here so SD edits
+   *  to scene 2 actually render. V1.13–V1.21 omit this — scenes keep their
+   *  hardcoded paths byte-stable. */
+  compositionId?: string;
 }
 
 export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
   sceneOverrides,
+  compositionId,
 } = {}) => {
   const scenes = resolveScenesV1_12(sceneOverrides);
   const sceneEntries = buildSceneEntries(scenes);
@@ -249,7 +256,7 @@ export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
         durationInFrames={scenes.homeScroll.duration}
         name="2-HomeScroll"
       >
-        <HomeScrollSceneV1_09 />
+        <HomeScrollSceneV1_09 compositionId={compositionId} />
       </Sequence>
       <Sequence
         from={scenes.tapBubble.start}

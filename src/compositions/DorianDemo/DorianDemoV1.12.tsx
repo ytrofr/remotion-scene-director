@@ -298,14 +298,17 @@ export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
         durationInFrames={scenes.productPage.duration}
         name="8-ProductPage"
       >
-        <ProductPageSceneV1_12 sceneConfig={productPageConfig} />
+        <ProductPageSceneV1_12
+          sceneConfig={productPageConfig}
+          compositionId={compositionId}
+        />
       </Sequence>
       <Sequence
         from={scenes.productDetail.start}
         durationInFrames={scenes.productDetail.duration}
         name="9-ProductDetail"
       >
-        <ProductDetailSceneV1_12 />
+        <ProductDetailSceneV1_12 compositionId={compositionId} />
       </Sequence>
       <Sequence
         from={scenes.outro.start}

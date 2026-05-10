@@ -6,14 +6,9 @@
 
 import React, { useMemo } from 'react';
 import { FloatingHand } from '../../../components/FloatingHand';
-import { DEFAULT_PHYSICS } from '../../../components/FloatingHand/types';
 import type { HandLayer } from '../layers';
-import {
-  GESTURE_PRESETS,
-  buildClickAnimationFile,
-  CLICK_ANIM_DURATION,
-  MIN_CLICK_DURATION,
-} from '../gestures';
+import { CLICK_ANIM_DURATION, MIN_CLICK_DURATION } from '../gestures';
+import { resolveSDPreviewProps } from '../floatingHandPropResolver';
 import type { CompositionEntry, DirectorState, SceneInfo } from '../state';
 import type { Layer } from '../layers';
 
@@ -55,7 +50,6 @@ const SingleHandRenderer: React.FC<{
   if (!wps || wps.length === 0) return null;
 
   const gesture = layer.data.gesture || 'click';
-  const preset = GESTURE_PRESETS[gesture];
 
   // Check if this specific layer is being dragged
   const isSelected = state.selectedLayerId === layer.id;
@@ -83,24 +77,16 @@ const SingleHandRenderer: React.FC<{
     return null;
   }
 
-  // Use the owner scene's animation/dark settings (not selected scene)
-  const animation = state.sceneAnimation[ownerSceneName] ?? preset.animation;
-  const dark = state.sceneDark[ownerSceneName] ?? preset.dark;
-  // Per-layer size. Falls back to zoom-adjusted default (base 120 at zoom 1.8).
-  const zoomDefault = Math.round(120 * ((ownerScene.zoom ?? 1.8) / 1.8));
-  const size = layer.data.size ?? zoomDefault;
-
-  // Build click animation file. Per-composition override (set via
-  // CompositionEntry.clickAnimationOverride in compositions.ts) wins over
-  // the global state.clickAnimation. `null` explicitly suppresses the
-  // click Lottie — used by V1.19+ to match the rendered output (which
-  // doesn't load any burst Lottie either).
-  const clickAnimFile =
-    clickAnimationOverride === null
-      ? undefined
-      : clickAnimationOverride !== undefined
-        ? buildClickAnimationFile(animation, clickAnimationOverride)
-        : buildClickAnimationFile(animation, state.clickAnimation);
+  // Single source of truth for prop computation — shared with parity test.
+  const resolved = resolveSDPreviewProps({
+    compositionId: '', // not consumed by formula today
+    sceneName: ownerSceneName,
+    sceneZoom: ownerScene.zoom ?? 1.8,
+    gesture,
+    layerData: layer.data,
+    state,
+    composition: { clickAnimationOverride, clickStyle },
+  });
 
   // Compute click animation speed: scales proportionally to user-set duration
   // speed = CLICK_ANIM_DURATION / actual_duration (normal=1.0 at 45f, faster when shorter)
@@ -115,14 +101,14 @@ const SingleHandRenderer: React.FC<{
       frame={handFrame}
       path={handPath}
       startFrame={handStartFrame}
-      animation={animation}
-      size={size}
-      showRipple={preset.showRipple}
-      dark={dark}
-      physics={{ ...DEFAULT_PHYSICS, ...preset.physics }}
-      clickAnimation={clickAnimFile}
+      animation={resolved.animation}
+      size={resolved.size}
+      showRipple={resolved.showRipple}
+      dark={resolved.dark}
+      physics={resolved.physics}
+      clickAnimation={resolved.clickAnimationFile}
       clickSpeed={clickSpeed}
-      clickStyle={clickStyle}
+      clickStyle={resolved.clickStyle}
     />
   );
 };

@@ -50,6 +50,7 @@ import {
 } from '../../../components/DorianPhone';
 import { fontFamily } from '../../../lib/fonts';
 import { DorianLoader, ChatOverlay, HomeBackground } from './ProductPageParts';
+import { getSavedPath } from '../../SceneDirector/codedPaths';
 
 /**
  * Scene-config props for callers (V1.21+) that want to extend the click
@@ -84,11 +85,17 @@ export interface ProductPageSceneV1_12_SceneConfig {
 
 interface ProductPageSceneV1_12_Props {
   sceneConfig?: ProductPageSceneV1_12_SceneConfig;
+  /** Optional parent composition ID. When set AND saved data has ≥2
+   *  waypoints, scene reads SD-saved waypoints for "8-ProductPage" from
+   *  that comp; otherwise falls through to the hardcoded path below.
+   *  V1.22+ wires this; V1.13–V1.21 don't pass it (behavior unchanged). */
+  compositionId?: string;
 }
 
 // Scene 8 V1.12: Product page with scrollbar-drag cursor.
 export const ProductPageSceneV1_12: React.FC<ProductPageSceneV1_12_Props> = ({
   sceneConfig,
+  compositionId,
 } = {}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -143,7 +150,18 @@ export const ProductPageSceneV1_12: React.FC<ProductPageSceneV1_12_Props> = ({
   const CLICK_FRAME = sceneConfig?.clickFrame ?? 147;
   const CLICK_DURATION = sceneConfig?.clickDuration ?? 6;
   const FADE_OUT_FRAME = sceneConfig?.fadeOutFrame ?? 150;
-  const scrollHandPath: HandPathPoint[] = [
+  // SceneDirector override (V1.22+ via `compositionId` prop). When the
+  // caller supplies a comp ID AND that comp has saved waypoints with ≥2
+  // points, those waypoints win. Otherwise fall through to the hardcoded
+  // path below — preserves V1.13–V1.21 behavior byte-for-byte.
+  const sdSaved = compositionId
+    ? getSavedPath(compositionId, '8-ProductPage')
+    : null;
+  const sdPath =
+    sdSaved && Array.isArray(sdSaved.path) && sdSaved.path.length >= 2
+      ? sdSaved.path
+      : null;
+  const hardcodedScrollHandPath: HandPathPoint[] = [
     // Enter from off-screen right at f105 (slightly before scroll begins)
     {
       x: 1050,
@@ -222,6 +240,7 @@ export const ProductPageSceneV1_12: React.FC<ProductPageSceneV1_12_Props> = ({
       scale: 0,
     },
   ];
+  const scrollHandPath: HandPathPoint[] = sdPath ?? hardcodedScrollHandPath;
 
   const contentTop = 130;
 

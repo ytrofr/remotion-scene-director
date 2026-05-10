@@ -97,11 +97,21 @@ export const FULL_VIDEO_V1_22 = {
   durationInFrames: CLOSING_OFFSET + CLOSING_DURATION,
 };
 
+// Per-scene zoom levels — must match what the scene file applies via
+// `transform: scale(zoom)`. SceneDirector reads these so its preview hand
+// size formula `120 * (zoom / 1.8)` matches the rendered video's
+// `handSizeForZoom(zoomScale)`. Without this, SD always defaults to 1.8 and
+// shows a 120px cursor on chat scenes (4-7) that render at ~183px.
+//   - Scenes 1, 2, 8, 9: phone at base scale 1.8
+//   - Scenes 3-7: chat-zoomed to 2.75
+//   - 3-TapBubble + 8-ProductPage: scenes interpolate the zoom; we pin to
+//     the END value (where the cursor click lands).
 export const FULL_SCENE_INFO_V1_22 = [
   {
     name: '1-Intro',
     start: DORIAN_SCENES_V1_22.intro.start,
     end: DORIAN_SCENES_V1_22.intro.start + DORIAN_SCENES_V1_22.intro.duration,
+    zoom: 1.8,
   },
   {
     name: '2-HomeScroll',
@@ -109,6 +119,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.homeScroll.start +
       DORIAN_SCENES_V1_22.homeScroll.duration,
+    zoom: 1.8,
   },
   {
     name: '3-TapBubble',
@@ -116,6 +127,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.tapBubble.start +
       DORIAN_SCENES_V1_22.tapBubble.duration,
+    zoom: 2.75,
   },
   {
     name: '4-ChatOpen',
@@ -123,6 +135,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.chatOpen.start +
       DORIAN_SCENES_V1_22.chatOpen.duration,
+    zoom: 2.75,
   },
   {
     name: '5-UserTyping',
@@ -130,6 +143,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.userTyping.start +
       DORIAN_SCENES_V1_22.userTyping.duration,
+    zoom: 2.75,
   },
   {
     name: '6-AIThinking',
@@ -137,6 +151,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.aiThinking.start +
       DORIAN_SCENES_V1_22.aiThinking.duration,
+    zoom: 2.75,
   },
   {
     name: '7-AIResponse',
@@ -144,6 +159,7 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.aiResponse.start +
       DORIAN_SCENES_V1_22.aiResponse.duration,
+    zoom: 2.75,
   },
   {
     name: '8-ProductPage',
@@ -151,11 +167,13 @@ export const FULL_SCENE_INFO_V1_22 = [
     end:
       DORIAN_SCENES_V1_22.productPage.start +
       DORIAN_SCENES_V1_22.productPage.duration,
+    zoom: 1.8, // zooms OUT from 2.75 → 1.8; cursor lands at 1.8
   },
   {
     name: '9-ProductDetail',
     start: DORIAN_SCENES_V1_22.productDetail.start,
     end: DORIAN_CUT,
+    zoom: 1.8,
   },
   {
     name: '10-StoreDashboard',

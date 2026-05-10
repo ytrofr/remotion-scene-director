@@ -156,9 +156,9 @@ const FloatingHandStandalone: React.FC<
   path: literalPath,
   startFrame = 0,
   animation: literalAnimation = 'hand-click',
-  size = 120,
+  size: literalSize = 120,
   dark: literalDark = false,
-  showRipple = false,
+  showRipple: literalShowRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   physics: physicsOverrides,
   clickAnimation,
@@ -168,13 +168,25 @@ const FloatingHandStandalone: React.FC<
   // SD override merge: when wrapped in <SDOverrideProvider>, saved data
   // shadows the literal props the scene passed. No-op when no Provider.
   const { saved } = useSDOverride();
-  const { path, animation, dark } = applySDOverride(
-    { path: literalPath, animation: literalAnimation, dark: literalDark },
+  const merged = applySDOverride(
+    {
+      path: literalPath,
+      animation: literalAnimation,
+      dark: literalDark,
+      size: literalSize,
+      showRipple: literalShowRipple,
+      physics: physicsOverrides,
+    },
     saved,
   );
+  const path = merged.path;
+  const animation = merged.animation as LottieAnimation;
+  const dark = merged.dark ?? false;
+  const size = merged.size ?? literalSize;
+  const showRipple = merged.showRipple ?? literalShowRipple;
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
-    ...physicsOverrides,
+    ...merged.physics,
   };
 
   const handState = useMemo(
@@ -275,10 +287,10 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   path: literalPath,
   startFrame = 0,
   animation: literalAnimation = 'hand-click',
-  size = 64,
+  size: literalSize = 64,
   dark: literalDark = false,
   physics: physicsOverrides,
-  showRipple = false,
+  showRipple: literalShowRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   clickAnimation,
   clickStyle: clickStyleOverride,
@@ -288,13 +300,25 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   // SD override merge: when wrapped in <SDOverrideProvider>, saved data
   // shadows the literal props the scene passed. No-op when no Provider.
   const { saved } = useSDOverride();
-  const { path, animation, dark } = applySDOverride(
-    { path: literalPath, animation: literalAnimation, dark: literalDark },
+  const merged = applySDOverride(
+    {
+      path: literalPath,
+      animation: literalAnimation,
+      dark: literalDark,
+      size: literalSize,
+      showRipple: literalShowRipple,
+      physics: physicsOverrides,
+    },
     saved,
   );
+  const path = merged.path;
+  const animation = merged.animation as LottieAnimation;
+  const dark = merged.dark ?? false;
+  const size = merged.size ?? literalSize;
+  const showRipple = merged.showRipple ?? literalShowRipple;
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
-    ...physicsOverrides,
+    ...merged.physics,
   };
   const handState = useHandAnimation(path, startFrame, physics);
   const { offsetY, shadowScale } = useFloatEffect(physics);

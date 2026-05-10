@@ -26,6 +26,7 @@ import { HistoryTab } from './HistoryTab';
 import { LayerPanel } from './LayerPanel';
 import { NumField } from './NumField';
 import { ZoomInspector } from './ZoomInspector';
+import { PHYSICS_PRESET_ORDER } from '../physicsPresets';
 
 // Gesture abbreviations for compact display
 const GESTURE_ABBR: Record<string, string> = {
@@ -300,6 +301,87 @@ export const Inspector: React.FC = () => {
             </button>
           </div>
         )}
+      {/* Stage 2: Physics preset + Show Ripple. Saved to layer.data via
+          UPDATE_LAYER_DATA → buildProposalForScene serializes to JSON →
+          FloatingHand reads via SDOverrideContext.applySDOverride. */}
+      {selectedHandLayer && (
+        <div className="inspector__size-row">
+          <label className="inspector__size-label">Physics</label>
+          <select
+            value={
+              (selectedHandLayer.data as { physicsPreset?: string })
+                .physicsPreset ?? ''
+            }
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_LAYER_DATA',
+                scene,
+                layerId: selectedHandLayer.id,
+                data: { physicsPreset: e.target.value || undefined },
+              })
+            }
+            className="inspector__size-value"
+            style={{ flex: 1 }}
+            title="Override the cursor's physics preset for this scene. Empty = use scene's literal value."
+          >
+            <option value="">(scene default)</option>
+            {PHYSICS_PRESET_ORDER.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {selectedHandLayer && (
+        <div className="inspector__size-row">
+          <label className="inspector__size-label">Ripple</label>
+          <button
+            type="button"
+            onClick={() =>
+              dispatch({
+                type: 'UPDATE_LAYER_DATA',
+                scene,
+                layerId: selectedHandLayer.id,
+                data: {
+                  showRipple:
+                    (selectedHandLayer.data as { showRipple?: boolean })
+                      .showRipple === true
+                      ? false
+                      : true,
+                },
+              })
+            }
+            className={`inspector__dark-btn ${
+              (selectedHandLayer.data as { showRipple?: boolean })
+                .showRipple === true
+                ? 'inspector__dark-btn--active'
+                : ''
+            }`}
+            title="Show click ripple effect for this scene's cursor."
+          >
+            {(selectedHandLayer.data as { showRipple?: boolean }).showRipple ===
+            true
+              ? 'On'
+              : 'Off'}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              dispatch({
+                type: 'UPDATE_LAYER_DATA',
+                scene,
+                layerId: selectedHandLayer.id,
+                data: { showRipple: undefined },
+              })
+            }
+            className="inspector__dark-btn"
+            title="Reset to scene/preset default."
+          >
+            Reset
+          </button>
+        </div>
+      )}
     </div>
   );
 

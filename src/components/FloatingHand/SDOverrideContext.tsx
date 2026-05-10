@@ -30,7 +30,12 @@ import {
   getSavedPath,
   type CodedPath,
 } from '../../compositions/SceneDirector/codedPaths';
-import type { HandPathPoint, LottieAnimation } from './types';
+import { resolvePhysicsPreset } from '../../compositions/SceneDirector/physicsPresets';
+import type {
+  HandPathPoint,
+  HandPhysicsConfig,
+  LottieAnimation,
+} from './types';
 
 export interface SDOverrideValue {
   compositionId: string;
@@ -74,19 +79,31 @@ export function useSDOverride(): {
 }
 
 /**
- * Subset of FloatingHandProps that SD can override. Stage 1 fields only.
- * Stage 2 will extend this interface with physics, size, showRipple.
+ * Subset of FloatingHandProps that SD can override. Stage 1+2 fields.
  */
 export interface OverridableFloatingHandProps {
   path: HandPathPoint[];
   animation?: LottieAnimation;
   dark?: boolean;
+  size?: number;
+  showRipple?: boolean;
+  physics?: Partial<HandPhysicsConfig>;
 }
 
 /**
  * Pure merge: saved CodedPath fields shadow literal props per field.
- * Path requires ≥2 waypoints to override (matches the existing
- * HomeScrollSceneV1.09 opt-in pattern — guards against half-saved data).
+ *
+ * Stage 1 fields:
+ *  - path: requires ≥2 waypoints to override (guards against half-saved
+ *    data; matches HomeScrollSceneV1.09 opt-in pattern).
+ *  - animation, dark: simple per-field shadow.
+ *
+ * Stage 2 fields:
+ *  - size: per-layer override.
+ *  - showRipple: per-layer toggle.
+ *  - physics: resolved from `physicsPreset` (named registry) and/or
+ *    free-form `physics` partial. Preset wins as the base; free-form
+ *    partial layers on top.
  *
  * No-op when saved is null (no Provider OR no saved data).
  */
@@ -104,6 +121,23 @@ export function applySDOverride<T extends OverridableFloatingHandProps>(
   }
   if (typeof saved.dark === 'boolean') {
     next.dark = saved.dark;
+  }
+  if (typeof saved.size === 'number' && saved.size > 0) {
+    next.size = saved.size;
+  }
+  if (typeof saved.showRipple === 'boolean') {
+    next.showRipple = saved.showRipple;
+  }
+  // Physics: preset is the BASE (replaces literal physics entirely),
+  // free-form `saved.physics` Partial layers on top of preset.
+  // Literal physics is REPLACED only when the saved override exists —
+  // otherwise the scene's literal physics wins (current behavior).
+  const preset = resolvePhysicsPreset(saved.physicsPreset);
+  if (preset) {
+    next.physics = { ...preset, ...(saved.physics ?? {}) };
+  } else if (saved.physics) {
+    // free-form override only — merge on top of literal
+    next.physics = { ...(literal.physics ?? {}), ...saved.physics };
   }
   return next;
 }

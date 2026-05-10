@@ -176,18 +176,22 @@ export function handleLayerAction(
             state.sceneGesture[action.scene] ??
             (coded?.gesture as GestureTool) ??
             'click';
-          // Default size: base 120 scaled by scene zoom ratio
+          // Default size: base 120 scaled by scene zoom ratio.
+          // Saved `coded.size` (Stage 2) wins over the zoom-default.
           const baseZoom = 1.8;
           const defaultSize = Math.round(
             120 * ((action.sceneZoom ?? baseZoom) / baseZoom),
           );
+          const effectiveSize = coded?.size ?? defaultSize;
           newLayers.push(
             createHandLayer(
               action.scene,
               effectiveWaypoints,
               gesture,
               order++,
-              defaultSize,
+              effectiveSize,
+              coded?.physicsPreset,
+              coded?.showRipple,
             ),
           );
 
@@ -200,7 +204,7 @@ export function handleLayerAction(
                   sec.path,
                   sec.gesture as GestureTool,
                   order++,
-                  defaultSize,
+                  effectiveSize,
                 );
                 newLayers.push(secLayer);
               }

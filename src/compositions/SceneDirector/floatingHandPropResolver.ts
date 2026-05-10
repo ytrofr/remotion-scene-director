@@ -24,6 +24,7 @@ import {
   buildClickAnimationFile,
   type GestureTool,
 } from './gestures';
+import { resolvePhysicsPreset } from './physicsPresets';
 import type { HandLayerData } from './layers';
 import type { CompositionEntry, DirectorState } from './state.types';
 
@@ -104,12 +105,27 @@ export function resolveSDPreviewProps(
 
   const wps = layerData.waypoints ?? [];
 
+  // Stage 2: per-layer physics override (named preset registry) wins
+  // over gesture preset. Mirrors applySDOverride in SDOverrideContext.
+  const layerPhysicsPreset = resolvePhysicsPreset(
+    (layerData as { physicsPreset?: string }).physicsPreset,
+  );
+  const physics: HandPhysicsConfig = {
+    ...DEFAULT_PHYSICS,
+    ...(layerPhysicsPreset ?? preset.physics),
+  };
+
+  // Stage 2: per-layer showRipple override wins over gesture preset.
+  const layerShowRipple = (layerData as { showRipple?: boolean }).showRipple;
+  const showRipple =
+    typeof layerShowRipple === 'boolean' ? layerShowRipple : preset.showRipple;
+
   return {
     animation,
     size,
     dark,
-    physics: { ...DEFAULT_PHYSICS, ...preset.physics },
-    showRipple: preset.showRipple,
+    physics,
+    showRipple,
     clickAnimationFile,
     clickStyle: composition.clickStyle,
     pathLength: wps.length,

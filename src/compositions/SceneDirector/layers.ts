@@ -1100,6 +1100,11 @@ export interface HandLayerData {
   // needed) UNLESS another override already occupies the same lane at an
   // overlapping time — in that case it falls back to greedy.
   laneOverride?: number;
+  // ── Stage 2: physics + showRipple per-layer overrides ─────────────────
+  /** Named physics preset key (PHYSICS_PRESET_REGISTRY). Inspector writes this. */
+  physicsPreset?: string;
+  /** Toggle ripple effect. Inspector writes this. */
+  showRipple?: boolean;
 }
 
 export interface HandLayer extends LayerBase {
@@ -1215,6 +1220,10 @@ export function createHandLayer(
   gesture: GestureTool,
   order: number = 0,
   size?: number,
+  /** Stage 2 — initial physics preset key (Inspector dropdown). */
+  physicsPreset?: string,
+  /** Stage 2 — initial showRipple toggle. */
+  showRipple?: boolean,
 ): HandLayer {
   return {
     id: generateLayerId('hand'),
@@ -1224,7 +1233,7 @@ export function createHandLayer(
     visible: true,
     locked: false,
     order,
-    data: { waypoints, gesture, size },
+    data: { waypoints, gesture, size, physicsPreset, showRipple },
   };
 }
 

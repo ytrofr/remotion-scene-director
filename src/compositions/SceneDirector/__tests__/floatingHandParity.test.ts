@@ -88,12 +88,15 @@ function resolveSDForProbe(key: string) {
   }
 
   const gesture = (source.gesture ?? 'click') as GestureTool;
+  // Hydrate layer data exactly as ENSURE_SCENE_LAYERS does — saved
+  // physicsPreset / showRipple / size from CodedPath flow into HandLayerData
+  // so the SD resolver applies them.
   const layerData: HandLayerData = {
     waypoints: source.path,
     gesture,
-    // No per-layer size override in saved JSON today — overlay falls back
-    // to zoom-adjusted default.
-    size: undefined,
+    size: source.size,
+    physicsPreset: source.physicsPreset,
+    showRipple: source.showRipple,
   };
 
   // Read scene zoom + composition meta from the test-local mirrors above
@@ -198,78 +201,14 @@ function shallowWaypointEqual(
  * but does NOT fail — the gap is acknowledged. Anything OUTSIDE this list
  * is an UNEXPECTED divergence and fails loud.
  *
- * Remove entries as the corresponding migration ships.
+ * Stage 2 result: empty. SD-saved physics/showRipple/size in
+ * codedPaths.data.json now feed both the SD preview AND production
+ * render through SDOverrideContext. Categories A, B, C, D all closed.
  *
- * Format keys: top-level field name, OR `physics.<key>` for nested.
+ * Add entries here ONLY for known intentional gaps with a comment
+ * explaining why and a removal target.
  */
-const ALLOWED_DIVERGENCE: Record<string, string[]> = {
-  // Category B (physics — deferred): scene picks scrollbar physics, SD picks
-  // gesture-preset physics. Migration plan: extend CodedPath schema to save
-  // per-scene physics; SD reads it via getCodedPath/getSavedPath.
-  'DorianFullV1-22|2-HomeScroll|0': [
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatAmplitude',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  // Stage 1: SDOverrideProvider closed Category C path divergence for the
-  // frozen scenes. Only physics (Category B — Stage 2) remains here.
-  'DorianFullV1-22|3-TapBubble|0': [
-    'physics.smoothing',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatAmplitude',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  'DorianFullV1-22|4-ChatOpen|0': [
-    'physics.smoothing',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  'DorianFullV1-22|5-UserTyping|0': [
-    'physics.smoothing',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  'DorianFullV1-22|7-AIResponse|0': [
-    'physics.smoothing',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  // Category B (physics) + D (showRipple — gesture preset says false, scene
-  // hardcodes true). Path is now in parity post Cat-C migration.
-  'DorianFullV1-22|8-ProductPage|0': [
-    'showRipple',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatAmplitude',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-  'DorianFullV1-22|9-ProductDetail|0': [
-    'showRipple',
-    'physics.velocityScale',
-    'physics.maxRotation',
-    'physics.floatAmplitude',
-    'physics.floatSpeed',
-    'physics.shadowDistance',
-    'physics.shadowBlur',
-  ],
-};
+const ALLOWED_DIVERGENCE: Record<string, string[]> = {};
 
 /** Convert a top-level diff line like "  pathLength: SD=2 PROD=3" or
  *  "    physics.velocityScale: SD=0.4 PROD=0" to its allowlist key. */

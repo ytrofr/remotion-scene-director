@@ -24,6 +24,10 @@ export interface SaveProposal {
   dark?: boolean;
   locked?: boolean;
   secondaryLayers?: Array<{ gesture: string; path: HandPathPoint[] }>;
+  // ── Stage 2: SD-saved override fields (additive, optional) ─────
+  size?: number;
+  showRipple?: boolean;
+  physicsPreset?: string;
 }
 
 export interface DiffResult {

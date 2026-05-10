@@ -133,6 +133,36 @@ The pattern works for any FloatingHand prop that has a clear source-of-truth in 
 
 `npm run test:parity` runs a Vitest harness that, for every probe in `productionPropProbes.ts`, compares SD-preview prop bag (via `floatingHandPropResolver.ts`) against production prop bag (manually mirrored). Field-level diff is the source of truth for "what's still divergent." Add a probe for every new `<FloatingHand>` instance in a versioned composition. Known-deferred divergences live in `ALLOWED_DIVERGENCE` map at the top of `floatingHandParity.test.ts` — remove entries as migrations close gaps.
 
+**Probe coverage is load-bearing.** A scene with a `<FloatingHand>` that has NO probe is invisible to the parity test. Stage 3 of the original SD↔render plan (skipOverlayRender) was reverted because Stores scenes 10-12 had no probes AND no `<SDOverrideProvider>` — the harness reported "fully green" while a structural bug was waiting. **When adding a probe, also confirm the scene's FloatingHand call site is wrapped in a Provider; "no Provider" + "no probe" is a silent gap.**
+
+## Hazard: Disabling the SD Overlay Cursor (skipOverlayRender)
+
+The SD overlay's cursor is the **safety net** for any FloatingHand call site that is NOT wrapped in `<SDOverrideProvider>`. Disabling the overlay (e.g. via a `skipOverlayRender` composition flag) is only safe when **100% of FloatingHand instances reachable from the composition's tree are inside a Provider**.
+
+| Provider coverage | Overlay enabled? | Safe?                        | Reason                                                                                                                                   |
+| ----------------- | ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 100%              | yes              | yes                          | Both paths render; overlap is harmless                                                                                                   |
+| 100%              | no               | yes                          | Production cursor is the only render — single source of truth                                                                            |
+| **partial**       | yes              | yes                          | Overlay covers the un-wrapped scenes                                                                                                     |
+| **partial**       | **no**           | **NO — silent invisibility** | Un-wrapped scenes return null in the FloatingHand gate (`isSceneDirector && !sdContext`) AND have no overlay fallback → no cursor at all |
+
+**Audit before flipping a `skipOverlayRender`-style flag**:
+
+```bash
+# 1. List every FloatingHand call site reachable from the composition
+grep -rln "<FloatingHand" src/compositions/<Family>/ src/compositions/<SubFamily>/
+
+# 2. For each, confirm an SDOverrideProvider ancestor in its tree
+#    (manually trace from leaf comp through wrappers)
+
+# 3. Add a probe for each in productionPropProbes.ts so parity test
+#    notices any subsequent regression
+```
+
+**Evidence**: 2026-05-10 — Stage 3 enabled `skipOverlayRender: true` on V1.22. Parity test was green (7/7 probes — all Dorian scenes 1-9). Stores scenes 10-12 in the same composition tree had no Provider and no probes; cursor went invisible there at runtime. Reverted via commit `7cb28a1`. Stages 0-2 already deliver full parity for probed scenes; the "single render path" optimization was dropped in favor of the overlay safety net. See `SDOverrideContext.tsx` docstring for the failure-mode notes.
+
+**Known parity gap (post-revert)**: V1.22 Stores scenes (10-StoreDashboard, 11-MapSearch, 12-AIProducts) are NOT wrapped in `<SDOverrideProvider>`. SD overlay shows their cursor correctly from saved JSON, but production rendering uses the scene files' literal coords — saved edits to those scenes do NOT flow into MP4. Closing the gap requires wrapping each Sequence in `DorianFullV1.22.tsx` with a Provider AND adding parity probes; not done as of revert because no user-reported divergence yet.
+
 ## Evidence
 
 2026-05-10 — User authored 2-HomeScroll scroll waypoints in SD on V1.22, hit Save (SD slice → JSON file mtime updated), re-rendered → cursor still at hardcoded x=880, not at the saved x=812. ~30min of diagnosis (coord transform theories, slice isolation theories, save semantics theories) before I grepped `getSavedPath` in the actual scene file and found the explicit opt-out comment. One-line opt-in in 3 files unblocked V1.22 + all future versions. V1.10–V1.21 untouched (don't pass `compositionId`).

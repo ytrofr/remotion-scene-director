@@ -19,9 +19,20 @@
  *     compositionId). Their renders stay byte-stable.
  *
  * Stage 1 scope: overrides path, animation, dark (fields already in
- * CodedPath). Stage 2 extends to physics, size, showRipple. Stage 3 adds
- * a live-drag override so the production cursor can follow the user's
- * mouse during waypoint editing.
+ * CodedPath). Stage 2 extends to physics, size, showRipple.
+ *
+ * Stage 3 (skipOverlayRender — single render path): ATTEMPTED + REVERTED
+ * 2026-05-10 (commit 7cb28a1 reverts 3f0e9af). Failure mode: V1.22's
+ * `skipOverlayRender` was composition-wide, but Provider coverage was
+ * partial — scenes 10-12 (DorianStores) sit inside DorianFullV1.22 but
+ * NOT inside DorianDemoV1.12's MaybeOverride. With overlay disabled +
+ * no Provider, the gate `(isSceneDirector && !sdContext)` returned null
+ * → cursor invisible in Stores scenes. Parity test missed it because
+ * all 7 probes covered Dorian 1-9 only. If Stage 3 is revisited:
+ * (1) wrap ALL FloatingHand call sites in the composition's tree with
+ * <SDOverrideProvider>, (2) add parity probes for every wrapped scene,
+ * (3) only then flip skipOverlayRender. Until then, the SD overlay is
+ * the load-bearing safety net for un-wrapped sub-trees.
  *
  * Mirrors the shape of ClickStyleContext.tsx in this directory.
  */

@@ -39,6 +39,7 @@ import { GESTURE_PRESETS } from '../SceneDirector/gestures';
 import { FloatingHand } from '../../components/FloatingHand';
 import { DEFAULT_PHYSICS } from '../../components/FloatingHand/types';
 import { useSceneDirectorMode } from '../../components/FloatingHand/SceneDirectorMode';
+import { SDOverrideProvider } from '../../components/FloatingHand/SDOverrideContext';
 import { AudioFromLayers } from '../SceneDirector/AudioLayerRenderer';
 
 export const SCENES_V1_12 = {
@@ -238,6 +239,24 @@ export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
   const scenes = resolveScenesV1_12(sceneOverrides);
   const sceneEntries = buildSceneEntries(scenes);
   const productPageConfig = sceneOverrides?.productPage?.sceneConfig;
+
+  // SD-override wrapper: when compositionId is set (V1.22+), wrap each
+  // scene with SDOverrideProvider so FloatingHand instances inside —
+  // including frozen scenes 3-7 — read SD-saved props per scene name.
+  // V1.13–V1.21 don't pass compositionId → MaybeOverride is a pass-through
+  // → byte-stable. See .claude/rules/sd-overrides-must-honor-saved.md.
+  const MaybeOverride: React.FC<{
+    sceneName: string;
+    children: React.ReactNode;
+  }> = ({ sceneName, children }) => {
+    if (!compositionId) return <>{children}</>;
+    return (
+      <SDOverrideProvider compositionId={compositionId} sceneName={sceneName}>
+        {children}
+      </SDOverrideProvider>
+    );
+  };
+
   return (
     <AbsoluteFill style={{ background: 'transparent' }}>
       <DorianAudioV1_12 sceneEntries={sceneEntries} />
@@ -249,73 +268,93 @@ export const DorianDemoV1_12: React.FC<DorianDemoV1_12_Props> = ({
         durationInFrames={scenes.intro.duration}
         name="1-Intro"
       >
-        <IntroScene />
+        <MaybeOverride sceneName="1-Intro">
+          <IntroScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.homeScroll.start}
         durationInFrames={scenes.homeScroll.duration}
         name="2-HomeScroll"
       >
-        <HomeScrollSceneV1_09 compositionId={compositionId} />
+        <MaybeOverride sceneName="2-HomeScroll">
+          <HomeScrollSceneV1_09 compositionId={compositionId} />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.tapBubble.start}
         durationInFrames={scenes.tapBubble.duration}
         name="3-TapBubble"
       >
-        <TapAIBubbleScene />
+        <MaybeOverride sceneName="3-TapBubble">
+          <TapAIBubbleScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.chatOpen.start}
         durationInFrames={scenes.chatOpen.duration}
         name="4-ChatOpen"
       >
-        <ChatOpenScene />
+        <MaybeOverride sceneName="4-ChatOpen">
+          <ChatOpenScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.userTyping.start}
         durationInFrames={scenes.userTyping.duration}
         name="5-UserTyping"
       >
-        <UserTypingScene />
+        <MaybeOverride sceneName="5-UserTyping">
+          <UserTypingScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.aiThinking.start}
         durationInFrames={scenes.aiThinking.duration}
         name="6-AIThinking"
       >
-        <AIThinkingScene />
+        <MaybeOverride sceneName="6-AIThinking">
+          <AIThinkingScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.aiResponse.start}
         durationInFrames={scenes.aiResponse.duration}
         name="7-AIResponse"
       >
-        <AIResponseScene />
+        <MaybeOverride sceneName="7-AIResponse">
+          <AIResponseScene />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.productPage.start}
         durationInFrames={scenes.productPage.duration}
         name="8-ProductPage"
       >
-        <ProductPageSceneV1_12
-          sceneConfig={productPageConfig}
-          compositionId={compositionId}
-        />
+        <MaybeOverride sceneName="8-ProductPage">
+          <ProductPageSceneV1_12
+            sceneConfig={productPageConfig}
+            compositionId={compositionId}
+          />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.productDetail.start}
         durationInFrames={scenes.productDetail.duration}
         name="9-ProductDetail"
       >
-        <ProductDetailSceneV1_12 compositionId={compositionId} />
+        <MaybeOverride sceneName="9-ProductDetail">
+          <ProductDetailSceneV1_12 compositionId={compositionId} />
+        </MaybeOverride>
       </Sequence>
       <Sequence
         from={scenes.outro.start}
         durationInFrames={scenes.outro.duration}
         name="10-Outro"
       >
-        <OutroScene />
+        <MaybeOverride sceneName="10-Outro">
+          <OutroScene />
+        </MaybeOverride>
       </Sequence>
     </AbsoluteFill>
   );

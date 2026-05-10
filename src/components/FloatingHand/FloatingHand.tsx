@@ -17,6 +17,7 @@ import { LottieHand } from './hands/LottieHand';
 import { LottieHandStandalone } from './hands/LottieHandStandalone';
 import { useSceneDirectorMode } from './SceneDirectorMode';
 import { useClickStyle, computeClickPulseScale } from './ClickStyleContext';
+import { useSDOverride, applySDOverride } from './SDOverrideContext';
 
 /**
  * SimpleCursorHand - SVG cursor for standalone rendering (outside Remotion).
@@ -152,11 +153,11 @@ const FloatingHandStandalone: React.FC<
   FloatingHandProps & { frame: number }
 > = ({
   frame,
-  path,
+  path: literalPath,
   startFrame = 0,
-  animation = 'hand-click',
+  animation: literalAnimation = 'hand-click',
   size = 120,
-  dark = false,
+  dark: literalDark = false,
   showRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   physics: physicsOverrides,
@@ -164,6 +165,13 @@ const FloatingHandStandalone: React.FC<
   clickSpeed,
   clickStyle: clickStyleOverride,
 }) => {
+  // SD override merge: when wrapped in <SDOverrideProvider>, saved data
+  // shadows the literal props the scene passed. No-op when no Provider.
+  const { saved } = useSDOverride();
+  const { path, animation, dark } = applySDOverride(
+    { path: literalPath, animation: literalAnimation, dark: literalDark },
+    saved,
+  );
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
     ...physicsOverrides,
@@ -264,11 +272,11 @@ const FloatingHandStandalone: React.FC<
  * Only used when rendered inside a Remotion Player composition.
  */
 const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
-  path,
+  path: literalPath,
   startFrame = 0,
-  animation = 'hand-click',
+  animation: literalAnimation = 'hand-click',
   size = 64,
-  dark = false,
+  dark: literalDark = false,
   physics: physicsOverrides,
   showRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
@@ -277,6 +285,13 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
 }) => {
   const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
+  // SD override merge: when wrapped in <SDOverrideProvider>, saved data
+  // shadows the literal props the scene passed. No-op when no Provider.
+  const { saved } = useSDOverride();
+  const { path, animation, dark } = applySDOverride(
+    { path: literalPath, animation: literalAnimation, dark: literalDark },
+    saved,
+  );
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
     ...physicsOverrides,

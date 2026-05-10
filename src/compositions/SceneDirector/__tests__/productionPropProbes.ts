@@ -80,16 +80,19 @@ const PROBES: Record<string, ProductionProbe> = {
   },
 
   // ── 4-ChatOpen ───────────────────────────────────────────────────────
-  // ChatOpenScene — reads getSavedPath('DorianDemo', '4-ChatOpen') for
-  // animation, dark, path. Static zoomScale = 2.75 → handSizeForZoom(2.75).
+  // ChatOpenScene reads getSavedPath('DorianDemo',...). Stage 1: FloatingHand
+  // is now wrapped in SDOverrideProvider(compositionId='DorianFullV1-22'),
+  // so SD-saved data for V1.22 wins when present. Probe reflects:
+  // V1.22 saved (from override) > DorianDemo saved (scene literal) > defaults.
   'DorianFullV1-22|4-ChatOpen|0': () => {
-    const saved = getSavedPath('DorianDemo', '4-ChatOpen');
-    const animation = saved?.animation ?? 'cursor-real-black';
-    const dark = saved?.dark ?? true;
+    const v22 = getSavedPath('DorianFullV1-22', '4-ChatOpen');
+    const v22HasPath = v22 && Array.isArray(v22.path) && v22.path.length >= 2;
+    const fallback = getSavedPath('DorianDemo', '4-ChatOpen');
+    const path = v22HasPath ? v22!.path : (fallback?.path ?? []);
     return {
-      animation,
+      animation: v22?.animation ?? fallback?.animation ?? 'cursor-real-black',
       size: handSizeForZoom(2.75), // ≈ 183.33
-      dark,
+      dark: v22?.dark ?? fallback?.dark ?? true,
       physics: {
         ...DEFAULT_PHYSICS,
         ...HAND_PHYSICS.tap,
@@ -97,19 +100,22 @@ const PROBES: Record<string, ProductionProbe> = {
       showRipple: true,
       clickAnimationFile: V1_22_CLICK_ANIM_FILE,
       clickStyle: V1_22_CLICK_STYLE,
-      pathLength: saved?.path?.length ?? 0,
-      firstWaypoint: saved?.path?.[0],
-      lastWaypoint: saved?.path?.[(saved?.path?.length ?? 1) - 1],
+      pathLength: path.length,
+      firstWaypoint: path[0],
+      lastWaypoint: path[path.length - 1],
     };
   },
 
   // ── 5-UserTyping ─────────────────────────────────────────────────────
   'DorianFullV1-22|5-UserTyping|0': () => {
-    const saved = getSavedPath('DorianDemo', '5-UserTyping');
+    const v22 = getSavedPath('DorianFullV1-22', '5-UserTyping');
+    const v22HasPath = v22 && Array.isArray(v22.path) && v22.path.length >= 2;
+    const fallback = getSavedPath('DorianDemo', '5-UserTyping');
+    const path = v22HasPath ? v22!.path : (fallback?.path ?? []);
     return {
-      animation: saved?.animation ?? 'cursor-real-black',
+      animation: v22?.animation ?? fallback?.animation ?? 'cursor-real-black',
       size: handSizeForZoom(2.75),
-      dark: saved?.dark ?? true,
+      dark: v22?.dark ?? fallback?.dark ?? true,
       physics: {
         ...DEFAULT_PHYSICS,
         ...HAND_PHYSICS.tapGentle,
@@ -117,19 +123,22 @@ const PROBES: Record<string, ProductionProbe> = {
       showRipple: true,
       clickAnimationFile: V1_22_CLICK_ANIM_FILE,
       clickStyle: V1_22_CLICK_STYLE,
-      pathLength: saved?.path?.length ?? 0,
-      firstWaypoint: saved?.path?.[0],
-      lastWaypoint: saved?.path?.[(saved?.path?.length ?? 1) - 1],
+      pathLength: path.length,
+      firstWaypoint: path[0],
+      lastWaypoint: path[path.length - 1],
     };
   },
 
   // ── 7-AIResponse ─────────────────────────────────────────────────────
   'DorianFullV1-22|7-AIResponse|0': () => {
-    const saved = getSavedPath('DorianDemo', '7-AIResponse');
+    const v22 = getSavedPath('DorianFullV1-22', '7-AIResponse');
+    const v22HasPath = v22 && Array.isArray(v22.path) && v22.path.length >= 2;
+    const fallback = getSavedPath('DorianDemo', '7-AIResponse');
+    const path = v22HasPath ? v22!.path : (fallback?.path ?? []);
     return {
-      animation: saved?.animation ?? 'cursor-real-black',
+      animation: v22?.animation ?? fallback?.animation ?? 'cursor-real-black',
       size: handSizeForZoom(2.75),
-      dark: saved?.dark ?? true,
+      dark: v22?.dark ?? fallback?.dark ?? true,
       physics: {
         ...DEFAULT_PHYSICS,
         ...HAND_PHYSICS.tapGentle,
@@ -137,9 +146,9 @@ const PROBES: Record<string, ProductionProbe> = {
       showRipple: true,
       clickAnimationFile: V1_22_CLICK_ANIM_FILE,
       clickStyle: V1_22_CLICK_STYLE,
-      pathLength: saved?.path?.length ?? 0,
-      firstWaypoint: saved?.path?.[0],
-      lastWaypoint: saved?.path?.[(saved?.path?.length ?? 1) - 1],
+      pathLength: path.length,
+      firstWaypoint: path[0],
+      lastWaypoint: path[path.length - 1],
     };
   },
 
@@ -168,13 +177,18 @@ const PROBES: Record<string, ProductionProbe> = {
   // ── 3-TapBubble (dynamic zoom) ───────────────────────────────────────
   // zoomScale = interpolate(zoomProgress, [0, 1], [1.8, 2.75]).
   // Probed at the click frame ~75 (zoomProgress saturates well before that).
+  // Stage 1: SDOverrideProvider lets V1.22 saved win over scene's
+  // 'DorianDemo' literal source.
   'DorianFullV1-22|3-TapBubble|0': () => {
-    const saved = getSavedPath('DorianDemo', '3-TapBubble');
+    const v22 = getSavedPath('DorianFullV1-22', '3-TapBubble');
+    const v22HasPath = v22 && Array.isArray(v22.path) && v22.path.length >= 2;
+    const fallback = getSavedPath('DorianDemo', '3-TapBubble');
+    const path = v22HasPath ? v22!.path : (fallback?.path ?? []);
     return {
-      animation: saved?.animation ?? 'cursor-real-black',
+      animation: v22?.animation ?? fallback?.animation ?? 'cursor-real-black',
       // zoomScale ≈ 2.75 at frame 75 (zoomProgress fully clamped to 1)
       size: handSizeForZoom(2.75),
-      dark: saved?.dark ?? true,
+      dark: v22?.dark ?? fallback?.dark ?? true,
       physics: {
         ...DEFAULT_PHYSICS,
         ...HAND_PHYSICS.trailResponsive,
@@ -182,9 +196,9 @@ const PROBES: Record<string, ProductionProbe> = {
       showRipple: true,
       clickAnimationFile: V1_22_CLICK_ANIM_FILE,
       clickStyle: V1_22_CLICK_STYLE,
-      pathLength: saved?.path?.length ?? 0,
-      firstWaypoint: saved?.path?.[0],
-      lastWaypoint: saved?.path?.[(saved?.path?.length ?? 1) - 1],
+      pathLength: path.length,
+      firstWaypoint: path[0],
+      lastWaypoint: path[path.length - 1],
     };
   },
 

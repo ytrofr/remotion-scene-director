@@ -214,9 +214,8 @@ const ALLOWED_DIVERGENCE: Record<string, string[]> = {
     'physics.shadowDistance',
     'physics.shadowBlur',
   ],
-  // Categories B (physics) + C (frozen scene reads from 'DorianDemo' not V1.22).
-  // Scenes 3-7 are frozen at V1.00; Category C migration requires forking
-  // each scene to a V-versioned file. Tracked as Phase 2 follow-up.
+  // Stage 1: SDOverrideProvider closed Category C path divergence for the
+  // frozen scenes. Only physics (Category B — Stage 2) remains here.
   'DorianFullV1-22|3-TapBubble|0': [
     'physics.smoothing',
     'physics.velocityScale',
@@ -225,8 +224,6 @@ const ALLOWED_DIVERGENCE: Record<string, string[]> = {
     'physics.floatSpeed',
     'physics.shadowDistance',
     'physics.shadowBlur',
-    'firstWaypoint',
-    'lastWaypoint',
   ],
   'DorianFullV1-22|4-ChatOpen|0': [
     'physics.smoothing',
@@ -235,9 +232,6 @@ const ALLOWED_DIVERGENCE: Record<string, string[]> = {
     'physics.floatSpeed',
     'physics.shadowDistance',
     'physics.shadowBlur',
-    'pathLength',
-    'firstWaypoint',
-    'lastWaypoint',
   ],
   'DorianFullV1-22|5-UserTyping|0': [
     'physics.smoothing',
@@ -246,8 +240,6 @@ const ALLOWED_DIVERGENCE: Record<string, string[]> = {
     'physics.floatSpeed',
     'physics.shadowDistance',
     'physics.shadowBlur',
-    'firstWaypoint',
-    'lastWaypoint',
   ],
   'DorianFullV1-22|7-AIResponse|0': [
     'physics.smoothing',
@@ -256,8 +248,6 @@ const ALLOWED_DIVERGENCE: Record<string, string[]> = {
     'physics.floatSpeed',
     'physics.shadowDistance',
     'physics.shadowBlur',
-    'firstWaypoint',
-    'lastWaypoint',
   ],
   // Category B (physics) + D (showRipple — gesture preset says false, scene
   // hardcodes true). Path is now in parity post Cat-C migration.

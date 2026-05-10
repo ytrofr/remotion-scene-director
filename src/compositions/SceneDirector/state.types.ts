@@ -58,21 +58,6 @@ export interface CompositionEntry {
    *                             (matches V1.13+ rendered output)
    */
   clickStyle?: 'default' | 'soft-pulse';
-  /**
-   * Stage 3 single-render-path mode: when true, SD's FloatingHandOverlay
-   * renders NO cursors. The cursor user sees during edits is the production
-   * composition's actual <FloatingHand> rendered through Remotion's <Player>
-   * (with SDOverrideProvider supplying saved-data overrides). Eliminates
-   * drift by construction.
-   *
-   * Requires the composition to wrap each scene in <SDOverrideProvider>
-   * (Stage 1) so saved data flows in.
-   *
-   * V1.10–V1.21 leave this undefined → keep the legacy two-path behavior
-   * (overlay renders, production FloatingHand returns null in SD mode).
-   * V1.22+ sets this true.
-   */
-  skipOverlayRender?: boolean;
 }
 
 // Activity log entry

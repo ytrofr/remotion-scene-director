@@ -140,11 +140,6 @@ export const FloatingHandOverlay: React.FC<Props> = ({
   currentScene,
   allScenes,
 }) => {
-  // Stage 3: when the composition opts into single-render-path mode, SD
-  // renders NO cursor here — the production composition's FloatingHand
-  // (inside Remotion's <Player>, wrapped by SDOverrideProvider) is the
-  // cursor visible during edits. Drift becomes structurally impossible.
-  // Hooks must run before any early-return; useMemo below is unconditional.
   // Collect hand layers to render: selected scene's layers + bleeding layers from other scenes
   const layersToRender = useMemo(() => {
     const result: { layer: HandLayer; scene: SceneInfo; sceneName: string }[] =
@@ -184,10 +179,6 @@ export const FloatingHandOverlay: React.FC<Props> = ({
 
     return result;
   }, [sceneLayers, currentScene, allScenes, state.layers, frame]);
-
-  // Single-render-path mode (Stage 3): skip cursor render entirely —
-  // production composition is the source of truth.
-  if (composition.skipOverlayRender) return null;
 
   if (layersToRender.length === 0) return null;
 

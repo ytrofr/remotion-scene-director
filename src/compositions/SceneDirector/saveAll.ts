@@ -48,6 +48,15 @@ export function buildProposalForScene(
     gesture: l.data.gesture,
     path: ((l.data as { waypoints?: unknown[] }).waypoints || []) as never,
   }));
+  // Primary hand layer carries the Stage 2 override fields (size,
+  // showRipple, physicsPreset). Read from data and persist when set.
+  const primary = handLayers[0]?.data as
+    | {
+        size?: number;
+        showRipple?: boolean;
+        physicsPreset?: string;
+      }
+    | undefined;
   return {
     path: waypoints,
     gesture,
@@ -55,6 +64,9 @@ export function buildProposalForScene(
     dark: state.sceneDark[scene],
     locked: state.sceneLocked[scene] ?? false,
     secondaryLayers: secondary.length > 0 ? secondary : undefined,
+    size: primary?.size,
+    showRipple: primary?.showRipple,
+    physicsPreset: primary?.physicsPreset,
   };
 }
 

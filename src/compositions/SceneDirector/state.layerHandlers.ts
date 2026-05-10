@@ -12,6 +12,8 @@ import {
   getCodedAudio,
   AUDIO_FILES,
   type Layer,
+  type HandLayer,
+  type HandLayerData,
 } from './layers';
 import { parseSrt } from '@remotion/captions';
 import type { DirectorAction, DirectorState } from './state.types';
@@ -176,18 +178,22 @@ export function handleLayerAction(
             state.sceneGesture[action.scene] ??
             (coded?.gesture as GestureTool) ??
             'click';
-          // Default size: base 120 scaled by scene zoom ratio
+          // Default size: base 120 scaled by scene zoom ratio.
+          // Saved `coded.size` (Stage 2) wins over the zoom-default.
           const baseZoom = 1.8;
           const defaultSize = Math.round(
             120 * ((action.sceneZoom ?? baseZoom) / baseZoom),
           );
+          const effectiveSize = coded?.size ?? defaultSize;
           newLayers.push(
             createHandLayer(
               action.scene,
               effectiveWaypoints,
               gesture,
               order++,
-              defaultSize,
+              effectiveSize,
+              coded?.physicsPreset,
+              coded?.showRipple,
             ),
           );
 
@@ -200,11 +206,59 @@ export function handleLayerAction(
                   sec.path,
                   sec.gesture as GestureTool,
                   order++,
-                  defaultSize,
+                  effectiveSize,
                 );
                 newLayers.push(secLayer);
               }
             }
+          }
+        }
+      }
+
+      // ── Hydrate existing primary hand layer's Stage 2 fields ──
+      // One-shot fill from saved JSON (`coded` is already saved-merged-
+      // with-coded per getCodedPath()). Only fills fields that are
+      // currently undefined on the layer — never overwrites a value the
+      // user (or a prior hydration) already set. Without this, a
+      // localStorage hand layer created before Stage 2 shipped has
+      // physicsPreset/showRipple/size = undefined; Inspector then shows
+      // empty even though saved JSON has effective values, and
+      // buildProposalForScene reads undefined → server-side merge keeps
+      // the JSON value (after the savePathEntryMerge fix), but the UI is
+      // stale. This closes that loop.
+      let hydratedExisting: Layer[] | null = null;
+      if (hasHand && action.codedPath) {
+        const layers = state.layers[action.scene]!;
+        const primaryIdx = layers.findIndex((l) => l.type === 'hand');
+        const primary = primaryIdx >= 0 ? layers[primaryIdx] : null;
+        if (primary && primary.type === 'hand') {
+          const data = primary.data;
+          const updates: Partial<HandLayerData> = {};
+          if (
+            data.physicsPreset === undefined &&
+            action.codedPath.physicsPreset !== undefined
+          ) {
+            updates.physicsPreset = action.codedPath.physicsPreset;
+          }
+          if (
+            data.showRipple === undefined &&
+            action.codedPath.showRipple !== undefined
+          ) {
+            updates.showRipple = action.codedPath.showRipple;
+          }
+          if (data.size === undefined && action.codedPath.size !== undefined) {
+            updates.size = action.codedPath.size;
+          }
+          if (Object.keys(updates).length > 0) {
+            const updatedLayer: HandLayer = {
+              ...primary,
+              data: { ...data, ...updates },
+            };
+            hydratedExisting = [
+              ...layers.slice(0, primaryIdx),
+              updatedLayer,
+              ...layers.slice(primaryIdx + 1),
+            ];
           }
         }
       }
@@ -247,6 +301,14 @@ export function handleLayerAction(
             [action.scene]: coded.path,
           };
         }
+      } else if (hydratedExisting) {
+        // No new layers added, but existing primary hand layer needed
+        // hydration of Stage 2 fields from saved JSON.
+        newState = {
+          ...state,
+          layers: { ...state.layers, [action.scene]: hydratedExisting },
+        };
+        changed = true;
       }
 
       if (!newState.sceneGesture[action.scene] && coded?.gesture) {

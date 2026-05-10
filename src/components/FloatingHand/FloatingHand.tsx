@@ -17,6 +17,7 @@ import { LottieHand } from './hands/LottieHand';
 import { LottieHandStandalone } from './hands/LottieHandStandalone';
 import { useSceneDirectorMode } from './SceneDirectorMode';
 import { useClickStyle, computeClickPulseScale } from './ClickStyleContext';
+import { useSDOverride, applySDOverride } from './SDOverrideContext';
 
 /**
  * SimpleCursorHand - SVG cursor for standalone rendering (outside Remotion).
@@ -152,21 +153,40 @@ const FloatingHandStandalone: React.FC<
   FloatingHandProps & { frame: number }
 > = ({
   frame,
-  path,
+  path: literalPath,
   startFrame = 0,
-  animation = 'hand-click',
-  size = 120,
-  dark = false,
-  showRipple = false,
+  animation: literalAnimation = 'hand-click',
+  size: literalSize = 120,
+  dark: literalDark = false,
+  showRipple: literalShowRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   physics: physicsOverrides,
   clickAnimation,
   clickSpeed,
   clickStyle: clickStyleOverride,
 }) => {
+  // SD override merge: when wrapped in <SDOverrideProvider>, saved data
+  // shadows the literal props the scene passed. No-op when no Provider.
+  const { saved } = useSDOverride();
+  const merged = applySDOverride(
+    {
+      path: literalPath,
+      animation: literalAnimation,
+      dark: literalDark,
+      size: literalSize,
+      showRipple: literalShowRipple,
+      physics: physicsOverrides,
+    },
+    saved,
+  );
+  const path = merged.path;
+  const animation = merged.animation as LottieAnimation;
+  const dark = merged.dark ?? false;
+  const size = merged.size ?? literalSize;
+  const showRipple = merged.showRipple ?? literalShowRipple;
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
-    ...physicsOverrides,
+    ...merged.physics,
   };
 
   const handState = useMemo(
@@ -264,22 +284,41 @@ const FloatingHandStandalone: React.FC<
  * Only used when rendered inside a Remotion Player composition.
  */
 const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
-  path,
+  path: literalPath,
   startFrame = 0,
-  animation = 'hand-click',
-  size = 64,
-  dark = false,
+  animation: literalAnimation = 'hand-click',
+  size: literalSize = 64,
+  dark: literalDark = false,
   physics: physicsOverrides,
-  showRipple = false,
+  showRipple: literalShowRipple = false,
   rippleColor = 'rgba(0, 217, 255, 0.5)',
   clickAnimation,
   clickStyle: clickStyleOverride,
 }) => {
   const isSceneDirector = useSceneDirectorMode();
   const frame = useCurrentFrame();
+  // SD override merge: when wrapped in <SDOverrideProvider>, saved data
+  // shadows the literal props the scene passed. No-op when no Provider.
+  const { saved } = useSDOverride();
+  const merged = applySDOverride(
+    {
+      path: literalPath,
+      animation: literalAnimation,
+      dark: literalDark,
+      size: literalSize,
+      showRipple: literalShowRipple,
+      physics: physicsOverrides,
+    },
+    saved,
+  );
+  const path = merged.path;
+  const animation = merged.animation as LottieAnimation;
+  const dark = merged.dark ?? false;
+  const size = merged.size ?? literalSize;
+  const showRipple = merged.showRipple ?? literalShowRipple;
   const physics: HandPhysicsConfig = {
     ...DEFAULT_PHYSICS,
-    ...physicsOverrides,
+    ...merged.physics,
   };
   const handState = useHandAnimation(path, startFrame, physics);
   const { offsetY, shadowScale } = useFloatEffect(physics);

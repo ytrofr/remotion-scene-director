@@ -425,6 +425,7 @@ export const COMPOSITIONS: CompositionEntry[] = [
       name: s.name,
       start: s.start,
       end: s.end,
+      zoom: s.zoom,
     })),
     clickAnimationOverride: null,
     clickStyle: 'soft-pulse',

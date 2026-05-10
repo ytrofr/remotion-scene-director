@@ -445,3 +445,26 @@ NOT in the component rendering. This avoids hours of debugging the wrong layer.
     range vs full),
     `~/.claude/projects/-home-ytr-limor-video-poc/memory/feedback_floating_hand_mount_discipline.md`
     (full empirical record).
+
+58. **SD-vs-render mismatch: grep the scene file FIRST**: When SceneDirector
+    preview shows a cursor in one place and the rendered MP4 shows it
+    elsewhere — at the same waypoint coords, on the same composition —
+    do NOT chase coord-transform theories first (phone scale, canvas zoom,
+    composition-space math). The MOST LIKELY cause is the scene file is
+    HARDCODED to ignore SD entirely. Diagnostic order: (1) `grep -n
+"getSavedPath\|getCodedPath" src/compositions/<Family>/scenes/<Scene>.tsx`
+    — if the scene doesn't call either, OR has a comment like "intentionally
+    does NOT consult getSavedPath()", that's the bug. (2) Only AFTER ruling
+    out the data-source disconnect, investigate coord systems, zoom
+    transforms, composition-space math (rule 42). Evidence 2026-05-10: user
+    edited V1.22 / 2-HomeScroll waypoints, saved (codedPaths.data.json mtime
+    updated), re-rendered → cursor still at hardcoded x=880. ~30 min lost
+    to coord transform + slice isolation + save semantics theories before
+    grepping the scene file revealed `HomeScrollSceneV1_09` had explicit
+    `// Hardcoded path; intentionally does NOT consult getSavedPath()`.
+    Fix was 3 lines (opt-in `compositionId` prop on scene + thread through
+    wrapper + pass from leaf comp). See
+    `.claude/rules/sd-overrides-must-honor-saved.md` for the fix template.
+    Cross-ref: rule 7 (codedPaths key matching), rule 45 (3 data override
+    layers — saved JSON, ts baseline, localStorage), rule 28 (saved session
+    is sacred).

@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { spawn } from 'child_process';
 import { updateHfScene } from './scripts/hf-exporter.mjs';
+import { mergeSavePathEntry } from './src/compositions/SceneDirector/savePathEntryMerge';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Auto-wire helpers for /api/versions/bump
@@ -1078,16 +1079,8 @@ function savePathPlugin(): Plugin {
         req.on('data', (chunk: string) => (body += chunk));
         req.on('end', () => {
           try {
-            const {
-              compositionId,
-              sceneName,
-              path: pathData,
-              gesture,
-              animation,
-              dark,
-              locked,
-              secondaryLayers,
-            } = JSON.parse(body);
+            const body_ = JSON.parse(body);
+            const { compositionId, sceneName, path: pathData } = body_;
             const filePath = path.resolve(
               __dirname,
               'src/compositions/SceneDirector/codedPaths.data.json',
@@ -1107,16 +1100,13 @@ function savePathPlugin(): Plugin {
               }
             } else {
               if (!existing[compositionId]) existing[compositionId] = {};
-              const entry: Record<string, unknown> = {
-                gesture,
-                animation,
-                path: pathData,
-              };
-              if (dark !== undefined) entry.dark = dark;
-              if (locked === true) entry._locked = true;
-              if (secondaryLayers?.length > 0)
-                entry.secondaryLayers = secondaryLayers;
-              existing[compositionId][sceneName] = entry;
+              // Merge via pure helper — preserves Stage 2 fields when
+              // incoming doesn't carry them (Inspector untouched).
+              // See src/.../savePathEntryMerge.ts for semantics.
+              existing[compositionId][sceneName] = mergeSavePathEntry(
+                prevEntry,
+                body_,
+              );
             }
 
             fs.writeFileSync(filePath, JSON.stringify(existing, null, 2));

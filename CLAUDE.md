@@ -24,9 +24,13 @@ npm run render:dashmor         # DashmorDemo (labor dashboard)
 npm run render:capabilities    # CapabilitiesDemo + post-render feedback
 npm run render:stores          # DorianStores (3 store scenes)
 npm run render:full            # DorianFull (Demo + Stores combined, 75s)
+npm run render:dorian-full:v1.22       # V1.22 default 2x (visuals fast, music 1x — scripts/render-fast2x.mjs)
+npm run render:dorian-full:v1.22:1x    # V1.22 plain 1x (debug / SD parity)
 npm run render:sigma-app       # SigmaAppDemo (landscape 1920x1080)
 npm run render:sigma-investor  # SigmaInvestorDemo (pitch deck, 60s)
-npm run postrender:2x          # 2x speed post-processing (setpts only)
+npm run postrender:2x          # 2x speed post-processing (legacy — atempo on full audio)
+npm run r:auto                 # Auto-GL render-cache (scripts/render.mjs — rule 56 swiftshader for cursor-Lottie)
+npm run render:fast2x:selftest # 4-test selftest for the V1.22 pipeline
 npm run capture:mobile         # Dark mode mobile capture (needs port 8080)
 npx remotion benchmark         # Find optimal --concurrency value
 ```
@@ -189,8 +193,15 @@ Read these files ONLY when working on the relevant area:
 | `video-feedback-loop`      | Post-render review → capture learnings → improve next video                                                |
 | `remotion-best-practices`  | Remotion framework patterns (37 official rules from remotion-dev)                                          |
 
-## SceneDirector Composition Registry (12 compositions)
+## SceneDirector Composition Registry (13 compositions)
 
 MobileChatDemoCombined, DorianDemo, DashmorDemo, AudioTest, CapabilitiesDemo,
 SharedComponentsDemo, DorianDemoEnhanced, DorianStores, DorianStoresDebug,
-DorianFull, SigmaAppDemo, SigmaInvestorDemo.
+DorianFull, **DorianFullV1-22 (default — 2x visuals + 1x music)**, SigmaAppDemo,
+SigmaInvestorDemo.
+
+V1.22 is the new default Dorian deliverable. SD edits to its scenes (esp.
+2-HomeScroll) ARE honored by the render — see
+`.claude/rules/sd-overrides-must-honor-saved.md` for the opt-in
+`compositionId` pattern. Older Dorian versions (V1.10–V1.21) keep
+hardcoded scene paths byte-stable.

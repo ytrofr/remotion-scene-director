@@ -6680,15 +6680,17 @@
           "scale": 1
         },
         {
-          "x": 508,
-          "y": 1622,
+          "x": 488,
+          "y": 1608,
           "frame": 86,
           "gesture": "click",
           "scale": 1,
           "duration": 45
         }
       ],
-      "dark": false
+      "dark": false,
+      "physicsPreset": "tap",
+      "showRipple": true
     },
     "2-HomeScroll": {
       "gesture": "scroll",
@@ -6711,7 +6713,9 @@
           "rotation": 0
         }
       ],
-      "dark": false
+      "dark": false,
+      "physicsPreset": "scrollbar",
+      "showRipple": false
     },
     "3-TapBubble": {
       "gesture": "click",
@@ -6734,7 +6738,9 @@
         }
       ],
       "dark": false,
-      "_locked": true
+      "_locked": true,
+      "physicsPreset": "trailResponsive",
+      "showRipple": true
     },
     "10-StoreDashboard": {
       "gesture": "click",
@@ -7043,7 +7049,9 @@
           "duration": 10
         }
       ],
-      "dark": false
+      "dark": false,
+      "physicsPreset": "tapGentle",
+      "showRipple": true
     },
     "7-AIResponse": {
       "gesture": "click",
@@ -7065,7 +7073,9 @@
           "duration": 10
         }
       ],
-      "dark": false
+      "dark": false,
+      "physicsPreset": "tapGentle",
+      "showRipple": true
     },
     "8-ProductPage": {
       "gesture": "scroll",
@@ -7128,7 +7138,9 @@
             }
           ]
         }
-      ]
+      ],
+      "physicsPreset": "scrollbar",
+      "showRipple": true
     },
     "8-V4-Typing": {
       "gesture": "click",
@@ -7263,7 +7275,9 @@
             }
           ]
         }
-      ]
+      ],
+      "physicsPreset": "scrollbar",
+      "showRipple": true
     },
     "9-V4-Send": {
       "gesture": "click",

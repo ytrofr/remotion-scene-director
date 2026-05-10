@@ -38,7 +38,16 @@ const SKIP_END = 1380;
 const HOLD_OFFSET = -75;
 const SCROLL_END = -1075;
 
-export const ProductDetailSceneV1_12: React.FC = () => {
+/**
+ * Optional `compositionId` prop (V1.22+ via DorianDemoV1_12): when set,
+ * the scene reads SD-saved data for "9-ProductDetail" from THAT comp first,
+ * falling back to legacy 'DorianFullV1-10' (where V1.10's pattern was
+ * frozen). V1.13–V1.21 callers don't pass compositionId — fallback
+ * unchanged. See .claude/rules/sd-overrides-must-honor-saved.md
+ */
+export const ProductDetailSceneV1_12: React.FC<{ compositionId?: string }> = ({
+  compositionId,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -81,7 +90,11 @@ export const ProductDetailSceneV1_12: React.FC = () => {
   //   My Store      phone (140, 360) → comp (419, 827)
   // V1.12 path: BIG scrollbar drag (X=880, Y 860→1060 over frames 25-115),
   // then invisible jump to Add to Cart and existing click sequence.
-  const savedPath = getSavedPath('DorianFullV1-10', '9-ProductDetail');
+  // V1.22+ (compositionId="DorianFullV1-22") wins. Fall through to V1.10's
+  // saved entry — that's where the original click+scroll pattern was authored.
+  const savedPath =
+    (compositionId ? getSavedPath(compositionId, '9-ProductDetail') : null) ??
+    getSavedPath('DorianFullV1-10', '9-ProductDetail');
   const handPath: HandPathPoint[] = savedPath?.path ?? [
     // Hold invisible at scene start (Lottie loads, SVG renders before reveal)
     { x: 880, y: 860, frame: 0, gesture: 'pointer', scale: 0, rotation: 0 },

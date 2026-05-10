@@ -6,7 +6,10 @@
  * as default trail overlays when the user hasn't placed manual waypoints.
  */
 
-import type { HandPathPoint } from '../../components/FloatingHand/types';
+import type {
+  HandPathPoint,
+  HandPhysicsConfig,
+} from '../../components/FloatingHand/types';
 import type { GestureTool } from './gestures';
 import savedData from './codedPaths.data.json';
 
@@ -18,6 +21,15 @@ export interface CodedPath {
   secondaryLayers?: Array<{ gesture: GestureTool; path: HandPathPoint[] }>;
   /** When true, Reload skips this scene; Save prompts for confirmation. */
   _locked?: boolean;
+  // ── Stage 2: SD-saved override fields (all optional, additive) ─────
+  /** Per-layer hand cursor size (px). Overrides scene literal + zoom default. */
+  size?: number;
+  /** Toggle the click ripple effect. Overrides scene literal + gesture preset. */
+  showRipple?: boolean;
+  /** Named physics preset (key in PHYSICS_PRESET_REGISTRY). Resolves at render. */
+  physicsPreset?: string;
+  /** Free-form physics overrides (merged on top of preset). Rare — usually unset. */
+  physics?: Partial<HandPhysicsConfig>;
 }
 
 // ── MobileChatDemoCombined paths (from COMBINED_HAND_PATH_MARKERS) ──

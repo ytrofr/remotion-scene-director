@@ -28,9 +28,21 @@ import { HandPathPoint } from '../../../components/FloatingHand/types';
 import { DorianPhoneMockup as DorianPhoneMockupNew } from '../DorianPhoneMockup';
 import { AnimatedText } from '../../../components/DorianPhone/AnimatedText';
 import { fontFamily } from '../../../lib/fonts';
+import { getSavedPath } from '../../SceneDirector/codedPaths';
 
-// Scene 2 V1.09: Home page scroll with scrollbar-drag cursor.
-export const HomeScrollSceneV1_09: React.FC = () => {
+/**
+ * Optional `compositionId` prop — when set, the scene reads SD-saved
+ * waypoints for "2-HomeScroll" from that comp. If saved data is present
+ * (≥2 waypoints), it OVERRIDES the hardcoded scrollbar-drag pattern
+ * below. If no compositionId is passed (V1.10–V1.21 callers), behavior
+ * is unchanged: hardcoded x=880 path locked in.
+ *
+ * V1.22+ wires this so SceneDirector edits actually render. Earlier
+ * versions deliberately froze the pattern; that freeze stands for them.
+ */
+export const HomeScrollSceneV1_09: React.FC<{ compositionId?: string }> = ({
+  compositionId,
+}) => {
   const frame = useCurrentFrame();
 
   // Scroll progress: 0 = homepage, 1 = products. Same window as V1.00 (30-120).
@@ -46,7 +58,19 @@ export const HomeScrollSceneV1_09: React.FC = () => {
   const Y_MID = 960;
   const Y_TOP = Y_MID - 100;
   const Y_BOT = Y_MID + 100;
-  const scrollHandPath: HandPathPoint[] = [
+  // SceneDirector override (V1.22+ via `compositionId` prop). When the
+  // caller supplies a comp ID AND that comp has saved waypoints with ≥2
+  // points, those waypoints win. Otherwise fall through to the hardcoded
+  // scrollbar pattern below — preserves V1.10–V1.21 behavior byte-for-byte.
+  const sdSaved = compositionId
+    ? getSavedPath(compositionId, '2-HomeScroll')
+    : null;
+  const sdPath =
+    sdSaved && Array.isArray(sdSaved.path) && sdSaved.path.length >= 2
+      ? sdSaved.path
+      : null;
+
+  const hardcodedScrollHandPath: HandPathPoint[] = [
     // Enter from off-screen right at scrollbar's start Y
     { x: 1050, y: Y_TOP, frame: 0, gesture: 'pointer', rotation: 0, scale: 1 },
     // Arrive at scrollbar
@@ -94,6 +118,8 @@ export const HomeScrollSceneV1_09: React.FC = () => {
       scale: 1,
     },
   ];
+
+  const scrollHandPath: HandPathPoint[] = sdPath ?? hardcodedScrollHandPath;
 
   return (
     <AbsoluteFill style={{ background: COLORS.white }}>

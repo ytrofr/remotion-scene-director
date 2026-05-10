@@ -429,6 +429,10 @@ export const COMPOSITIONS: CompositionEntry[] = [
     })),
     clickAnimationOverride: null,
     clickStyle: 'soft-pulse',
+    // Stage 3: single render path — SD overlay renders no cursors;
+    // production composition's FloatingHand (wrapped in SDOverrideProvider)
+    // is the cursor user sees during edits.
+    skipOverlayRender: true,
   },
   {
     id: 'DorianFullV1-140',

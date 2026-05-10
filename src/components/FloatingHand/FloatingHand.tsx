@@ -299,7 +299,7 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   const frame = useCurrentFrame();
   // SD override merge: when wrapped in <SDOverrideProvider>, saved data
   // shadows the literal props the scene passed. No-op when no Provider.
-  const { saved } = useSDOverride();
+  const { context: sdContext, saved } = useSDOverride();
   const merged = applySDOverride(
     {
       path: literalPath,
@@ -330,8 +330,11 @@ const FloatingHandRemotionWrapper: React.FC<FloatingHandProps> = ({
   const effectiveShowRipple =
     effectiveClickStyle === 'soft-pulse' ? false : showRipple;
 
-  // Hide composition's built-in hand when SceneDirector provides its own overlay
-  if (isSceneDirector || frame < startFrame) return null;
+  // Stage 3: when wrapped in <SDOverrideProvider>, the production cursor
+  // renders even in SD mode (single render path). Without the Provider
+  // (V1.10–V1.21 and other comps), keep legacy behavior — return null in
+  // SD mode so the SD overlay is the only cursor.
+  if ((isSceneDirector && !sdContext) || frame < startFrame) return null;
 
   const finalX = handState.x;
   const finalY = handState.y + offsetY;

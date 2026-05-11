@@ -280,6 +280,85 @@ const PROBES: Record<string, ProductionProbe> = {
       lastWaypoint: merged.path[merged.path.length - 1],
     };
   },
+
+  // ── 10-StoreDashboard (Stores, primary hand — frames 10-230) ─────────
+  // Dynamic zoom: scene zooms 1.8 → 2.75 around chat, back to 1.8, then
+  // 2.4 for confirm. Probe samples at base zoom for SD-parity (overlay
+  // has no per-scene `zoom` field → falls back to 1.8 → size = 120).
+  // Production literals: HAND_PHYSICS.tapGentle + showRipple=true.
+  // CAVEAT: scene has 3 FloatingHand instances; only layerIndex 0 probed.
+  // The Provider wrap in DorianFullV1.22.tsx applies a saved V1-22 path
+  // override to ALL three instances uniformly — future structural fix is
+  // hoisting secondary hands per DorianSecondaryHandsV1_12 pattern.
+  'DorianFullV1-22|10-StoreDashboard|0': () => {
+    const merged = mergeWithSavedOverride(
+      {
+        animation: 'cursor-real-black' as LottieAnimation,
+        size: handSizeForZoom(1.8),
+        dark: false,
+        physics: { ...DEFAULT_PHYSICS, ...HAND_PHYSICS.tapGentle },
+        showRipple: true,
+      },
+      getSavedPath('DorianFullV1-22', '10-StoreDashboard'),
+    );
+    return {
+      ...merged,
+      clickAnimationFile: V1_22_CLICK_ANIM_FILE,
+      clickStyle: V1_22_CLICK_STYLE,
+      pathLength: merged.path.length,
+      firstWaypoint: merged.path[0],
+      lastWaypoint: merged.path[merged.path.length - 1],
+    };
+  },
+
+  // ── 11-MapSearch (Stores, single hand) ───────────────────────────────
+  // Dynamic zoom (1.8 → 2.5 on search tap → back to 1.8 on pin tap).
+  // Probe samples at base zoom 1.8.
+  'DorianFullV1-22|11-MapSearch|0': () => {
+    const merged = mergeWithSavedOverride(
+      {
+        animation: 'cursor-real-black' as LottieAnimation,
+        size: handSizeForZoom(1.8),
+        dark: false,
+        physics: { ...DEFAULT_PHYSICS, ...HAND_PHYSICS.tapGentle },
+        showRipple: true,
+      },
+      getSavedPath('DorianFullV1-22', '11-MapSearch'),
+    );
+    return {
+      ...merged,
+      clickAnimationFile: V1_22_CLICK_ANIM_FILE,
+      clickStyle: V1_22_CLICK_STYLE,
+      pathLength: merged.path.length,
+      firstWaypoint: merged.path[0],
+      lastWaypoint: merged.path[merged.path.length - 1],
+    };
+  },
+
+  // ── 12-AIProducts (Stores, primary hand — frames 5-85) ───────────────
+  // Dynamic zoom (1.8 → 2.6 input/send → 1.8 settled). Secondary hand at
+  // frames 210-245 ("Add Products" click) is unprobed and inherits the
+  // primary's override under the Provider — see scene 10 caveat above.
+  'DorianFullV1-22|12-AIProducts|0': () => {
+    const merged = mergeWithSavedOverride(
+      {
+        animation: 'cursor-real-black' as LottieAnimation,
+        size: handSizeForZoom(1.8),
+        dark: false,
+        physics: { ...DEFAULT_PHYSICS, ...HAND_PHYSICS.tapGentle },
+        showRipple: true,
+      },
+      getSavedPath('DorianFullV1-22', '12-AIProducts'),
+    );
+    return {
+      ...merged,
+      clickAnimationFile: V1_22_CLICK_ANIM_FILE,
+      clickStyle: V1_22_CLICK_STYLE,
+      pathLength: merged.path.length,
+      firstWaypoint: merged.path[0],
+      lastWaypoint: merged.path[merged.path.length - 1],
+    };
+  },
 };
 
 /** Use object key splitting for ergonomic test loop. */

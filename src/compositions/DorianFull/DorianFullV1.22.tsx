@@ -46,6 +46,7 @@ import { OutroScene } from '../DorianDemo/scenes/OutroScene';
 import { SCENES as STORES_SCENES, COLORS } from '../DorianStores/constants';
 import { StoreDashboardSceneV1_12 } from '../DorianStores/scenes/StoreDashboardSceneV1.12';
 import { ClickStyleProvider } from '../../components/FloatingHand/ClickStyleContext';
+import { SDOverrideProvider } from '../../components/FloatingHand/SDOverrideContext';
 import { MapSearchScene } from '../DorianStores/scenes/MapSearchScene';
 import { AIProductsScene } from '../DorianStores/scenes/AIProductsScene';
 import { getCodedAudio } from '../SceneDirector/layers';
@@ -431,19 +432,44 @@ export const DorianFullV1_22: React.FC<DorianFullV1_22Props> = ({
         <StoresAudioFromLayersV1_22 />
         <SoundtrackV1_22 noMusic={noMusic} />
 
+        {/* Stores scenes: wrapped in SDOverrideProvider so SD-saved waypoints
+            under DorianFullV1-22 keys reach FloatingHand at render time.
+            Closes the V1.22 Stores parity gap that surfaced when Stage 3
+            (skipOverlayRender) shipped without these wraps — see
+            .claude/rules/sd-overrides-must-honor-saved.md § "Hazard:
+            Disabling the SD Overlay Cursor".
+            CAVEAT: scenes 10 and 12 contain MULTIPLE FloatingHand instances
+            (primary + scrollbar drag + confirm click in scene 10; primary +
+            "Add Products" click in scene 12). applySDOverride applies to ALL
+            consumers of useSDOverride() within the Provider — so a future
+            SD save of a multi-waypoint path under these V1-22 scene keys
+            would override every FloatingHand in the scene with the same
+            path. The structural fix (hoist secondary hands out — see
+            DorianSecondaryHandsV1_12 pattern in DorianDemoV1.12) is future
+            work. Today's parity probes cover layerIndex 0 only. */}
         <Sequence
           from={STORES_OFFSET}
           durationInFrames={STORES_SCENES.dashboard.duration}
           name="10-StoreDashboard"
         >
-          <StoreDashboardSceneV1_12 />
+          <SDOverrideProvider
+            compositionId="DorianFullV1-22"
+            sceneName="10-StoreDashboard"
+          >
+            <StoreDashboardSceneV1_12 />
+          </SDOverrideProvider>
         </Sequence>
         <Sequence
           from={STORES_OFFSET + STORES_SCENES.dashboard.duration}
           durationInFrames={STORES_SCENES.mapSearch.duration}
           name="11-MapSearch"
         >
-          <MapSearchScene />
+          <SDOverrideProvider
+            compositionId="DorianFullV1-22"
+            sceneName="11-MapSearch"
+          >
+            <MapSearchScene />
+          </SDOverrideProvider>
         </Sequence>
         <Sequence
           from={
@@ -454,7 +480,12 @@ export const DorianFullV1_22: React.FC<DorianFullV1_22Props> = ({
           durationInFrames={STORES_SCENES.aiProducts.duration}
           name="12-AIProducts"
         >
-          <AIProductsScene />
+          <SDOverrideProvider
+            compositionId="DorianFullV1-22"
+            sceneName="12-AIProducts"
+          >
+            <AIProductsScene />
+          </SDOverrideProvider>
         </Sequence>
         <Sequence
           from={CLOSING_OFFSET}

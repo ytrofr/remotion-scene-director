@@ -6826,7 +6826,9 @@
             }
           ]
         }
-      ]
+      ],
+      "physicsPreset": "tapGentle",
+      "showRipple": true
     },
     "11-MapSearch": {
       "gesture": "click",
@@ -6884,7 +6886,9 @@
           "duration": 15
         }
       ],
-      "dark": false
+      "dark": false,
+      "physicsPreset": "tapGentle",
+      "showRipple": true
     },
     "12-AIProducts": {
       "gesture": "click",
@@ -6985,7 +6989,9 @@
             }
           ]
         }
-      ]
+      ],
+      "physicsPreset": "tapGentle",
+      "showRipple": true
     },
     "3-V2-Typing": {
       "gesture": "click",

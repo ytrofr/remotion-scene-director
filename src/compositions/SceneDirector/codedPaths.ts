@@ -257,6 +257,12 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
     gesture: 'click',
     animation: 'cursor-real-black',
     dark: false,
+    // Mirror StoreDashboardSceneV1_12's primary FloatingHand literals so SD's
+    // overlay matches what production renders. Without this, SD falls back
+    // to gesture-preset physics (snappy) while the scene uses tapGentle —
+    // parity test flags physics divergence on layer 0.
+    physicsPreset: 'tapGentle',
+    showRipple: true,
     path: [
       // Bubble click (pre-zoom S=1.8): bubble at phone (359,758) → comp (814,1543)
       { x: 900, y: 1600, frame: 10, gesture: 'pointer', scale: 1 },
@@ -310,6 +316,10 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
     gesture: 'click',
     animation: 'cursor-real-black',
     dark: false,
+    // Mirror MapSearchScene's FloatingHand literals — see 1-StoreDashboard
+    // note above. Production uses HAND_PHYSICS.tapGentle + showRipple={true}.
+    physicsPreset: 'tapGentle',
+    showRipple: true,
     path: [
       // Search bar click (pre-zoom S=1.8): search at phone (207,190) → comp (540,521)
       { x: 540, y: 700, frame: 5, gesture: 'pointer', scale: 1 },
@@ -326,6 +336,10 @@ const DORIAN_STORES_PATHS: Record<string, CodedPath> = {
     gesture: 'click',
     animation: 'cursor-real-black',
     dark: false,
+    // Mirror AIProductsScene's FloatingHand literals — see 1-StoreDashboard
+    // note above. Production uses HAND_PHYSICS.tapGentle + showRipple={true}.
+    physicsPreset: 'tapGentle',
+    showRipple: true,
     path: [
       // Input click (zoomed S=2.6, O=-350): input at phone (207,826) → comp (540,1630)
       { x: 540, y: 1700, frame: 5, gesture: 'pointer', scale: 1 },

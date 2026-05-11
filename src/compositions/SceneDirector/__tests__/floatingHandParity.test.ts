@@ -50,6 +50,12 @@ const SCENE_ZOOM_MAP: Record<string, Record<string, number>> = {
     '7-AIResponse': 2.75,
     '8-ProductPage': 1.8,
     '9-ProductDetail': 1.8,
+    // Stores scenes — dynamic zoom at runtime; SD's composition entry has
+    // no per-scene `zoom` field, so the overlay shows base 1.8. Probes
+    // sample at base zoom for parity.
+    '10-StoreDashboard': 1.8,
+    '11-MapSearch': 1.8,
+    '12-AIProducts': 1.8,
   },
 };
 

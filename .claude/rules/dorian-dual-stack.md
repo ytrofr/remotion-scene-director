@@ -118,7 +118,41 @@ Evidence: 2026-04-24 — scene 4 authored at (480, 1550) with transform 1.528/-3
 | `npm run render:hf-full:2x`       | Pure HF, post-processed 2x         |
 | `npm run render:dorian-hybrid:2x` | Both (HF 1+13 + Remotion 2-12), 2x |
 
-## Scene-Name ↔ Frame-Range Table
+## Scene-Name ↔ Frame-Range Tables
+
+Remotion timing diverges across versions. Use the table that matches the
+composition you're touching. **V1.22 is the current default deliverable**
+(`render:dorian-full:v1.22`); the V1.00 table is preserved for the frozen
+`DorianFull` baseline that HF scene files still mirror.
+
+### V1.22 (current default — `DorianFullV1.22.tsx`)
+
+Source of truth: `SCENES_V1_12` (`DorianDemo/DorianDemoV1.12.tsx`) +
+`SCENE_OVERRIDES_V1_22` (`DorianFull/DorianFullV1.22.tsx`, productPage
+extended 150 → 220) + Stores `SCENES` (`DorianStores/constants.ts`).
+
+| Scene             | Start | End  | Duration (f) | Duration (s @1x) | Note                  |
+| ----------------- | ----- | ---- | ------------ | ---------------- | --------------------- |
+| 1-Intro           | 0     | 75   | 75           | 2.5              |                       |
+| 2-HomeScroll      | 75    | 225  | 150          | 5.0              |                       |
+| 3-TapBubble       | 225   | 300  | 75           | 2.5              |                       |
+| 4-ChatOpen        | 300   | 390  | 90           | 3.0              |                       |
+| 5-UserTyping      | 390   | 540  | 150          | 5.0              |                       |
+| 6-AIThinking      | 540   | 600  | **60**       | 2.0              | V1.12 (-30 vs V1.00)  |
+| 7-AIResponse      | 600   | 720  | **120**      | 4.0              | V1.12 (-30 vs V1.00)  |
+| 8-ProductPage     | 720   | 940  | **220**      | 7.33             | V1.22 (+70 vs V1.12)  |
+| 9-ProductDetail   | 940   | 1190 | **250**      | 8.33             | V1.12 (+160 vs V1.00) |
+| 10-StoreDashboard | 1190  | 1850 | 660          | 22.0             | DorianStores SCENES   |
+| 11-MapSearch      | 1850  | 2090 | 240          | 8.0              | DorianStores SCENES   |
+| 12-AIProducts     | 2090  | 2480 | 390          | 13.0             | DorianStores SCENES   |
+| 13-Closing        | 2480  | 2660 | 180          | 6.0              | Outro                 |
+
+Total: **2660f** (88.67s @ 1x, ~44s at 2x).
+
+### V1.00 baseline (frozen — `DorianFull.tsx`, HF scene file durations)
+
+Source of truth: `FULL_SCENE_INFO` in `src/compositions/DorianFull/DorianFull.tsx`.
+HF scene files (`hf/scenes/*.html`) mirror this timing.
 
 | Scene             | Start | End  | Duration (f) | Duration (s @1x) |
 | ----------------- | ----- | ---- | ------------ | ---------------- |
@@ -136,8 +170,17 @@ Evidence: 2026-04-24 — scene 4 authored at (480, 1550) with transform 1.528/-3
 | 12-AIProducts     | 1860  | 2250 | 390          | 13.0             |
 | 13-Closing        | 2250  | 2430 | 180          | 6.0              |
 
-Source of truth: `FULL_SCENE_INFO` in `src/compositions/DorianFull/DorianFull.tsx`.
+Total: **2430f** (81s @ 1x).
+
+### HF Stack — duration drift
+
+HF scene files are still on V1.00 timing. For `render:hf-full` /
+`render:dorian-hybrid:2x` to match V1.22 Remotion, HF scenes 6, 7, 8, 9
+need re-timing (and scene 8 + 9 need waypoint re-authoring at the new
+durations). Not currently blocking — V1.22's primary deliverable is
+`render:dorian-full:v1.22` (Remotion-only).
 
 ---
 
-**Last Updated**: 2026-04-23
+**Last Updated**: 2026-05-11 (V1.22 timing table added; V1.00 table
+preserved as the frozen baseline that HF still mirrors)

@@ -29,7 +29,8 @@ async function captureChatSequence() {
 
   try {
     // Use staging since localhost account is locked
-    const baseUrl = "https://limor-staging-4vonhahbua-uc.a.run.app";
+    // Set CAPTURE_BASE_URL to your running dashboard; defaults to local dev server.
+    const baseUrl = process.env.CAPTURE_BASE_URL ?? "http://localhost:8080";
 
     // Step 1: Go to login page
     console.log("Step 1: Navigating to login page (staging)...");

@@ -42,7 +42,8 @@ async function captureMobileChat() {
 
   try {
     // Use staging since localhost may not be running
-    const baseUrl = "https://limor-staging-4vonhahbua-uc.a.run.app";
+    // Set CAPTURE_BASE_URL to your running dashboard; defaults to local dev server.
+    const baseUrl = process.env.CAPTURE_BASE_URL ?? "http://localhost:8080";
 
     // Step 1: Navigate to login
     console.log("Step 1: Navigating to login page (staging)...");

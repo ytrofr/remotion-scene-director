@@ -1,9 +1,9 @@
 """Generate English voice-over MP3s for the 8 AgentSmith OAuth verification videos.
 
 Uses Google Cloud Text-to-Speech REST API via Application Default Credentials.
-Saves each MP3 to ~/limor-video-poc/public/agentsmith-voiceover/.
+Saves each MP3 to public/agentsmith-voiceover/.
 
-Run after `gcloud auth login` (jordan@example.com is already logged in).
+Run after `gcloud auth login`.
 Requires: requests, google-auth (`pip install google-auth requests`).
 """
 

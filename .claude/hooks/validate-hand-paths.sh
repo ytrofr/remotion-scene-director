@@ -12,6 +12,6 @@ FILE_PATH=$(echo "$JSON_INPUT" | python3 -c "import sys,json; print(json.load(sy
 if [[ "$FILE_PATH" == *"codedPaths.ts"* ]] || [[ "$FILE_PATH" == *"SceneDirector/layers.ts"* ]]; then
   echo ""
   echo "── Hand Path Validation (auto) ──"
-  cd $HOME/limor-video-poc && npx tsx scripts/validate-hand-paths.ts 2>&1 | tail -30
+  cd "${CLAUDE_PROJECT_DIR:-$PWD}" && npx tsx scripts/validate-hand-paths.ts 2>&1 | tail -30
   echo "──────────────────────────────────"
 fi

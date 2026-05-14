@@ -127,16 +127,16 @@ export const PRICING = {
 
 export const TEAM = [
   {
-    initials: 'YO',
+    initials: 'JA',
     name: 'Jordan Avery',
     role: 'CEO',
     gradient: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
     roleColor: '#a78bfa',
-    bio: 'MBA. Founded marketing agency serving 300+ SMBs. Built ecommerce platforms generating 1M+ ILS. Autodidact developer.',
+    bio: 'Founder with a background in marketing and ecommerce. Full-stack developer.',
   },
   {
-    initials: 'RV',
-    name: 'Jordan Avery',
+    initials: 'SP',
+    name: 'Sam Park',
     role: 'CTO',
     gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
     roleColor: '#67e8f9',

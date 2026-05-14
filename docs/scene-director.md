@@ -98,7 +98,7 @@ grid-template-areas:
 **Invariants**:
 
 - Main dropdown's `value` is `baseOf(state.compositionId)` — NOT the raw compositionId. So `DorianFullV1-15` shows "Dorian Full" selected.
-- VersionBar renders nothing when the current comp is non-versioned (e.g. SigmaAppDemo). Test: `if (!currentFamily) return null`.
+- VersionBar renders nothing when the current comp is non-versioned (e.g. a one-off demo comp). Test: `if (!currentFamily) return null`.
 - Versioned comp ids match `^(.+?)V(\d+)-(\d{2})$` (dash form, NOT dot form). The dot form `V1.15` is the human label; in code it's always `V1-15`.
 
 **Anti-pattern (DO NOT add)**: a family dropdown above the sub-version. The family is fully encoded by the main video dropdown — adding a third selector creates redundant state and a synchronization tax (which dropdown is the source of truth?).

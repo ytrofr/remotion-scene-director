@@ -52,3 +52,6 @@ src/compositions/SceneDirector/feedbackNotes.data.json
 
 # SceneDirector save history (local recovery log; dev-only, can grow large)
 src/compositions/SceneDirector/codedPaths.history.jsonl
+
+# Private product demo reference — kept local, not for the public engine repo
+docs/sigma-demo-videos.md

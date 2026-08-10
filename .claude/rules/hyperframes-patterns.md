@@ -166,8 +166,40 @@ npx hyperframes doctor                  # system deps check
 | Async Lottie load via `path:`                                  | Timeline seeks empty Lottie              | Inline JSON as `<script type="application/json">` |
 | `window.__timelines['main'] = tl` in `DOMContentLoaded`        | Engine misses registration               | Register synchronously at module scope            |
 | Inline `style="transform: translateX(-600px)"` with later GSAP | `gsap_css_transform_conflict` lint warn  | Use `gsap.set(el, { x: -600 })` instead           |
+| **ANY** CSS-declared transform (stylesheet class, not just inline) on an element GSAP later animates with `x`/`y` | Silent: element snaps to the tween's origin. N stacked rows collapse onto ONE baseline | Let flexbox own layout, GSAP own entrance. Never position with `transform` an element you also tween |
+| Exit tween scheduled BEFORE that element's entrance tween | Element stays visible for the REST of the film. No error, no warning | Assert `leaveTime > enterTime` at build time; fit staggers to the frame's real duration |
 | `<audio>` without `id` attr                                    | Silent in rendered MP4                   | Always set `id` even if not referenced by JS      |
 | Multiple `.html` files at root with `data-composition-id`      | Lint error: `multiple_root_compositions` | Keep only one root; move others to subdirs        |
+
+## 9. The Imperative-Timeline Bug Class (2026-08-10, L.I.M.O.R film)
+
+A GSAP timeline describes a SEQUENCE OF WRITES; a Remotion component describes WHAT IS
+TRUE AT A FRAME. Two failure modes exist only on the timeline side, and neither errors:
+
+1. **GSAP and CSS fight over `transform`.** Animating `y` writes `transform`, silently
+   discarding any `translateY` a stylesheet set for layout. Three stacked lines rendered
+   on top of each other, unreadable.
+2. **Order is not validated.** Scheduling a fade-out at t=69.30 for an element that fades
+   in at t=69.34 leaves it on screen permanently. It surfaced 30s later, in the middle of
+   the brand reveal.
+
+Both were invisible in the generator and only appeared in the finished MP4, where the
+feedback loop is a ~7 minute render.
+
+**Guard both at build time** — generators must refuse to emit:
+
+```js
+// exit-before-entrance: the element would never leave the screen
+enters.forEach((enterTime, sel) => {
+  const leaveTime = leaves.get(sel);
+  if (leaveTime !== undefined && leaveTime <= enterTime) fail(sel);
+});
+// an undefined token stringifies to "NaN", which GSAP accepts and then animates nothing
+if (/NaN/.test(generatedHtml)) fail('token lookup returned undefined');
+```
+
+Reference implementation: `scripts/build-limor-hf.mts` (all three guards, each proven to
+fire on the real defect before it was fixed).
 
 ## See Also
 
@@ -177,4 +209,4 @@ npx hyperframes doctor                  # system deps check
 
 ---
 
-**Last Updated**: 2026-04-22 (initial — HyperFrames evaluation)
+**Last Updated**: 2026-08-10 (+§9 imperative-timeline bug class + 2 anti-pattern rows — L.I.M.O.R film tournament); 2026-04-22 (initial — HyperFrames evaluation)

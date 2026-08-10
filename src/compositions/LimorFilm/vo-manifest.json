@@ -1,0 +1,111 @@
+{
+  "voice": "bf_emma",
+  "speed": 0.8,
+  "cues": [
+    {
+      "id": "V1",
+      "at": 1.5,
+      "src": "limor/vo/V1.wav",
+      "duration": 3.413,
+      "text": "A business is made of thousands of moving parts."
+    },
+    {
+      "id": "V2",
+      "at": 11.5,
+      "src": "limor/vo/V2.wav",
+      "duration": 4.224,
+      "text": "Every system knows something. None of them knows the business."
+    },
+    {
+      "id": "V3",
+      "at": 18,
+      "src": "limor/vo/V3.wav",
+      "duration": 7.04,
+      "text": "So someone has to connect it all. Usually, that someone is the owner. The owner is the API."
+    },
+    {
+      "id": "V4",
+      "at": 27,
+      "src": "limor/vo/V4.wav",
+      "duration": 2.624,
+      "text": "But what if your business had a brain?"
+    },
+    {
+      "id": "V5",
+      "at": 38,
+      "src": "limor/vo/V5.wav",
+      "duration": 3.563,
+      "text": "One intelligence, shaped by the business itself."
+    },
+    {
+      "id": "V6",
+      "at": 46,
+      "src": "limor/vo/V6.wav",
+      "duration": 3.392,
+      "text": "You don't learn the software. It learns your business."
+    },
+    {
+      "id": "V7",
+      "at": 53.8,
+      "src": "limor/vo/V7.wav",
+      "duration": 4.885,
+      "text": "A conversation becomes a rule. A rule becomes capability."
+    },
+    {
+      "id": "V8",
+      "at": 59.8,
+      "src": "limor/vo/V8.wav",
+      "duration": 3.648,
+      "text": "Not separate systems. Different organs. One mind."
+    },
+    {
+      "id": "V9",
+      "at": 63.7,
+      "src": "limor/vo/V9.wav",
+      "duration": 4.949,
+      "text": "Every correction adds knowledge. Every experience becomes memory."
+    },
+    {
+      "id": "V10",
+      "at": 72.8,
+      "src": "limor/vo/V10.wav",
+      "duration": 4.011,
+      "text": "Software can be replaced. Shared history is different."
+    },
+    {
+      "id": "V11",
+      "at": 77,
+      "src": "limor/vo/V11.wav",
+      "duration": 5.035,
+      "text": "At some point it is no longer a generic system. It becomes yours."
+    },
+    {
+      "id": "V12",
+      "at": 84.8,
+      "src": "limor/vo/V12.wav",
+      "duration": 3.392,
+      "text": "The business grows it. And it grows the business."
+    },
+    {
+      "id": "V13",
+      "at": 88.8,
+      "src": "limor/vo/V13.wav",
+      "duration": 3.413,
+      "text": "What happens when the business itself begins to learn?"
+    },
+    {
+      "id": "V14",
+      "at": 92.8,
+      "src": "limor/vo/V14.wav",
+      "duration": 5.248,
+      "text": "One business. One memory. One language. One mind. One evolving entity."
+    },
+    {
+      "id": "V15",
+      "at": 98.9,
+      "src": "limor/vo/V15.wav",
+      "duration": 1.963,
+      "text": "L.I.M.O.R."
+    }
+  ]
+}

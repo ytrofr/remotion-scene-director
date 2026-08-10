@@ -24,6 +24,8 @@ import {
   DebugSectionPickerInteractive,
   VIDEO as DASHMOR_VIDEO,
 } from './compositions/DashmorDemo';
+import { LimorFilm } from './compositions/LimorFilm/LimorFilm';
+import { tokens as LIMOR_TOKENS } from './compositions/LimorFilm/timing';
 import { HandGestureGallery } from './compositions/HandGestureGallery/HandGestureGallery';
 import { VIDEO as GALLERY_VIDEO } from './compositions/HandGestureGallery/constants';
 import {
@@ -646,6 +648,16 @@ export const RemotionRoot: React.FC = () => {
           fps={OAUTH_DEMO_FPS}
           width={OAUTH_DEMO_WIDTH}
           height={OAUTH_DEMO_HEIGHT}
+        />
+      </Folder>
+      <Folder name="LimorFilm">
+        <Composition
+          id="LimorFilm"
+          component={LimorFilm}
+          durationInFrames={LIMOR_TOKENS.canvas.durationInFrames}
+          fps={LIMOR_TOKENS.canvas.fps}
+          width={LIMOR_TOKENS.canvas.width}
+          height={LIMOR_TOKENS.canvas.height}
         />
       </Folder>
       {/* SceneDirector v2 is now a standalone app: npm run scene-director */}

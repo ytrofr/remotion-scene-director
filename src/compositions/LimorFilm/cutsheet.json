@@ -1,0 +1,565 @@
+{
+  "title": "L.I.M.O.R - Endless Possibilities. One Entity.",
+  "totalSeconds": 105,
+  "fps": 30,
+  "note": "Single source of truth for BOTH tournament arms (Remotion + HyperFrames). Times are absolute seconds. Never edit one arm's timing without editing this file.",
+  "vo": [
+    {
+      "id": "V1",
+      "at": 1.5,
+      "text": "A business is made of thousands of moving parts."
+    },
+    {
+      "id": "V2",
+      "at": 11.5,
+      "text": "Every system knows something. None of them knows the business."
+    },
+    {
+      "id": "V3",
+      "at": 18,
+      "text": "So someone has to connect it all. Usually, that someone is the owner. The owner is the API."
+    },
+    {
+      "id": "V4",
+      "at": 27,
+      "text": "But what if your business had a brain?"
+    },
+    {
+      "id": "V5",
+      "at": 38,
+      "text": "One intelligence, shaped by the business itself."
+    },
+    {
+      "id": "V6",
+      "at": 46,
+      "text": "You don't learn the software. It learns your business."
+    },
+    {
+      "id": "V7",
+      "at": 53.8,
+      "text": "A conversation becomes a rule. A rule becomes capability."
+    },
+    {
+      "id": "V8",
+      "at": 59.8,
+      "text": "Not separate systems. Different organs. One mind."
+    },
+    {
+      "id": "V9",
+      "at": 63.7,
+      "text": "Every correction adds knowledge. Every experience becomes memory."
+    },
+    {
+      "id": "V10",
+      "at": 72.8,
+      "text": "Software can be replaced. Shared history is different."
+    },
+    {
+      "id": "V11",
+      "at": 77,
+      "text": "At some point it is no longer a generic system. It becomes yours."
+    },
+    {
+      "id": "V12",
+      "at": 84.8,
+      "text": "The business grows it. And it grows the business."
+    },
+    {
+      "id": "V13",
+      "at": 88.8,
+      "text": "What happens when the business itself begins to learn?"
+    },
+    {
+      "id": "V14",
+      "at": 92.8,
+      "text": "One business. One memory. One language. One mind. One evolving entity."
+    },
+    {
+      "id": "V15",
+      "at": 98.9,
+      "text": "L.I.M.O.R."
+    }
+  ],
+  "audio": {
+    "comment": "Act I is tactile rhythm only - soft clicks, paper, distant room tone. No melody. Density rises with the fragment count, never volume. Full cut to near-silence on THE OWNER IS THE API. One low organic pulse enters at 34.5 with the first pathway. Score decays from 92.0 so the slogan lands almost dry.",
+    "beds": [
+      {
+        "id": "tactile",
+        "start": 0,
+        "end": 25.3,
+        "peak": 0.34
+      },
+      {
+        "id": "silence",
+        "start": 25.3,
+        "end": 31.5,
+        "peak": 0
+      },
+      {
+        "id": "pulse",
+        "start": 31.5,
+        "end": 69.5,
+        "peak": 0.3
+      },
+      {
+        "id": "organic",
+        "start": 56.5,
+        "end": 92.5,
+        "peak": 0.38
+      },
+      {
+        "id": "decay",
+        "start": 92.5,
+        "end": 100.5,
+        "peak": 0.16
+      },
+      {
+        "id": "dry",
+        "start": 100.5,
+        "end": 105,
+        "peak": 0
+      }
+    ]
+  },
+  "frames": [
+    {
+      "id": "F1",
+      "act": "I",
+      "start": 0,
+      "dur": 6,
+      "kind": "scatter",
+      "note": "Begin almost silently. Independent objects sharing a world without understanding one another. Deliberately unaligned.",
+      "items": [
+        {
+          "t": "SALES",
+          "x": 0.14,
+          "y": 0.22
+        },
+        {
+          "t": "PEOPLE",
+          "x": 0.63,
+          "y": 0.15
+        },
+        {
+          "t": "SHIFTS",
+          "x": 0.31,
+          "y": 0.71
+        },
+        {
+          "t": "PRODUCTS",
+          "x": 0.79,
+          "y": 0.44
+        },
+        {
+          "t": "INVENTORY",
+          "x": 0.09,
+          "y": 0.53
+        },
+        {
+          "t": "SUPPLIERS",
+          "x": 0.52,
+          "y": 0.86
+        },
+        {
+          "t": "PURCHASING",
+          "x": 0.71,
+          "y": 0.68
+        },
+        {
+          "t": "FINANCE",
+          "x": 0.42,
+          "y": 0.36
+        },
+        {
+          "t": "TASKS",
+          "x": 0.86,
+          "y": 0.24
+        },
+        {
+          "t": "MESSAGES",
+          "x": 0.22,
+          "y": 0.9
+        },
+        {
+          "t": "PROCEDURES",
+          "x": 0.58,
+          "y": 0.57
+        },
+        {
+          "t": "KNOWLEDGE",
+          "x": 0.35,
+          "y": 0.09
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "act": "I",
+      "start": 6,
+      "dur": 5,
+      "kind": "scatterDense",
+      "note": "Specific fragments appear BETWEEN the standing words. Field becomes denser and slightly harder to follow. Carried by type alone - no VO.",
+      "keepPrevious": true,
+      "items": [
+        {
+          "t": "A SALE",
+          "x": 0.24,
+          "y": 0.33
+        },
+        {
+          "t": "A CLOCK-IN",
+          "x": 0.68,
+          "y": 0.29
+        },
+        {
+          "t": "A CANCELLATION",
+          "x": 0.45,
+          "y": 0.63
+        },
+        {
+          "t": "A MISSING INGREDIENT",
+          "x": 0.13,
+          "y": 0.79
+        },
+        {
+          "t": "A SUPPLIER INVOICE",
+          "x": 0.74,
+          "y": 0.83
+        },
+        {
+          "t": "A MESSAGE FROM A MANAGER",
+          "x": 0.55,
+          "y": 0.21
+        },
+        {
+          "t": "A BROKEN TABLE",
+          "x": 0.88,
+          "y": 0.56
+        },
+        {
+          "t": "A DECISION MADE YESTERDAY",
+          "x": 0.29,
+          "y": 0.47
+        },
+        {
+          "t": "A PROCEDURE SOMEONE FORGOT",
+          "x": 0.62,
+          "y": 0.74
+        },
+        {
+          "t": "A CONVERSATION THAT NEVER ENTERED A SYSTEM",
+          "x": 0.18,
+          "y": 0.63
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "act": "I",
+      "start": 11,
+      "dur": 6.5,
+      "kind": "swap",
+      "note": "Everything pauses. The field freezes and dims behind the statement.",
+      "a": "EVERY SYSTEM KNOWS SOMETHING.",
+      "b": "NONE OF THEM KNOWS THE BUSINESS.",
+      "swapAt": 3.4
+    },
+    {
+      "id": "F4",
+      "act": "I",
+      "start": 17.5,
+      "dur": 8,
+      "kind": "converge",
+      "note": "Scattered words move toward one central invisible point. Phrases arrive one at a time. On the last line CUT THE SOUND and hold it alone.",
+      "sequence": [
+        "THE CONNECTION.",
+        "THE MEMORY.",
+        "THE INTERPRETER.",
+        "THE DECISION MAKER.",
+        "THE OWNER."
+      ],
+      "final": "THE OWNER IS THE API.",
+      "finalAt": 5.6,
+      "silenceAt": 7.8
+    },
+    {
+      "id": "F5",
+      "act": "II",
+      "start": 25.5,
+      "dur": 6,
+      "kind": "question",
+      "note": "Frame almost empty. Dark mineral surface. Visual noise gone. ONE tiny warm point of light. No music. Do not answer - let the question exist.",
+      "text": "WHAT IF YOUR BUSINESS HAD A BRAIN?",
+      "seedPoint": true
+    },
+    {
+      "id": "F6",
+      "act": "II",
+      "start": 31.5,
+      "dur": 6,
+      "kind": "questions",
+      "note": "One at a time, each owning the whole emotional focus. With each, one pathway grows from the seed point. Music begins here - one low organic pulse.",
+      "items": [
+        "WHAT IF IT COULD REMEMBER?",
+        "WHAT IF IT COULD LEARN?",
+        "WHAT IF IT COULD MAKE DECISIONS?",
+        "WHAT IF IT COULD ACT?",
+        "WHAT IF IT COULD EVOLVE?"
+      ],
+      "growPathway": true
+    },
+    {
+      "id": "F7",
+      "act": "III",
+      "start": 37.5,
+      "dur": 4,
+      "kind": "stack",
+      "note": "Fragments from Act I begin organising around the same living structure.",
+      "items": [
+        "ONE BRAIN.",
+        "ONE MEMORY.",
+        "ONE LANGUAGE."
+      ]
+    },
+    {
+      "id": "F8",
+      "act": "III",
+      "start": 41.5,
+      "dur": 4,
+      "kind": "orbit",
+      "note": "Words settle around the structure. It does not get brighter or more technological - it gets more coherent.",
+      "items": [
+        "PEOPLE.",
+        "PRODUCTS.",
+        "BRANCHES.",
+        "LANGUAGE.",
+        "HABITS.",
+        "EXCEPTIONS.",
+        "HISTORY."
+      ]
+    },
+    {
+      "id": "F9",
+      "act": "IV",
+      "start": 45.5,
+      "dur": 4,
+      "kind": "swap",
+      "a": "YOU DON'T LEARN THE SOFTWARE.",
+      "b": "THE SOFTWARE LEARNS YOUR BUSINESS.",
+      "swapAt": 2.1
+    },
+    {
+      "id": "F10",
+      "act": "IV",
+      "start": 49.5,
+      "dur": 4,
+      "kind": "dissolve",
+      "note": "Each sentence dissolves into the network and leaves a new pathway behind.",
+      "items": [
+        "“ALWAYS SUBTRACT CANCELLATIONS.”",
+        "“BUILD ME A FORECAST FOR SUNDAYS.”",
+        "“IF THIS HAPPENS AGAIN, TELL THE MANAGER.”"
+      ]
+    },
+    {
+      "id": "F11",
+      "act": "IV",
+      "start": 53.5,
+      "dur": 3,
+      "kind": "chain",
+      "items": [
+        "A CONVERSATION BECOMES A RULE.",
+        "A RULE BECOMES A TOOL.",
+        "A TOOL BECOMES A ROUTINE.",
+        "A ROUTINE BECOMES CAPABILITY."
+      ],
+      "final": "EVERY CONVERSATION CAN BUILD THE SYSTEM."
+    },
+    {
+      "id": "F12",
+      "act": "V",
+      "start": 56.5,
+      "dur": 3,
+      "kind": "rejoin",
+      "note": "The module words return separate, exactly as they began - then join the same structure.",
+      "items": [
+        "ATTENDANCE.",
+        "SCHEDULING.",
+        "EMPLOYEES.",
+        "SALES.",
+        "INVENTORY.",
+        "PURCHASING.",
+        "SUPPLIERS.",
+        "PRODUCTS.",
+        "FINANCE.",
+        "OPERATIONS.",
+        "TASKS.",
+        "KNOWLEDGE."
+      ]
+    },
+    {
+      "id": "F13",
+      "act": "V",
+      "start": 59.5,
+      "dur": 4,
+      "kind": "stack",
+      "note": "Important reveal. Hold it.",
+      "items": [
+        "NOT SEPARATE SYSTEMS.",
+        "DIFFERENT ORGANS.",
+        "ONE MIND."
+      ],
+      "hero": true
+    },
+    {
+      "id": "F14",
+      "act": "VI",
+      "start": 63.5,
+      "dur": 3.5,
+      "kind": "words",
+      "note": "Fragments from earlier moments return and find their correct place. The intelligence becomes more precise, not larger.",
+      "items": [
+        "REMEMBER.",
+        "LEARN.",
+        "UNDERSTAND.",
+        "BUILD.",
+        "DECIDE.",
+        "ACT.",
+        "EVOLVE."
+      ],
+      "recall": true
+    },
+    {
+      "id": "F15",
+      "act": "VI",
+      "start": 67,
+      "dur": 2.5,
+      "kind": "swap",
+      "a": "IT DOESN'T JUST RECEIVE UPDATES.",
+      "b": "IT DEVELOPS.",
+      "swapAt": 1.3,
+      "tail": [
+        "BUILT THROUGH CONVERSATION.",
+        "SHAPED BY EXPERIENCE."
+      ]
+    },
+    {
+      "id": "F16",
+      "act": "VII",
+      "start": 69.5,
+      "dur": 3,
+      "kind": "particles",
+      "note": "Each particle briefly carries one concept, then joins an increasingly complex organic pattern. Never literal pixels.",
+      "items": [
+        "A NAME.",
+        "A PRODUCT.",
+        "A RULE.",
+        "A CORRECTION.",
+        "A PREFERENCE.",
+        "A PROCEDURE.",
+        "A DECISION.",
+        "A MEMORY.",
+        "A RELATIONSHIP.",
+        "A SOLUTION."
+      ],
+      "final": [
+        "ONE PIXEL IS INFORMATION.",
+        "THOUSANDS BECOME UNDERSTANDING."
+      ]
+    },
+    {
+      "id": "F17",
+      "act": "VIII",
+      "start": 72.5,
+      "dur": 3,
+      "kind": "swap",
+      "a": "SOFTWARE CAN BE REPLACED.",
+      "b": "SHARED HISTORY IS DIFFERENT.",
+      "swapAt": 1.6
+    },
+    {
+      "id": "F18",
+      "act": "VIII",
+      "start": 75.5,
+      "dur": 3.5,
+      "kind": "swap",
+      "note": "Very minimal.",
+      "a": "IT KNOWS WHAT YOU MEAN.",
+      "b": "BECAUSE YOU TAUGHT IT.",
+      "swapAt": 1.6
+    },
+    {
+      "id": "F19",
+      "act": "VIII",
+      "start": 79,
+      "dur": 2.5,
+      "kind": "stack",
+      "note": "The structure now feels mature and almost invisible. Impressive because it belongs, not because it glows.",
+      "items": [
+        "THE MORE YOU TEACH IT,",
+        "THE MORE IT BECOMES YOURS."
+      ]
+    },
+    {
+      "id": "F20",
+      "act": "VIII",
+      "start": 81.5,
+      "dur": 3,
+      "kind": "swap",
+      "note": "Keep the frame quiet. No sentimental imagery.",
+      "a": "SOFTWARE IS EASY TO REPLACE.",
+      "b": "A PARTNER WHO REMEMBERS IS DIFFERENT.",
+      "swapAt": 1.5
+    },
+    {
+      "id": "F21",
+      "act": "IX",
+      "start": 84.5,
+      "dur": 4,
+      "kind": "mutual",
+      "note": "Two subtle organic systems grow into the same pattern. Mutual evolution. No hearts, no pets, no characters.",
+      "a": "THE BUSINESS GROWS L.I.M.O.R.",
+      "b": "L.I.M.O.R GROWS THE BUSINESS."
+    },
+    {
+      "id": "F22",
+      "act": "X",
+      "start": 88.5,
+      "dur": 4,
+      "kind": "swap",
+      "note": "Return to the original question, then let it become the bigger one.",
+      "a": "WHAT IF YOUR BUSINESS HAD A BRAIN?",
+      "b": "WHAT IF IT COULD KNOW ITSELF?",
+      "swapAt": 1.5
+    },
+    {
+      "id": "F23",
+      "act": "X",
+      "start": 92.5,
+      "dur": 5,
+      "kind": "stack",
+      "note": "The visual system is now completely coherent. No clutter remains. Typography is calm, aligned, unified.",
+      "items": [
+        "ONE BUSINESS.",
+        "ONE MEMORY.",
+        "ONE LANGUAGE.",
+        "ONE MIND.",
+        "ONE EVOLVING ENTITY."
+      ],
+      "resolved": true
+    },
+    {
+      "id": "REVEAL",
+      "act": "BRAND",
+      "start": 97.5,
+      "dur": 7.5,
+      "kind": "reveal",
+      "note": "Everything disappears. Silence. A faint trace of warm organic light moves through the mineral surface. Wordmark alone first - do NOT show the slogan yet. Slogan is never spoken. Final frame holds at least 4s and ends in complete silence.",
+      "wordmark": "L.I.M.O.R",
+      "wordmarkAt": 1,
+      "slogan": "ENDLESS POSSIBILITIES. ONE ENTITY.",
+      "sloganAt": 3.5,
+      "holdSeconds": 4
+    }
+  ]
+}

@@ -55,7 +55,7 @@ export const BeforeAfterScene: React.FC = () => {
     extrapolateRight: 'clamp',
   });
 
-  // "87% savings" badge
+  // savings badge
   const badgeScale = spring({
     frame: frame - 70,
     fps,
@@ -182,7 +182,7 @@ export const BeforeAfterScene: React.FC = () => {
             textShadow: `0 0 60px ${COLORS.emerald}44`,
           }}
         >
-          $349
+          $XXX
         </div>
         <div
           style={{
@@ -196,7 +196,7 @@ export const BeforeAfterScene: React.FC = () => {
         </div>
       </div>
 
-      {/* "87% savings" badge */}
+      {/* savings badge */}
       <div
         style={{
           opacity: badgeOpacity,

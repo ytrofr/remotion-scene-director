@@ -277,7 +277,7 @@ const ClosingScene: React.FC<{
               marginTop: 8,
             }}
           >
-            Pre-Seed · 2026
+            Demo · 2026
           </p>
         </div>
       </AbsoluteFill>

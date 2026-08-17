@@ -17,8 +17,8 @@ export const TheAskScene: React.FC = () => {
     extrapolateRight: 'clamp',
   });
 
-  // "$X,XXX,XXX" types in digit by digit like a cash register
-  const fullAmount = '$X,XXX,XXX';
+  // the amount types in digit by digit like a cash register
+  const fullAmount = '$X,XXX,XXX'; // REDACTED - public repo
   const digitCount = Math.floor(
     interpolate(frame, [10, 50], [0, fullAmount.length], {
       extrapolateLeft: 'clamp',

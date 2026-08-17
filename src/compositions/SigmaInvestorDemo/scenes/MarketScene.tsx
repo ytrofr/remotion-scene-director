@@ -9,24 +9,24 @@ import { COLORS, FONTS } from '../constants';
 const MARKET = [
   {
     label: 'TAM',
-    value: '$XXB',
-    numericValue: 54,
+    value: '$XXB', // REDACTED
+    numericValue: 0,
     desc: 'Global SMB services',
     color: COLORS.cyan,
     widthPercent: 100,
   },
   {
     label: 'SAM',
-    value: '$X.XB',
-    numericValue: 8.2,
+    value: '$X.XB', // REDACTED
+    numericValue: 0,
     desc: 'AI-ready SMBs',
     color: COLORS.accent,
     widthPercent: 15,
   },
   {
     label: 'SOM',
-    value: '$XXXM',
-    numericValue: 0.12,
+    value: '$XXXM', // REDACTED
+    numericValue: 0,
     desc: 'Year 3 target',
     color: COLORS.emerald,
     widthPercent: 2.2,

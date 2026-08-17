@@ -1,3 +1,8 @@
+// NOTE: this repo is PUBLIC. The market-size, raise, pricing and traction
+// figures in this composition are REDACTED placeholders (X-strings / zeros)
+// on purpose. Real figures live in a local note outside the repo - do not
+// commit them back, and do not quote them in comments either.
+
 export const SIGMA_VIDEO = {
   width: 1080,
   height: 1920,
@@ -10,7 +15,7 @@ export const SCENES = {
   // Act 1: The Problem (0-12s)
   problemIntro: { start: 0, duration: 120 }, // 0-4s - typewriter + pain points slam
   vendorStack: { start: 120, duration: 120 }, // 4-8s - vendor bars slide in
-  totalCost: { start: 240, duration: 90 }, // 8-11s - $2,750 count-up
+  totalCost: { start: 240, duration: 90 }, // 8-11s - vendor-stack total count-up
   // (painPoints merged into problemIntro)
 
   // Act 2: The Solution (12-30s)
@@ -26,7 +31,7 @@ export const SCENES = {
 
   // Act 4: The Ask (43-60s)
   team: { start: 1290, duration: 150 }, // 43-48s - founders
-  theAsk: { start: 1440, duration: 150 }, // 48-53s - $1M pre-seed
+  theAsk: { start: 1440, duration: 150 }, // 48-53s - the ask
   outro: { start: 1590, duration: 210 }, // 53-60s - "Agentify Your Business"
 };
 
@@ -121,8 +126,8 @@ export const INTEGRATIONS_COUNT = 19;
 
 export const PRICING = {
   free: { price: 0, label: 'Free', desc: 'Explore the platform' },
-  single: { price: 49, label: 'Single', desc: 'One business, all agents' },
-  agency: { price: 349, label: 'Agency', desc: 'Unlimited businesses' },
+  single: { price: 0, label: 'Single', desc: 'One business, all agents' }, // REDACTED
+  agency: { price: 0, label: 'Agency', desc: 'Unlimited businesses' }, // REDACTED
 };
 
 export const TEAM = [

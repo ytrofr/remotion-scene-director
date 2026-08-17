@@ -12,7 +12,7 @@ const METRICS = [
   { target: 11, suffix: '', label: 'AI Agents', color: COLORS.accent },
   { target: 71, suffix: '+', label: 'Tools', color: COLORS.cyan },
   { target: 19, suffix: '', label: 'Integrations', color: COLORS.emerald },
-  { target: 300, suffix: '+', label: 'SMBs Validated', color: COLORS.amber },
+  { target: 0, suffix: '+', label: 'SMBs Validated', color: COLORS.amber }, // REDACTED
 ];
 
 // Corner positions for 2x2 grid fly-in (relative to grid center)

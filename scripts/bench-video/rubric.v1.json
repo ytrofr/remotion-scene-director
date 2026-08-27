@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "updated": "2026-08-26",
+  "composite": false,
+  "compositeNote": "There is deliberately NO overall score. Dimensions are reported separately and never averaged. An unweighted mean invents a weighting nobody agreed to, and it lets a film that is beautiful and illegible tie with one that is plain and clear. If a composite is ever needed, the weights get pre-registered first.",
+  "primary": "pairwise",
+  "primaryNote": "Ranking comes from blind, order-swapped pairwise preference. These dimensions exist to say WHY, not to produce the ranking.",
+  "dimensions": [
+    { "id": "brief",     "label": "Brief adherence",  "ask": "Does it carry the deck's nine beats, in the deck's own words, in 25 seconds?" },
+    { "id": "brand",     "label": "Brand fit",        "ask": "Does it look like SIGMA - the near-black ground, the violet-to-cyan light, Space Grotesk?" },
+    { "id": "clarity",   "label": "Message clarity",  "ask": "After ONE normal viewing, could you state what SIGMA does?" },
+    { "id": "legibility","label": "Legibility",       "ask": "Could you read every word at normal speed, without pausing?" },
+    { "id": "motion",    "label": "Motion quality",   "ask": "Is the movement intentional and weighted, or does it drift and stop mechanically? Restraint scores well here; more motion does not." },
+    { "id": "composition","label": "Composition",     "ask": "Does it use the whole frame, or is everything stacked in the middle?" },
+    { "id": "distinct",  "label": "Distinctiveness",  "ask": "Would you remember this, or could it be any B2B software film?" },
+    { "id": "defects",   "label": "Technical defects","ask": "Flicker, artifacts, text touching edges, elements visible when they should not be." }
+  ],
+  "anchors": {
+    "1": "Fails badly - absent, incorrect, or unusable",
+    "2": "Major problems - would need substantial rework",
+    "3": "Adequate - meets the requirement, unremarkable",
+    "4": "Strong - clearly satisfies it, minor issues only",
+    "5": "Exceptional - precise and free of meaningful defects"
+  },
+  "anchorNote": "For `motion`, a 5 is NOT more movement. It is movement that is intentional and improves communication; a restrained film can score 5. For `defects`, 5 means none were seen."
+}

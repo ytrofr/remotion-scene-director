@@ -1,0 +1,173 @@
+{
+  "updated": "2026-08-26",
+  "note": "Clauses follow the ads-doctrine tenant schema: `rule` is the normative sentence, `cost` is the failure that earned it (with a date and a measurement, never a rationalisation). `detect` is what lint-composition.mjs greps for - a clause with no detector is honest about being unenforceable rather than pretending.",
+  "clauses": [
+    {
+      "id": "M1",
+      "section": "motion",
+      "iron": true,
+      "title": "Never linear",
+      "rule": "Every interpolate() carries an easing curve, and every entrance prefers a spring. Linear interpolation is permitted only for a value that is genuinely constant-rate, such as a clock or a scanline.",
+      "plain": "Nothing in a film moves at a constant speed unless it is a machine.",
+      "cost": "2026-08-26, SigmaFilm v1: the composition DECLARED `EASE = [0.22,0.61,0.36,1]` at timing.ts:62 and consumed it zero times, so all 750 frames ran on linear ramps. The operator's report was 'it doesnt get the feeling right' - not 'the easing is wrong', because the defect is invisible as a defect and only legible as a feeling. Linear motion is the single most-cited tell of generated video across every source consulted.",
+      "detect": {
+        "kind": "ratio",
+        "numerator": "easing:|Easing\\.|spring\\(",
+        "denominator": "interpolate\\(",
+        "min": 0.5,
+        "note": "Counts Easing/spring MENTIONS against interpolate calls, which is a proxy, not a per-call check. It cannot easily produce a false pass (a file with no easing anywhere scores 0) but it CAN under-credit well-factored code that applies one shared curve through a helper - D1 scores 60% while actually easing every call. Read a failure as 'look at this file', not as a count."
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "M2",
+      "section": "motion",
+      "iron": false,
+      "title": "A declared constant that is never consumed is a lie",
+      "rule": "A design constant exported by a composition must be referenced by that composition. An unconsumed token reads as intent in code review and is absent from the artifact.",
+      "plain": "If you declare the look and never use it, the review sees the intention and the viewer sees the default.",
+      "cost": "2026-08-26, SigmaFilm v1: EASE and an SVG `sigmaGrad` linearGradient were both defined and never referenced. Source review passed - the constants are right there. Only the render disagreed.",
+      "detect": {
+        "kind": "declared-unused",
+        "names": [
+          "EASE",
+          "SPRING",
+          "GRADIENT"
+        ]
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "M3",
+      "section": "motion",
+      "iron": true,
+      "title": "An entrance moves more than opacity",
+      "rule": "An element entering the frame animates at least two properties together - opacity with position, scale, blur or clip. A lone fade is forbidden.",
+      "plain": "Things arrive; they do not just become visible.",
+      "cost": "2026-08-26, SigmaFilm v1: every one of the nine beats entered on a 4-point opacity curve plus a fixed 16px rise, identical for all of them. Nine beats, one entrance.",
+      "detect": null,
+      "added": "2026-08-26",
+      "enforced": false
+    },
+    {
+      "id": "L1",
+      "section": "light",
+      "iron": true,
+      "title": "Grain moves or it is dirt",
+      "rule": "A grain or noise plate must be re-seeded per frame. A plate memoised once is painted identically on every frame and reads as a dirty lens, not as film.",
+      "plain": "Film grain that never changes is a smudge on the lens.",
+      "cost": "2026-08-26, SigmaFilm v1 Surface.tsx:25 memoised 900 noise rects with an empty dependency array - the same plate on all 750 frames. LimorFilm/Surface.tsx:36 already had it right and its own comment said why; the technique was available in the same repo and was not carried across. Then, on 2026-08-26, the FIRST detector written for this clause reported v1 as clean - a regex whose character class stopped at a paren before reaching its own marker word. A false pass on a known violation. The detector now asks whether the grain reads the frame at all.",
+      "detect": {
+        "kind": "grain-static"
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "L2",
+      "section": "light",
+      "iron": false,
+      "title": "There must be a light source",
+      "rule": "A composition carries at least one bloom, glow or light sweep. Light is what makes a dark frame read as a space rather than as a background colour.",
+      "plain": "Something has to be lit, or it is just a dark rectangle.",
+      "cost": "2026-08-26, SigmaFilm v1: zero boxShadow, zero textShadow, zero drop-shadow, zero bloom across the whole composition. Measured ink coverage was 3.9% of frame - the same as a synthetic 'caption on an empty screen' test fixture.",
+      "detect": {
+        "kind": "require",
+        "pattern": "Bloom|LightSweep|boxShadow|textShadow|drop-shadow|radial-gradient"
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "S1",
+      "section": "space",
+      "iron": true,
+      "title": "More than one plane",
+      "rule": "A composition must express depth: a camera, parallax, or layers carrying a depth value that drives their own blur and haze. Everything on one plane is a slide.",
+      "plain": "If every element is the same distance away, you have made a slide.",
+      "cost": "2026-08-26, SigmaFilm v1: no camera, no parallax, no z-layering beyond paint order, and zero blur anywhere. Measured spatial spread 0.270 against 0.58 for a frame used evenly - the ink sat in the middle because there was nowhere else for it to be. Separately, the first detector for this clause produced a FALSE FAIL on D3: it matched on importing lib/camera, so a direction that rolls its own lateral parallax - correctly, because it has no zoom - was told it had no depth. A gate that recognises one implementation is measuring conformance to a library, not the property it claims.",
+      "detect": {
+        "kind": "depth-expressed"
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "S2",
+      "section": "space",
+      "iron": false,
+      "title": "Type names, it does not introduce",
+      "rule": "A line of type should name something the picture has already shown. If deleting the line leaves the beat still legible, the picture is carrying it and the line is optional; if deleting it makes the beat meaningless, the picture is not doing its job.",
+      "plain": "The screen should show it. The words only label it.",
+      "cost": "2026-08-26, SigmaFilm v1 opening beat: the copy read 'Your business runs on chaos' over six evenly-spaced, perfectly still grey dots. The word did all the work and the picture actively contradicted it.",
+      "detect": null,
+      "added": "2026-08-26",
+      "enforced": false
+    },
+    {
+      "id": "D1",
+      "section": "determinism",
+      "iron": true,
+      "title": "Nothing random, ever",
+      "rule": "No Math.random in any composition or asset generator. Randomness comes from a seeded PRNG or from Remotion's own random().",
+      "plain": "Two renders of the same frame must be the same picture.",
+      "cost": "A film that renders differently each time cannot be byte-compared, so the determinism gate silently stops discriminating and every arm reports 'identical' for the wrong reason.",
+      "detect": {
+        "kind": "forbid",
+        "pattern": "Math\\.random\\s*\\("
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "D2",
+      "section": "determinism",
+      "iron": true,
+      "title": "Nullish, not falsy, for numbers",
+      "rule": "Numeric defaults use ?? and never ||. Zero is a meaningful value for scale, opacity, frame, volume and every physics knob.",
+      "plain": "`scale: 0` means invisible. `|| 1` turns it back on.",
+      "cost": "2026-04-27, useHandAnimation.ts: `scale: point.scale || 1` ate every scale-0 waypoint, so a cursor meant to be hidden slid visibly across the screen instead. Reported by the operator as 'flickering'; three sessions were spent on the wrong layer first.",
+      "detect": {
+        "kind": "forbid",
+        "pattern": "(scale|opacity|rotation|volume|frame|delay|duration|width|height)\\s*\\|\\|\\s*[0-9]"
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "B1",
+      "section": "brand",
+      "iron": true,
+      "title": "Colour comes from tokens",
+      "rule": "No hex literal in a composition file. Every colour resolves through the token file, so the palette is a closed vocabulary.",
+      "plain": "Colours live in one file, not scattered through the code.",
+      "cost": "A stray hex is how a brand drifts: it never looks wrong in the diff that introduces it, and it is invisible until someone compares two films side by side.",
+      "detect": {
+        "kind": "forbid",
+        "pattern": "#[0-9a-fA-F]{6}\\b"
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    },
+    {
+      "id": "R1",
+      "section": "rhythm",
+      "iron": false,
+      "title": "The film must build",
+      "rule": "Measured motion energy in the final third should exceed the first third. A film that decays ends quieter than it began and reads as running out rather than arriving.",
+      "plain": "It should end bigger than it started.",
+      "cost": "2026-08-26, SigmaFilm v1 measured escalation 0.62 - it ends at under two thirds the energy it opened with. Arm D measured 0.56. The engine that won on determinism, Lazy Frames, measured 2.97. | 2026-08-26, SECOND cost, this time paid by the clause itself: it shipped enforced:true with an artifact detector the linter never called, so it printed \"needs-mp4\" and read as fine. D1 passed all ten source clauses and still measured 0.618 - statistically identical to the 0.622 baseline it was built to beat. Wiring --mp4 is what turned the clause from a description into a check.",
+      "detect": {
+        "kind": "artifact",
+        "probe": "scripts/bench-video/probe-motion.mjs",
+        "field": "escalation",
+        "min": 1.0,
+        "note": "Reads the RENDERED film, not the source, because no static check can see an arc. Requires --mp4; without it the clause reports ARTIFACT and is NOT counted as a pass."
+      },
+      "added": "2026-08-26",
+      "enforced": true
+    }
+  ]
+}

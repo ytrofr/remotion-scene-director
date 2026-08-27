@@ -1,0 +1,73 @@
+{
+  "updated": "2026-08-26",
+  "note": "House schema (ads-doctrine tenants): routines -> phases -> steps. A phase has a `gate` stated in words - the condition that must be true to leave it. A step is MACHINE (a command, and it must name the field or file it reads), AGENT (judgement, and it must name its evidence) or PRINCIPLE (a standing rule). `killer: true` means skipping it has actually cost us a session.",
+  "routines": [
+    {
+      "id": "FILM",
+      "title": "Make a film",
+      "when": "Any new video composition, or a substantial re-direction of an existing one.",
+      "phases": [
+        {
+          "title": "1 · Measure the brief",
+          "why": "A brief that fixes a duration AND supplies the words is over-constrained until someone multiplies one out against the other. Nobody ever does, because the two halves read as equally authoritative and never sit side by side.",
+          "gate": "Speech/beat time has been computed against the stated runtime, and any conflict has been put to the operator as a priced choice - not silently resolved.",
+          "steps": [
+            { "id": "F1", "kind": "MACHINE", "killer": true, "text": "Compute beats x seconds against the supplied copy before designing anything.", "field": "cutsheet.json totalSeconds vs the sum of frame durations", "detail": "2026-08-10: a brief marked 90-105s NON-NEGOTIABLE shipped with a script measuring ~302s. Everything built before the conflict surfaced was built against the wrong film." },
+            { "id": "F2", "kind": "AGENT", "text": "Present the conflict as the operator's choice with both options priced: hold the duration and cut N% of the words, or hold the words and run to M seconds.", "evidence": "the arithmetic from F1, stated in seconds" },
+            { "id": "F3", "kind": "PRINCIPLE", "text": "Copy from a source is reproduced as found. Contradictions in the source are flagged, never reconciled by us." }
+          ]
+        },
+        {
+          "title": "2 · Declare the direction",
+          "why": "Without a stated restraint, every direction converges on the same shell, and the reflex fix for 'it feels flat' is to add effects - which is how a film becomes noisy rather than good.",
+          "gate": "One big idea and a restraint statement are written into the composition's own source, above the code, before any code exists.",
+          "steps": [
+            { "id": "F4", "kind": "AGENT", "killer": true, "text": "Write the ONE BIG IDEA in a sentence, and the RESTRAINT STATEMENT - what you will deliberately not do - as a docstring at the top of the composition.", "evidence": "the docstring itself; a direction with no restraint is not ready to build" },
+            { "id": "F5", "kind": "AGENT", "text": "Apply the grid-fallback test: if this were reduced to a plain centred layout, what idea would break? 'Not much' means the direction is not strong enough yet.", "evidence": "a named idea that would be lost" },
+            { "id": "F6", "kind": "PRINCIPLE", "text": "Type names what the picture has shown. If a beat only works because of its caption, the picture is not doing its job." }
+          ]
+        },
+        {
+          "title": "3 · Build",
+          "why": "The craft defects that make generated video read as generated are mechanical and greppable. There is no reason to find them by eye.",
+          "gate": "The doctrine linter is clean on the composition directory.",
+          "steps": [
+            { "id": "F7", "kind": "MACHINE", "text": "node .claude/skills/video-doctrine/lint-composition.mjs src/compositions/<Name>", "field": "doctrine.json clauses" },
+            { "id": "F8", "kind": "PRINCIPLE", "text": "Data (cutsheet, tokens) is shared across directions. Only the expression changes, or you are comparing different films." },
+            { "id": "F9", "kind": "PRINCIPLE", "text": "Price the grade as you add it. feTurbulence at full resolution cost 1.68 s/frame - 21 minutes a render - until it was moved to 1/3 res and scaled up." }
+          ]
+        },
+        {
+          "title": "4 · Look at it",
+          "why": "Three of five defects in the last arm existed ONLY in the rendered artifact and zero were visible in source review. Stills at mid-segment frames are clean by construction.",
+          "gate": "Every camera move and every mount/unmount window has been RANGE-rendered and watched, not sampled as stills.",
+          "steps": [
+            { "id": "F10", "kind": "MACHINE", "killer": true, "text": "npx remotion render ... --frames=A-B over each camera move, then actually watch it.", "field": "the frame range of each move" },
+            { "id": "F11", "kind": "PRINCIPLE", "killer": true, "text": "Same code, different output between a scoped and a full render means the ENVIRONMENT is the variable. Stop editing code; build the 2x2 over --gl, --concurrency and frame range.", "detail": "rule 57. Five sessions of code refactoring, then a 15-minute matrix found it." },
+            { "id": "F12", "kind": "AGENT", "text": "For a reported visual artifact: render, zoom, and NAME the element before forming any theory.", "evidence": "the named element and its source line" }
+          ]
+        },
+        {
+          "title": "5 · Measure the artifact",
+          "why": "'Better' is unfalsifiable without numbers, and numbers from an instrument nobody has watched fail are worse than none.",
+          "gate": "Both probes have run AND both negative-control batteries fired.",
+          "steps": [
+            { "id": "F13", "kind": "MACHINE", "killer": true, "text": "node scripts/bench-video/probe-frame.mjs --negative-control && node scripts/bench-video/probe-motion.mjs --negative-control", "field": "the FIRED/SILENT lines" },
+            { "id": "F14", "kind": "MACHINE", "text": "Run both probes on every arm including the frozen baseline.", "field": "ink share, spread, escalation" },
+            { "id": "F15", "kind": "PRINCIPLE", "text": "These are PROXIES. A metric that disagrees with the operator's eye is a wrong metric, not a wrong eye." }
+          ]
+        },
+        {
+          "title": "6 · Score",
+          "why": "A side-by-side glance is not reproducible and accumulates nothing. Position and label bias are large and free to remove.",
+          "gate": "Arms scored blind, in both orders, with the frozen baseline present in the set.",
+          "steps": [
+            { "id": "F16", "kind": "PRINCIPLE", "killer": true, "text": "Include a confound control - the baseline with ONLY the cheap change applied (e.g. music). Without it, a win cannot be attributed to craft." },
+            { "id": "F17", "kind": "MACHINE", "text": "Serve the pairs from a Range-capable server and verify the URL from Windows before handing it over.", "field": "HTTP 206 + verify-dev-url.sh" },
+            { "id": "F18", "kind": "MACHINE", "text": "Write the result to the ledger WITH numbers, so the next film can be compared to this one.", "field": "~/.claude/metrics/tournament-runs.jsonl" }
+          ]
+        }
+      ]
+    }
+  ]
+}
